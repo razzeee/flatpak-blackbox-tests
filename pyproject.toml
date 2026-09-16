@@ -1,0 +1,32 @@
+[project]
+name = "flatpak-blackbox-tests"
+version = "0.1.0"
+description = "Public-interface compatibility tests for Flatpak implementations"
+requires-python = ">=3.10"
+dependencies = []
+
+[dependency-groups]
+dev = [
+  "mypy==2.3.1",
+  "ruff==0.16.7",
+  "ty==0.0.81",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.ty.environment]
+python-version = "3.10"
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+files = ["."]
+exclude = ["^\\.venv/"]

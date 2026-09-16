@@ -1,0 +1,16 @@
+{
+  "name": "installed-flatpak",
+  "cli": "/usr/bin/flatpak",
+  "adapter": ["python3", "flatpak-adapter.py"],
+  "environment": {
+    "BLACKBOX_SYSTEM_INSTALL_DIR": "/var/lib/flatpak",
+    "BLACKBOX_SYSTEM_CONFIG_DIR": "/etc/flatpak"
+  },
+  "library": {
+    "pkg_config": "pkg-config",
+    "package": "flatpak",
+    "cc": "cc",
+    "environment": {},
+    "runtime_library_dirs": ["/usr/lib64"]
+  }
+}

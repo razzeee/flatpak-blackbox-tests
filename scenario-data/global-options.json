@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "notes": [
+    "The fixed 624-option catalogue is unchanged. Help assertions credit only each command's --help option, never displayed flags or command execution.",
+    "Help commands receive no CLI behavior requirement mapping. Global help and informational mappings satisfy their complete existing obligations.",
+    "Default architecture comes from the independently prepared fixture. Supported architectures use static x86_64 compatibility metadata in native-first order, accepting whitespace-separated output.",
+    "Version checks product and release syntax, without requiring the target and fixture producer to have the same version."
+  ],
+  "behaviors": [
+    {
+      "id": "global-options.command-help",
+      "scenario": "global-options-command-help",
+      "handler": "global_option_scenarios:run",
+      "profile": "any",
+      "drivers": ["cli"],
+      "required_capabilities": ["cli"],
+      "description": "Request --help independently for all 44 frozen documented commands.",
+      "preconditions": "Fresh isolated environment; no installed app or running service is needed.",
+      "expected": "Every call exits successfully with stdout usage naming that command, a described help option, and documented command-specific option or positional syntax; stderr is empty.",
+      "references": ["doc/flatpak.xml", "tests/blackbox/coverage-data/surfaces.json"]
+    },
+    {
+      "id": "global-options.help",
+      "scenario": "global-options-help",
+      "handler": "global_option_scenarios:run",
+      "profile": "any",
+      "drivers": ["cli"],
+      "required_capabilities": ["cli"],
+      "description": "Request global --help without a command.",
+      "preconditions": "Fresh isolated environment.",
+      "expected": "Successful exit, global usage, described help option, documented commands and informational options on stdout, empty stderr.",
+      "references": ["doc/flatpak.xml"]
+    },
+    {
+      "id": "global-options.default-arch",
+      "scenario": "global-options-default-arch",
+      "handler": "global_option_scenarios:run",
+      "profile": "any",
+      "drivers": ["cli"],
+      "required_capabilities": ["cli"],
+      "description": "Compare --default-arch with independently prepared native fixture metadata.",
+      "preconditions": "Native fixtures prepared for this execution host.",
+      "expected": "Successful exit with exactly the fixture architecture token on stdout and empty stderr.",
+      "references": ["doc/flatpak.xml"]
+    },
+    {
+      "id": "global-options.supported-arches",
+      "scenario": "global-options-supported-arches",
+      "handler": "global_option_scenarios:run",
+      "profile": "any",
+      "drivers": ["cli"],
+      "required_capabilities": ["cli"],
+      "description": "Compare --supported-arches with static native-first x86 compatibility metadata.",
+      "preconditions": "Native x86_64 fixture; other architectures report an unmet prerequisite.",
+      "expected": "Successful exit with exactly x86_64 then i386 as whitespace-separated tokens and empty stderr.",
+      "references": ["doc/flatpak.xml"]
+    },
+    {
+      "id": "global-options.version",
+      "scenario": "global-options-version",
+      "handler": "global_option_scenarios:run",
+      "profile": "any",
+      "drivers": ["cli"],
+      "required_capabilities": ["cli"],
+      "description": "Request standalone target release information.",
+      "preconditions": "Fresh isolated environment.",
+      "expected": "Successful exit, Flatpak product name and numeric release version on stdout, empty stderr.",
+      "references": ["doc/flatpak.xml"]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "global-options.command-help",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "All 44 standalone help invocations assert successful exit, empty stderr, command-specific stdout usage and documented syntax. No command behavior is claimed.",
+      "surface_assertions": [
+        {"id":"cli.option.build.--help","rationale":"Help identifies build usage and documents --runtime."},
+        {"id":"cli.option.build-bundle.--help","rationale":"Help identifies build-bundle usage and documents --runtime."},
+        {"id":"cli.option.build-commit-from.--help","rationale":"Help identifies build-commit-from usage and documents --src-repo."},
+        {"id":"cli.option.build-export.--help","rationale":"Help identifies build-export usage and documents --runtime."},
+        {"id":"cli.option.build-finish.--help","rationale":"Help identifies build-finish usage and documents --command."},
+        {"id":"cli.option.build-import-bundle.--help","rationale":"Help identifies build-import-bundle usage and documents --gpg-sign."},
+        {"id":"cli.option.build-init.--help","rationale":"Help identifies build-init usage and documents --sdk-extension."},
+        {"id":"cli.option.build-sign.--help","rationale":"Help identifies build-sign usage and documents --gpg-sign."},
+        {"id":"cli.option.build-update-repo.--help","rationale":"Help identifies build-update-repo usage and documents --generate-static-deltas."},
+        {"id":"cli.option.config.--help","rationale":"Help identifies config usage and documents --set."},
+        {"id":"cli.option.create-usb.--help","rationale":"Help identifies create-usb usage and documents --allow-partial."},
+        {"id":"cli.option.document-export.--help","rationale":"Help identifies document-export usage and documents --unique."},
+        {"id":"cli.option.document-info.--help","rationale":"Help identifies document-info usage with FILE argument."},
+        {"id":"cli.option.document-unexport.--help","rationale":"Help identifies document-unexport usage and documents --doc-id."},
+        {"id":"cli.option.documents.--help","rationale":"Help identifies documents usage with optional APPID argument."},
+        {"id":"cli.option.enter.--help","rationale":"Help identifies enter usage with INSTANCE COMMAND arguments."},
+        {"id":"cli.option.history.--help","rationale":"Help identifies history usage and documents --columns."},
+        {"id":"cli.option.info.--help","rationale":"Help identifies info usage and documents --show-ref."},
+        {"id":"cli.option.install.--help","rationale":"Help identifies install usage and documents --no-deploy."},
+        {"id":"cli.option.kill.--help","rationale":"Help identifies kill usage with INSTANCE argument."},
+        {"id":"cli.option.list.--help","rationale":"Help identifies list usage and documents --app-runtime."},
+        {"id":"cli.option.make-current.--help","rationale":"Help identifies make-current usage and documents --arch."},
+        {"id":"cli.option.mask.--help","rationale":"Help identifies mask usage and documents --remove."},
+        {"id":"cli.option.override.--help","rationale":"Help identifies override usage and documents --show."},
+        {"id":"cli.option.permission-remove.--help","rationale":"Help identifies permission-remove usage with TABLE ID arguments."},
+        {"id":"cli.option.permission-reset.--help","rationale":"Help identifies permission-reset usage and documents --all."},
+        {"id":"cli.option.permission-set.--help","rationale":"Help identifies permission-set usage and documents --data."},
+        {"id":"cli.option.permission-show.--help","rationale":"Help identifies permission-show usage with APP_ID argument."},
+        {"id":"cli.option.permissions.--help","rationale":"Help identifies permissions usage with optional TABLE and ID arguments."},
+        {"id":"cli.option.pin.--help","rationale":"Help identifies pin usage and documents --remove."},
+        {"id":"cli.option.preinstall.--help","rationale":"Help identifies preinstall usage and documents --no-deploy."},
+        {"id":"cli.option.ps.--help","rationale":"Help identifies ps usage and documents --columns."},
+        {"id":"cli.option.remote-add.--help","rationale":"Help identifies remote-add usage and documents --title."},
+        {"id":"cli.option.remote-delete.--help","rationale":"Help identifies remote-delete usage and documents --force."},
+        {"id":"cli.option.remote-info.--help","rationale":"Help identifies remote-info usage and documents --show-ref."},
+        {"id":"cli.option.remote-ls.--help","rationale":"Help identifies remote-ls usage and documents --updates."},
+        {"id":"cli.option.remote-modify.--help","rationale":"Help identifies remote-modify usage and documents --title."},
+        {"id":"cli.option.remotes.--help","rationale":"Help identifies remotes usage and documents --show-disabled."},
+        {"id":"cli.option.repair.--help","rationale":"Help identifies repair usage and documents --dry-run."},
+        {"id":"cli.option.repo.--help","rationale":"Help identifies repo usage and documents --branches."},
+        {"id":"cli.option.run.--help","rationale":"Help identifies run usage and documents --command."},
+        {"id":"cli.option.search.--help","rationale":"Help identifies search usage and documents --columns."},
+        {"id":"cli.option.uninstall.--help","rationale":"Help identifies uninstall usage and documents --force-remove."},
+        {"id":"cli.option.update.--help","rationale":"Help identifies update usage and documents --commit."}
+      ]
+    },
+    {
+      "behavior_id": "global-options.help", "driver": "cli", "profile": "any",
+      "requirements": ["cli.global.any.help"],
+      "rationale": "Standalone global help exits successfully, prints usage and described help options, and has empty stderr.",
+      "surface_assertions": [
+        {"id":"cli.option.global.--help","rationale":"Global usage, documented command list and described help option are printed before successful exit."}
+      ]
+    },
+    {
+      "behavior_id": "global-options.default-arch", "driver": "cli", "profile": "any",
+      "requirements": ["cli.global.any.default-arch"],
+      "rationale": "Successful standalone query reports exactly the independently prepared native fixture architecture.",
+      "surface_assertions": [
+        {"id":"cli.option.global.--default-arch","rationale":"The sole stdout token equals fixture.arch, with zero status and empty stderr."}
+      ]
+    },
+    {
+      "behavior_id": "global-options.supported-arches", "driver": "cli", "profile": "any",
+      "requirements": ["cli.global.any.supported-arches"],
+      "rationale": "Successful standalone query reports exactly native x86_64 followed by compatible i386; whitespace layout is not assumed.",
+      "surface_assertions": [
+        {"id":"cli.option.global.--supported-arches","rationale":"Exact ordered architecture tokens match independent static compatibility metadata."}
+      ]
+    },
+    {
+      "behavior_id": "global-options.version", "driver": "cli", "profile": "any",
+      "requirements": ["cli.global.any.version"],
+      "rationale": "Standalone version request exits successfully and prints product and release information with empty stderr.",
+      "surface_assertions": [
+        {"id":"cli.option.global.--version","rationale":"Stdout contains Flatpak product identity and a numeric release version, rather than help or unrelated output."}
+      ]
+    }
+  ]
+}

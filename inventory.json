@@ -1,0 +1,124 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "lifecycle.user",
+      "description": "Install A and its runtime, query and run A, update to B, query and run B, uninstall and query absence.",
+      "preconditions": "Fresh user installation; prepared A/B repositories; session bus and sandbox support.",
+      "expected": "Both installed refs match the fixture; app reports A then B; app is absent after uninstall.",
+      "drivers": ["cli", "library"],
+      "profile": "user",
+      "scenario": "lifecycle",
+      "required_capabilities": ["user-installation", "local-repository", "sandbox-execution"],
+      "references": ["doc/flatpak-install.xml", "doc/flatpak-update.xml", "doc/flatpak-info.xml", "doc/flatpak-run.xml", "doc/flatpak-uninstall.xml", "https://docs.flatpak.org/en/latest/libflatpak-api-reference.html"]
+    },
+    {
+      "id": "update.failed-download-preserves-installation",
+      "description": "Update installed A to advertised B while a required repository object download fails.",
+      "preconditions": "Fresh user installation of A; repository advertises B; fixture server denies payload downloads.",
+      "expected": "A payload download is attempted and denied, update fails, installed commit remains A and app still reports A.",
+      "drivers": ["cli", "library"],
+      "profile": "user",
+      "scenario": "failed-update",
+      "required_capabilities": ["user-installation", "local-repository", "sandbox-execution"],
+      "references": ["https://docs.flatpak.org/en/latest/basic-concepts.html#ostree", "doc/flatpak-update.xml"]
+    },
+    {
+      "id": "update.already-current",
+      "description": "Update an installed app while its remote still advertises the installed commit.",
+      "preconditions": "Fresh user installation of A and its runtime; healthy repository still at A.",
+      "expected": "Update succeeds; app and runtime commits are unchanged and the app still reports A.",
+      "drivers": ["cli", "library"],
+      "profile": "user",
+      "scenario": "noop-update",
+      "required_capabilities": ["user-installation", "local-repository", "sandbox-execution"],
+      "references": ["doc/flatpak-update.xml", "common/flatpak-transaction.c: flatpak_transaction_add_update public API documentation"]
+    },
+    {
+      "id": "install.already-installed",
+      "description": "Repeat a plain install of A after its remote advertises B.",
+      "preconditions": "Fresh user installation of A and its runtime; healthy repository advanced to B.",
+      "expected": "CLI succeeds with an already-installed warning; libflatpak returns ALREADY_INSTALLED. Both preserve the app/runtime commits and runnable A, without upgrading to B.",
+      "drivers": ["cli", "library"],
+      "profile": "user",
+      "scenario": "repeated-install",
+      "required_capabilities": ["user-installation", "local-repository", "sandbox-execution"],
+      "references": ["doc/flatpak-install.xml: --or-update", "common/flatpak-error.h: FlatpakError public API documentation", "common/flatpak-transaction.c: flatpak_transaction_add_install public API documentation"]
+    },
+    {
+      "id": "install.missing-ref",
+      "description": "Attempt to install a well-formed app ref absent from a healthy configured remote.",
+      "preconditions": "Fresh empty user installation; fixture remote configured; requested ref is absent from the repository.",
+      "expected": "CLI fails and identifies the missing ref; libflatpak returns REF_NOT_FOUND. Successful public enumeration shows no installed apps or runtimes afterward.",
+      "drivers": ["cli", "library"],
+      "profile": "user",
+      "scenario": "missing-install",
+      "required_capabilities": ["user-installation", "local-repository"],
+      "references": ["doc/flatpak-install.xml", "common/flatpak-error.h: FlatpakError public API documentation", "common/flatpak-transaction.c: flatpak_transaction_add_install public API documentation"]
+    },
+    {
+      "id": "lifecycle.absent-ref",
+      "description": "Query and attempt to uninstall a well-formed ref that is not installed, alongside an existing app.",
+      "preconditions": "Fresh user installation of A and its runtime; requested app ref has never been installed.",
+      "expected": "Both operations fail: CLI diagnostics identify the absent ref and libflatpak returns NOT_INSTALLED. After each operation, installed app/runtime commits remain unchanged and A is runnable.",
+      "drivers": ["cli", "library"],
+      "profile": "user",
+      "scenario": "absent-ref",
+      "required_capabilities": ["user-installation", "local-repository", "sandbox-execution"],
+      "references": ["doc/flatpak-info.xml", "doc/flatpak-uninstall.xml", "common/flatpak-error.h: FlatpakError public API documentation", "common/flatpak-transaction.c: flatpak_transaction_add_uninstall public API documentation"]
+    },
+    {
+      "id": "update.retry-after-failed-download",
+      "description": "Retry an update after restoring downloads previously denied by the fixture server.",
+      "preconditions": "Fresh user installation of A and its runtime; repository advertises B; initial payload downloads fail.",
+      "expected": "Initial update fails after an injected download error and leaves app/runtime commits and runnable A intact. After downloads are restored, a new update succeeds, downloads B, preserves the runtime, and makes B queryable and runnable.",
+      "drivers": ["cli", "library"],
+      "profile": "user",
+      "scenario": "retry-update",
+      "required_capabilities": ["user-installation", "local-repository", "sandbox-execution"],
+      "references": ["doc/flatpak-update.xml", "https://docs.flatpak.org/en/latest/basic-concepts.html#ostree", "common/flatpak-transaction.c: flatpak_transaction_add_update public API documentation"]
+    },
+    {
+      "id": "remotes.user.configuration",
+      "description": "Persist remote names, URLs, titles and priorities; modify them and remove one while preserving another.",
+      "preconditions": "Fresh empty user installation and a healthy local fixture repository.",
+      "expected": "Separate queries return exact added and modified properties, remotes follow distinct-priority order, and deletion leaves only the untouched remote. Library checks also cover unsetting a title.",
+      "drivers": ["cli", "library"],
+      "profile": "user",
+      "scenario": "remote-config",
+      "required_capabilities": ["user-installation", "local-repository"],
+      "references": ["doc/flatpak-remote-add.xml", "doc/flatpak-remotes.xml", "doc/flatpak-remote-modify.xml", "doc/flatpak-remote-delete.xml", "common/flatpak-installation.c: public remote APIs", "common/flatpak-remote.c: public property APIs"]
+    },
+    {
+      "id": "remotes.library.priority-order",
+      "description": "Check the public library's documented descending priority order and earlier-added-first tie order.",
+      "preconditions": "Fresh user installation with three newly added remotes; two share priority and have reverse-alphabetical names.",
+      "expected": "Higher priority remotes precede the lower priority remote, and the earlier added equal-priority remote precedes the later one. The contract remains strict even when reference Flatpak disagrees.",
+      "drivers": ["library"],
+      "profile": "user",
+      "scenario": "remote-priority-order",
+      "required_capabilities": ["user-installation", "local-repository"],
+      "references": ["common/flatpak-installation.c: flatpak_installation_list_remotes public API documentation"]
+    },
+    {
+      "id": "transaction.library.ready-decision",
+      "description": "Reject a resolved transaction in the public ready signal, then accept a fresh transaction.",
+      "preconditions": "Fresh user installation and healthy local fixture repository.",
+      "expected": "Returning FALSE from ready fails the transaction before new-operation signals and leaves installed-ref enumeration empty. A subsequent transaction accepting ready installs the app and runtime at the fixture commits.",
+      "drivers": ["library"],
+      "profile": "user",
+      "scenario": "ready-abort",
+      "required_capabilities": ["user-installation", "local-repository", "sandbox-execution"],
+      "references": ["common/flatpak-transaction.c: FlatpakTransaction::ready public signal documentation"]
+    },
+    {"id": "lifecycle.system", "profile": "system", "drivers": ["cli", "library"], "gap": "VM provisioning, system services, authorization, multiple users"},
+    {"id": "lifecycle.additional", "gap": "Related refs, cleanup, repeated uninstall, conflicting state"},
+    {"id": "remotes.discovery", "gap": "Filtering, search, metadata, authentication, disabled remote behavior"},
+    {"id": "queries.configuration", "gap": "List, overrides, configuration, permission inspection"},
+    {"id": "sandbox.access", "gap": "Arguments, environment, filesystem access, sockets, process lifecycle"},
+    {"id": "distribution.maintenance", "gap": "Build/export, bundles, repository updates, repair, history"},
+    {"id": "library.contracts", "gap": "Ownership, cancellation, error codes, signal ordering"},
+    {"id": "cli.contracts", "gap": "Malformed input, exact exit codes, stdout/stderr, prompts, terminal formatting"},
+    {"id": "security.regressions", "gap": "Inventory and port applicable existing regression scenarios"}
+  ]
+}

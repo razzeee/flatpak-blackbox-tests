@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "cases": [
+    {
+      "behavior_id": "lifecycle.user", "driver": "cli", "profile": "user",
+      "requirements": ["cli.install.user.app", "cli.install.user.runtime-dependency", "cli.info.user.ref-commit", "cli.run.user.command", "cli.update.user.latest", "cli.uninstall.user.app", "cli.list.user.apps-empty"],
+      "rationale": "Install and exact app/runtime queries, runnable A then B, successful uninstall, failed app query, and empty app-only enumeration with the runtime still queryable. No general selection, noninteractive, or remote-property credit."
+    },
+    {
+      "behavior_id": "lifecycle.user", "driver": "library", "profile": "user",
+      "requirements": ["library.install.user.app", "library.install.user.runtime-dependency", "library.query.user.ref-commit", "library.update.user.latest", "library.uninstall.user.app", "library.query.user.absent-ref"],
+      "rationale": "Transactions followed by exact public installed-ref/commit queries; uninstall followed by the public NOT_INSTALLED error. CLI launches supply state evidence but do not cover library launch APIs."
+    },
+    {
+      "behavior_id": "update.failed-download-preserves-installation", "driver": "cli", "profile": "user",
+      "requirements": ["cli.install.user.app", "cli.install.user.runtime-dependency", "cli.info.user.ref-commit", "cli.run.user.command", "cli.update.user.failed-download-preserves"],
+      "rationale": "A denied payload request and failed update precede exact unchanged app/runtime commits and runnable A. No exact download-error or whole-transaction rollback claim."
+    },
+    {
+      "behavior_id": "update.failed-download-preserves-installation", "driver": "library", "profile": "user",
+      "requirements": ["library.install.user.app", "library.install.user.runtime-dependency", "library.query.user.ref-commit", "library.update.user.failed-download-preserves"],
+      "rationale": "Public transaction failure after injected payload error, followed by exact unchanged installed refs. Logged signals and operation getters are not asserted."
+    },
+    {
+      "behavior_id": "update.already-current", "driver": "cli", "profile": "user",
+      "requirements": ["cli.install.user.app", "cli.install.user.runtime-dependency", "cli.info.user.ref-commit", "cli.run.user.command", "cli.update.user.noop"],
+      "rationale": "Successful update with the remote still advertising A; exact app/runtime commit queries and runnable A before and after."
+    },
+    {
+      "behavior_id": "update.already-current", "driver": "library", "profile": "user",
+      "requirements": ["library.install.user.app", "library.install.user.runtime-dependency", "library.query.user.ref-commit", "library.update.user.noop"],
+      "rationale": "Successful public update transaction with unchanged exact commits. No claim that a skipped operation emits operation-done."
+    },
+    {
+      "behavior_id": "install.already-installed", "driver": "cli", "profile": "user",
+      "requirements": ["cli.install.user.app", "cli.install.user.runtime-dependency", "cli.info.user.ref-commit", "cli.run.user.command", "cli.install.user.already-installed"],
+      "rationale": "Repeat install while B is available, require success and an already-installed warning, then verify exact A/runtime commits and runnable A."
+    },
+    {
+      "behavior_id": "install.already-installed", "driver": "library", "profile": "user",
+      "requirements": ["library.install.user.app", "library.install.user.runtime-dependency", "library.query.user.ref-commit", "library.install.user.already-installed"],
+      "rationale": "After positive install assertions, repeat install while B is available; require the public ALREADY_INSTALLED domain/code and unchanged exact installed refs."
+    },
+    {
+      "behavior_id": "install.missing-ref", "driver": "cli", "profile": "user",
+      "requirements": ["cli.install.user.missing-ref", "cli.list.user.empty"],
+      "rationale": "Require a missing-ref error identifying the requested app and successful empty enumeration of all installed refs. No sandbox, populated enumeration, or formatting coverage."
+    },
+    {
+      "behavior_id": "install.missing-ref", "driver": "library", "profile": "user",
+      "requirements": ["library.install.user.missing-ref", "library.list.user.empty"],
+      "rationale": "Require public REF_NOT_FOUND and non-NULL empty installed-ref enumeration. An empty result does not exercise the client's per-element formatting loop."
+    },
+    {
+      "behavior_id": "lifecycle.absent-ref", "driver": "cli", "profile": "user",
+      "requirements": ["cli.install.user.app", "cli.install.user.runtime-dependency", "cli.info.user.ref-commit", "cli.run.user.command", "cli.info.user.absent-ref", "cli.uninstall.user.absent-ref"],
+      "rationale": "Missing query and uninstall diagnostics identify the absent ref; after each, exact existing app/runtime commits and runnable A are checked."
+    },
+    {
+      "behavior_id": "lifecycle.absent-ref", "driver": "library", "profile": "user",
+      "requirements": ["library.install.user.app", "library.install.user.runtime-dependency", "library.query.user.ref-commit", "library.query.user.absent-ref", "library.uninstall.user.absent-ref"],
+      "rationale": "Missing query and uninstall require public NOT_INSTALLED; after each, existing app/runtime commits are checked through public queries."
+    },
+    {
+      "behavior_id": "update.retry-after-failed-download", "driver": "cli", "profile": "user",
+      "requirements": ["cli.install.user.app", "cli.install.user.runtime-dependency", "cli.info.user.ref-commit", "cli.run.user.command", "cli.update.user.failed-download-preserves", "cli.update.user.retry", "cli.update.user.latest"],
+      "rationale": "Fail a payload request and verify preserved A/runtime; restore downloads, require another payload request and successful update, then exact B/runtime commits and runnable B."
+    },
+    {
+      "behavior_id": "update.retry-after-failed-download", "driver": "library", "profile": "user",
+      "requirements": ["library.install.user.app", "library.install.user.runtime-dependency", "library.query.user.ref-commit", "library.update.user.failed-download-preserves", "library.update.user.retry", "library.update.user.latest"],
+      "rationale": "Public transaction failure preserves A/runtime, followed by a new successful transaction, a restored payload request and exact B/runtime installed commits."
+    },
+    {
+      "behavior_id": "remotes.user.configuration", "driver": "cli", "profile": "user",
+      "requirements": ["cli.remote-add.user.url", "cli.remote-add.user.title", "cli.remote-add.user.priority", "cli.remotes.user.columns", "cli.remotes.user.priority-order", "cli.remote-modify.user.url", "cli.remote-modify.user.title", "cli.remote-modify.user.priority", "cli.remote-delete.user.removed"],
+      "rationale": "Separate CLI processes read back exact remote name/URL/title/priority columns after creation and edits; priority changes reverse order; deletion removes one remote and preserves the other. Equal-priority CLI order is not promised or asserted."
+    },
+    {
+      "behavior_id": "remotes.user.configuration", "driver": "library", "profile": "user",
+      "requirements": ["library.remote.user.add-persistence", "library.remote.user.modify-url-persistence", "library.remote.user.delete-persistence", "library.remote.user.priority-persistence", "library.remote.user.title-persistence"],
+      "rationale": "Fresh client processes enumerate and look up exact remote properties after public add/modify/remove calls. Priority changes reverse order, setting title NULL is observed as NULL, and deleted-remote lookup fails while another remote survives. Tied priority order and unasserted remote-ref metadata get no credit."
+    },
+    {
+      "behavior_id": "remotes.library.priority-order", "driver": "library", "profile": "user",
+      "requirements": ["library.remote.list-priority"],
+      "rationale": "Freshly added reverse-alphabetical names with equal priorities must retain insertion order, ahead of a lower-priority remote. Kept separate because reference Flatpak 1.19.1 disagrees with its public documentation; a failing result earns no verified credit."
+    },
+    {
+      "behavior_id": "transaction.library.ready-decision", "driver": "library", "profile": "user",
+      "requirements": ["library.signal.ready-abort", "library.list.user.empty", "library.install.user.app", "library.install.user.runtime-dependency", "library.query.user.ref-commit"],
+      "rationale": "Require the public ready callback to run, return FALSE, prevent new-operation events, fail the transaction and leave no installed refs. A new transaction returning TRUE installs exact app/runtime commits. Other logged signals get no coverage credit."
+    }
+  ]
+}
