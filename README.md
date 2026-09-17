@@ -373,3 +373,40 @@ through unpinned `uv tool run` when checking this suite.
 Run individual scenarios while changing them, then run the unfiltered command
 above once all changes are ready. The standalone suite is intentionally separate
 from Meson's internal tests; it requires prepared fixtures and an explicit target.
+
+## GitHub Actions
+
+`Development checks` runs on pushes and pull requests, and can also be started
+manually. It runs Ruff, ty, strict mypy, Bash syntax checks, and ShellCheck. Unit
+tests run on Python 3.10 and 3.14 with D-Bus installed so the runner integration
+tests execute. The optional prepared-fixture round-trip test is skipped because
+this workflow does not generate full fixtures. Python tools use `uv.lock`; the
+workflows pin uv and action revisions. Superseded checks are cancelled.
+
+`Manual reference compatibility` is started from the Actions tab or with:
+
+```sh
+gh workflow run compatibility.yml --repo razzeee/flatpak-blackbox-tests
+gh run list --workflow compatibility.yml --repo razzeee/flatpak-blackbox-tests
+gh run download RUN_ID --repo razzeee/flatpak-blackbox-tests --dir compatibility-artifacts
+```
+
+This workflow builds Flatpak 1.19.1 at upstream commit
+`1a6ec6a1f720fb30d76c76e656ac624fcaa237e9` on Ubuntu 24.04. It prepares full
+fixtures using that reference's public exporters, then runs every CLI and library
+case against the uninstalled reference build. Each command has a 90-second
+timeout, and the job has a 60-minute limit. Preparation and execution run as the
+ordinary runner user; only host dependency installation and namespace setup use
+sudo. The namespace setup changes AppArmor restrictions only on the disposable
+GitHub-hosted VM and probes nested bubblewrap support before preparing fixtures.
+
+Failing compatibility checks, unavailable prerequisites, and setup errors fail
+the job. Existing reference discrepancies are not suppressed. The upload step
+runs even after failure and retains reports, coverage, target configuration,
+package versions, and phase/build logs for 14 days. Fixtures, disposable signing
+keys, and build trees are not uploaded. These measurements are specific to the
+pinned build and hosted environment; see `COVERAGE.md` for the earlier local run.
+
+To update the reference, change `FLATPAK_REFERENCE_COMMIT` in
+`.github/workflows/compatibility.yml` to a reviewed upstream commit and recheck its
+build dependencies and options in `ci/compatibility.sh`.

@@ -1,0 +1,82 @@
+name: Development checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static:
+    name: Lint and type checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out suite
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+        with:
+          version: "0.12.9"
+          python-version: "3.14"
+          enable-cache: true
+
+      - name: Install locked development tools
+        run: uv sync --locked
+
+      - name: Ruff
+        run: uv run --locked ruff check .
+
+      - name: ty
+        run: uv run --locked ty check .
+
+      - name: Strict mypy
+        run: uv run --locked mypy
+
+      - name: Check compatibility script
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends shellcheck
+          bash -n ci/compatibility.sh
+          shellcheck ci/compatibility.sh
+
+  unit:
+    name: Unit tests on Python ${{ matrix.python }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.14"]
+    steps:
+      - name: Check out suite
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+        with:
+          version: "0.12.9"
+          python-version: ${{ matrix.python }}
+          enable-cache: true
+
+      - name: Install D-Bus for runner integration tests
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends dbus-daemon
+
+      - name: Install locked development tools
+        run: uv sync --locked
+
+      - name: Run unit tests
+        run: uv run --locked python -m unittest discover -v -p 'test_*.py'
