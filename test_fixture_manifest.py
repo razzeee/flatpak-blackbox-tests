@@ -2,6 +2,7 @@
 """Public fixture parser contracts, including the prepared schema-1 format."""
 
 import json
+import os
 import re
 import tempfile
 import unittest
@@ -251,10 +252,10 @@ class FixtureManifestTests(unittest.TestCase):
                 load_fixture(path)
 
     def test_current_prepared_fixture(self) -> None:
-        path = (Path(__file__).resolve().parents[2] / "_build/blackbox-artifacts"
-                / "expanded-reviewed-fixtures/fixture.json")
-        if not path.exists():
-            self.skipTest("reviewed prepared fixture is not available in this checkout")
+        manifest = os.environ.get("BLACKBOX_TEST_FIXTURE")
+        if manifest is None:
+            self.skipTest("set BLACKBOX_TEST_FIXTURE to check a prepared fixture manifest")
+        path = Path(manifest)
         self.assertEqual(load_fixture(path), load_json(path))
 
 

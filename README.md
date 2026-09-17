@@ -1,5 +1,9 @@
 # Black-box compatibility tests
 
+This repository was extracted from Flatpak's `tests/blackbox` directory, preserving
+its directory history. Run the commands below from this repository's root.
+The suite is licensed under LGPL-2.1-or-later; see [COPYING](COPYING).
+
 This standalone suite tests a selected CLI and source-compatible libflatpak
 implementation through public interfaces. It covers installation lifecycles,
 remote configuration, sandbox observations, build/distribution output, library
@@ -333,7 +337,7 @@ uses `Any` in places, so passing a type checker does not establish complete type
 safety for those inputs. The runtime uses the standard library; development tools
 are pinned in the suite-local `pyproject.toml` and `uv.lock`.
 
-From `tests/blackbox`, install and run the reproducible development checks:
+From this repository's root, install and run the reproducible development checks:
 
 ```sh
 uv sync --locked
@@ -342,6 +346,23 @@ uv run --locked mypy
 uv run --locked ruff check .
 uv run --locked python -m unittest discover -p 'test_*.py'
 ```
+
+The unit tests build their own small input fixtures. To also validate a prepared
+fixture manifest, set `BLACKBOX_TEST_FIXTURE` to its `fixture.json` path when
+running the tests. If unset, that optional round-trip test is skipped.
+
+Catalogue regeneration and source-drift checks require a separate Flatpak source
+checkout. For a sibling checkout named `flatpak`, use:
+
+```sh
+uv run --locked python catalogue.py --source-root ../flatpak \
+    --output coverage-data/surfaces.json --check
+```
+
+The committed catalogue's source paths and commit IDs refer to that upstream
+checkout. Test execution itself does not need it. Historical `_build/` artifact
+paths in this README and `COVERAGE.md` refer to the original Flatpak checkout;
+fixtures and reports are supplied through explicit paths and are not tracked here.
 
 ty checks Python 3.10 compatibility; strict mypy remains a complementary check
 for annotation discipline. Ruff enforces the repository's 100-column limit,

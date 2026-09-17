@@ -9,7 +9,9 @@ The latter has no defensible finite denominator yet.
 A complete run against reference Flatpak 1.19.1 on 2026-09-17 produced 308 passing
 cases, 17 failing checks and one unmet prerequisite. The current-definition report is
 `_build/blackbox-artifacts/six-contract-reviewed-full-01/report.json`, relative to the
-checkout root. Its passing evidence covers:
+original Flatpak checkout root. Historical artifact paths and source commit IDs
+in this document refer to that checkout, not this extracted repository. Its
+passing evidence covers:
 
 | Measurement | Passing credit | Percentage |
 | --- | ---: | ---: |
@@ -158,7 +160,7 @@ This deliberately invalid-target run is separate from the measured reference run
 
 ## Reproduce the accounting
 
-From `tests/blackbox`:
+From this repository's root:
 
 ```sh
 # Tests mapped to obligations, without claiming they have passed:
@@ -171,7 +173,7 @@ python3 coverage_report.py --report /path/to/results/report.json
 python3 coverage_report.py --report /path/to/results/report.json --json
 
 # In the reference source checkout, detect source/interface drift:
-python3 catalogue.py --source-root ../.. --output coverage-data/surfaces.json --check
+python3 catalogue.py --source-root ../flatpak --output coverage-data/surfaces.json --check
 ```
 
 Every target run also writes `coverage.md` and embeds the same accounting in
