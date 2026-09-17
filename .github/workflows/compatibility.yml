@@ -1,13 +1,15 @@
-name: Manual reference compatibility
+name: Reference compatibility
 
 on:
+  push:
+  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: compatibility-${{ github.ref }}
+  group: compatibility-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:

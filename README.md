@@ -415,7 +415,9 @@ tests execute. The optional prepared-fixture round-trip test is skipped because
 this workflow does not generate full fixtures. Python tools use `uv.lock`; the
 workflows pin uv and action revisions. Superseded checks are cancelled.
 
-`Manual reference compatibility` is started from the Actions tab or with:
+`Reference compatibility` runs all cases on every push and pull request,
+independently of the development checks. It can also be started from the Actions
+tab or with:
 
 ```sh
 gh workflow run compatibility.yml --repo razzeee/flatpak-blackbox-tests
