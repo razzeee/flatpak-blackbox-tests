@@ -121,8 +121,10 @@ probe() {
     reference_environment
     # The selector backend uses host bwrap; Flatpak uses its newer bundled helper.
     # Match the backend's outer read-only mount and inner writable namespace.
+    # Mapping root into the inner user namespace requires CAP_SETFCAP in its
+    # parent namespace, as in system_selector_scenarios.Namespace.
     /usr/bin/bwrap --unshare-all --die-with-parent --new-session \
-        --ro-bind / / --proc /proc --dev /dev --uid 0 --gid 0 \
+        --ro-bind / / --proc /proc --dev /dev --uid 0 --gid 0 --cap-add CAP_SETFCAP \
         /usr/bin/bwrap --unshare-all --die-with-parent --new-session \
         --bind / / --proc /proc --dev /dev --uid 0 --gid 0 \
         /usr/bin/true
