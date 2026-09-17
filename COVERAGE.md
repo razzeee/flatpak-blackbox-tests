@@ -4,10 +4,21 @@ This suite reports separate measurements for catalogued behavior and public
 interface reach. It does not report a percentage of all possible Flatpak behavior.
 The latter has no defensible finite denominator yet.
 
-## Measured checkpoint
+## Ubuntu CI portability validation
+
+After correcting fixture `ldconfig` selection, C-locale help rendering, and D-Bus
+tool dependencies and multiarch lookup, a full Ubuntu 24.04 container run against
+the CI-pinned Flatpak 1.19.1 completed with 308 passes and 18 failures. The failing
+case IDs and passing coverage match the checkpoint below. Its current-definition
+report is `_build/blackbox-artifacts/u191v/results-multiarch-reaper/report.json` in
+the original Flatpak checkout. A child-reaping supervisor handles orphaned
+processes in this container; the GitHub-hosted VM has its own init process.
+This is local Ubuntu validation, not a subsequent GitHub Actions run.
+
+## Recorded surface-layout checkpoint
 
 A complete run against reference Flatpak 1.19.1 on 2026-09-17 produced 308 passing
-cases and 18 failing checks. The current-definition report is
+cases and 18 failing checks. The recorded report is
 `_build/blackbox-artifacts/surface-layout-full-02/report.json`, relative to the
 original Flatpak checkout root. Historical artifact paths and source commit IDs
 in this document refer to that checkout, not this extracted repository. Its

@@ -11,6 +11,7 @@ import shutil
 import socket
 import struct
 import subprocess
+import sysconfig
 import tempfile
 import threading
 import time
@@ -692,9 +693,16 @@ def _bus(driver: Driver, app: str, name: str) -> None:
             raise PrerequisiteError(f"bus probe needs host tool {binary}")
     # Host OS files supply an independent D-Bus client, including its libraries.
     # No host /run access is granted; the client still uses the sandbox bus proxy.
+    library_dirs = [Path("/usr/lib64"), Path("/usr/lib")]
+    multiarch = sysconfig.get_config_var("MULTIARCH")
+    if isinstance(multiarch, str) and multiarch:
+        directory = Path("/usr/lib") / multiarch
+        if directory.is_dir():
+            library_dirs.insert(0, directory)
+    library_path = ":".join(f"/run/host{directory}" for directory in library_dirs)
     tool_options: tuple[str, ...] = (
         "--filesystem=host-os:ro",
-        "--env=LD_LIBRARY_PATH=/run/host/usr/lib64:/run/host/usr/lib",
+        f"--env=LD_LIBRARY_PATH={library_path}",
         "--command=/run/host/usr/bin/dbus-send")
     destination = "org.blackbox.Echo"
     system = name in {"sandbox-system-bus", "sandbox-system-socket"}
