@@ -6,43 +6,113 @@ The latter has no defensible finite denominator yet.
 
 ## Measured checkpoint
 
-A complete run against reference Flatpak 1.19.1 on 2026-09-15 produced 304 passing
-cases and 16 failing checks. The current-definition report is
-`_build/blackbox-artifacts/tx-contract-reviewed-full-01/report.json`, relative to the
+A complete run against reference Flatpak 1.19.1 on 2026-09-17 produced 308 passing
+cases, 17 failing checks and one unmet prerequisite. The current-definition report is
+`_build/blackbox-artifacts/six-contract-reviewed-full-01/report.json`, relative to the
 checkout root. Its passing evidence covers:
 
 | Measurement | Passing credit | Percentage |
 | --- | ---: | ---: |
 | Catalogued CLI behavior | 115 / 136 obligations | 84.56% |
-| Catalogued library behavior | 143 / 163 obligations | 87.73% |
+| Catalogued library behavior | 147 / 163 obligations | 90.18% |
 | CLI command reach | 38 / 44 commands | 86.36% |
 | Documented CLI option reach | 385 / 624 options | 61.70% |
-| Public library function reach | 182 / 223 functions | 81.61% |
+| Public library function reach | 192 / 223 functions | 86.10% |
 | Public library signal reach | 13 / 14 signals | 92.86% |
 
-There are 121 mapped CLI obligations and 148 mapped library obligations; failures
+There are 121 mapped CLI obligations and 154 mapped library obligations; failures
 do not receive passing credit. Twenty-two of the 28 explicit system obligations
 have passing evidence from isolated selector, preinstall, environment, and repair
 privilege checks. Polkit, non-root system-helper and multiple-user contracts
 remain uncovered. This checkpoint is not a substitute for running the accounting
 against the report for the target and definitions being evaluated.
 
-The 320-case run used the uncommitted suite changes based on
-`e66397758f357b91977318b882dd245368e0a6eb`, target configuration
+The 326-case run used the uncommitted suite changes based on
+`bbb4e16c` on branch `blackbox`, target configuration
 `/tmp/opencode/flatpak-blackbox-build-target.json`, and fully regenerated fixtures
-at `_build/blackbox-artifacts/tx-contract-fixtures-01`. It ran with `--timeout 90`
+at `_build/blackbox-artifacts/six-contract-fixtures-04`. It ran with `--timeout 90`
 and `TMPDIR=/home/razze/dev/flatpak/_build/t`. Recorded SHA-256 values:
 
 | Input | SHA-256 |
 | --- | --- |
-| Suite definition fingerprint | `3a48115c8a5d9b7593e787b405d878744c4f2f944ed2eed6fc4a79d15b376d02` |
+| Suite definition fingerprint | `8df05943e73a0e8ee666cffe87e091142dfcca13d3fbb0a3bffaa48d48223779` |
 | Target configuration | `f3fbbf138daa37ef617632b3933f26f45f5fca9527e56d64a13271ed3a2cb97a` |
 | Target CLI | `9e00add5910406853422eab296cc40ec90ba0439f5fea9564a8fba7fd09a90f2` |
 | Target libflatpak | `d8ecbe648ea28869fa0e78a74b2c48b86dffd95123cb8015c530e630e70801e2` |
-| Fixture manifest | `9232a74de3d6aaaf1daefadf8a9f02c7c455e5f0eb4403ec91d78be59931864b` |
+| Fixture manifest | `05ceae1af2272444bbc2d3fdbf142f0b9de52ed7c7854b6906bce7d0db098a61` |
 
-The seven new transaction cases pass both focused runs and the full run. No new
-reference failures appeared; the existing 16 failed checks retain no credit.
+The seven earlier transaction cases still pass. Four of the six additional
+library contracts pass in focused runs and the full run, increasing passing
+library obligations by four and function reach by ten. Two new contract failures
+receive no credit. Fifteen of the previous 16 failures reproduce; document
+forwarding instead reports an unmet prerequisite because its private document
+portal fails to start. Its earlier failure remains unresolved and receives no credit.
+
+### Six additional library contracts
+
+`scenario-data/six-contracts.json` maps the six existing obligations without
+changing the requirement or interface denominators. Native calls and assertions
+live in `client-transaction-contracts.c` and `six_contract_scenarios.py`. Public
+installed-ref enumeration and independently prepared commits establish deployment
+state. No assertions read private installation metadata or infer private paths.
+
+- **Automatic SDK/debug installation.** Four independent flag combinations check
+  native getters and exact resolved/deployed refs. The SDK differs from the runtime;
+  app, runtime and SDK debug refs have their own commits. An update adds the SDK
+  and debug refs to an initially plain installation. An uninstall-only transaction
+  with both flags enabled adds no installs and leaves only the prior dependencies.
+- **Operation causes.** A shared runtime names both requesting app operations.
+  A runtime extension names its runtime and a shared app extension names both apps.
+  Explicit app requests accept the documented NULL/empty cause equivalence.
+  A runtime-only update exposes both unchanged app causes with `is_skipped` TRUE;
+  they are absent from the operation list and execution callbacks.
+- **Rebase migration.** The old sandbox writes and reads a marker in its actual
+  `XDG_DATA_HOME`. Native rebase receives a nonempty previous-ID array. A new target
+  and a changed-commit target expose that marker through their own sandbox data
+  paths. An ordinary install does not. An already-installed target at the same
+  commit fails to expose the marker despite successful rebase. All variants run
+  before the case reports failure. This is distinct from the existing nullable
+  rebase argument failure. CLI launches are data observers and earn no library
+  launch coverage. No new-operation callback is required for a no-op update.
+- **Missing/shared dependencies.** Apps installed without their runtime or
+  should-download related refs appear in update enumeration. Fully current and
+  repaired installations return no updates. However, with only a shared runtime
+  or shared extension update available, the target lists the dependency alone and
+  omits both affected apps, contrary to the public query documentation. Both
+  update variants are checked and repaired before the case reports failure.
+- **Branch/collection persistence.** A valid signed collection remote installs
+  exact prepared app/runtime commits. Branch and collection getters survive
+  reopening in new processes. Every clearing variant first sets both properties
+  and verifies them after reopening. The `branch-clear` action calls only
+  `flatpak_remote_set_default_branch()`; `collection-clear` calls only
+  `flatpak_remote_set_collection_id()`. Reopened getters must report NULL for the
+  cleared property and the original value for the untouched property. This avoids
+  masking cross-property damage by setting the untouched property again. The
+  clear-both variant also starts with both populated. Verification and deployments
+  remain unchanged.
+- **Trusted remote key.** Committing the prepared binary key permits installation
+  from the signed remote with verification enabled. Separate missing-key and
+  unsigned controls fail with GError and leave installed-ref enumeration empty.
+  The test accepts failure during resolution or execution and does not require an
+  operation-error signal or a particular error code. The existing explicitly keyed
+  bundle crash is separate and remains unresolved.
+
+Preparation uses `/usr/bin/flatpak` independently of the target and validates the
+optional `contracts` manifest group. The final preparation log is
+`_build/blackbox-artifacts/six-contract-preparation-04.log`. Pre-review focused reports are
+`_build/blackbox-artifacts/six-contract-final-SCENARIO-01/report.json`, where
+`SCENARIO` is `tx-auto-sdk-debug`, `tx-operation-causes`, `tx-rebase-migration`,
+`query-missing-dependencies`, `remote-branch-collection` or `remote-trusted-key`.
+Those pre-review reports use the earlier suite fingerprint. The reviewed
+single-setter remote case passes in
+`_build/blackbox-artifacts/six-contract-reviewed-remote-01/report.json`.
+All six cases are rerun under the current fingerprint in the reviewed full report.
+Its log is `_build/blackbox-artifacts/six-contract-reviewed-full-01.log`.
+
+Locked Ruff and ty checks pass; locked mypy passes for 41 Python files. All 75
+unit tests pass, including the new incomplete-contract-oracle rejection test.
+Library clients compile with `-Wall -Wextra -Werror`. `catalogue.py --check` confirms
+44 commands, 624 options, 223 functions and 14 signals against the current source.
 
 ### Transaction contract review
 
@@ -296,7 +366,7 @@ after return and during a second, callback-free refresh. It verifies the refresh
 public XML against the independently exported fixture. This is a bounded check
 of post-call scope, not proof that a callback can never arrive later.
 
-All six new cases pass, covering the callback contract, search, explicit
+The six callback/search cases pass, covering the callback contract, search, explicit
 AppStream refresh, extensionless bundle format selection, runtime-based app
 filtering, and effective locale selection after config unset.
 
@@ -307,8 +377,12 @@ contracts, writable SDK/base initialization under the host's SELinux-xattr
 restrictions, clearing inherited environment, `enter` output, named-installation
 override isolation, related-ref enumeration, instance child-process identity,
 unreachable-installation enumeration, and a documented nullable rebase argument.
-Document forwarding, explicitly keyed bundle installation, and the native
-collection-ID sideload-query variant also remain failed checks in this run.
+Explicitly keyed bundle installation and the native collection-ID sideload-query
+variant also remain failed checks in this run. Document forwarding previously
+failed its behavioral assertion; this run cannot reach it because the private
+document portal fails to start. That unmet prerequisite does not resolve or
+replace the prior failure finding. The two additional failures are described
+under "Six additional library contracts" above.
 These observations need individual triage; failed assertions are not automatically
 proof of implementation defects. None earns passing credit.
 

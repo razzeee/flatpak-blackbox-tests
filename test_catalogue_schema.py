@@ -26,7 +26,7 @@ class CatalogueSchemaTests(unittest.TestCase):
         suite = Path(__file__).parent
         model = CoverageModel(suite)
         self.assertEqual(model.catalogue, load_json(suite / "coverage-data/surfaces.json"))
-        self.assertEqual(len(model.cases), 320)
+        self.assertEqual(len(model.cases), 326)
         metrics = model.summarize()["metrics"]
         self.assertEqual({key: item["total"] for key, item in metrics["behaviors"].items()},
                          {"cli": 136, "library": 163})
@@ -35,7 +35,7 @@ class CatalogueSchemaTests(unittest.TestCase):
                           "library-function": 223, "library-signal": 14})
         self.assertEqual({key: item["implemented"] for key, item in metrics["surfaces"].items()},
                           {"cli-command": 40, "cli-option": 393,
-                           "library-function": 188, "library-signal": 13})
+                            "library-function": 199, "library-signal": 13})
         self.assertTrue(extension_clients(suite))
 
     def test_gap_defaults_and_both_contract_text_formats(self) -> None:

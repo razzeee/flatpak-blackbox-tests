@@ -28,6 +28,20 @@ plan (FlatpakTransaction *transaction, ContractTrace *trace)
   for (GList *item = operations; item != NULL; item = item->next)
     {
       FlatpakTransactionOperation *op = item->data;
+      const char *ref = CALL_API (flatpak_transaction_operation_get_ref, op);
+      GPtrArray *causes = CALL_API (flatpak_transaction_operation_get_related_to_ops, op);
+      g_print ("skip\t%s\t%d\n", ref,
+               CALL_API (flatpak_transaction_operation_get_is_skipped, op));
+      if (causes == NULL || causes->len == 0)
+        g_print ("cause-free\t%s\n", ref);
+      else
+        for (size_t i = 0; i < causes->len; i++)
+          {
+            FlatpakTransactionOperation *cause = causes->pdata[i];
+            g_print ("cause\t%s\t%s\t%d\n", ref,
+                     CALL_API (flatpak_transaction_operation_get_ref, cause),
+                     CALL_API (flatpak_transaction_operation_get_is_skipped, cause));
+          }
       const char *remote = CALL_API (flatpak_transaction_operation_get_remote, op);
       GFile *bundle = CALL_API (flatpak_transaction_operation_get_bundle_path, op);
       g_autofree char *uri = bundle == NULL ? NULL : g_file_get_uri (bundle);
@@ -82,6 +96,121 @@ blackbox_transaction_contracts_main (int argc, char **argv)
   if (argc < 4)
     return 2;
   installation = open_installation (argv[2]);
+  if (strcmp (argv[3], "updates") == 0 && argc == 4)
+    {
+      g_autoptr(GPtrArray) refs = CALL_API (flatpak_installation_list_installed_refs_for_update,
+                                          installation, NULL, &error);
+      g_assert_no_error (error);
+      g_assert_nonnull (refs);
+      for (size_t i = 0; i < refs->len; i++)
+        g_print ("update\t%s\n", CALL_API (flatpak_ref_format_ref_cached, refs->pdata[i]));
+      return 0;
+    }
+  if (strcmp (argv[3], "signed-remote") == 0 && argc == 8)
+    {
+      g_autoptr(FlatpakRemote) remote = CALL_API (flatpak_remote_new, "fixture");
+      CALL_API (flatpak_remote_set_url, remote, argv[4]);
+      CALL_API (flatpak_remote_set_gpg_verify, remote, TRUE);
+      if (strcmp (argv[5], "-") != 0)
+        {
+          char *contents = NULL;
+          size_t length = 0;
+          g_assert_true (g_file_get_contents (argv[5], &contents, &length, &error));
+          g_assert_no_error (error);
+          g_autoptr(GBytes) key = g_bytes_new_take (contents, length);
+          CALL_API (flatpak_remote_set_gpg_key, remote, key);
+        }
+      CALL_API (flatpak_remote_set_default_branch, remote,
+                strcmp (argv[6], "-") == 0 ? NULL : argv[6]);
+      CALL_API (flatpak_remote_set_collection_id, remote,
+                strcmp (argv[7], "-") == 0 ? NULL : argv[7]);
+      g_assert_true (CALL_API (flatpak_installation_modify_remote, installation,
+                               remote, NULL, &error));
+      g_assert_no_error (error);
+      return 0;
+    }
+  if (strcmp (argv[3], "properties") == 0 || strcmp (argv[3], "settings") == 0 ||
+      strcmp (argv[3], "branch-clear") == 0 || strcmp (argv[3], "collection-clear") == 0)
+    {
+      g_autoptr(FlatpakRemote) remote = CALL_API (flatpak_installation_get_remote_by_name,
+                                                installation, "fixture", NULL, &error);
+      g_assert_no_error (error);
+      g_assert_nonnull (remote);
+      if (strcmp (argv[3], "branch-clear") == 0 && argc == 4)
+        CALL_API (flatpak_remote_set_default_branch, remote, NULL);
+      else if (strcmp (argv[3], "collection-clear") == 0 && argc == 4)
+        CALL_API (flatpak_remote_set_collection_id, remote, NULL);
+      else if (strcmp (argv[3], "settings") == 0 && argc == 6)
+        {
+          CALL_API (flatpak_remote_set_default_branch, remote,
+                    strcmp (argv[4], "-") == 0 ? NULL : argv[4]);
+          CALL_API (flatpak_remote_set_collection_id, remote,
+                    strcmp (argv[5], "-") == 0 ? NULL : argv[5]);
+        }
+      else if (strcmp (argv[3], "properties") != 0 || argc != 4)
+        return 2;
+      if (strcmp (argv[3], "properties") != 0)
+        {
+          g_assert_true (CALL_API (flatpak_installation_modify_remote, installation,
+                                   remote, NULL, &error));
+          g_assert_no_error (error);
+        }
+      g_autofree char *branch = CALL_API (flatpak_remote_get_default_branch, remote);
+      g_autofree char *collection = CALL_API (flatpak_remote_get_collection_id, remote);
+      g_print ("properties\t%d\t%s\t%s\n",
+               CALL_API (flatpak_remote_get_gpg_verify, remote),
+               branch == NULL ? "-" : branch, collection == NULL ? "-" : collection);
+      return 0;
+    }
+  /* PATH exercise ACTION REFS SDK DEBUG NODEPS NORELATED PREVIOUS_IDS */
+  if (strcmp (argv[3], "exercise") == 0 && argc == 11)
+    {
+      g_autoptr(FlatpakTransaction) transaction =
+        CALL_API (flatpak_transaction_new_for_installation, installation, NULL, &error);
+      g_assert_no_error (error);
+      ContractTrace trace = { 0 };
+      g_signal_connect (transaction, "ready", G_CALLBACK (plan), &trace);
+      g_signal_connect (transaction, "new-operation", G_CALLBACK (executing), &trace);
+      gboolean sdk = strcmp (argv[6], "1") == 0;
+      gboolean debug = strcmp (argv[7], "1") == 0;
+      CALL_API (flatpak_transaction_set_auto_install_sdk, transaction, sdk);
+      CALL_API (flatpak_transaction_set_auto_install_debug, transaction, debug);
+      g_assert_cmpint (CALL_API (flatpak_transaction_get_auto_install_sdk, transaction), ==, sdk);
+      g_assert_cmpint (CALL_API (flatpak_transaction_get_auto_install_debug, transaction), ==, debug);
+      CALL_API (flatpak_transaction_set_disable_dependencies, transaction, strcmp (argv[8], "1") == 0);
+      CALL_API (flatpak_transaction_set_disable_related, transaction, strcmp (argv[9], "1") == 0);
+      g_auto(GStrv) refs = g_strsplit (argv[5], ";", -1);
+      g_auto(GStrv) previous = g_strsplit (argv[10], ";", -1);
+      for (size_t i = 0; refs[i] != NULL; i++)
+        {
+          gboolean added = FALSE;
+          if (strcmp (argv[4], "install") == 0 || strcmp (argv[4], "reject-install") == 0)
+            added = CALL_API (flatpak_transaction_add_install, transaction, "fixture", refs[i],
+                              NULL, &error);
+          else if (strcmp (argv[4], "update") == 0)
+            added = CALL_API (flatpak_transaction_add_update, transaction, refs[i], NULL, NULL, &error);
+          else if (strcmp (argv[4], "uninstall") == 0)
+            added = CALL_API (flatpak_transaction_add_uninstall, transaction, refs[i], &error);
+          else if (strcmp (argv[4], "rebase") == 0)
+            added = CALL_API (flatpak_transaction_add_rebase, transaction, "fixture", refs[i],
+                              NULL, (const char **) previous, &error);
+          g_assert_no_error (error);
+          g_assert_true (added);
+        }
+      gboolean result = CALL_API (flatpak_transaction_run, transaction, NULL, &error);
+      if (strcmp (argv[4], "reject-install") == 0)
+        {
+          g_assert_false (result);
+          g_assert_nonnull (error);
+          g_print ("rejected\t%s\t%d\t%s\n", g_quark_to_string (error->domain),
+                   error->code, error->message);
+          return 0;
+        }
+      g_assert_no_error (error);
+      g_assert_true (result);
+      g_print ("completed\t%u\n", trace.started);
+      return 0;
+    }
   if (strcmp (argv[3], "state") == 0 && argc == 4)
     {
       g_autoptr(GPtrArray) refs = CALL_API (flatpak_installation_list_installed_refs,

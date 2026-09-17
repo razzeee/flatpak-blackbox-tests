@@ -124,6 +124,7 @@ def main() -> None:
             args.flatpak, output / "transactions", transaction_fixture,
         )
         fixture["extras"] = {"transactions": transactions}
+        fixture["contracts"] = prepare_transactions.prepare_contracts(args.flatpak, output, fixture)
         fixture["extras"]["auth"] = prepare_auth.prepare(args.flatpak, output / "auth", fixture)
         fixture["lifecycle_extra"] = prepare_lifecycle_extra.prepare(args.flatpak, output, fixture)
     fixture["sizes"] = prepare_transactions.prepare_sizes(output, fixture)

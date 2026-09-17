@@ -4,8 +4,8 @@ This standalone suite tests a selected CLI and source-compatible libflatpak
 implementation through public interfaces. It covers installation lifecycles,
 remote configuration, sandbox observations, build/distribution output, library
 objects, transactions, cancellation, signals, and isolated system selectors.
-The current full run contains 320 driver/profile cases, with 304 passing and
-16 known failing checks against reference Flatpak 1.19.1.
+The current full run contains 326 driver/profile cases, with 308 passing,
+17 failing checks and one unmet prerequisite against reference Flatpak 1.19.1.
 
 For measured percentages, denominators, and known reference discrepancies, read
 [`COVERAGE.md`](COVERAGE.md). Each execution now writes `coverage.md` and embeds
@@ -77,6 +77,15 @@ command when using fixtures prepared before this marker was added.
 Only `tx-update-subpaths-default` and `tx-disable-related` require the selection
 repository and its commit map. The other transaction-contract cases accept query
 fixtures without those optional fields.
+
+The six SDK/debug, operation-cause, migration, dependency-query and remote-trust
+cases are registered in `scenario-data/six-contracts.json`. Full preparation adds
+the optional, validated `contracts` manifest group. It contains two runnable apps,
+a shared runtime, a distinct SDK, app/runtime/SDK debug refs, and shared extensions.
+Separate repository snapshots change only the runtime, a shared app extension, or
+the migration target app. Every snapshot records all expected commits. Older
+manifests remain valid, but the four cases requiring this group report an unmet
+prerequisite. The two remote cases reuse `build.usb_repo` and its disposable key.
 
 Distribute the whole fixture directory with the suite. Execution needs no reference
 Flatpak exporter, source tree, Meson build, or public network repository. Some
@@ -206,6 +215,12 @@ Timeouts fail the test and retain command output.
 | `tx-extra-dependency-source` | A public custom-path source supplies the installed runtime without duplication; an unregistered-source control installs a target copy. |
 | `tx-file-uri-origin` | Native transaction installation from a file URI creates a publicly queryable origin remote with that URL. |
 | `tx-operation-identity` | Install, update, uninstall and bundle operations expose their ref, type, applicable remote and nullable bundle path; execution callbacks verify current-operation identity. |
+| `tx-auto-sdk-debug` | All SDK/debug flag combinations have exact deployment controls; update adds the SDK and debug refs; uninstall-only adds none. Native getters check the settings. |
+| `tx-operation-causes` | A shared runtime identifies both requesting apps, extensions identify their main operations, explicit apps have no causes, and unchanged app causes report skipped during a runtime update. |
+| `tx-rebase-migration` | The old app writes persistent data. Rebase with nonempty previous IDs must expose it through the new app's own data path, for new, unchanged-installed and updated targets. An ordinary install must not migrate it. |
+| `query-missing-dependencies` | Both apps must appear in update enumeration for a missing runtime, missing related extension, shared runtime update and shared extension update; complete/repaired installations have no updates. |
+| `remote-branch-collection` | Install from a valid signed collection remote and verify persistence after reopening. Before each clear, populate both properties; single-setter NULL clears must preserve the untouched property after reopening. Also check clearing both. |
+| `remote-trusted-key` | A committed trusted key permits exact signed deployments. Missing-key and unsigned controls fail with no deployments; resolution or execution failure is accepted. |
 
 Additional groups cover CLI management, build/export and signing, runtime
 permissions and process behavior, library objects and queries, transactions and
@@ -230,11 +245,16 @@ remain in the output directory. If state cleanup fails, the report identifies
 the remaining path and marks the case as a setup error.
 
 The current measured run is
-`_build/blackbox-artifacts/tx-contract-reviewed-full-01/report.json`, using
-`_build/blackbox-artifacts/tx-contract-fixtures-01`. Its definition fingerprint is
-`3a48115c8a5d9b7593e787b405d878744c4f2f944ed2eed6fc4a79d15b376d02`.
-All seven transaction-contract cases pass; the full run retains the same 16
-existing failures. `COVERAGE.md` records target and fixture hashes.
+`_build/blackbox-artifacts/six-contract-reviewed-full-01/report.json`, using
+`_build/blackbox-artifacts/six-contract-fixtures-04`. Its definition fingerprint is
+`8df05943e73a0e8ee666cffe87e091142dfcca13d3fbb0a3bffaa48d48223779`.
+All seven earlier transaction-contract cases and four of the six new cases pass.
+The new failures are unchanged-commit rebase migration and affected-app update
+enumeration for shared dependency updates. The existing nullable-rebase failure
+and explicitly keyed bundle crash are separate checks. Fifteen previous failures
+reproduce; document forwarding is now blocked by private portal startup rather
+than reaching its previous failing assertion. `COVERAGE.md` records details,
+target and fixture hashes.
 
 For long runs on a quota-limited `/tmp`, select a short writable `TMPDIR` on a
 filesystem with sufficient space and put `--output` there too. Keep the temporary

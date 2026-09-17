@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from fixture_manifest import load_fixture, parse_fixture
+from fixture_manifest import FixtureContracts, load_fixture, parse_fixture
 from json_validation import JSONValue, ValidationError, json_value, load_json
 
 
@@ -108,6 +108,35 @@ def malformed_nodes(value: JSONValue, path: str = "fixture") -> list[tuple[JSONV
 
 
 class FixtureManifestTests(unittest.TestCase):
+    def test_contract_fixture_requires_every_ref_and_version_oracle(self) -> None:
+        aliases = ("one", "two", "platform", "sdk", "extension", "shared", "one_debug",
+                   "two_debug", "platform_debug", "sdk_debug")
+        refs = {alias: f"runtime/org.example.{alias}/x86_64/test" for alias in aliases}
+        contracts: FixtureContracts = {
+            "refs": refs,
+            "repos": {version: version for version in ("A", "RUNTIME", "EXTENSION", "APP")},
+            "commits": {version: {ref: "commit" for ref in refs.values()}
+                        for version in ("A", "RUNTIME", "EXTENSION", "APP")},
+        }
+        self.assertEqual(parse_fixture({**basic(), "contracts": contracts})["contracts"], contracts)
+        for version in contracts["repos"]:
+            for ref in refs.values():
+                changed: FixtureContracts = {**contracts, "commits": {
+                    **contracts["commits"], version: {
+                        key: commit for key, commit in contracts["commits"][version].items()
+                        if key != ref}}}
+                with self.subTest(version=version, ref=ref), self.assertRaisesRegex(
+                    ValidationError,
+                    re.escape(f"fixture.contracts.commits.{version}.{ref}: required")
+                ):
+                    parse_fixture({**basic(), "contracts": changed})
+        for alias in aliases:
+            changed = {**contracts, "refs": {key: ref for key, ref in refs.items() if key != alias}}
+            with self.subTest(alias=alias), self.assertRaisesRegex(
+                ValidationError, re.escape(f"fixture.contracts.refs.{alias}: required")
+            ):
+                parse_fixture({**basic(), "contracts": changed})
+
     def test_basic_groups_are_optional(self) -> None:
         value = basic()
         self.assertEqual(parse_fixture(value), value)

@@ -107,6 +107,12 @@ class FixtureTransactions(TypedDict):
     eol_reason: str
 
 
+class FixtureContracts(TypedDict):
+    repos: dict[str, str]
+    refs: dict[str, str]
+    commits: dict[str, dict[str, str]]
+
+
 class FixtureAuth(TypedDict):
     directory: str
     ref: str
@@ -169,6 +175,7 @@ class FixtureManifest(_FixtureRequired, total=False):
     queries: FixtureQueries
     extras: FixtureExtras
     lifecycle_extra: FixtureLifecycleExtra
+    contracts: FixtureContracts
 
 
 class FixtureBuildEntries(TypedDict, total=False):
@@ -414,6 +421,29 @@ def parse_lifecycle_extra(value: object, path: str) -> FixtureLifecycleExtra:
     return result
 
 
+def parse_contracts(value: object, path: str) -> FixtureContracts:
+    data = object_map(value, path)
+    result: FixtureContracts = {
+        "repos": string_map(required(data, "repos", path), f"{path}.repos", nonempty=True),
+        "refs": string_map(required(data, "refs", path), f"{path}.refs", nonempty=True),
+        "commits": {version: string_map(item, f"{path}.commits.{version}", nonempty=True)
+                    for version, item in object_map(
+                        required(data, "commits", path), f"{path}.commits").items()},
+    }
+    for alias in ("one", "two", "platform", "sdk", "extension", "shared", "one_debug", "two_debug",
+                  "platform_debug", "sdk_debug"):
+        string(required(dict(result["refs"]), alias, f"{path}.refs"),
+               f"{path}.refs.{alias}", nonempty=True)
+    for version in ("A", "RUNTIME", "EXTENSION", "APP"):
+        required(dict(result["repos"]), version, f"{path}.repos")
+        commits = object_map(required(dict(result["commits"]), version, f"{path}.commits"),
+                             f"{path}.commits.{version}")
+        for ref in result["refs"].values():
+            required(commits, ref, f"{path}.commits.{version}")
+    _known(data, result, path)
+    return result
+
+
 def parse_fixture(value: object, path: str = "fixture") -> FixtureManifest:
     """Validate every provided field, leaving supplemental groups optional for --basic."""
     data = object_map(value, path)
@@ -454,6 +484,8 @@ def parse_fixture(value: object, path: str = "fixture") -> FixtureManifest:
     if "lifecycle_extra" in data:
         result["lifecycle_extra"] = parse_lifecycle_extra(
             data["lifecycle_extra"], f"{path}.lifecycle_extra")
+    if "contracts" in data:
+        result["contracts"] = parse_contracts(data["contracts"], f"{path}.contracts")
     _known(data, result, path)
     return result
 

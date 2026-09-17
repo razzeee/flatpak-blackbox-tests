@@ -13,6 +13,7 @@ import tempfile
 from pathlib import Path
 
 from fixture_manifest import (
+    FixtureContracts,
     FixtureManifest,
     FixtureSize,
     FixtureTransactions,
@@ -20,6 +21,78 @@ from fixture_manifest import (
     parse_fixture,
     parse_size,
 )
+
+
+def prepare_contracts(reference_cli: str, output: Path,
+                      fixture: FixtureManifest) -> FixtureContracts:
+    """Runnable apps, distinct SDK/debug refs, and isolated dependency updates."""
+    root = output / "contracts"
+    root.mkdir()
+    arch = fixture["arch"]
+    names = {"one": "org.flatpak.ContractOne", "two": "org.flatpak.ContractTwo",
+             "platform": "org.flatpak.ContractPlatform", "sdk": "org.flatpak.ContractSdk",
+             "extension": "org.flatpak.ContractPlatform.Extra",
+             "shared": "org.flatpak.ContractOne.Shared"}
+    names.update({f"{alias}_debug": names[alias] + ".Debug"
+                  for alias in ("one", "two", "platform", "sdk")})
+    refs = {alias: f"{'app' if alias in ('one', 'two') else 'runtime'}/{name}/{arch}/test"
+            for alias, name in names.items()}
+
+    def command(*args: str) -> str:
+        return subprocess.check_output(args, text=True).strip()
+
+    repos: dict[str, str] = {}
+    commits: dict[str, dict[str, str]] = {}
+    with tempfile.TemporaryDirectory(prefix="contract-export-") as temporary:
+        work = Path(temporary)
+        for version in ("A", "RUNTIME", "EXTENSION", "APP"):
+            repo = root / version
+            if version != "A":
+                shutil.copytree(root / "A", repo)
+            for alias, name in names.items():
+                if version != "A" and alias != {"RUNTIME": "platform",
+                                                "EXTENSION": "shared", "APP": "two"}[version]:
+                    continue
+                build = work / f"{version}-{alias}"
+                is_app = alias in ("one", "two")
+                if is_app or alias in ("platform", "sdk"):
+                    asset = (fixture["assets"]["app_tree"] if is_app else
+                             fixture["assets"]["runtime_tree"])
+                    shutil.copytree(output / asset, build, symlinks=True)
+                else:
+                    (build / "files").mkdir(parents=True)
+                    (build / "usr").mkdir()
+                if is_app:
+                    metadata = (f"[Application]\nname={name}\n"
+                                f"runtime={names['platform']}/{arch}/test\n"
+                                f"sdk={names['sdk']}/{arch}/test\ncommand=blackbox-probe\n")
+                    metadata += (f"[Extension {names['shared']}]\ndirectory=share/contract\n"
+                                 "version=test\n")
+                    (build / "files/share/contract").mkdir(parents=True, exist_ok=True)
+                else:
+                    metadata = f"[Runtime]\nname={name}\n"
+                if alias == "platform":
+                    metadata += (f"[Extension {names['extension']}]\n"
+                                 "directory=share/contract-platform\nversion=test\n")
+                    (build / "usr/share/contract-platform").mkdir(parents=True)
+                if alias in ("one", "two", "platform", "sdk"):
+                    metadata += (f"[Extension {name}.Debug]\ndirectory=lib/debug\n"
+                                 "version=test\nno-autodownload=true\nautodelete=true\n")
+                else:
+                    parent = ("platform" if alias == "extension" else "one" if alias == "shared"
+                              else alias.removesuffix("_debug"))
+                    metadata += f"[ExtensionOf]\nref={refs[parent]}\n"
+                (build / "metadata").write_text(metadata)
+                payload = build / ("files" if is_app else "usr") / "contract-marker"
+                payload.write_text(f"{alias}:{version}\n")
+                flags = [] if is_app else ["--runtime"]
+                command(reference_cli, "build-export", "--disable-sandbox", f"--arch={arch}",
+                        *flags, str(repo), str(build), "test")
+            command(reference_cli, "build-update-repo", str(repo))
+            repos[version] = str(repo.relative_to(output))
+            commits[version] = {ref: command("ostree", f"--repo={repo}", "rev-parse", ref)
+                                for ref in refs.values()}
+    return {"repos": repos, "refs": refs, "commits": commits}
 
 
 def prepare(reference_cli: str, output: Path, fixture: FixtureManifest) -> FixtureTransactions:
