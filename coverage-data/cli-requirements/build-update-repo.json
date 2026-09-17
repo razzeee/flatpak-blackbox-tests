@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.build-update-repo.any.summary",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "Updating repository metadata generates a summary that makes the repository's current refs discoverable through remote-ls.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-update-repo.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-update-repo"
+      ],
+      "required_capabilities": [
+        "cli",
+        "build-tools",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.build-update-repo.any.prune",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "build-update-repo --prune removes unreferenced repository objects.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-update-repo.xml",
+          "anchor": "--prune"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-update-repo",
+        "cli.option.build-update-repo.--prune"
+      ],
+      "required_capabilities": [
+        "cli",
+        "build-tools",
+        "local-repository"
+      ]
+    }
+  ],
+  "limitations": []
+}

@@ -1,0 +1,125 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "management.config",
+      "scenario": "management-config",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation"
+      ],
+      "description": "Persist languages through two writes.",
+      "preconditions": "Fresh user state.",
+      "expected": "Each get returns exactly the last value.",
+      "references": [
+        "doc/flatpak-config.xml"
+      ]
+    },
+    {
+      "id": "coverage.config-unset",
+      "scenario": "coverage-config-unset",
+      "handler": "coverage_next_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "runtime-extensions"
+      ],
+      "description": "Unset languages and observe locale payload selection.",
+      "preconditions": "Locale-subset extension with de/fr/ja/es markers; current language fr, extra-languages de, explicit languages ja.",
+      "expected": "Initial deployment contains only ja. After uninstall and unset, deployment contains de and fr, excluding ja and es; extra-languages persists.",
+      "references": [
+        "doc/flatpak-config.xml"
+      ]
+    },
+    {
+      "id": "system-selectors.config",
+      "scenario": "system-selectors-config",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations"
+      ],
+      "description": "Set, read and unset distinct installation configurations, including implicit default selection.",
+      "preconditions": "Disposable namespace with fresh default, named alt, and root-user stores.",
+      "expected": "Writes and unsets change only the selected installation; implicit write selects default system.",
+      "references": [
+        "doc/flatpak-config.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "management.config",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.config.user.roundtrip"
+      ],
+      "rationale": "Two separate get calls match each preceding languages write."
+    },
+    {
+      "behavior_id": "coverage.config-unset",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.config.user.unset"
+      ],
+      "rationale": "Public info deployment locations expose locale marker payloads. Explicit ja overrides current fr and extra de; after --unset languages, a fresh deployment contains de/fr and excludes ja/es."
+    },
+    {
+      "behavior_id": "system-selectors.config",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [
+        "cli.config.system.named"
+      ],
+      "rationale": "Named languages value persists while default/user values remain independent; default and unset writes are checked across fresh calls.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.config.--system",
+          "rationale": "Explicit default write and get select default languages while alt/user retain distinct values."
+        },
+        {
+          "id": "cli.option.config.--user",
+          "rationale": "User languages remain independent of default and named writes."
+        },
+        {
+          "id": "cli.option.config.--installation",
+          "rationale": "Named languages survive default writes and only named unset restores its original value."
+        },
+        {
+          "id": "cli.option.config.--set",
+          "rationale": "Exact stored value changes after each set."
+        },
+        {
+          "id": "cli.option.config.--get",
+          "rationale": "Get returns exact selected installation value."
+        },
+        {
+          "id": "cli.option.config.--unset",
+          "rationale": "Unset restores the pre-write public value only in the selected installation."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Every target call enters two disposable bubblewrap user/mount namespace layers. The outer root maps only to the invoking host UID; inner root maps only to outer root. Inherited host mounts are locked read-only, checked by a denied bind-remount before every target call. Private PID/network namespaces and writable installation state are case-local; generated state is removed after each case while command evidence is retained.",
+    "Target environment keys BLACKBOX_SYSTEM_INSTALL_DIR and BLACKBOX_SYSTEM_CONFIG_DIR specify the expected compiled defaults; their reference-build defaults are /var/local/lib/flatpak and /usr/local/etc/flatpak. The namespace mounts private data at those paths, and CLI/C-client assertions still check the target's actual default location. These keys never become FLATPAK_SYSTEM_DIR or FLATPAK_CONFIG_DIR redirects. Set them under the target JSON environment object, not the host shell environment.",
+    "Readonly exposure includes only the suite directory, selected target executables, configured helpers and LD_LIBRARY_PATH directories. Uninstalled targets can explicitly add colon-separated absolute paths with BLACKBOX_TARGET_READONLY_PATHS in the target environment. No repository ancestor is inferred. Paths that cover private namespace roots or overlap protected installation/service content are rejected, including symlink aliases.",
+    "CLI deployment location checks use the public returned location, verify containment in the selected public installation base, locate the controlled bin/blackbox-probe payload there and execute it to distinguish A from B. They never construct a deployment path from a ref or commit, and never recursively search a general installation root for content.",
+    "Direct-root mutations may satisfy explicitly selected installation outcomes. These cases do not assert polkit authorization, non-root helper behavior, or multiple-user access. No requirement demanding those outcomes is mapped.",
+    "The named override case intentionally asserts the documented isolation contract; the reference target currently fails it, so that option receives no verified credit from that case."
+  ]
+}

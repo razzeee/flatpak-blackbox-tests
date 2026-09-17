@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.remote-info.user.ref-commit",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "A remote-info machine-readable query returns the matched full ref and its remote commit ID, rather than the commit of an older local deployment.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-info.xml",
+          "anchor": "--show-ref"
+        },
+        {
+          "path": "doc/flatpak-remote-info.xml",
+          "anchor": "--show-commit"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-info",
+        "cli.option.remote-info.--show-ref",
+        "cli.option.remote-info.--show-commit"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.remote-info.user.history",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "remote-info --log displays available previous versions of the requested remote ref.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-info.xml",
+          "anchor": "--log"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-info",
+        "cli.option.remote-info.--log"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    }
+  ],
+  "limitations": []
+}

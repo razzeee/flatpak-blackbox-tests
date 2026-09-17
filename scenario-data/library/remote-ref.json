@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "queryx.remote-metadata",
+      "scenario": "queryx-remote-metadata",
+      "handler": "library_query_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Compare remote cached and direct metadata and sizes.",
+      "preconditions": "Expected bytes and integer sizes from independently exported commit metadata.",
+      "expected": "Cached getters and direct queries match every expected value.",
+      "references": [
+        "common/flatpak-remote-ref.c: size and metadata getters",
+        "common/flatpak-installation.c: flatpak_installation_fetch_remote_metadata_sync, flatpak_installation_fetch_remote_size_sync"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "queryx.remote-metadata",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.remote-ref.sizes-metadata",
+        "library.remote-query.direct-metadata-size"
+      ],
+      "rationale": "Cached and direct byte results and both size integers match values recorded during independent preparation."
+    }
+  ]
+}

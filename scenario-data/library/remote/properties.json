@@ -1,0 +1,225 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "objects.remote-ownership",
+      "scenario": "objects-remote-ownership",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "libflatpak"
+      ],
+      "description": "Retain owned URL and explicitly referenced borrowed metadata.",
+      "preconditions": "Remote URL setter and RemoteRef public metadata property supply literals.",
+      "expected": "URL and retained bytes remain byte-exact after both source objects and original input bytes are released.",
+      "references": [
+        "common/flatpak-remote.c: flatpak_remote_get_url",
+        "common/flatpak-remote-ref.c: flatpak_remote_ref_get_metadata"
+      ]
+    },
+    {
+      "id": "objects.remote-file",
+      "scenario": "objects-remote-file",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ],
+      "description": "Parse valid and malformed flatpakrepo bytes.",
+      "preconditions": "Literal Version=1 file and three malformed files; isolated user installation.",
+      "expected": "Name, URL and title match literals without adding a remote; malformed files return NULL and errors.",
+      "references": [
+        "common/flatpak-remote.c: flatpak_remote_new_from_file"
+      ]
+    },
+    {
+      "id": "objects.remote-local",
+      "scenario": "objects-remote-local",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ],
+      "description": "Keep uncommitted remote changes local to the object.",
+      "preconditions": "One unadded object and one configured remote.",
+      "expected": "The unadded name is absent; edited object's URL changes while a newly opened installation still returns the original URL.",
+      "references": [
+        "common/flatpak-remote.c: flatpak_remote_new, flatpak_remote_set_url"
+      ]
+    },
+    {
+      "id": "objects.remote-description",
+      "scenario": "objects-remote-description",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ],
+      "description": "Persist descriptive remote properties.",
+      "preconditions": "Configured unsigned remote with literal comment, description, homepage and icon edits.",
+      "expected": "All four getters return edited literals after reopening.",
+      "references": [
+        "common/flatpak-remote.c: descriptive property setters/getters",
+        "common/flatpak-installation.c: flatpak_installation_modify_remote"
+      ]
+    },
+    {
+      "id": "objects.remote-policy",
+      "scenario": "objects-remote-policy",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ],
+      "description": "Persist independent remote policy booleans.",
+      "preconditions": "All eight disabled/noenumerate/nodeps combinations, then all FALSE.",
+      "expected": "Reopened getters match every combination and the final reset.",
+      "references": [
+        "common/flatpak-remote.c: disabled, noenumerate and nodeps setters/getters"
+      ]
+    },
+    {
+      "id": "objects.remote-branch",
+      "scenario": "objects-remote-branch",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ],
+      "description": "Check local branch and collection-ID edits.",
+      "preconditions": "Remote object gets explicit string values followed by NULL.",
+      "expected": "Getters return literal strings then NULL. No signed-repository persistence credit is claimed.",
+      "references": [
+        "common/flatpak-remote.c: default-branch and collection-ID setters/getters"
+      ]
+    },
+    {
+      "id": "objects.remote-filter",
+      "scenario": "objects-remote-filter",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ],
+      "description": "Persist filter pathname and main ref.",
+      "preconditions": "Valid allow-rule filter file and explicit full app ref.",
+      "expected": "Reopened getters return the supplied path and literal ref.",
+      "references": [
+        "common/flatpak-remote.c: filter and main-ref setters/getters"
+      ]
+    },
+    {
+      "id": "contracts.branch-collection",
+      "scenario": "remote-branch-collection",
+      "handler": "six_contract_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Signed remote branch/collection persistence and independent NULL clearing.",
+      "preconditions": [
+        "Prepared signed collection repository and trusted public key"
+      ],
+      "expected": [
+        "Branch/collection survive process reopen, exact signed app/runtime install, NULL clears each setting independently and together."
+      ],
+      "references": [
+        "common/flatpak-remote.c:flatpak_remote_set_collection_id",
+        "common/flatpak-remote.c:flatpak_remote_set_default_branch"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "objects.remote-ownership",
+      "driver": "library",
+      "profile": "any",
+      "requirements": [
+        "library.ownership.remote-owned-and-borrowed"
+      ],
+      "rationale": "Owned URL survives remote destruction; borrowed metadata is explicitly reffed before source destruction and byte-checked after all source references are released. The public metadata property supplies bytes solely for this lifetime contract; no metadata retrieval pipeline is claimed."
+    },
+    {
+      "behavior_id": "objects.remote-file",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.remote.from-file"
+      ],
+      "rationale": "Valid file name/URL/title and installation absence are checked; three invalid files require NULL and error."
+    },
+    {
+      "behavior_id": "objects.remote-local",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.remote.local-edits"
+      ],
+      "rationale": "Unadded name remains absent and an uncommitted URL edit is visible only on the edited object."
+    },
+    {
+      "behavior_id": "objects.remote-description",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.remote.user.description-persistence"
+      ],
+      "rationale": "Committed comment, description and homepage are each checked against literals on a newly opened installation."
+    },
+    {
+      "behavior_id": "objects.remote-policy",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.remote.user.policy-persistence"
+      ],
+      "rationale": "All independent boolean combinations and final FALSE reset are checked after reopening."
+    },
+    {
+      "behavior_id": "objects.remote-filter",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.remote.filter-main-ref-persistence"
+      ],
+      "rationale": "Valid filter pathname and explicit main ref are committed and checked after reopening."
+    },
+    {
+      "behavior_id": "contracts.branch-collection",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.remote.branch-collection-persistence"
+      ],
+      "rationale": "Public setters and modify_remote persist branch/collection on valid signed installable remote. Separate processes reopen before getter checks; independent NULL clearing checks the other setting remains intact and deployments remain unchanged."
+    }
+  ]
+}

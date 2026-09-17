@@ -1,7 +1,6 @@
 {
   "schema": 1,
   "scope": "library",
-  "limitations": [],
   "requirements": [
     {
       "id": "library.query.installed.origin-location-size",
@@ -167,5 +166,6 @@
         "libflatpak"
       ]
     }
-  ]
+  ],
+  "limitations": []
 }

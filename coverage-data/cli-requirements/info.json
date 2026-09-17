@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.info.user.ref-commit",
+      "interface": "cli",
+      "profile": "user",
+      "category": "queries-configuration",
+      "description": "Querying an installed user ref with --show-ref and --show-commit returns the exact requested full ref and its installed commit in machine-readable output.",
+      "sources": [
+        {
+          "path": "doc/flatpak-info.xml",
+          "anchor": "--show-ref"
+        },
+        {
+          "path": "doc/flatpak-info.xml",
+          "anchor": "--show-commit"
+        },
+        {
+          "path": "doc/flatpak-info.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.info",
+        "cli.option.info.--show-ref",
+        "cli.option.info.--show-commit"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.info.user.absent-ref",
+      "interface": "cli",
+      "profile": "user",
+      "category": "queries-configuration",
+      "description": "Querying a ref absent from the user installation fails with a diagnostic identifying that ref as not installed, while an unrelated installed app and runtime retain their commits and runnable contents.",
+      "sources": [
+        {
+          "path": "doc/flatpak-info.xml",
+          "anchor": "Show info about an installed application or runtime."
+        }
+      ],
+      "surfaces": [
+        "cli.command.info"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.info.user.metadata",
+      "interface": "cli",
+      "profile": "user",
+      "category": "queries-configuration",
+      "description": "info --show-metadata returns the metadata belonging to the installed user application or runtime.",
+      "sources": [
+        {
+          "path": "doc/flatpak-info.xml",
+          "anchor": "--show-metadata"
+        }
+      ],
+      "surfaces": [
+        "cli.command.info",
+        "cli.option.info.--show-metadata"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.info.user.file-access",
+      "interface": "cli",
+      "profile": "user",
+      "category": "queries-configuration",
+      "description": "info --file-access reports the application's level of access to the requested path in machine-readable output.",
+      "sources": [
+        {
+          "path": "doc/flatpak-info.xml",
+          "anchor": "--file-access=PATH"
+        },
+        {
+          "path": "doc/flatpak-info.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.info",
+        "cli.option.info.--file-access"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    }
+  ],
+  "limitations": []
+}

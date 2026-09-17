@@ -1,0 +1,270 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "build.options.summary-sign",
+      "scenario": "build-option-summary-sign",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository",
+        "repository-signing"
+      ],
+      "description": "Sign repository summary and advertise imported public key.",
+      "preconditions": "Independent unsigned A repository and disposable signing material.",
+      "expected": "Independent OSTree remote with mandatory summary verification reads refs; advertised public key bytes equal input.",
+      "references": [
+        "doc/flatpak-build-update-repo.xml"
+      ]
+    },
+    {
+      "id": "build.options.collection",
+      "scenario": "build-option-collection",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository"
+      ],
+      "description": "Set repository collection ID.",
+      "preconditions": "Independent A repository with no collection ID.",
+      "expected": "Public core.collection-id equals requested value.",
+      "references": [
+        "doc/flatpak-build-update-repo.xml"
+      ]
+    },
+    {
+      "id": "build.options.deploy-collection",
+      "scenario": "build-option-deploy-collection",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository"
+      ],
+      "description": "Advertise collection rollout in summary.",
+      "preconditions": "Independent A repo with collection configured by OSTree.",
+      "expected": "Summary deployment field equals configured collection ID.",
+      "references": [
+        "doc/flatpak-build-update-repo.xml"
+      ]
+    },
+    {
+      "id": "build.options.deploy-sideload",
+      "scenario": "build-option-deploy-sideload",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository"
+      ],
+      "description": "Advertise sideload-only collection rollout in summary.",
+      "preconditions": "Independent A repo with collection configured by OSTree.",
+      "expected": "Summary sideload deployment field equals configured collection ID.",
+      "references": [
+        "doc/flatpak-build-update-repo.xml"
+      ]
+    },
+    {
+      "id": "build.repo.deltas",
+      "scenario": "build-repo-deltas",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository"
+      ],
+      "description": "Generate app deltas while excluding runtime.",
+      "preconditions": "Independent B repo without static deltas.",
+      "expected": "Public OSTree delta listing targets B app and excludes runtime checksum.",
+      "references": [
+        "doc/flatpak-build-update-repo.xml"
+      ]
+    },
+    {
+      "id": "build.repo.summary",
+      "scenario": "build-repo-summary",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository",
+        "user-installation"
+      ],
+      "description": "Generate discoverable summary and descriptive repository metadata.",
+      "preconditions": "Independent B distribution repo with summary removed.",
+      "expected": "remote-ls discovers app/runtime and repo --info exposes requested metadata values.",
+      "references": [
+        "doc/flatpak-build-update-repo.xml",
+        "doc/flatpak-repo.xml"
+      ]
+    },
+    {
+      "id": "build.repo.prune",
+      "scenario": "build-repo-prune",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository"
+      ],
+      "description": "Prune independently unreferenced app objects.",
+      "preconditions": "Copied B distribution repo with app ref removed using OSTree.",
+      "expected": "Objects removed, reachable runtime intact and fsck succeeds.",
+      "references": [
+        "doc/flatpak-build-update-repo.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "build.options.summary-sign",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Independent public-key verifier requires valid summary signature; raw summary key bytes compared.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-update-repo.--gpg-sign",
+          "rationale": "Mandatory GPG summary verification succeeds for initially unsigned repository."
+        },
+        {
+          "id": "cli.option.build-update-repo.--gpg-homedir",
+          "rationale": "Signing key is available only in designated disposable home."
+        },
+        {
+          "id": "cli.option.build-update-repo.--gpg-import",
+          "rationale": "Summary advertises byte-for-byte imported public key."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.options.collection",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Public repository configuration changed from absent ID.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-update-repo.--collection-id",
+          "rationale": "core.collection-id equals requested nondefault identifier."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.options.deploy-collection",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Public summary rollout metadata observed.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-update-repo.--deploy-collection-id",
+          "rationale": "Summary contains requested ostree.deploy-collection-id value."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.options.deploy-sideload",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Public summary sideload rollout metadata observed.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-update-repo.--deploy-sideload-collection-id",
+          "rationale": "Summary contains requested xa.deploy-collection-id value for newer sideload clients."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.repo.deltas",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Independent OSTree delta listing checks output objects.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-update-repo.--generate-static-deltas",
+          "rationale": "Delta targeting current app head appears in previously delta-free repo."
+        },
+        {
+          "id": "cli.option.build-update-repo.--static-delta-ignore-ref",
+          "rationale": "No generated delta targets ignored runtime."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.repo.summary",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.build-update-repo.any.summary"
+      ],
+      "rationale": "Regenerated summary makes both exact refs discoverable; descriptive values queried through repo.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-update-repo.--title",
+          "rationale": "Requested title in repo info."
+        },
+        {
+          "id": "cli.option.build-update-repo.--comment",
+          "rationale": "Requested comment in repo info."
+        },
+        {
+          "id": "cli.option.build-update-repo.--description",
+          "rationale": "Requested description in repo info."
+        },
+        {
+          "id": "cli.option.build-update-repo.--homepage",
+          "rationale": "Requested homepage in repo info."
+        },
+        {
+          "id": "cli.option.build-update-repo.--icon",
+          "rationale": "Requested icon in repo info."
+        },
+        {
+          "id": "cli.option.build-update-repo.--default-branch",
+          "rationale": "Requested default branch in repo info."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.repo.prune",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.build-update-repo.any.prune"
+      ],
+      "rationale": "Public unreachable object removal with reachable runtime checksum and fsck preserved.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-update-repo.--prune-depth",
+          "rationale": "Depth-zero prune removes independently unreferenced objects."
+        }
+      ]
+    }
+  ]
+}

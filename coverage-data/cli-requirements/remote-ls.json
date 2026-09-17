@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.remote-ls.user.available",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "remote-ls reports the available application and runtime refs from the specified configured user remote, including refs not installed locally.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-ls.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-ls"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.remote-ls.user.updates",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "remote-ls --updates reports only refs with updates available, excluding installed refs already at their remote tip.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-ls.xml",
+          "anchor": "--updates"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-ls",
+        "cli.option.remote-ls.--updates"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    }
+  ],
+  "limitations": []
+}

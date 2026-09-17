@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.config.user.roundtrip",
+      "interface": "cli",
+      "profile": "user",
+      "category": "queries-configuration",
+      "description": "Setting the user languages configuration persists the supplied value, which a later config --get languages returns.",
+      "sources": [
+        {
+          "path": "doc/flatpak-config.xml",
+          "anchor": "languages"
+        },
+        {
+          "path": "doc/flatpak-config.xml",
+          "anchor": "--set"
+        },
+        {
+          "path": "doc/flatpak-config.xml",
+          "anchor": "--get"
+        }
+      ],
+      "surfaces": [
+        "cli.command.config",
+        "cli.option.config.--set",
+        "cli.option.config.--get"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.config.user.unset",
+      "interface": "cli",
+      "profile": "user",
+      "category": "queries-configuration",
+      "description": "Unsetting languages removes the explicit user setting so locale inclusion again follows extra-languages and the current locale.",
+      "sources": [
+        {
+          "path": "doc/flatpak-config.xml",
+          "anchor": "languages"
+        },
+        {
+          "path": "doc/flatpak-config.xml",
+          "anchor": "--unset"
+        }
+      ],
+      "surfaces": [
+        "cli.command.config",
+        "cli.option.config.--unset"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "runtime-extensions"
+      ]
+    },
+    {
+      "id": "cli.config.system.named",
+      "interface": "cli",
+      "profile": "system",
+      "category": "queries-configuration",
+      "description": "A configuration change with --installation=NAME is stored in that named system installation rather than another installation.",
+      "sources": [
+        {
+          "path": "doc/flatpak-config.xml",
+          "anchor": "--installation=NAME"
+        }
+      ],
+      "surfaces": [
+        "cli.command.config",
+        "cli.option.config.--installation"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "system-authorization",
+        "multiple-installations"
+      ]
+    }
+  ],
+  "limitations": []
+}

@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "sandbox.process",
+      "scenario": "sandbox-process",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "concurrent-processes"
+      ],
+      "description": "Enumerate and kill a running instance.",
+      "preconditions": "Probe holds a background application process.",
+      "expected": "Selected ps columns identify app and live process IDs; kill stops instance and removes ps row.",
+      "references": [
+        "doc/flatpak-ps.xml",
+        "doc/flatpak-kill.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "sandbox.process",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.ps.any.instances",
+        "cli.kill.any.instance"
+      ],
+      "rationale": "Selected ps instance/app/process columns identify live PIDs; kill stops process and removes row."
+    }
+  ]
+}

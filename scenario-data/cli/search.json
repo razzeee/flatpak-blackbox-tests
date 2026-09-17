@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "coverage.search",
+      "scenario": "coverage-search",
+      "handler": "coverage_next_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "appstream"
+      ],
+      "description": "Search independently prepared AppStream description text.",
+      "preconditions": "Fresh user remote with A query metadata.",
+      "expected": "A-only keyword returns exactly Query; B-only and missing keywords return no matches; no deployments.",
+      "references": [
+        "doc/flatpak-search.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "coverage.search",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.search.user.appstream"
+      ],
+      "rationale": "Unique description-only keyword matches exactly the prepared app ID, with B-only and nonexistent terms excluded."
+    }
+  ]
+}

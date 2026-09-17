@@ -1,0 +1,278 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "management.uninstall-arch",
+      "scenario": "management-uninstall-arch",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Remove foreign copy by architecture-free app name.",
+      "preconditions": "Both native and foreign copies installed.",
+      "expected": "Only foreign copy removed; exact native commit retained.",
+      "references": [
+        "doc/flatpak-uninstall.xml"
+      ]
+    },
+    {
+      "id": "management.keep-ref",
+      "scenario": "management-keep-ref",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Remove deployment while preserving the ref for local reinstall.",
+      "preconditions": "A installed before B is advertised.",
+      "expected": "keep-ref permits local A reinstall; ordinary uninstall prevents it.",
+      "references": [
+        "doc/flatpak-uninstall.xml"
+      ]
+    },
+    {
+      "id": "management.uninstall-apps",
+      "scenario": "management-uninstall-apps",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "App-only matching rejects a runtime name and removes an app name.",
+      "preconditions": "App and runtime installed.",
+      "expected": "Rejected runtime removal preserves both; app removal retains runtime commit.",
+      "references": [
+        "doc/flatpak-uninstall.xml"
+      ]
+    },
+    {
+      "id": "management.uninstall-runtimes",
+      "scenario": "management-uninstall-runtimes",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Runtime-only matching rejects an app name and accepts an unused runtime name.",
+      "preconditions": "App and runtime installed.",
+      "expected": "Rejected app removal preserves both; after removing dependent app, runtime selector removes runtime.",
+      "references": [
+        "doc/flatpak-uninstall.xml"
+      ]
+    },
+    {
+      "id": "management.unused",
+      "scenario": "management-unused",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Remove app then collect its unpinned dependency.",
+      "preconditions": "Automatically installed runtime.",
+      "expected": "Runtime remains after app removal and disappears after unused cleanup.",
+      "references": [
+        "doc/flatpak-uninstall.xml"
+      ]
+    },
+    {
+      "id": "management.uninstall-all",
+      "scenario": "management-uninstall-all",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Uninstall every deployed ref.",
+      "preconditions": "A app/runtime installed.",
+      "expected": "Both app and runtime disappear.",
+      "references": [
+        "doc/flatpak-uninstall.xml"
+      ]
+    },
+    {
+      "id": "permissions.delete-data",
+      "scenario": "permissions-delete-data",
+      "handler": "permission_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "desktop-portals",
+        "session-bus"
+      ],
+      "description": "Contrast normal uninstall with uninstall --delete-data.",
+      "preconditions": "Installed fixture app, cache/config/data marker files and dynamic permissions across tables; unrelated app data and grants.",
+      "expected": "Normal uninstall preserves app data and grants; reinstall then --delete-data removes the app directory and every app grant, retains unrelated app data and grants, and removes the installed app.",
+      "references": [
+        "doc/flatpak-uninstall.xml"
+      ]
+    },
+    {
+      "id": "system-selectors.ambiguous",
+      "scenario": "system-selectors-ambiguous",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Reject an unselected uninstall when the same full ref exists in multiple installations.",
+      "preconditions": "Default, named and user copies are installed.",
+      "expected": "Noninteractive ambiguity error identifies the app and every deployment retains its commit.",
+      "references": [
+        "doc/flatpak-uninstall.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "management.uninstall-arch",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Removal affects only selected architecture.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.uninstall.--arch",
+          "rationale": "Foreign-only removal retains installed native A."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.keep-ref",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.uninstall.user.app"
+      ],
+      "rationale": "Deployment becomes unavailable immediately after uninstall.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.uninstall.--keep-ref",
+          "rationale": "Local A reinstall succeeds after keep-ref removal but fails after ordinary removal."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.uninstall-apps",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "App-only matching rejects installed runtime candidate.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.uninstall.--app",
+          "rationale": "Rejects runtime ID without removing either ref, then permits app ID removal."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.uninstall-runtimes",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Runtime-only matching rejects installed app candidate.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.uninstall.--runtime",
+          "rationale": "Rejects app ID without removing either ref, then permits runtime ID removal."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.unused",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.uninstall.user.unused",
+        "cli.list.user.apps-empty"
+      ],
+      "rationale": "Runtime retained after app removal then collected as unused; app-only listing empty with runtime present."
+    },
+    {
+      "behavior_id": "management.uninstall-all",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.list.user.empty"
+      ],
+      "rationale": "After uninstall-all exact installed ref enumeration is empty.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.uninstall.--all",
+          "rationale": "One all invocation removes both installed app and runtime."
+        }
+      ]
+    },
+    {
+      "behavior_id": "permissions.delete-data",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.uninstall.user.delete-data"
+      ],
+      "rationale": "After a preserving plain-uninstall control, --delete-data removes the actual ~/.var/app directory and every seeded app grant across tables, while unrelated app files and permissions survive; CLI enumeration confirms uninstall.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.uninstall.--delete-data",
+          "rationale": "Dropping the flag preserves the marker directory and app permissions as demonstrated by the plain-uninstall control, failing both deletion checks."
+        }
+      ]
+    },
+    {
+      "behavior_id": "system-selectors.ambiguous",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [
+        "cli.uninstall.system.ambiguous-installation"
+      ],
+      "rationale": "Unselected noninteractive uninstall reports matching installed refs and retains all three exact commits."
+    }
+  ],
+  "notes": [
+    "Uses a real xdg-permission-store on the case bus with isolated XDG_DATA_HOME; gdbus provides independent public fixture setup and mutation observations. No FUSE or document portal is needed.",
+    "All service output and termination status are retained, including failed cases. Fixed catalogues and denominators are unchanged.",
+    "Every target call enters two disposable bubblewrap user/mount namespace layers. The outer root maps only to the invoking host UID; inner root maps only to outer root. Inherited host mounts are locked read-only, checked by a denied bind-remount before every target call. Private PID/network namespaces and writable installation state are case-local; generated state is removed after each case while command evidence is retained.",
+    "Target environment keys BLACKBOX_SYSTEM_INSTALL_DIR and BLACKBOX_SYSTEM_CONFIG_DIR specify the expected compiled defaults; their reference-build defaults are /var/local/lib/flatpak and /usr/local/etc/flatpak. The namespace mounts private data at those paths, and CLI/C-client assertions still check the target's actual default location. These keys never become FLATPAK_SYSTEM_DIR or FLATPAK_CONFIG_DIR redirects. Set them under the target JSON environment object, not the host shell environment.",
+    "Readonly exposure includes only the suite directory, selected target executables, configured helpers and LD_LIBRARY_PATH directories. Uninstalled targets can explicitly add colon-separated absolute paths with BLACKBOX_TARGET_READONLY_PATHS in the target environment. No repository ancestor is inferred. Paths that cover private namespace roots or overlap protected installation/service content are rejected, including symlink aliases.",
+    "CLI deployment location checks use the public returned location, verify containment in the selected public installation base, locate the controlled bin/blackbox-probe payload there and execute it to distinguish A from B. They never construct a deployment path from a ref or commit, and never recursively search a general installation root for content.",
+    "Direct-root mutations may satisfy explicitly selected installation outcomes. These cases do not assert polkit authorization, non-root helper behavior, or multiple-user access. No requirement demanding those outcomes is mapped.",
+    "The named override case intentionally asserts the documented isolation contract; the reference target currently fails it, so that option receives no verified credit from that case."
+  ]
+}

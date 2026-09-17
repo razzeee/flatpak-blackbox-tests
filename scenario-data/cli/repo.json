@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "build.repo.inspect",
+      "scenario": "build-repo-inspect",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository"
+      ],
+      "description": "Inspect independent repository branches, metadata and commits.",
+      "preconditions": "Reference B distribution repo.",
+      "expected": "Both fixture refs, exact application metadata name and B head checksum appear.",
+      "references": [
+        "doc/flatpak-repo.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "build.repo.inspect",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.repo.any.branches",
+        "cli.repo.any.metadata"
+      ],
+      "rationale": "Independent repository yields exact known refs, metadata app ID and head commit.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.repo.--info",
+          "rationale": "Combined --branches --info adds archive-z2 mode absent from branch-only output."
+        },
+        {
+          "id": "cli.option.repo.--branches",
+          "rationale": "Both exact fixture refs appear."
+        },
+        {
+          "id": "cli.option.repo.--metadata",
+          "rationale": "Requested branch metadata parses with exact app ID."
+        },
+        {
+          "id": "cli.option.repo.--commits",
+          "rationale": "Requested branch head checksum appears."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.remotes.user.priority-order",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Listing user remotes returns configured remotes in priority order, with higher numeric priorities first.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remotes.xml",
+          "anchor": "Lists the known remote repositories, in priority order."
+        },
+        {
+          "path": "doc/flatpak-remote-add.xml",
+          "anchor": "--prio=PRIO"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remotes"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.remotes.user.columns",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "A remotes query selecting name,url,title,priority returns the configured values for those fields in the requested column order.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remotes.xml",
+          "anchor": "--columns=FIELD"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remotes",
+        "cli.option.remotes.--columns"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.remotes.user.disabled",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "A user remotes query with --show-disabled includes a configured disabled remote.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remotes.xml",
+          "anchor": "--show-disabled"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remotes",
+        "cli.option.remotes.--show-disabled"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.remotes.system.named",
+      "interface": "cli",
+      "profile": "system",
+      "category": "remotes-discovery",
+      "description": "A remotes query with --installation=NAME lists the remotes configured in the named system installation.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remotes.xml",
+          "anchor": "--installation=NAME"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remotes",
+        "cli.option.remotes.--installation"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "multiple-installations"
+      ]
+    }
+  ],
+  "limitations": []
+}

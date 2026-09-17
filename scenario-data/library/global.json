@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "objects.arches",
+      "scenario": "objects-arches",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "libflatpak"
+      ],
+      "description": "Check canonical default and ordered supported architectures.",
+      "preconditions": "Runner has verified fixture architecture against target machine.",
+      "expected": "Default and first supported architecture equal fixture arch; all entries are canonical and unique; x86_64 priority is x86_64 then i386; array terminates.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_get_default_arch, flatpak_get_supported_arches"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "objects.arches",
+      "driver": "library",
+      "profile": "any",
+      "requirements": [
+        "library.arches.priority"
+      ],
+      "rationale": "Fixture architecture supplies independent expected default; canonical names, termination and x86_64 compatibility priority are asserted."
+    }
+  ]
+}

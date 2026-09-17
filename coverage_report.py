@@ -245,7 +245,7 @@ class CoverageModel:
     def snapshot(self) -> Definition:
         paths = [self.suite / "inventory.json"]
         paths += sorted((self.suite / "coverage-data").rglob("*.json"))
-        paths += sorted((self.suite / "scenario-data").glob("*.json"))
+        paths += sorted((self.suite / "scenario-data").rglob("*.json"))
         paths += sorted(
             path for pattern in ("*.py", "*.c", "*.h") for path in self.suite.glob(pattern)
             if path.suffix != ".py" or not path.name.startswith("test_")

@@ -1,0 +1,312 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "requirements": [
+    {
+      "id": "library.query.user.ref-commit",
+      "interface": "library",
+      "profile": "user",
+      "category": "installed-query",
+      "description": "Looking up an installed user app or runtime by its full identity returns a ref whose formatted identity and commit equal the deployed fixture ref and commit.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_installed_ref"
+        },
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_format_ref"
+        },
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_get_commit"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_get_installed_ref",
+        "library.function.flatpak_ref_format_ref",
+        "library.function.flatpak_ref_get_commit"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.list.user.empty",
+      "interface": "library",
+      "profile": "user",
+      "category": "installed-query",
+      "description": "Enumerating installed refs in an empty user installation succeeds with a non-NULL, zero-length array, rather than representing emptiness as a failure.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_installed_refs"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_list_installed_refs"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "library.query.system.profile-isolation",
+      "interface": "library",
+      "profile": "system",
+      "category": "installed-query",
+      "description": "With the same full ref installed at different commits in user and system installations, installed-ref lookup through each installation returns that installation's commit.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_installed_ref"
+        },
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_get_commit"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_get_installed_ref",
+        "library.function.flatpak_ref_get_commit"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.list.installed.membership",
+      "interface": "library",
+      "profile": "any",
+      "category": "installed-query",
+      "description": "In a fixture containing several installed apps and runtimes, installed-ref enumeration returns the complete installed set and excludes available but undeployed refs, without requiring a particular ordering.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_installed_refs"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_list_installed_refs"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.list.installed.kind-filter",
+      "interface": "library",
+      "profile": "any",
+      "category": "installed-query",
+      "description": "Kind-filtered installed-ref enumeration returns exactly the installed apps for APP and exactly the installed runtimes for RUNTIME, including an empty result for a kind with no installations.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_installed_refs_by_kind"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_list_installed_refs_by_kind"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.query.installed.default-components",
+      "interface": "library",
+      "profile": "any",
+      "category": "installed-query",
+      "description": "Installed-ref lookup with arch NULL and branch NULL selects the current architecture and master branch, even when a different explicit branch is also installed.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_installed_ref"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_get_installed_ref"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.query.installed.current-app",
+      "interface": "library",
+      "profile": "any",
+      "category": "installed-query",
+      "description": "After installing different branches of an app through the direct installation API, current-app lookup identifies the last installed build and that returned installed ref reports is_current TRUE.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_current_installed_app"
+        },
+        {
+          "path": "common/flatpak-installed-ref.c",
+          "anchor": "flatpak_installed_ref_get_is_current"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_get_current_installed_app",
+        "library.function.flatpak_installed_ref_get_is_current"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.query.updates.available",
+      "interface": "library",
+      "profile": "any",
+      "category": "installed-query",
+      "description": "Update enumeration includes refs with a newer remote commit or a locally downloaded but undeployed update, and excludes otherwise current refs whose dependencies are complete.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_installed_refs_for_update"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_list_installed_refs_for_update"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.query.updates.missing-dependencies",
+      "interface": "library",
+      "profile": "any",
+      "category": "installed-query",
+      "description": "Update enumeration includes an app missing its runtime or a should-download related ref, and includes every installed app needing an update of the same shared runtime or extension.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_installed_refs_for_update"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_list_installed_refs_for_update"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "runtime-extensions"
+      ]
+    },
+    {
+      "id": "library.query.user.absent-ref",
+      "interface": "library",
+      "profile": "user",
+      "category": "errors",
+      "description": "Querying a well-formed ref not installed in the user installation returns NULL with domain FLATPAK_ERROR and code FLATPAK_ERROR_NOT_INSTALLED.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_installed_ref"
+        },
+        {
+          "path": "common/flatpak-error.h",
+          "anchor": "FlatpakError"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_get_installed_ref"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "library.ownership.returned-installed-ref",
+      "interface": "library",
+      "profile": "any",
+      "category": "ownership",
+      "description": "An installed ref returned with transfer full remains usable for identity and commit inspection after its installation object is released, and the caller can release the ref independently.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_installed_ref"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_get_installed_ref"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.cleanup.unused-pinned",
+      "interface": "library",
+      "profile": "any",
+      "category": "maintenance",
+      "description": "Unused-ref enumeration excludes applications, their transitively used runtimes, SDKs and extensions, and pinned runtimes. Pinned-ref enumeration includes the installed pinned fixture runtime, and an explicit architecture filters both queries.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_unused_refs"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_pinned_refs"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_list_unused_refs",
+        "library.function.flatpak_installation_list_pinned_refs"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "runtime-extensions",
+        "multiple-architectures"
+      ]
+    },
+    {
+      "id": "library.cleanup.unused-hypothetical-state",
+      "interface": "library",
+      "profile": "any",
+      "category": "maintenance",
+      "description": "Unused-ref queries with exclude-refs calculate usage as though those refs were absent; metadata_injection substitutes supplied metadata when calculating dependencies. These queries do not deploy, uninstall, or rewrite the installed refs.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_unused_refs_with_options"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_list_unused_refs_with_options"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    }
+  ],
+  "limitations": []
+}

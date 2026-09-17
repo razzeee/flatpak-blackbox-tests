@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "objects.error-domains",
+      "scenario": "objects-error-domains",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "libflatpak"
+      ],
+      "description": "Check public error-domain identities.",
+      "preconditions": "No installation required.",
+      "expected": "Flatpak and portal quarks are nonzero, stable and distinct.",
+      "references": [
+        "common/flatpak-error.h: FLATPAK_ERROR",
+        "common/flatpak-portal-error.h: FLATPAK_PORTAL_ERROR"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "objects.error-domains",
+      "driver": "library",
+      "profile": "any",
+      "requirements": [
+        "library.errors.domain-identity"
+      ],
+      "rationale": "Both domain functions are called repeatedly and asserted nonzero, stable and mutually distinct."
+    }
+  ]
+}

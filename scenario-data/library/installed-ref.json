@@ -1,0 +1,194 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "objects.eol",
+      "scenario": "objects-eol",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "libflatpak"
+      ],
+      "description": "Roundtrip installed-ref and remote-ref public EOL properties.",
+      "preconditions": "Constructed objects receive explicit reason/rebase properties or NULL; neither object is obtained by querying metadata.",
+      "expected": "All four getters return the literal properties, including NULL. This partial getter test earns no installed or remote EOL metadata requirement credit.",
+      "references": [
+        "common/flatpak-installed-ref.c: public end-of-life properties and getters",
+        "common/flatpak-remote-ref.c: public end-of-life properties and getters"
+      ]
+    },
+    {
+      "id": "objects.appdata",
+      "scenario": "objects-appdata",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "libflatpak"
+      ],
+      "description": "Roundtrip public AppStream-related object properties.",
+      "preconditions": "Constructed objects receive literal version, MIT license, OARS type and two rating attributes or NULL; no AppStream document is loaded.",
+      "expected": "Version, license, type and complete rating map match the supplied properties; missing values return NULL. This partial getter test earns no AppStream metadata requirement credit.",
+      "references": [
+        "common/flatpak-installed-ref.c: public appdata properties and getters"
+      ]
+    },
+    {
+      "id": "queryx.installed-metadata",
+      "scenario": "queryx-installed-metadata",
+      "handler": "library_query_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Read deployed metadata, location, origin and size.",
+      "preconditions": "App exported by reference tooling, expected exact metadata and size recorded before target execution.",
+      "expected": "Byte-exact metadata with runtime and permissions; origin queries; deployment directory holds matching metadata and fixture payload; size matches exported commit.",
+      "references": [
+        "common/flatpak-installed-ref.c: flatpak_installed_ref_load_metadata and deployment getters"
+      ]
+    },
+    {
+      "id": "queryx.installed-appdata",
+      "scenario": "queryx-installed-appdata",
+      "handler": "library_query_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository",
+        "appstream"
+      ],
+      "description": "Load embedded appdata from an installed app.",
+      "preconditions": "Prepared compressed AppStream and controlled C locale.",
+      "expected": "Decompressed XML has exactly the fixture elements, attributes and text, ignoring formatting whitespace; name and summary equal literal fields.",
+      "references": [
+        "common/flatpak-installed-ref.c: flatpak_installed_ref_load_appdata, flatpak_installed_ref_get_appdata_name, flatpak_installed_ref_get_appdata_summary"
+      ]
+    },
+    {
+      "id": "queryx.installed-subpaths",
+      "scenario": "queryx-installed-subpaths",
+      "handler": "library_query_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Read full and partial deployment subpaths.",
+      "preconditions": "One full app and another directly installed with /bin only.",
+      "expected": "Full getter is NULL; partial getter has exactly /bin and terminator.",
+      "references": [
+        "common/flatpak-installed-ref.c: flatpak_installed_ref_get_subpaths"
+      ]
+    },
+    {
+      "id": "lifex.appdata",
+      "scenario": "lifex-appdata",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository",
+        "appstream"
+      ],
+      "description": "Read release and rating fields from actual deployed AppStream.",
+      "preconditions": "Independent rich Query app and QuerySecond without optional AppStream fields.",
+      "expected": "Exact version, MIT license, oars-1.1 type and single violence-cartoon=none attribute; all optional getters NULL for second app.",
+      "references": [
+        "common/flatpak-installed-ref.c: AppStream getters"
+      ]
+    },
+    {
+      "id": "lifex.eol",
+      "scenario": "lifex-eol",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Read actual installed and remote end-of-life metadata.",
+      "preconditions": "Independent transaction A, EOL and REBASE commits.",
+      "expected": "Both typed refs expose absent, reason-only and reason-plus-full-rebase values matching independent exports.",
+      "references": [
+        "common/flatpak-installed-ref.c: flatpak_installed_ref_get_eol",
+        "common/flatpak-remote-ref.c: flatpak_remote_ref_get_eol"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "queryx.installed-metadata",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.query.installed.origin-location-size",
+        "library.query.installed.metadata"
+      ],
+      "rationale": "Expected exported metadata bytes and exact size, literal origin and real payload at reported deployment directory asserted."
+    },
+    {
+      "behavior_id": "queryx.installed-appdata",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.query.installed.appdata"
+      ],
+      "rationale": "Full decompressed XML structure, attributes, text and literal name/summary checked on a deployed reference-exported app."
+    },
+    {
+      "behavior_id": "queryx.installed-subpaths",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.query.installed.subpaths"
+      ],
+      "rationale": "Actual full and partial deployments expose NULL and exact single-element subpaths respectively."
+    },
+    {
+      "behavior_id": "lifex.appdata",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.query.installed.appdata-release-rating"
+      ],
+      "rationale": "Real rich and field-absent deployments exercise all four typed getters including exact attribute membership and NULL cases."
+    },
+    {
+      "behavior_id": "lifex.eol",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.query.installed.eol",
+        "library.remote-ref.eol"
+      ],
+      "rationale": "Both typed installed and remote getters checked against independently exported absent, EOL-only and rebase metadata."
+    }
+  ]
+}

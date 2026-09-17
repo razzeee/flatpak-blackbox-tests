@@ -22,7 +22,7 @@ def read_document(path: Path) -> ScenarioGroup:
 
 def documents(suite: Path) -> list[ScenarioGroup]:
     result = []
-    for path in sorted((suite / "scenario-data").glob("*.json")):
+    for path in sorted((suite / "scenario-data").rglob("*.json")):
         result.append(read_document(path))
     return result
 

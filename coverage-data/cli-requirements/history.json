@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.history.user.changes",
+      "interface": "cli",
+      "profile": "user",
+      "category": "maintenance",
+      "description": "When the relevant journal records are available, user history reports the installation, update and removal changes made to user refs.",
+      "sources": [
+        {
+          "path": "doc/flatpak-history.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.history"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "journal"
+      ]
+    }
+  ],
+  "limitations": []
+}

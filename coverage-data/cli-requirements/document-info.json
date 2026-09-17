@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.document-info.any.identity-permissions",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "document-info reports an exported file's document ID, FUSE path, original location and per-application permissions consistently with its current grant.",
+      "sources": [
+        {
+          "path": "doc/flatpak-document-info.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.document-info"
+      ],
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ]
+    }
+  ],
+  "limitations": []
+}

@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "system-selectors.library-update",
+      "scenario": "system-selectors-library-update",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "library"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Perform a direct-root system update through a transaction.",
+      "preconditions": "System A and unchanged runtime installed, then B origin is configured.",
+      "expected": "NULL-commit update deploys B in the actual default store, preserving runtime and other copies.",
+      "references": [
+        "common/flatpak-transaction.c",
+        "common/flatpak-installation.c"
+      ]
+    },
+    {
+      "id": "system-selectors.library-dependency-sources",
+      "scenario": "system-selectors-library-dependency-sources",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "library"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Distinguish named-system from user runtime dependency sources.",
+      "preconditions": "First only user runtime exists; second phase also has named-system runtime.",
+      "expected": "Default dependency sources exclude user runtime, causing a system copy; named runtime later satisfies the dependency without a system copy.",
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "system-selectors.library-update",
+      "driver": "library",
+      "profile": "system",
+      "requirements": [],
+      "rationale": "Retained direct-root regression scenario verifies A-to-B update and unchanged runtime. It does not exercise an authorization service or challenge and therefore does not map library.update.system.latest."
+    },
+    {
+      "behavior_id": "system-selectors.library-dependency-sources",
+      "driver": "library",
+      "profile": "system",
+      "requirements": [
+        "library.transaction.system.default-dependency-sources"
+      ],
+      "rationale": "With only user runtime, system app gets its own runtime; with named-system runtime, same app gets no system runtime copy. Both source installations retain the expected runtime commit."
+    }
+  ],
+  "notes": [
+    "Every target call enters two disposable bubblewrap user/mount namespace layers. The outer root maps only to the invoking host UID; inner root maps only to outer root. Inherited host mounts are locked read-only, checked by a denied bind-remount before every target call. Private PID/network namespaces and writable installation state are case-local; generated state is removed after each case while command evidence is retained.",
+    "Target environment keys BLACKBOX_SYSTEM_INSTALL_DIR and BLACKBOX_SYSTEM_CONFIG_DIR specify the expected compiled defaults; their reference-build defaults are /var/local/lib/flatpak and /usr/local/etc/flatpak. The namespace mounts private data at those paths, and CLI/C-client assertions still check the target's actual default location. These keys never become FLATPAK_SYSTEM_DIR or FLATPAK_CONFIG_DIR redirects. Set them under the target JSON environment object, not the host shell environment.",
+    "Readonly exposure includes only the suite directory, selected target executables, configured helpers and LD_LIBRARY_PATH directories. Uninstalled targets can explicitly add colon-separated absolute paths with BLACKBOX_TARGET_READONLY_PATHS in the target environment. No repository ancestor is inferred. Paths that cover private namespace roots or overlap protected installation/service content are rejected, including symlink aliases.",
+    "CLI deployment location checks use the public returned location, verify containment in the selected public installation base, locate the controlled bin/blackbox-probe payload there and execute it to distinguish A from B. They never construct a deployment path from a ref or commit, and never recursively search a general installation root for content.",
+    "Direct-root mutations may satisfy explicitly selected installation outcomes. These cases do not assert polkit authorization, non-root helper behavior, or multiple-user access. No requirement demanding those outcomes is mapped.",
+    "The named override case intentionally asserts the documented isolation contract; the reference target currently fails it, so that option receives no verified credit from that case."
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "contracts.rebase-migration",
+      "scenario": "tx-rebase-migration",
+      "handler": "six_contract_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "sandbox-execution"
+      ],
+      "description": "Nonempty previous IDs migrate real application data.",
+      "preconditions": [
+        "Runnable old/new apps with isolated homes and old app-written persistent marker"
+      ],
+      "expected": [
+        "Rebase install and already-installed update expose old marker through new app data path; ordinary installation does not."
+      ],
+      "references": [
+        "common/flatpak-transaction.c:flatpak_transaction_add_rebase"
+      ]
+    },
+    {
+      "id": "transaction.rebase-null",
+      "scenario": "tx-rebase-null",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Isolated documented nullable previous_ids rebase variant.",
+      "preconditions": [
+        "prepare_transactions.py extras.transactions"
+      ],
+      "expected": [
+        "Public gtk-doc permits NULL previous_ids; addition succeeds and replacement installs before old uninstall."
+      ],
+      "references": [
+        "common/flatpak-transaction.c:flatpak_transaction_add_rebase_and_uninstall"
+      ]
+    },
+    {
+      "id": "transaction.rebase-success",
+      "scenario": "tx-rebase-success",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Rebase installation precedes uninstall; absent old ref is ignored.",
+      "preconditions": [
+        "prepare_transactions.py extras.transactions"
+      ],
+      "expected": [
+        "New app installs before old removal; repeat with absent old ref adds only new install."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    },
+    {
+      "id": "transaction.rebase-failure",
+      "scenario": "tx-rebase-failure",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Failed replacement preserves old app.",
+      "preconditions": [
+        "prepare_transactions.py extras.transactions"
+      ],
+      "expected": [
+        "Denied replacement payload prevents old uninstall and retains exact old commit."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "contracts.rebase-migration",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.rebase-migration"
+      ],
+      "rationale": "Native rebase with nonempty previous IDs installs or updates new ref. Old sandbox writes actual XDG_DATA_HOME payload; new sandbox reads migrated payload at its own path. Ordinary install control cannot read it. No deployment metadata parsing."
+    },
+    {
+      "behavior_id": "transaction.rebase-success",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.rebase-uninstall-success"
+      ],
+      "rationale": "Exact new-install then old-uninstall order and resulting state; repeat after removing new app while old remains absent proves omitted uninstall."
+    },
+    {
+      "behavior_id": "transaction.rebase-failure",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.rebase-failure-preserves-old"
+      ],
+      "rationale": "Required replacement payload denial causes new operation failure, no old uninstall execution, old exact commit preserved and replacement absent."
+    }
+  ]
+}

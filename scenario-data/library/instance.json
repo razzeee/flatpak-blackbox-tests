@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "queryx.instance-processes",
+      "scenario": "queryx-instance-processes",
+      "handler": "library_query_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus",
+        "concurrent-processes"
+      ],
+      "description": "Identify the controlled sandbox's application process and supervising parent.",
+      "preconditions": "DO_NOT_REAP launches held alive until explicit release; public procfs exposes process executable and ancestry.",
+      "expected": "Child PID becomes positive and executable bytes match the deployed probe; process ancestry reaches outer PID; child watch confirms successful exit.",
+      "references": [
+        "common/flatpak-instance.c: flatpak_instance_get_pid, flatpak_instance_get_child_pid"
+      ]
+    },
+    {
+      "id": "lifex.runtime-instance",
+      "scenario": "lifex-runtime-instance",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus"
+      ],
+      "description": "Inspect a held-live runtime-only sandbox.",
+      "preconditions": "CLI launches independent runtime probe and reports instance ID; probe confirms execution before inspection.",
+      "expected": "Exactly that live instance reports NULL app, expected runtime and runtime commit; sandbox is explicitly killed and reaped.",
+      "references": [
+        "common/flatpak-instance.c: flatpak_instance_get_app"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "queryx.instance-processes",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.instance.processes"
+      ],
+      "rationale": "Synchronized child PID must identify the deployed probe executable; its ancestry must reach the outer PID; caller child watch confirms exit."
+    },
+    {
+      "behavior_id": "lifex.runtime-instance",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.instance.runtime-only"
+      ],
+      "rationale": "Synchronized actual runtime sandbox selected by launch-reported instance ID has NULL application getter."
+    }
+  ]
+}

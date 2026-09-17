@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.create-usb.user.offline",
+      "interface": "cli",
+      "profile": "user",
+      "category": "building-distribution",
+      "description": "create-usb copies selected user refs with dependencies and metadata so a destination with the matching collection-ID remotes configured can install those refs offline from the copied repository.",
+      "sources": [
+        {
+          "path": "doc/flatpak-create-usb.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.create-usb"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "sideload-repository",
+        "multiple-installations"
+      ]
+    }
+  ],
+  "limitations": []
+}

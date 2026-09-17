@@ -1,0 +1,306 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "sandbox.instance-fd",
+      "scenario": "sandbox-instance-fd",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "concurrent-processes"
+      ],
+      "description": "Report running instance ID through supplied descriptor.",
+      "preconditions": "Controlled writable descriptor and background hold probe.",
+      "expected": "Written decimal instance ID equals public ps row for app and launched PID.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "sandbox.metadata-network",
+      "scenario": "sandbox-metadata-network",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Revoke network granted in app metadata.",
+      "preconditions": "Independent app metadata variant grants network; controlled loopback TCP listener.",
+      "expected": "Default connection accepted; run unshare makes probe connection fail.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "sandbox.devel",
+      "scenario": "sandbox-devel",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Select SDK for development mode.",
+      "preconditions": "Independent metadata variant names unavailable SDK and available runtime.",
+      "expected": "Normal run outputs A; devel fails identifying missing SDK.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "sandbox.restrict",
+      "scenario": "sandbox-restrict",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Restrict application permission with sandbox mode.",
+      "preconditions": "Stored filesystem grant exposes controlled host marker.",
+      "expected": "Normal run reads marker; sandbox mode denies probe read.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "sandbox.network",
+      "scenario": "sandbox-network",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Share and revoke host network namespace with run and stored overrides.",
+      "preconditions": "Local TCP listener on loopback and no metadata network grant.",
+      "expected": "Default connect fails, run/stored share connect and accept, run/stored unshare fail in probe.",
+      "references": [
+        "doc/flatpak-run.xml",
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "sandbox.conditional-network",
+      "scenario": "sandbox-conditional-network",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Evaluate conditional network sharing.",
+      "preconditions": "Local loopback TCP server and conditional permissions support.",
+      "expected": "True condition connects and is accepted; false condition fails in probe.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "sandbox.selectors",
+      "scenario": "sandbox-selectors",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Select architecture, branch and runtime version.",
+      "preconditions": "A app and runtime on nondefault test branch.",
+      "expected": "Selected app executes; absent branch/runtime rejected; runtime-version overrides missing runtime tuple version.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "sandbox.shm",
+      "scenario": "sandbox-shm",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Grant and revoke host shared-memory device access.",
+      "preconditions": "Controlled /dev/shm host marker.",
+      "expected": "Marker readable only under run/stored shm grants, absent after respective revocations.",
+      "references": [
+        "doc/flatpak-run.xml",
+        "doc/flatpak-override.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "sandbox.instance-fd",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Descriptor ID independently cross-checked with public ps and launch PID.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--instance-id-fd",
+          "rationale": "Written instance ID matches ps row for the held application and launched PID."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.metadata-network",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.run.user.network-revocation"
+      ],
+      "rationale": "Independent metadata grants network; accepted control connection becomes probe failure under run unshare."
+    },
+    {
+      "behavior_id": "sandbox.devel",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Distinct unavailable SDK and available runtime prove development runtime selection.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--devel",
+          "rationale": "Normal launch succeeds; devel selects missing SDK and identifies it in failure."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.restrict",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Granted host marker access revoked by restrictive mode.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--sandbox",
+          "rationale": "Probe cannot read controlled host marker despite stored filesystem grant."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.network",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Local TCP observations check run and stored namespace grant/revocation, not metadata network precedence.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--share",
+          "rationale": "network grant enables loopback connection accepted by controlled server."
+        },
+        {
+          "id": "cli.option.run.--unshare",
+          "rationale": "network revocation blocks connection despite stored network grant."
+        },
+        {
+          "id": "cli.option.override.--share",
+          "rationale": "Stored network grant enables local TCP connection accepted by server."
+        },
+        {
+          "id": "cli.option.override.--unshare",
+          "rationale": "Stored network revocation causes probe connect failure."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.conditional-network",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Local TCP success/denial follows true/false condition.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--share-if",
+          "rationale": "network:true permits accepted host connection; network:false fails from probe."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.selectors",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Explicit installed selections execute; absent selections fail instead of falling back.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--arch",
+          "rationale": "Native architecture runs A; valid unavailable architecture is refused rather than falling back, and ordinary launch still runs A."
+        },
+        {
+          "id": "cli.option.run.--branch",
+          "rationale": "Installed test branch runs A; absent branch is rejected."
+        },
+        {
+          "id": "cli.option.run.--runtime",
+          "rationale": "Absent runtime ID rejected; valid runtime with version override executes app probe."
+        },
+        {
+          "id": "cli.option.run.--runtime-version",
+          "rationale": "Missing runtime version rejected; requested installed version overrides missing version in runtime tuple."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.shm",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Actual controlled /dev/shm file visibility, specifically shm and no other device.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--device",
+          "rationale": "shm grant makes controlled host /dev/shm marker readable."
+        },
+        {
+          "id": "cli.option.run.--nodevice",
+          "rationale": "shm denial hides marker despite stored shm grant."
+        },
+        {
+          "id": "cli.option.override.--device",
+          "rationale": "Stored shm grant makes host marker readable."
+        },
+        {
+          "id": "cli.option.override.--nodevice",
+          "rationale": "Stored shm denial hides host marker."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,184 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "build.options.force",
+      "scenario": "build-option-force",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository"
+      ],
+      "description": "Force a commit for unchanged contents.",
+      "preconditions": "Two independent B repository copies.",
+      "expected": "Control retains B; force creates a different head.",
+      "references": [
+        "doc/flatpak-build-commit-from.xml"
+      ]
+    },
+    {
+      "id": "build.options.untrusted",
+      "scenario": "build-option-untrusted",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository"
+      ],
+      "description": "Verify untrusted source payload checksums.",
+      "preconditions": "Independent archive copy with a valid compressed payload substituted under the wrong checksum.",
+      "expected": "Trusted control accepts the source; untrusted import rejects checksum mismatch.",
+      "references": [
+        "doc/flatpak-build-commit-from.xml"
+      ]
+    },
+    {
+      "id": "build.options.promotion",
+      "scenario": "build-option-promotion",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository",
+        "repository-signing",
+        "appstream"
+      ],
+      "description": "Set signed promotion metadata, collection binding and subset.",
+      "preconditions": "Independent unsigned B source, empty destination and disposable key.",
+      "expected": "Verifiable signature, exact extra collection/ref pair, subset, EOL/rebase and AppStream branch.",
+      "references": [
+        "doc/flatpak-build-commit-from.xml"
+      ]
+    },
+    {
+      "id": "build.commit-from.contents",
+      "scenario": "build-commit-from",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository",
+        "repository-signing"
+      ],
+      "description": "Promote independently signed B into a clean destination branch.",
+      "preconditions": "Reference signed source with parent history; empty destination repo.",
+      "expected": "Identical files, no source parent/signature, requested subject/body/date and no summary.",
+      "references": [
+        "doc/flatpak-build-commit-from.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "build.options.force",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Independent unchanged-content control distinguishes force.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-commit-from.--force",
+          "rationale": "Flag changes head while identical control preserves head."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.options.untrusted",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Independent payload corruption with accepting trusted control.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-commit-from.--untrusted",
+          "rationale": "Flag rejects payload checksum mismatch accepted without verification."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.options.promotion",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Independent public key verifies signature; public commit metadata/ref listing checks remaining effects.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-commit-from.--extra-collection-id",
+          "rationale": "Exact requested collection/ref tuple exists in commit metadata."
+        },
+        {
+          "id": "cli.option.build-commit-from.--subset",
+          "rationale": "Commit xa.subsets contains requested qa value."
+        },
+        {
+          "id": "cli.option.build-commit-from.--end-of-life",
+          "rationale": "Commit ostree.endoflife contains requested retirement message."
+        },
+        {
+          "id": "cli.option.build-commit-from.--end-of-life-rebase",
+          "rationale": "Commit rebase target equals successor ref."
+        },
+        {
+          "id": "cli.option.build-commit-from.--gpg-sign",
+          "rationale": "Initially unsigned source becomes verifiably signed destination."
+        },
+        {
+          "id": "cli.option.build-commit-from.--gpg-homedir",
+          "rationale": "Only designated disposable home contains signing key."
+        },
+        {
+          "id": "cli.option.build-commit-from.--update-appstream",
+          "rationale": "Fresh destination gains AppStream branch."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.commit-from.contents",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.build-commit-from.any.contents"
+      ],
+      "rationale": "Independent signed source and public destination checkout compare bytes, no parent and no detached signatures.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-commit-from.--src-repo",
+          "rationale": "Contents copied from distinct source repo."
+        },
+        {
+          "id": "cli.option.build-commit-from.--src-ref",
+          "rationale": "Source test branch copied into promoted branch."
+        },
+        {
+          "id": "cli.option.build-commit-from.--subject",
+          "rationale": "Requested subject in destination commit."
+        },
+        {
+          "id": "cli.option.build-commit-from.--body",
+          "rationale": "Requested body in destination commit."
+        },
+        {
+          "id": "cli.option.build-commit-from.--timestamp",
+          "rationale": "Fixed requested UTC timestamp in commit."
+        },
+        {
+          "id": "cli.option.build-commit-from.--no-update-summary",
+          "rationale": "Destination summary absent."
+        }
+      ]
+    }
+  ]
+}

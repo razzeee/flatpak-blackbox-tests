@@ -1,0 +1,121 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "transaction.options",
+      "scenario": "tx-options",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Transaction option roundtrips and installation association.",
+      "preconditions": [],
+      "expected": [
+        "Boolean options roundtrip both ways; parent window accepts both protocols; installation path and profile match."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    },
+    {
+      "id": "transaction.lookup",
+      "scenario": "tx-lookup",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Unique, remote-qualified, missing and ambiguous operation lookup.",
+      "preconditions": [],
+      "expected": [
+        "NULL remote finds unique ref, remote qualifier disambiguates duplicate ref, ambiguous and missing matches return NULL with GError."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    },
+    {
+      "id": "transaction.operation-list",
+      "scenario": "tx-operation-list",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Execution order, empty skipped updates, and signal thread.",
+      "preconditions": [],
+      "expected": [
+        "Non-skipped resolved list matches execution; unchanged update resolves empty; callbacks run synchronously on run thread."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    },
+    {
+      "id": "transaction.ownership",
+      "scenario": "tx-ownership",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Retained operations, installation, progress status and live cause graph.",
+      "preconditions": [],
+      "expected": [
+        "Owned results survive transaction destruction; borrowed cause graph is inspected only while transaction lives."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "transaction.options",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.installation-association"
+      ],
+      "rationale": "Compare owned installation path and user profile. Option roundtrips alone do not claim fixture-dependent option or authentication contracts."
+    },
+    {
+      "behavior_id": "transaction.lookup",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.operation-lookup"
+      ],
+      "rationale": "Lookup queued uninstall with NULL remote, then add a reinstall from a different remote and verify each qualifier; NULL remote ambiguity and missing remote/ref must all return NULL with GError. Inspection preserves installed A."
+    },
+    {
+      "behavior_id": "transaction.operation-list",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.operation-list",
+        "library.signal.executing-thread"
+      ],
+      "rationale": "Retained ready list pointer order equals new-operation order, no skipped elements; all-skipped update is empty. Every execution callback checks run thread and active run lifetime."
+    },
+    {
+      "behavior_id": "transaction.ownership",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.ownership.transaction-results",
+        "library.ownership.progress-status"
+      ],
+      "rationale": "Owned installation and operation list inspected after releasing transaction; runtime cause identifies app while alive. Actual allocating status result retained across later callbacks and object release, compared to saved bytes and freed."
+    }
+  ],
+  "client": {
+    "source": "client-transactions.c",
+    "entry": "blackbox_transactions_main"
+  }
+}

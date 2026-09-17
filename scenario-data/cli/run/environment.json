@@ -1,0 +1,198 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "sandbox.env-fd",
+      "scenario": "sandbox-env-fd",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Load NUL-separated environment from an inherited descriptor.",
+      "preconditions": "Controlled descriptor contains one environment assignment.",
+      "expected": "Probe reports exact value including equals sign and spaces.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "sandbox.command",
+      "scenario": "sandbox-command",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Execute metadata command, forward arguments and select runtime command.",
+      "preconditions": "Independent A app contains probe; runtime contains ldconfig.",
+      "expected": "Exact A output, exact argument lines, distinct ldconfig output, and app/runtime file visibility.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "sandbox.environment",
+      "scenario": "sandbox-environment",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Override and unset metadata environment.",
+      "preconditions": "A metadata sets BLACKBOX_META=metadata.",
+      "expected": "Metadata control, exact CLI replacement including equals/spaces, and unset variable absent.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "sandbox.clear-env",
+      "scenario": "sandbox-clear-env",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Clear inherited environment while retaining explicit values.",
+      "preconditions": "Controlled ordinary host variable.",
+      "expected": "Variable inherited normally, absent with clear-env, explicit value retained.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "sandbox.cwd",
+      "scenario": "sandbox-cwd",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Run in requested sandbox working directory.",
+      "preconditions": "Granted host directory contains marker.",
+      "expected": "Relative read resolves exact marker bytes.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "sandbox.var",
+      "scenario": "sandbox-var",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Preserve writable application var data.",
+      "preconditions": "Installed A app.",
+      "expected": "Exact /var/data marker survives a later run.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "sandbox.env-fd",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Actual probe environment value from independently supplied descriptor bytes.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--env-fd",
+          "rationale": "NUL-terminated descriptor assignment becomes exact sandbox variable value."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.command",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.run.user.command",
+        "cli.run.user.arguments",
+        "cli.run.user.command-override",
+        "cli.run.user.mounts"
+      ],
+      "rationale": "Observe metadata launch, exact forwarded argument lines, runtime command and both public mount paths."
+    },
+    {
+      "behavior_id": "sandbox.environment",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.run.user.environment"
+      ],
+      "rationale": "Metadata value is independently known; CLI override produces exact different value.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--unset-env",
+          "rationale": "Previously present metadata variable is absent with probe exit 1 and empty output."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.clear-env",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.run.user.clear-environment"
+      ],
+      "rationale": "Inherited host control is removed while explicit app variable remains."
+    },
+    {
+      "behavior_id": "sandbox.cwd",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Relative path resolves inside requested working directory.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--cwd",
+          "rationale": "Relative read returns controlled marker from requested sandbox working directory."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.var",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.run.user.persistent-var"
+      ],
+      "rationale": "Writable /var/data marker read unchanged in independent later launch."
+    }
+  ]
+}

@@ -1,0 +1,182 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "requirements": [
+    {
+      "id": "library.instance.session-enumeration",
+      "interface": "library",
+      "profile": "any",
+      "category": "instances",
+      "description": "While fixture sandboxes are held alive in the current session, instance enumeration includes them and their IDs distinguish the live instances without imposing a numeric or textual ID format.",
+      "sources": [
+        {
+          "path": "common/flatpak-instance.c",
+          "anchor": "flatpak_instance_get_all"
+        },
+        {
+          "path": "common/flatpak-instance.c",
+          "anchor": "flatpak_instance_get_id"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_instance_get_all",
+        "library.function.flatpak_instance_get_id"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "sandbox-execution",
+        "session-bus",
+        "concurrent-processes"
+      ]
+    },
+    {
+      "id": "library.instance.app-runtime-identity",
+      "interface": "library",
+      "profile": "any",
+      "category": "instances",
+      "description": "For a live controlled app sandbox, instance getters return the app ID, architecture, branch, app commit, runtime ref, and runtime commit actually used by that sandbox.",
+      "sources": [
+        {
+          "path": "common/flatpak-instance.c",
+          "anchor": "flatpak_instance_get_app"
+        },
+        {
+          "path": "common/flatpak-instance.c",
+          "anchor": "flatpak_instance_get_arch"
+        },
+        {
+          "path": "common/flatpak-instance.c",
+          "anchor": "flatpak_instance_get_branch"
+        },
+        {
+          "path": "common/flatpak-instance.c",
+          "anchor": "flatpak_instance_get_commit"
+        },
+        {
+          "path": "common/flatpak-instance.c",
+          "anchor": "flatpak_instance_get_runtime"
+        },
+        {
+          "path": "common/flatpak-instance.c",
+          "anchor": "flatpak_instance_get_runtime_commit"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_instance_get_app",
+        "library.function.flatpak_instance_get_arch",
+        "library.function.flatpak_instance_get_branch",
+        "library.function.flatpak_instance_get_commit",
+        "library.function.flatpak_instance_get_runtime",
+        "library.function.flatpak_instance_get_runtime_commit"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "library.instance.runtime-only",
+      "interface": "library",
+      "profile": "any",
+      "category": "instances",
+      "description": "For a controlled sandbox without an application, get_app returns NULL rather than inventing an application ID.",
+      "sources": [
+        {
+          "path": "common/flatpak-instance.c",
+          "anchor": "flatpak_instance_get_app"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_instance_get_app"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "sandbox-execution",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "library.instance.processes",
+      "interface": "library",
+      "profile": "any",
+      "category": "instances",
+      "description": "For a synchronized live sandbox, get_pid identifies the outer babysitter and get_child_pid identifies the application process. A zero child PID is permitted briefly after launch and is not treated as a permanent result.",
+      "sources": [
+        {
+          "path": "common/flatpak-instance.c",
+          "anchor": "flatpak_instance_get_pid"
+        },
+        {
+          "path": "common/flatpak-instance.c",
+          "anchor": "flatpak_instance_get_child_pid"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_instance_get_pid",
+        "library.function.flatpak_instance_get_child_pid"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "sandbox-execution",
+        "session-bus",
+        "concurrent-processes"
+      ]
+    },
+    {
+      "id": "library.instance.info",
+      "interface": "library",
+      "profile": "any",
+      "category": "instances",
+      "description": "The instance information keyfile agrees with the fixture's /.flatpak-info inside a held-live sandbox for the app, runtime, architecture, and commit fields available there.",
+      "sources": [
+        {
+          "path": "common/flatpak-instance.c",
+          "anchor": "flatpak_instance_get_info"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_instance_get_info"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "sandbox-execution",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "library.instance.liveness",
+      "interface": "library",
+      "profile": "any",
+      "category": "instances",
+      "description": "is_running is TRUE while a fixture sandbox is held alive and becomes FALSE after its confirmed exit, with synchronization preventing PID reuse or a lifecycle race from deciding the assertion.",
+      "sources": [
+        {
+          "path": "common/flatpak-instance.c",
+          "anchor": "flatpak_instance_is_running"
+        },
+        {
+          "path": "common/flatpak-instance.c",
+          "anchor": "FlatpakInstance"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_instance_is_running"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "sandbox-execution",
+        "session-bus",
+        "concurrent-processes"
+      ]
+    }
+  ],
+  "limitations": []
+}

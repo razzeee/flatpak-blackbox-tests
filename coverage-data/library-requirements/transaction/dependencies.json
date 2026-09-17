@@ -1,0 +1,218 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "requirements": [
+    {
+      "id": "library.install.system.app-dependency",
+      "interface": "library",
+      "profile": "system",
+      "category": "installation",
+      "description": "An authorized transaction in a provisioned system installation installs an available app and its required runtime in that system installation; a second user can query the installed refs with the expected commits. The caller uses a file-creation mask compatible with the documented cross-user readability prerequisite.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "FlatpakTransaction"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_add_install"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_installed_ref"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_add_install",
+        "library.function.flatpak_transaction_run",
+        "library.function.flatpak_installation_get_installed_ref"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "system-installation",
+        "system-authorization",
+        "multiple-users",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.install.user.runtime-dependency",
+      "interface": "library",
+      "profile": "user",
+      "category": "dependencies",
+      "description": "Installing an app with default dependency resolution into a fresh user installation also installs its available required runtime at the fixture runtime commit without an explicit runtime install request.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_new_for_installation"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_add_dependency_source"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_add_install",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.transaction.extra-dependency-source",
+      "interface": "library",
+      "profile": "any",
+      "category": "dependencies",
+      "description": "Adding an installation as a dependency source allows an app to rely on its already installed required runtime without installing a second copy in the transaction's target installation.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_add_dependency_source"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_add_dependency_source",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "multiple-installations",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.transaction.system.default-dependency-sources",
+      "interface": "library",
+      "profile": "system",
+      "category": "dependencies",
+      "description": "Adding default dependency sources makes runtimes in all defined system installations available as dependencies, including a named system installation, without adding per-user installations as dependency sources.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_add_default_dependency_sources"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_add_default_dependency_sources",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.transaction.disable-dependencies",
+      "interface": "library",
+      "profile": "any",
+      "category": "transaction-options",
+      "description": "With runtime dependency resolution disabled, resolving an app installation does not add its absent runtime to the operations list.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_set_disable_dependencies"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_set_disable_dependencies",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.transaction.disable-related",
+      "interface": "library",
+      "profile": "any",
+      "category": "transaction-options",
+      "description": "With related refs disabled, resolving an app with suggested locale extensions does not add those extensions to the operations list.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_set_disable_related"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_set_disable_related",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "runtime-extensions"
+      ]
+    },
+    {
+      "id": "library.transaction.auto-sdk-debug",
+      "interface": "library",
+      "profile": "any",
+      "category": "transaction-options",
+      "description": "Enabling automatic SDK and debug installation installs the SDK for an installed or updated app and debug information for the app and its dependencies. The corresponding getters reflect each enabled setting; uninstall-only transactions do not add these installs.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_set_auto_install_sdk"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_get_auto_install_sdk"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_set_auto_install_debug"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_get_auto_install_debug"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_set_auto_install_sdk",
+        "library.function.flatpak_transaction_get_auto_install_sdk",
+        "library.function.flatpak_transaction_set_auto_install_debug",
+        "library.function.flatpak_transaction_get_auto_install_debug",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "runtime-extensions"
+      ]
+    },
+    {
+      "id": "library.transaction.disable-auto-pin",
+      "interface": "library",
+      "profile": "any",
+      "category": "transaction-options",
+      "description": "An explicitly installed runtime is normally pinned against automatic removal; enabling disable_auto_pin suppresses that automatic pinning for a fresh otherwise unpinned runtime.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_set_disable_auto_pin"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_set_disable_auto_pin",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    }
+  ],
+  "limitations": []
+}

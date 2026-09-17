@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "objects.config-roundtrip",
+      "scenario": "objects-config-roundtrip",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ],
+      "description": "Persist and unset both documented language configuration keys.",
+      "preconditions": "Literal semicolon-separated languages and extra-languages values.",
+      "expected": "Reopening returns each exact value; NULL unsetting yields NULL with G_KEY_FILE_ERROR_KEY_NOT_FOUND.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_set_config_sync, flatpak_installation_get_config"
+      ]
+    },
+    {
+      "id": "objects.config-locales",
+      "scenario": "objects-config-locales",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ],
+      "description": "Resolve configured languages and territory-bearing extra locales.",
+      "preconditions": "Explicit de;fr, then unset languages with de_DE;fr_CA extra-languages, then empty languages.",
+      "expected": "Explicit arrays contain exactly de/fr; extra locale territories survive while languages include de/fr; empty languages gives an empty array.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_get_default_languages, flatpak_installation_get_default_locales"
+      ]
+    },
+    {
+      "id": "objects.overrides",
+      "scenario": "objects-overrides",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "libflatpak",
+        "user-installation"
+      ],
+      "description": "Load application override metadata configured through the public CLI.",
+      "preconditions": "CLI override --user sets two literal environment values for the fixture app and a different value for another app.",
+      "expected": "The public library loader returns parseable override metadata with exactly the fixture app's two Environment keys and literal values, including spaces and an equals sign. Assertions do not depend on backend paths or keyfile serialization.",
+      "references": [
+        "doc/flatpak-override.xml: --user and --env",
+        "common/flatpak-installation.c: flatpak_installation_load_app_overrides"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "objects.config-roundtrip",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.config.languages-roundtrip"
+      ],
+      "rationale": "Both supported keys roundtrip exact semicolon strings across reopening and each NULL unset yields the documented missing-key error."
+    },
+    {
+      "behavior_id": "objects.config-locales",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.config.languages-locales"
+      ],
+      "rationale": "Explicit language arrays, territory-preserving extra locales, language-only extra codes and empty-string all-languages semantics are asserted."
+    },
+    {
+      "behavior_id": "objects.overrides",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.config.app-overrides"
+      ],
+      "rationale": "CLI override --user seeds two known environment values and a decoy app's different value. The public library loader must return parseable metadata containing exactly the requested app's two Environment keys and literal values; no private paths or serialization details are assumed."
+    }
+  ]
+}

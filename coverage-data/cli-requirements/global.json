@@ -1,0 +1,205 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.global.any.help",
+      "interface": "cli",
+      "profile": "any",
+      "category": "global-options",
+      "description": "The global --help option prints help options and exits.",
+      "sources": [
+        {
+          "path": "doc/flatpak.xml",
+          "anchor": "--help"
+        }
+      ],
+      "surfaces": [
+        "cli.option.global.--help"
+      ],
+      "required_capabilities": [
+        "cli"
+      ]
+    },
+    {
+      "id": "cli.global.any.version",
+      "interface": "cli",
+      "profile": "any",
+      "category": "global-options",
+      "description": "The global --version option prints version information and exits.",
+      "sources": [
+        {
+          "path": "doc/flatpak.xml",
+          "anchor": "--version"
+        }
+      ],
+      "surfaces": [
+        "cli.option.global.--version"
+      ],
+      "required_capabilities": [
+        "cli"
+      ]
+    },
+    {
+      "id": "cli.global.any.default-arch",
+      "interface": "cli",
+      "profile": "any",
+      "category": "global-options",
+      "description": "The global --default-arch option prints the host's default Flatpak architecture and exits.",
+      "sources": [
+        {
+          "path": "doc/flatpak.xml",
+          "anchor": "--default-arch"
+        }
+      ],
+      "surfaces": [
+        "cli.option.global.--default-arch"
+      ],
+      "required_capabilities": [
+        "cli"
+      ]
+    },
+    {
+      "id": "cli.global.any.supported-arches",
+      "interface": "cli",
+      "profile": "any",
+      "category": "global-options",
+      "description": "The global --supported-arches option prints supported architectures in priority order and exits.",
+      "sources": [
+        {
+          "path": "doc/flatpak.xml",
+          "anchor": "--supported-arches"
+        }
+      ],
+      "surfaces": [
+        "cli.option.global.--supported-arches"
+      ],
+      "required_capabilities": [
+        "cli"
+      ]
+    },
+    {
+      "id": "cli.global.any.gl-drivers",
+      "interface": "cli",
+      "profile": "any",
+      "category": "global-options",
+      "description": "The global --gl-drivers option prints the active GL driver list and exits.",
+      "sources": [
+        {
+          "path": "doc/flatpak.xml",
+          "anchor": "--gl-drivers"
+        }
+      ],
+      "surfaces": [
+        "cli.option.global.--gl-drivers"
+      ],
+      "required_capabilities": [
+        "cli"
+      ]
+    },
+    {
+      "id": "cli.global.any.verbose",
+      "interface": "cli",
+      "profile": "any",
+      "category": "global-options",
+      "description": "Verbose command processing emits debug information, with repeated verbosity providing additional detail for operations that have it.",
+      "sources": [
+        {
+          "path": "doc/flatpak.xml",
+          "anchor": "--verbose"
+        }
+      ],
+      "surfaces": [
+        "cli.option.global.--verbose"
+      ],
+      "required_capabilities": [
+        "cli"
+      ]
+    },
+    {
+      "id": "cli.global.any.ostree-verbose",
+      "interface": "cli",
+      "profile": "any",
+      "category": "global-options",
+      "description": "The global --ostree-verbose option emits OSTree debug information during commands that perform OSTree operations.",
+      "sources": [
+        {
+          "path": "doc/flatpak.xml",
+          "anchor": "--ostree-verbose"
+        }
+      ],
+      "surfaces": [
+        "cli.option.global.--ostree-verbose"
+      ],
+      "required_capabilities": [
+        "cli",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.global.system.installations",
+      "interface": "cli",
+      "profile": "system",
+      "category": "global-options",
+      "description": "The global --installations option prints paths of configured system installations and exits.",
+      "sources": [
+        {
+          "path": "doc/flatpak.xml",
+          "anchor": "--installations"
+        }
+      ],
+      "surfaces": [
+        "cli.option.global.--installations"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "multiple-installations"
+      ]
+    },
+    {
+      "id": "cli.global.any.updated-environment",
+      "interface": "cli",
+      "profile": "any",
+      "category": "global-options",
+      "description": "The global --print-updated-env option prints the environment variables needed to use Flatpaks, amending the current environment.",
+      "sources": [
+        {
+          "path": "doc/flatpak.xml",
+          "anchor": "--print-updated-env"
+        }
+      ],
+      "surfaces": [
+        "cli.option.global.--print-updated-env"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation"
+      ]
+    },
+    {
+      "id": "cli.global.system.environment-only",
+      "interface": "cli",
+      "profile": "system",
+      "category": "global-options",
+      "description": "Combining --print-system-only with --print-updated-env produces environment settings for system installations without including the user's home installation.",
+      "sources": [
+        {
+          "path": "doc/flatpak.xml",
+          "anchor": "--print-system-only"
+        }
+      ],
+      "surfaces": [
+        "cli.option.global.--print-system-only",
+        "cli.option.global.--print-updated-env"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "user-installation",
+        "multiple-installations"
+      ]
+    }
+  ],
+  "limitations": []
+}

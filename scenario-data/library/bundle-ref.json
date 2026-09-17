@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "queryx.bundle",
+      "scenario": "queryx-bundle",
+      "handler": "library_query_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "bundle-files",
+        "appstream"
+      ],
+      "description": "Read real bundle payloads and retain owned results.",
+      "preconditions": "Reference-exported bundles with and without URLs, distinct 64/128 PNGs, compressed XML and metadata.",
+      "expected": "Identity, commit, file, metadata, XML, size, icons and URLs match; owned file, bytes and origin survive bundle destruction.",
+      "references": [
+        "common/flatpak-bundle-ref.c: public constructors and getters"
+      ]
+    },
+    {
+      "id": "lifex.bundle-errors",
+      "scenario": "lifex-bundle-errors",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "bundle-files",
+        "local-repository"
+      ],
+      "description": "Reject malformed and missing public bundle files.",
+      "preconditions": "Literal invalid bytes and nonexistent path; unrelated runtime installed.",
+      "expected": "Bundle constructor and direct installer fail with GError; transaction fails either when adding or running; app remains absent and runtime unchanged.",
+      "references": [
+        "common/flatpak-bundle-ref.c: flatpak_bundle_ref_new",
+        "common/flatpak-installation.c: flatpak_installation_install_bundle",
+        "common/flatpak-transaction.c: flatpak_transaction_add_install_bundle"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "queryx.bundle",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.bundle.identity-file",
+        "library.bundle.payload-metadata",
+        "library.bundle.icons",
+        "library.bundle.origin-runtime-repository",
+        "library.ownership.bundle-results"
+      ],
+      "rationale": "Actual bundles assert all payload fields against independent inputs, both optional URL cases and retained transfer-full results after destruction."
+    },
+    {
+      "behavior_id": "lifex.bundle-errors",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Public bundle failure cases have no matching behavior row in the fixed denominator."
+    }
+  ]
+}

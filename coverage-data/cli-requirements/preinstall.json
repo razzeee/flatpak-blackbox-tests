@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.preinstall.system.synchronize",
+      "interface": "cli",
+      "profile": "system",
+      "category": "maintenance",
+      "description": "Preinstall with no action options synchronizes system-installed vendor flatpaks with the selected .preinstall definitions by installing or removing the designated refs.",
+      "sources": [
+        {
+          "path": "doc/flatpak-preinstall.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.preinstall"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "system-authorization",
+        "local-repository",
+        "vendor-preinstall"
+      ]
+    },
+    {
+      "id": "cli.preinstall.system.opt-out",
+      "interface": "cli",
+      "profile": "system",
+      "category": "maintenance",
+      "description": "A vendor-preinstalled flatpak explicitly uninstalled by the user is not automatically reinstalled by a later preinstall synchronization.",
+      "sources": [
+        {
+          "path": "doc/flatpak-preinstall.xml",
+          "anchor": "Users can opt out of preinstalled flatpaks by simply uninstalling them"
+        }
+      ],
+      "surfaces": [
+        "cli.command.preinstall"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "system-authorization",
+        "local-repository",
+        "vendor-preinstall"
+      ]
+    }
+  ],
+  "limitations": []
+}

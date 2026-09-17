@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "transaction.install-subpaths",
+      "scenario": "tx-install-subpaths",
+      "handler": "transaction_contract_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Explicit, NULL and empty install subsets.",
+      "preconditions": [
+        "Prepared query payloads including subset-control/payload"
+      ],
+      "expected": [
+        "Explicit /bin excludes subset-control/payload; NULL and empty arrays deploy both files in separate installations."
+      ],
+      "references": [
+        "common/flatpak-transaction.c:flatpak_transaction_add_install"
+      ]
+    },
+    {
+      "id": "transaction.update-subpaths-all",
+      "scenario": "tx-update-subpaths-all",
+      "handler": "transaction_contract_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Both all-subpaths update spellings.",
+      "preconditions": [
+        "Prepared query payloads including subset-control/payload"
+      ],
+      "expected": [
+        "Each fresh /bin-only deployment gains subset-control/payload with either { NULL } or { empty-string, NULL }."
+      ],
+      "references": [
+        "common/flatpak-transaction.c:flatpak_transaction_add_update"
+      ]
+    },
+    {
+      "id": "transaction.update-subpaths-default",
+      "scenario": "tx-update-subpaths-default",
+      "handler": "transaction_contract_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "NULL updates merge retained and configured locales.",
+      "preconditions": [
+        "Prepared selection locale markers"
+      ],
+      "expected": [
+        "Explicit ja excludes fr/de/es; NULL update adds configured fr, then configured de, retaining previous locales and excluding es."
+      ],
+      "references": [
+        "common/flatpak-transaction.c:flatpak_transaction_add_update"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "transaction.install-subpaths",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.install-subpaths"
+      ],
+      "rationale": "Native add_install in three independent custom-path installations receives explicit /bin, NULL, and { NULL }. Public deploy-dir file observations distinguish requested and excluded prepared payloads; exact commit checks accompany every variant."
+    },
+    {
+      "behavior_id": "transaction.update-subpaths-all",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.update-subpaths-all"
+      ],
+      "rationale": "Two independently installed /bin subsets exclude subset-control/payload before native add_update; { NULL } and { empty-string, NULL } each deploy both payloads at the prepared commit."
+    },
+    {
+      "behavior_id": "transaction.update-subpaths-default",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.update-subpaths-default"
+      ],
+      "rationale": "Explicit ja-only initial install excludes configured fr. NULL native updates add fr then de while retaining ja and previous fr, with es absent throughout. Public deploy-dir files have independently prepared language contents."
+    }
+  ],
+  "client": {
+    "source": "client-transaction-contracts.c",
+    "entry": "blackbox_transaction_contracts_main"
+  }
+}

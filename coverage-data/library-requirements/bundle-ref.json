@@ -1,7 +1,6 @@
 {
   "schema": 1,
   "scope": "library",
-  "limitations": [],
   "requirements": [
     {
       "id": "library.bundle.identity-file",
@@ -113,6 +112,37 @@
         "libflatpak",
         "bundle-files"
       ]
+    },
+    {
+      "id": "library.ownership.bundle-results",
+      "interface": "library",
+      "profile": "any",
+      "category": "ownership",
+      "description": "Transfer-full bundle file, metadata bytes, and origin string results remain valid after releasing the bundle ref, and each result can be released independently using its documented GLib ownership convention.",
+      "sources": [
+        {
+          "path": "common/flatpak-bundle-ref.c",
+          "anchor": "flatpak_bundle_ref_get_file"
+        },
+        {
+          "path": "common/flatpak-bundle-ref.c",
+          "anchor": "flatpak_bundle_ref_get_metadata"
+        },
+        {
+          "path": "common/flatpak-bundle-ref.c",
+          "anchor": "flatpak_bundle_ref_get_origin"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_bundle_ref_get_file",
+        "library.function.flatpak_bundle_ref_get_metadata",
+        "library.function.flatpak_bundle_ref_get_origin"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "bundle-files"
+      ]
     }
-  ]
+  ],
+  "limitations": []
 }

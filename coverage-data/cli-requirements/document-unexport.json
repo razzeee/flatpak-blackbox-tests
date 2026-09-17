@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.document-unexport.any.revoke",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "Unexporting a file removes its document ID and makes that document unavailable to all sandboxed applications.",
+      "sources": [
+        {
+          "path": "doc/flatpak-document-unexport.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.document-unexport"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "sandbox-execution",
+        "desktop-portals",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.document-unexport.any.by-id",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "Unexporting with --doc-id removes the specified document even when its original file has been deleted.",
+      "sources": [
+        {
+          "path": "doc/flatpak-document-unexport.xml",
+          "anchor": "--doc-id"
+        }
+      ],
+      "surfaces": [
+        "cli.command.document-unexport",
+        "cli.option.document-unexport.--doc-id"
+      ],
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ]
+    }
+  ],
+  "limitations": []
+}

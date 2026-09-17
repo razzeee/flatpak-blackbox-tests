@@ -1,0 +1,285 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "requirements": [
+    {
+      "id": "library.installation.user.identity",
+      "interface": "library",
+      "profile": "user",
+      "category": "constructors",
+      "description": "The user constructor selects the per-user installation; its path matches the configured user location, is_user is TRUE, and its ID is user.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_new_user"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_id"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_path"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_is_user"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_new_user",
+        "library.function.flatpak_installation_get_path",
+        "library.function.flatpak_installation_get_is_user",
+        "library.function.flatpak_installation_get_id"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "library.installation.system.default",
+      "interface": "library",
+      "profile": "system",
+      "category": "constructors",
+      "description": "The system constructor selects the default system-wide location, reports is_user FALSE, and reports ID default.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_new_system"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_id"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_path"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_is_user"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_new_system",
+        "library.function.flatpak_installation_get_path",
+        "library.function.flatpak_installation_get_is_user",
+        "library.function.flatpak_installation_get_id"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "system-installation"
+      ]
+    },
+    {
+      "id": "library.installation.system.named",
+      "interface": "library",
+      "profile": "system",
+      "category": "constructors",
+      "description": "Constructing a configured named system installation selects that installation's path and ID rather than the default installation, and reports is_user FALSE.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_new_system_with_id"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_path"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_id"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_is_user"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_new_system_with_id",
+        "library.function.flatpak_installation_get_path",
+        "library.function.flatpak_installation_get_id",
+        "library.function.flatpak_installation_get_is_user"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "system-installation",
+        "multiple-installations"
+      ]
+    },
+    {
+      "id": "library.installation.system.enumeration",
+      "interface": "library",
+      "profile": "system",
+      "category": "constructors",
+      "description": "System installation enumeration includes the configured reachable system installations and excludes an installation made unreachable by the fixture; it does not enumerate the per-user installation.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_get_system_installations"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_get_system_installations"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "system-installation",
+        "multiple-installations",
+        "filesystem-fault-injection"
+      ]
+    },
+    {
+      "id": "library.installation.user.custom-path",
+      "interface": "library",
+      "profile": "user",
+      "category": "constructors",
+      "description": "Constructing an installation for a supplied path with user TRUE reports that path and user profile, and its installed-ref queries address that location independently of the default user installation.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_new_for_path"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_path"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_is_user"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_installed_refs"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_new_for_path",
+        "library.function.flatpak_installation_get_path",
+        "library.function.flatpak_installation_get_is_user",
+        "library.function.flatpak_installation_list_installed_refs"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.installation.system.custom-path",
+      "interface": "library",
+      "profile": "system",
+      "category": "constructors",
+      "description": "Constructing an installation for a supplied path with user FALSE reports that path and system profile, and its installed-ref queries address that location independently of the default system installation.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_new_for_path"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_path"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_is_user"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_installed_refs"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_new_for_path",
+        "library.function.flatpak_installation_get_path",
+        "library.function.flatpak_installation_get_is_user",
+        "library.function.flatpak_installation_list_installed_refs"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "system-installation",
+        "multiple-installations",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.installation.system.metadata",
+      "interface": "library",
+      "profile": "system",
+      "category": "installation-properties",
+      "description": "For a named installation with explicit display name, numeric priority, and storage type, the installation getters return those configured values.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_display_name"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_priority"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_storage_type"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_get_display_name",
+        "library.function.flatpak_installation_get_priority",
+        "library.function.flatpak_installation_get_storage_type"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "system-installation",
+        "multiple-installations"
+      ]
+    },
+    {
+      "id": "library.installation.cache-refresh",
+      "interface": "library",
+      "profile": "any",
+      "category": "cache",
+      "description": "After another installation object changes a remote, dropping caches succeeds and a subsequent lookup on the original installation observes the changed remote configuration.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_drop_caches"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_remote_by_name"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_drop_caches",
+        "library.function.flatpak_installation_get_remote_by_name"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation"
+      ]
+    },
+    {
+      "id": "library.ownership.installation-path",
+      "interface": "library",
+      "profile": "any",
+      "category": "ownership",
+      "description": "The transfer-full GFile returned by get_path remains usable after the installation object is released and can be unreferenced independently.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_path"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_get_path"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation"
+      ]
+    }
+  ],
+  "limitations": []
+}

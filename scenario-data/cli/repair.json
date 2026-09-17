@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "maintenance.repair-root",
+      "scenario": "maintenance-repair-root",
+      "handler": "maintenance_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "local-repository"
+      ],
+      "description": "Contrast successful namespace-root repair with actual non-root denial for the same isolated installation.",
+      "preconditions": "Populated default system store inherited by a third disposable namespace with actual UID/GID 1000; same public paths and post-root-repair device/inode identities, caller-owned writable base, no installation/config redirects or host bus.",
+      "expected": "Root repair succeeds without a dry-run warning and retains app/runtime refs and commits; UID 1000 repair refuses mutation and preserves the post-root-repair public filesystem identities and commits.",
+      "references": [
+        "doc/flatpak-repair.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "maintenance.repair-root",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [
+        "cli.repair.system.root-required"
+      ],
+      "rationale": "Actual UID/EUID 1000 is denied mutation after root repair succeeds without a dry-run warning. Exact seeded refs/commits are checked before and after authorized root repair. Its resulting public system/deployment identities establish the baseline checked across the non-root namespace and read-only repair, without redirects. The base remains caller-owned and writable. No polkit or multiuser claim."
+    }
+  ],
+  "notes": [
+    "Uses system_selector_scenarios.Namespace with two disposable root user namespace layers and fixture-owned preinstall.d configuration. No non-root polkit or multiuser claim.",
+    "Only public .preinstall definitions, CLI queries and fixture payloads at publicly returned deployment locations are inspected. No installed repository backend paths are constructed.",
+    "The preinstall manual in this checkout is doc/flatpak-preinstall.xml. Install=false explicitly removes the app; the runtime remains designated for installation.",
+    "History uses an actual systemd-journald process and journalctl --sync within one guarded namespace invocation. Each nested CLI argv, exit status, stdout and stderr is retained as JSON lines in outer command evidence. User history refers to namespace root's per-user installation, not an ordinary user's authorization behavior. Lifecycle checks require ordered installation/update/removal concepts for controlled refs, accepting noun/verb aliases and an optional deployment prefix. Unknown auxiliary labels and repeated events do not satisfy missing lifecycle steps and do not impose fixed record counts. The documented installation column must identify the selected store; auxiliary records may identify temporary repository paths. Pure helper controls accept extra auxiliary records and reject wrong selectors, missing steps, wrong order and swapped columns.",
+    "Repair adds a third disposable user namespace mapping actual UID/GID 1000 to enclosing namespace UID/GID 0. Both callers query the same populated default system installation without installation/config redirects. Exact ref/commit checks bracket authorized root repair, which may rebuild filesystem objects. Device/inode identities at public installation/deployment paths are captured after root repair and must match across the non-root namespace and its read-only repair. The inherited host root remains read-only and no host bus is present. Coverage is limited to actual non-root refusal to mutate, including automatic dry-run; repository-object recovery and dry-run inconsistency detection remain unmapped.",
+    "Preinstall --system receives no option assertion because ignoring it still selects the default system installation. No preinstall --no-pull assertion is claimed: the attempted cached setup returned Nothing to do even without that flag. Download-only is verified by empty installed queries and subsequent ordinary offline installation of its downloaded content."
+  ]
+}

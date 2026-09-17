@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "requirements": [
+    {
+      "id": "library.ref.parse-invalid",
+      "interface": "library",
+      "profile": "any",
+      "category": "errors",
+      "description": "Parsing malformed full refs, including a missing component and an invalid kind, fails with NULL and a GError instead of producing a usable ref. No diagnostic text or undocumented exact error code is required.",
+      "sources": [
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_parse"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_ref_parse"
+      ],
+      "required_capabilities": [
+        "libflatpak"
+      ]
+    },
+    {
+      "id": "library.ref.parse-roundtrip",
+      "interface": "library",
+      "profile": "any",
+      "category": "refs",
+      "description": "Parsing valid full app and runtime refs preserves their kind, name, architecture, and branch; formatting each parsed ref returns its original full string.",
+      "sources": [
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_parse"
+        },
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_format_ref"
+        },
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_get_kind"
+        },
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_get_name"
+        },
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_get_arch"
+        },
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_get_branch"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_ref_parse",
+        "library.function.flatpak_ref_format_ref",
+        "library.function.flatpak_ref_get_kind",
+        "library.function.flatpak_ref_get_name",
+        "library.function.flatpak_ref_get_arch",
+        "library.function.flatpak_ref_get_branch"
+      ],
+      "required_capabilities": [
+        "libflatpak"
+      ]
+    },
+    {
+      "id": "library.ref.parse-no-commit",
+      "interface": "library",
+      "profile": "any",
+      "category": "refs",
+      "description": "A ref produced by parsing a valid full ref string has no commit set; get_commit returns NULL.",
+      "sources": [
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_parse"
+        },
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_get_commit"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_ref_parse",
+        "library.function.flatpak_ref_get_commit"
+      ],
+      "required_capabilities": [
+        "libflatpak"
+      ]
+    },
+    {
+      "id": "library.ref.cached-format",
+      "interface": "library",
+      "profile": "any",
+      "category": "refs",
+      "description": "Cached formatting equals the allocating formatter's full ref string and returns the same borrowed string on repeated calls for the same live immutable ref.",
+      "sources": [
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_format_ref_cached"
+        },
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_format_ref"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_ref_format_ref_cached",
+        "library.function.flatpak_ref_format_ref"
+      ],
+      "required_capabilities": [
+        "libflatpak"
+      ]
+    },
+    {
+      "id": "library.ref.collection-id",
+      "interface": "library",
+      "profile": "any",
+      "category": "refs",
+      "description": "A ref obtained from a fixture with an explicit collection ID exposes that collection ID through the public ref getter.",
+      "sources": [
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_get_collection_id"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_ref_get_collection_id"
+      ],
+      "required_capabilities": [
+        "libflatpak"
+      ]
+    },
+    {
+      "id": "library.ownership.formatted-string",
+      "interface": "library",
+      "profile": "any",
+      "category": "ownership",
+      "description": "A transfer-full string from format_ref remains valid after releasing its source ref and can be freed independently. Repeated allocating calls can each be freed without affecting a live ref or its cached borrowed formatter result.",
+      "sources": [
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_format_ref"
+        },
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_format_ref_cached"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_ref_format_ref",
+        "library.function.flatpak_ref_format_ref_cached"
+      ],
+      "required_capabilities": [
+        "libflatpak"
+      ]
+    }
+  ],
+  "limitations": []
+}

@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "management.force-delete",
+      "scenario": "management-force-delete",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Force removal of an origin still used by installed refs.",
+      "preconditions": "A app/runtime installed.",
+      "expected": "Ordinary deletion fails; force removes remote and retains deployments.",
+      "references": [
+        "doc/flatpak-remote-delete.xml"
+      ]
+    },
+    {
+      "id": "system-selectors.remote-force",
+      "scenario": "system-selectors-remote-force",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Force-delete selected origins while retaining their deployed applications.",
+      "preconditions": "Installed apps use same-name remotes in each private installation.",
+      "expected": "Ordinary deletion refuses installed refs; force removes selected remote configuration and retains the app commit.",
+      "references": [
+        "doc/flatpak-remote-delete.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "management.force-delete",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.remote-delete.user.force"
+      ],
+      "rationale": "Normal removal refuses installed origin; force removes it while both deployments remain."
+    },
+    {
+      "behavior_id": "system-selectors.remote-force",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [],
+      "rationale": "Forced deletion is contrasted with installed-origin refusal and followed by remote absence and preserved app query.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-delete.--force",
+          "rationale": "Force removes an origin that ordinary deletion refuses, without removing the app deployment."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Every target call enters two disposable bubblewrap user/mount namespace layers. The outer root maps only to the invoking host UID; inner root maps only to outer root. Inherited host mounts are locked read-only, checked by a denied bind-remount before every target call. Private PID/network namespaces and writable installation state are case-local; generated state is removed after each case while command evidence is retained.",
+    "Target environment keys BLACKBOX_SYSTEM_INSTALL_DIR and BLACKBOX_SYSTEM_CONFIG_DIR specify the expected compiled defaults; their reference-build defaults are /var/local/lib/flatpak and /usr/local/etc/flatpak. The namespace mounts private data at those paths, and CLI/C-client assertions still check the target's actual default location. These keys never become FLATPAK_SYSTEM_DIR or FLATPAK_CONFIG_DIR redirects. Set them under the target JSON environment object, not the host shell environment.",
+    "Readonly exposure includes only the suite directory, selected target executables, configured helpers and LD_LIBRARY_PATH directories. Uninstalled targets can explicitly add colon-separated absolute paths with BLACKBOX_TARGET_READONLY_PATHS in the target environment. No repository ancestor is inferred. Paths that cover private namespace roots or overlap protected installation/service content are rejected, including symlink aliases.",
+    "CLI deployment location checks use the public returned location, verify containment in the selected public installation base, locate the controlled bin/blackbox-probe payload there and execute it to distinguish A from B. They never construct a deployment path from a ref or commit, and never recursively search a general installation root for content.",
+    "Direct-root mutations may satisfy explicitly selected installation outcomes. These cases do not assert polkit authorization, non-root helper behavior, or multiple-user access. No requirement demanding those outcomes is mapped.",
+    "The named override case intentionally asserts the documented isolation contract; the reference target currently fails it, so that option receives no verified credit from that case."
+  ]
+}

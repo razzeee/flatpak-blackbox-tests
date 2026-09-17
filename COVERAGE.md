@@ -8,7 +8,7 @@ The latter has no defensible finite denominator yet.
 
 A complete run against reference Flatpak 1.19.1 on 2026-09-17 produced 308 passing
 cases and 18 failing checks. The current-definition report is
-`_build/blackbox-artifacts/readable-json-full-01/report.json`, relative to the
+`_build/blackbox-artifacts/surface-layout-full-02/report.json`, relative to the
 original Flatpak checkout root. Historical artifact paths and source commit IDs
 in this document refer to that checkout, not this extracted repository. Its
 passing evidence covers:
@@ -29,15 +29,15 @@ privilege checks. Polkit, non-root system-helper and multiple-user contracts
 remain uncovered. This checkpoint is not a substitute for running the accounting
 against the report for the target and definitions being evaluated.
 
-The 326-case run used the uncommitted JSON readability changes based on
-`6949188` on branch `refactor/readable-json`, target configuration
+The 326-case run used the uncommitted public-interface layout changes based on
+`2c69bfa` on branch `refactor/readable-json`, target configuration
 `/home/razze/dev/flatpak/_build/blackbox-artifacts/extracted-build-target.json`, and fixtures
 at `_build/blackbox-artifacts/six-contract-fixtures-04`. It ran with `--timeout 90`
 and `TMPDIR=/home/razze/dev/flatpak/_build/t`. Recorded SHA-256 values:
 
 | Input | SHA-256 |
 | --- | --- |
-| Suite definition fingerprint | `71cc0a93fc2e7d3ff5f30e5ab9e641216f84f703e45bc8a2fc1f3a40040bbb19` |
+| Suite definition fingerprint | `3df9330148771fc58c3a1f8c735267f9acbbc86f467e8c510d25c4cd8baa8ecb` |
 | Target configuration | `999164fb67f58ef7f33a2f718c4d0ba916616e99b354ed111ceac12f70683831` |
 | Target CLI | `9e00add5910406853422eab296cc40ec90ba0439f5fea9564a8fba7fd09a90f2` |
 | Target libflatpak | `d8ecbe648ea28869fa0e78a74b2c48b86dffd95123cb8015c530e630e70801e2` |
@@ -49,21 +49,25 @@ remain failures. All 17 failures from `six-contract-reviewed-full-01` reproduce.
 Document forwarding, previously an unmet portal prerequisite, now reaches execution
 and fails because the forwarded file is unavailable. Passing credit is unchanged.
 
-Before editing, the existing scenario loaders and `CoverageModel` recorded
-`_build/blackbox-artifacts/json-layout-baseline.json`. Exact comparison after the
-split preserves case definitions, requirement records, mappings and assertion
-metadata, capabilities, client registrations, limitations, denominators, and
-implemented counts. The 37 scenario files keep behaviors with their mappings.
-Requirement indexes include 10 CLI and 40 library category shards. The largest
-hand-maintained file is 490 lines; the unchanged generated interface snapshot is
-12,205 lines. Locked Ruff, ty, and strict mypy pass, as do all 84 unit tests with
-the prepared-fixture check enabled. Formatting and source catalogue checks pass.
-The full-run log is `_build/blackbox-artifacts/readable-json-full-01.log`.
+Before editing, the scenario loaders and `CoverageModel` recorded
+`_build/blackbox-artifacts/surface-layout-baseline.json`. Exact normalized comparison
+preserves all 326 cases, 299 requirements, 320 mappings, gaps, assertion metadata,
+capabilities, eight client registrations, limitations, and coverage counts.
+The 74 scenario files and 72 requirement shards now follow CLI commands and public
+library types. Their largest files are 463 and 474 lines respectively; the unchanged
+generated interface snapshot is 12,205 lines. Locked Ruff, ty, strict mypy, formatting,
+source catalogue checks, and all 89 unit tests pass with the prepared-fixture check.
+Every case outcome matches `readable-json-full-01`, including its 18 failures.
+The verification summary, ownership navigation, and full-run log are
+`_build/blackbox-artifacts/surface-layout-{verification.json,navigation.json,full-02.log}`.
+The initial `surface-layout-full-01` also matched all outcomes; the second run
+refreshes evidence after correcting two ownership placements.
 
 ### Six additional library contracts
 
-The transaction-contracts, library-queries-installed, and library-objects-remotes
-JSON groups in `scenario-data/` map the six existing obligations without
+The `library/transaction/`, `library/transaction-operation.json`,
+`library/installation/queries.json`, and `library/remote/` groups under
+`scenario-data/` map the six existing obligations without
 changing the requirement or interface denominators. Native calls and assertions
 live in `client-transaction-contracts.c` and `six_contract_scenarios.py`. Public
 installed-ref enumeration and independently prepared commits establish deployment

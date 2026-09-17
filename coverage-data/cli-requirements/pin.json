@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.pin.user.prevents-removal",
+      "interface": "cli",
+      "profile": "user",
+      "category": "maintenance",
+      "description": "A user runtime matching a stored pin remains installed when unused runtimes are automatically removed.",
+      "sources": [
+        {
+          "path": "doc/flatpak-pin.xml",
+          "anchor": "A pinned ref will never be automatically uninstalled"
+        }
+      ],
+      "surfaces": [
+        "cli.command.pin"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.pin.user.remove",
+      "interface": "cli",
+      "profile": "user",
+      "category": "maintenance",
+      "description": "Removing a user pin pattern removes it from later pin enumeration.",
+      "sources": [
+        {
+          "path": "doc/flatpak-pin.xml",
+          "anchor": "--remove"
+        },
+        {
+          "path": "doc/flatpak-pin.xml",
+          "anchor": "To list the current set of pins"
+        }
+      ],
+      "surfaces": [
+        "cli.command.pin",
+        "cli.option.pin.--remove"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    }
+  ],
+  "limitations": []
+}

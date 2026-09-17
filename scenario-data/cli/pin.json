@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "management.pin",
+      "scenario": "management-pin",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Pin an automatic dependency across unused cleanup, then remove pin.",
+      "preconditions": "A app/runtime installed.",
+      "expected": "Pin persists, protects runtime, and removing it permits cleanup.",
+      "references": [
+        "doc/flatpak-pin.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "management.pin",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.pin.user.prevents-removal",
+        "cli.pin.user.remove"
+      ],
+      "rationale": "Explicitly pinned automatic runtime survives unused cleanup; unpin clears listing and allows removal."
+    }
+  ]
+}

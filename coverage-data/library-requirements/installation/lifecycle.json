@@ -1,0 +1,189 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "requirements": [
+    {
+      "id": "library.cleanup.local-ref-protection",
+      "interface": "library",
+      "profile": "any",
+      "category": "maintenance",
+      "description": "Removing an undeployed local ref succeeds, while attempting the same API on a deployed ref returns an error and leaves it deployed. Removing an undeployed ref does not itself delete its objects.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_remove_local_ref_sync"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_remove_local_ref_sync"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.cleanup.orphaned-objects",
+      "interface": "library",
+      "profile": "any",
+      "category": "maintenance",
+      "description": "Cleaning local refs removes undeployed refs while retaining deployed refs. Pruning afterward removes their orphaned objects while preserving data still needed by deployed refs.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_cleanup_local_refs_sync"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_prune_local_repo"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_cleanup_local_refs_sync",
+        "library.function.flatpak_installation_prune_local_repo"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.legacy.deferred-triggers",
+      "interface": "library",
+      "profile": "any",
+      "category": "maintenance",
+      "description": "After direct installation, update, or uninstall with NO_TRIGGERS, calling run_triggers updates the files exported by the installed applications as documented.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_run_triggers"
+        },
+        {
+          "path": "common/flatpak-installation.h",
+          "anchor": "FlatpakInstallFlags"
+        },
+        {
+          "path": "common/flatpak-installation.h",
+          "anchor": "FlatpakUpdateFlags"
+        },
+        {
+          "path": "common/flatpak-installation.h",
+          "anchor": "FlatpakUninstallFlags"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_run_triggers"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.legacy.install-update-uninstall",
+      "interface": "library",
+      "profile": "any",
+      "category": "deprecated-api",
+      "description": "Using the deprecated direct install, update, and uninstall entry points on a fixture with dependencies already satisfied installs A, returns B's installed ref after an available update, and removes the requested ref on uninstall.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_install"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_update"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_uninstall"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_install",
+        "library.function.flatpak_installation_update",
+        "library.function.flatpak_installation_uninstall"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.legacy.update-noop-error",
+      "interface": "library",
+      "profile": "any",
+      "category": "deprecated-api",
+      "description": "A direct update_full of an already current ref returns NULL with FLATPAK_ERROR_ALREADY_INSTALLED; updating an absent ref returns NULL with FLATPAK_ERROR_NOT_INSTALLED. Both use the FLATPAK_ERROR domain.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_update_full"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_update_full"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.legacy.install-only-pulled",
+      "interface": "library",
+      "profile": "any",
+      "category": "deprecated-api",
+      "description": "Direct install_full with NO_DEPLOY downloads the ref without deploying it and returns NULL with FLATPAK_ERROR_ONLY_PULLED, despite completing the requested pull. The downloaded ref can subsequently be deployed with NO_PULL.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_install_full"
+        },
+        {
+          "path": "common/flatpak-installation.h",
+          "anchor": "FlatpakInstallFlags"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_install_full"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.legacy.ref-file-configures-only",
+      "interface": "library",
+      "profile": "any",
+      "category": "deprecated-api",
+      "description": "Direct install_ref_file adds a remote and returns the referenced RemoteRef without deploying the application. That returned ref has no commit set until explicitly resolved.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_install_ref_file"
+        },
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_get_commit"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_install_ref_file",
+        "library.function.flatpak_ref_get_commit"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation"
+      ]
+    }
+  ],
+  "limitations": []
+}

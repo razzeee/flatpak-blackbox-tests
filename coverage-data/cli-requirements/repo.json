@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.repo.any.branches",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "repo --branches lists the branches present in the specified local repository.",
+      "sources": [
+        {
+          "path": "doc/flatpak-repo.xml",
+          "anchor": "--branches"
+        }
+      ],
+      "surfaces": [
+        "cli.command.repo",
+        "cli.option.repo.--branches"
+      ],
+      "required_capabilities": [
+        "cli",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.repo.any.metadata",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "repo --metadata prints the metadata for the selected branch of the local repository.",
+      "sources": [
+        {
+          "path": "doc/flatpak-repo.xml",
+          "anchor": "--metadata=BRANCH"
+        }
+      ],
+      "surfaces": [
+        "cli.command.repo",
+        "cli.option.repo.--metadata"
+      ],
+      "required_capabilities": [
+        "cli",
+        "local-repository"
+      ]
+    }
+  ],
+  "limitations": []
+}

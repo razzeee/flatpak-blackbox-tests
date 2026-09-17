@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "sandbox.make-current",
+      "scenario": "sandbox-make-current",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Select runnable app branch and its public desktop export.",
+      "preconditions": "Independent A/B branch commits with distinct desktop names and probe output.",
+      "expected": "Both branch selections change unqualified run output and public exported desktop name.",
+      "references": [
+        "doc/flatpak-make-current.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "sandbox.make-current",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.make-current.user.branch"
+      ],
+      "rationale": "Both selections change actual unqualified launch A/B output and public desktop export name.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.make-current.--arch",
+          "rationale": "Native selections change launch and export; selecting the other branch at a valid unavailable architecture fails and preserves current launch version and exact exported bytes."
+        }
+      ]
+    }
+  ]
+}

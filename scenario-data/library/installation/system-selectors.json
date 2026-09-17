@@ -1,0 +1,204 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "system-selectors.library-identity",
+      "scenario": "system-selectors-library-identity",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "library"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations"
+      ],
+      "description": "Construct default, named and user installation objects and reject an unknown name.",
+      "preconditions": "Actual compiled default location and configured named alt location in private namespace.",
+      "expected": "Exact paths, IDs and user flags; unknown name returns NULL with error.",
+      "references": [
+        "common/flatpak-installation.c"
+      ]
+    },
+    {
+      "id": "system-selectors.library-metadata",
+      "scenario": "system-selectors-library-metadata",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "library"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "multiple-installations"
+      ],
+      "description": "Read explicit named installation metadata.",
+      "preconditions": "Named alt declares display name, priority 25 and network storage.",
+      "expected": "Public getters return exactly the configured values.",
+      "references": [
+        "common/flatpak-installation.c"
+      ]
+    },
+    {
+      "id": "system-selectors.library-enumeration",
+      "scenario": "system-selectors-library-enumeration",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "library"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "multiple-installations",
+        "filesystem-fault-injection"
+      ],
+      "description": "Verify a reachable configured installation, then obstruct its configured path itself with a regular file.",
+      "preconditions": "Default, alt and the control installation are initially reachable inside the disposable namespace.",
+      "expected": "Control constructor succeeds and enumeration initially includes all three system installations. After obstruction, the control constructor fails and enumeration returns exactly default and alt, excluding control and user.",
+      "references": [
+        "common/flatpak-installation.c"
+      ]
+    },
+    {
+      "id": "system-selectors.library-profile-isolation",
+      "scenario": "system-selectors-library-profile-isolation",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "library"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Install and query distinct commits through selected public library objects.",
+      "preconditions": "Direct-root transactions install system A and named/user B.",
+      "expected": "Each installed-ref lookup reports its own commit, including after reopening the default object.",
+      "references": [
+        "common/flatpak-installation.c",
+        "common/flatpak-ref.c"
+      ]
+    },
+    {
+      "id": "system-selectors.library-custom-path",
+      "scenario": "system-selectors-library-custom-path",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "library"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Construct a non-user installation for the populated named path.",
+      "preconditions": "Default A and named B, each with app/runtime deployments.",
+      "expected": "Custom object reports requested path and non-user flag; exact app/runtime set and B commit differ from default A.",
+      "references": [
+        "common/flatpak-installation.c"
+      ]
+    },
+    {
+      "id": "system-selectors.library-query-objects",
+      "scenario": "system-selectors-library-query-objects",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "library"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Query installed metadata and typed membership in a named installation.",
+      "preconditions": "Named app B and runtime; default A and user B remain separate.",
+      "expected": "Exact app/runtime sets and empty kind results after removal; exact application metadata and named deployment location.",
+      "references": [
+        "common/flatpak-installation.c",
+        "common/flatpak-installed-ref.c"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "system-selectors.library-identity",
+      "driver": "library",
+      "profile": "system",
+      "requirements": [
+        "library.installation.system.default",
+        "library.installation.system.named"
+      ],
+      "rationale": "Constructors report exact compiled/configured paths, default/alt IDs and non-user flags; the actual root-user constructor is separately checked."
+    },
+    {
+      "behavior_id": "system-selectors.library-metadata",
+      "driver": "library",
+      "profile": "system",
+      "requirements": [
+        "library.installation.system.metadata"
+      ],
+      "rationale": "Display name, priority 25 and NETWORK enum match the explicit named configuration."
+    },
+    {
+      "behavior_id": "system-selectors.library-enumeration",
+      "driver": "library",
+      "profile": "system",
+      "requirements": [
+        "library.installation.system.enumeration"
+      ],
+      "rationale": "The reachable control constructor and three-member enumeration succeed first. Replacing the configured control path itself with a regular file makes its public constructor fail; enumeration then contains exactly default and alt and excludes the control and user installations."
+    },
+    {
+      "behavior_id": "system-selectors.library-profile-isolation",
+      "driver": "library",
+      "profile": "system",
+      "requirements": [
+        "library.query.system.profile-isolation",
+        "library.transaction.installation-association"
+      ],
+      "rationale": "Library-created system A versus user/named B are queried through their own objects; each transaction returns its supplied installation object."
+    },
+    {
+      "behavior_id": "system-selectors.library-custom-path",
+      "driver": "library",
+      "profile": "system",
+      "requirements": [
+        "library.installation.system.custom-path"
+      ],
+      "rationale": "new_for_path(FALSE) reports alt path/non-user and enumerates exact alt app/runtime; B differs from default A."
+    },
+    {
+      "behavior_id": "system-selectors.library-query-objects",
+      "driver": "library",
+      "profile": "system",
+      "requirements": [
+        "library.list.installed.kind-filter",
+        "library.query.installed.metadata"
+      ],
+      "rationale": "Typed results contain exactly app/runtime and become empty after corresponding removal; complete four-key Application metadata is checked against fixture identity."
+    }
+  ],
+  "notes": [
+    "Every target call enters two disposable bubblewrap user/mount namespace layers. The outer root maps only to the invoking host UID; inner root maps only to outer root. Inherited host mounts are locked read-only, checked by a denied bind-remount before every target call. Private PID/network namespaces and writable installation state are case-local; generated state is removed after each case while command evidence is retained.",
+    "Target environment keys BLACKBOX_SYSTEM_INSTALL_DIR and BLACKBOX_SYSTEM_CONFIG_DIR specify the expected compiled defaults; their reference-build defaults are /var/local/lib/flatpak and /usr/local/etc/flatpak. The namespace mounts private data at those paths, and CLI/C-client assertions still check the target's actual default location. These keys never become FLATPAK_SYSTEM_DIR or FLATPAK_CONFIG_DIR redirects. Set them under the target JSON environment object, not the host shell environment.",
+    "Readonly exposure includes only the suite directory, selected target executables, configured helpers and LD_LIBRARY_PATH directories. Uninstalled targets can explicitly add colon-separated absolute paths with BLACKBOX_TARGET_READONLY_PATHS in the target environment. No repository ancestor is inferred. Paths that cover private namespace roots or overlap protected installation/service content are rejected, including symlink aliases.",
+    "CLI deployment location checks use the public returned location, verify containment in the selected public installation base, locate the controlled bin/blackbox-probe payload there and execute it to distinguish A from B. They never construct a deployment path from a ref or commit, and never recursively search a general installation root for content.",
+    "Direct-root mutations may satisfy explicitly selected installation outcomes. These cases do not assert polkit authorization, non-root helper behavior, or multiple-user access. No requirement demanding those outcomes is mapped.",
+    "The named override case intentionally asserts the documented isolation contract; the reference target currently fails it, so that option receives no verified credit from that case."
+  ],
+  "client": {
+    "source": "client-system.c",
+    "entry": "blackbox_system_main"
+  }
+}

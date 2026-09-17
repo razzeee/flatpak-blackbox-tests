@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "management.mask",
+      "scenario": "management-mask",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Mask an installed ref then remove its mask.",
+      "preconditions": "A installed and B advertised.",
+      "expected": "Stored mask blocks B; removal clears enumeration and permits B.",
+      "references": [
+        "doc/flatpak-mask.xml"
+      ]
+    },
+    {
+      "id": "system-selectors.patterns",
+      "scenario": "system-selectors-patterns",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations"
+      ],
+      "description": "Add, query and remove installation-specific mask and pin patterns.",
+      "preconditions": "Fresh default, named and user stores.",
+      "expected": "Each exact pattern appears and disappears only in the selected installation. This case does not assert dependency retention or update blocking.",
+      "references": [
+        "doc/flatpak-mask.xml",
+        "doc/flatpak-pin.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "management.mask",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.mask.user.blocks-update",
+        "cli.mask.user.remove"
+      ],
+      "rationale": "Persisted mask holds A; removal clears mask listing and permits B."
+    },
+    {
+      "behavior_id": "system-selectors.patterns",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [],
+      "rationale": "Exact mask/pin lists change only in the selected installation after each add/remove.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.mask.--system",
+          "rationale": "Default mask add/remove affects only default pattern list."
+        },
+        {
+          "id": "cli.option.mask.--installation",
+          "rationale": "Named mask add/remove affects only named pattern list."
+        },
+        {
+          "id": "cli.option.mask.--user",
+          "rationale": "User mask add/remove affects only user pattern list."
+        },
+        {
+          "id": "cli.option.mask.--remove",
+          "rationale": "Exact previously stored mask disappears only from selected store."
+        },
+        {
+          "id": "cli.option.pin.--system",
+          "rationale": "Default pin add/remove affects only default pattern list."
+        },
+        {
+          "id": "cli.option.pin.--installation",
+          "rationale": "Named pin add/remove affects only named pattern list."
+        },
+        {
+          "id": "cli.option.pin.--user",
+          "rationale": "User pin add/remove affects only user pattern list."
+        },
+        {
+          "id": "cli.option.pin.--remove",
+          "rationale": "Exact previously stored pin disappears only from selected store."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Every target call enters two disposable bubblewrap user/mount namespace layers. The outer root maps only to the invoking host UID; inner root maps only to outer root. Inherited host mounts are locked read-only, checked by a denied bind-remount before every target call. Private PID/network namespaces and writable installation state are case-local; generated state is removed after each case while command evidence is retained.",
+    "Target environment keys BLACKBOX_SYSTEM_INSTALL_DIR and BLACKBOX_SYSTEM_CONFIG_DIR specify the expected compiled defaults; their reference-build defaults are /var/local/lib/flatpak and /usr/local/etc/flatpak. The namespace mounts private data at those paths, and CLI/C-client assertions still check the target's actual default location. These keys never become FLATPAK_SYSTEM_DIR or FLATPAK_CONFIG_DIR redirects. Set them under the target JSON environment object, not the host shell environment.",
+    "Readonly exposure includes only the suite directory, selected target executables, configured helpers and LD_LIBRARY_PATH directories. Uninstalled targets can explicitly add colon-separated absolute paths with BLACKBOX_TARGET_READONLY_PATHS in the target environment. No repository ancestor is inferred. Paths that cover private namespace roots or overlap protected installation/service content are rejected, including symlink aliases.",
+    "CLI deployment location checks use the public returned location, verify containment in the selected public installation base, locate the controlled bin/blackbox-probe payload there and execute it to distinguish A from B. They never construct a deployment path from a ref or commit, and never recursively search a general installation root for content.",
+    "Direct-root mutations may satisfy explicitly selected installation outcomes. These cases do not assert polkit authorization, non-root helper behavior, or multiple-user access. No requirement demanding those outcomes is mapped.",
+    "The named override case intentionally asserts the documented isolation contract; the reference target currently fails it, so that option receives no verified credit from that case."
+  ]
+}

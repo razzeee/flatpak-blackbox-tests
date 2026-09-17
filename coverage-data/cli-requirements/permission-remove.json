@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.permission-remove.any.app",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "Removing permissions with an APP_ID removes only that application's entry for the selected table/object, retaining another application's entry.",
+      "sources": [
+        {
+          "path": "doc/flatpak-permission-remove.xml",
+          "anchor": "If APP_ID is specified"
+        }
+      ],
+      "surfaces": [
+        "cli.command.permission-remove"
+      ],
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.permission-remove.any.object",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "Removing a permission-store table/object entry without APP_ID removes the entire selected object entry.",
+      "sources": [
+        {
+          "path": "doc/flatpak-permission-remove.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.permission-remove"
+      ],
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ]
+    }
+  ],
+  "limitations": []
+}

@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "objects.timestamp",
+      "scenario": "objects-timestamp",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "filesystem-fault-injection"
+      ],
+      "description": "Observe Unix-second remote configuration timestamps.",
+      "preconditions": "Remote addition and title edit separated by two seconds; the public installation directory is then temporarily moved away.",
+      "expected": "Available timestamps are bounded by wall-clock seconds and the edit advances the timestamp; unavailable location yields G_MAXUINT64.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_get_timestamp"
+      ]
+    },
+    {
+      "id": "lifex.monitor",
+      "scenario": "lifex-monitor",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe installation monitor notifications for direct lifecycle changes.",
+      "preconditions": "New public monitor connected before each install, update and uninstall; runtime satisfied and remote selected before monitoring.",
+      "expected": "Each operation produces a changed notification while main context is serviced and the expected deployment outcome.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_create_monitor"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "objects.timestamp",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.monitor.timestamp"
+      ],
+      "rationale": "Available timestamps must lie in Unix-second wall-clock bounds and advance after a remote change beyond timestamp resolution; temporarily moving the entire public installation directory away must yield G_MAXUINT64."
+    },
+    {
+      "behavior_id": "lifex.monitor",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.monitor.installation-changes"
+      ],
+      "rationale": "Independent monitor registration immediately before each direct lifecycle operation, with context-driven event delivery and exact deployment checks."
+    }
+  ]
+}

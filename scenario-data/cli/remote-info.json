@@ -1,0 +1,222 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "management.remote-info-arch",
+      "scenario": "management-remote-info-arch",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Query foreign remote copy instead of native alternative.",
+      "preconditions": "queries fixture contains both architectures.",
+      "expected": "Exact foreign full ref and reference commit.",
+      "references": [
+        "doc/flatpak-remote-info.xml"
+      ]
+    },
+    {
+      "id": "management.remote-info-kinds",
+      "scenario": "management-remote-info-kinds",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Reject opposite-kind candidates in remote queries by ID.",
+      "preconditions": "Available app/runtime refs.",
+      "expected": "App-only rejects runtime ID; runtime-only rejects app ID.",
+      "references": [
+        "doc/flatpak-remote-info.xml"
+      ]
+    },
+    {
+      "id": "management.remote-info",
+      "scenario": "management-remote-info",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Query remote commit while older local app is installed.",
+      "preconditions": "A installed and B advertised.",
+      "expected": "Remote ref/commit is exactly B; local deployment stays A.",
+      "references": [
+        "doc/flatpak-remote-info.xml"
+      ]
+    },
+    {
+      "id": "management.remote-log",
+      "scenario": "management-remote-log",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Query remote commit history.",
+      "preconditions": "B repository retains A ancestry.",
+      "expected": "Both exact A and B commits appear.",
+      "references": [
+        "doc/flatpak-remote-info.xml"
+      ]
+    },
+    {
+      "id": "system-selectors.remote-queries",
+      "scenario": "system-selectors-remote-queries",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Query different remote commits and independently filtered remote ref sets.",
+      "preconditions": "Same remote name points to A or B in each installation; independent allow/deny filters.",
+      "expected": "remote-info selects the correct commit and remote-ls the exact selected ref set, without deployments.",
+      "references": [
+        "doc/flatpak-remote-info.xml",
+        "doc/flatpak-remote-ls.xml",
+        "doc/flatpak-remote-modify.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "management.remote-info-arch",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Native competitor distinguishes architecture selection.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-info.--arch",
+          "rationale": "Architecture-free name resolves to exact foreign ref and commit instead of native."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.remote-info-kinds",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Opposite-kind available candidates must not be queried.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-info.--app",
+          "rationale": "App-only remote query rejects an available runtime ID."
+        },
+        {
+          "id": "cli.option.remote-info.--runtime",
+          "rationale": "Runtime-only remote query rejects an available app ID."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.remote-info",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.remote-info.user.ref-commit"
+      ],
+      "rationale": "Exact remote full ref and B commit differ from verified local A.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-info.--commit",
+          "rationale": "Explicit A commit query returns A while default remote query returns B."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.remote-log",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.remote-info.user.history"
+      ],
+      "rationale": "History contains exact old A and current B commits."
+    },
+    {
+      "behavior_id": "system-selectors.remote-queries",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [],
+      "rationale": "Selected remote commits and distinct filtered ref sets are checked without installing anything.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-info.--system",
+          "rationale": "Default origin reports exact A commit while named origin reports B."
+        },
+        {
+          "id": "cli.option.remote-info.--installation",
+          "rationale": "Named origin reports exact B commit while default/user report A."
+        },
+        {
+          "id": "cli.option.remote-info.--user",
+          "rationale": "After changing only the user origin to B, user lookup returns B while default lookup still returns A."
+        },
+        {
+          "id": "cli.option.remote-info.--show-ref",
+          "rationale": "Machine-readable identity equals the requested full app ref."
+        },
+        {
+          "id": "cli.option.remote-info.--show-commit",
+          "rationale": "Machine-readable commit equals selected repository A or B."
+        },
+        {
+          "id": "cli.option.remote-ls.--system",
+          "rationale": "Default listing contains app and runtime, unlike independently filtered alt/user lists."
+        },
+        {
+          "id": "cli.option.remote-ls.--installation",
+          "rationale": "Named listing contains runtime only, then both refs after clearing its filter."
+        },
+        {
+          "id": "cli.option.remote-ls.--user",
+          "rationale": "User listing contains app only, including after named filter is cleared."
+        },
+        {
+          "id": "cli.option.remote-ls.--columns",
+          "rationale": "Ref-only output matches exact full-ref sets."
+        },
+        {
+          "id": "cli.option.remote-modify.--filter",
+          "rationale": "Separate explicit allow/deny files yield runtime-only and app-only selected views."
+        },
+        {
+          "id": "cli.option.remote-modify.--no-filter",
+          "rationale": "Clearing named filter restores both refs while user remains filtered."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Every target call enters two disposable bubblewrap user/mount namespace layers. The outer root maps only to the invoking host UID; inner root maps only to outer root. Inherited host mounts are locked read-only, checked by a denied bind-remount before every target call. Private PID/network namespaces and writable installation state are case-local; generated state is removed after each case while command evidence is retained.",
+    "Target environment keys BLACKBOX_SYSTEM_INSTALL_DIR and BLACKBOX_SYSTEM_CONFIG_DIR specify the expected compiled defaults; their reference-build defaults are /var/local/lib/flatpak and /usr/local/etc/flatpak. The namespace mounts private data at those paths, and CLI/C-client assertions still check the target's actual default location. These keys never become FLATPAK_SYSTEM_DIR or FLATPAK_CONFIG_DIR redirects. Set them under the target JSON environment object, not the host shell environment.",
+    "Readonly exposure includes only the suite directory, selected target executables, configured helpers and LD_LIBRARY_PATH directories. Uninstalled targets can explicitly add colon-separated absolute paths with BLACKBOX_TARGET_READONLY_PATHS in the target environment. No repository ancestor is inferred. Paths that cover private namespace roots or overlap protected installation/service content are rejected, including symlink aliases.",
+    "CLI deployment location checks use the public returned location, verify containment in the selected public installation base, locate the controlled bin/blackbox-probe payload there and execute it to distinguish A from B. They never construct a deployment path from a ref or commit, and never recursively search a general installation root for content.",
+    "Direct-root mutations may satisfy explicitly selected installation outcomes. These cases do not assert polkit authorization, non-root helper behavior, or multiple-user access. No requirement demanding those outcomes is mapped.",
+    "The named override case intentionally asserts the documented isolation contract; the reference target currently fails it, so that option receives no verified credit from that case."
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "permissions.remove-app",
+      "scenario": "permissions-remove-app",
+      "handler": "permission_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ],
+      "description": "Remove one application's grant from one object.",
+      "preconditions": "Two apps across three objects in two tables.",
+      "expected": "Lookup shows only the other app on the selected object; other objects and all data survive.",
+      "references": [
+        "doc/flatpak-permission-remove.xml"
+      ]
+    },
+    {
+      "id": "permissions.remove-object",
+      "scenario": "permissions-remove-object",
+      "handler": "permission_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ],
+      "description": "Remove an entire permission object.",
+      "preconditions": "Two apps across three objects in two tables.",
+      "expected": "Public List no longer contains the object; both unrelated objects retain their exact grants and data.",
+      "references": [
+        "doc/flatpak-permission-remove.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "permissions.remove-app",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.permission-remove.any.app"
+      ],
+      "rationale": "Independent Lookup proves only the selected grant disappears, retaining another app plus unrelated objects and data."
+    },
+    {
+      "behavior_id": "permissions.remove-object",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.permission-remove.any.object"
+      ],
+      "rationale": "Public List proves the entire selected object disappears and Lookup proves unrelated objects survive."
+    }
+  ],
+  "notes": [
+    "Uses a real xdg-permission-store on the case bus with isolated XDG_DATA_HOME; gdbus provides independent public fixture setup and mutation observations. No FUSE or document portal is needed.",
+    "All service output and termination status are retained, including failed cases. Fixed catalogues and denominators are unchanged."
+  ]
+}

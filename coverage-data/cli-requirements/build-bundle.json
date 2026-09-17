@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.build-bundle.any.app",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "build-bundle creates the requested single-file bundle carrying the selected application branch from the local repository, suitable for bundle installation or import.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-bundle.xml",
+          "anchor": "Description"
+        },
+        {
+          "path": "doc/flatpak-build-import-bundle.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-bundle"
+      ],
+      "required_capabilities": [
+        "cli",
+        "build-tools",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.build-bundle.any.update-origin",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "A bundle created with --repo-url configures a remote for that URL when installed, providing the application's update source.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-bundle.xml",
+          "anchor": "--repo-url=URL"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-bundle",
+        "cli.option.build-bundle.--repo-url"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "build-tools",
+        "local-repository"
+      ]
+    }
+  ],
+  "limitations": []
+}

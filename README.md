@@ -94,11 +94,14 @@ Use `python3 format_json.py --write` to format static JSON. Set
 `BLACKBOX_TEST_FIXTURE` to a prepared `fixture.json` to include its optional
 round-trip unit test.
 
-Cases and their coverage mappings live together in topic files under
-[`scenario-data/`](scenario-data/). Requirement indexes and category files live
-under [`coverage-data/`](coverage-data/). Add assertions against public behavior
-and map them to existing requirements; keep coverage denominators independent of
-the number of implemented cases.
+[`scenario-data/`](scenario-data/) groups cases with all their mappings by primary
+CLI command (`cli/`) or public libflatpak type (`library/`), with subgroups for
+larger owners. Requirement indexes under [`coverage-data/`](coverage-data/) mirror
+those owners; category metadata keeps its semantic meaning. Cross-command/type
+cases have one home. Shared baseline registrations remain in `inventory.json` and
+`coverage-data/mapping.json`; follow their requirement IDs to the owning command
+or type. Add public assertions and map existing requirements without changing
+coverage denominators. Nested JSON participates in discovery and report hashes.
 
 To check the generated interface catalogue against a separate Flatpak checkout:
 
