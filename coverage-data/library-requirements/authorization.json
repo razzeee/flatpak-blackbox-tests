@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "limitations": [],
+  "requirements": [
+    {
+      "id": "library.authorization.system.no-interaction",
+      "interface": "library",
+      "profile": "system",
+      "category": "authorization",
+      "description": "Setting installation no_interaction TRUE is reflected by its getter and prevents interactive authorization dialogs during a system operation that would otherwise request authorization. Lack of authorization still produces failure rather than success.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_set_no_interaction"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_no_interaction"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_set_no_interaction",
+        "library.function.flatpak_installation_get_no_interaction"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "system-installation",
+        "system-authorization"
+      ]
+    },
+    {
+      "id": "library.auth.interaction-inheritance",
+      "interface": "library",
+      "profile": "any",
+      "category": "authorization",
+      "description": "A new transaction inherits its installation's no-interaction setting. The transaction getter reflects an explicit override, and enabling no-interaction suppresses interactive authorization dialogs for its operations.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_set_no_interaction"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_get_no_interaction"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_set_no_interaction",
+        "library.function.flatpak_transaction_get_no_interaction"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "system-installation",
+        "system-authorization"
+      ]
+    }
+  ]
+}

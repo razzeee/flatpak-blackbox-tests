@@ -1,0 +1,228 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "management.install-arch",
+      "scenario": "management-install-arch",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Install foreign architecture using an ambiguous architecture-free name.",
+      "preconditions": "queries fixtures with native and foreign copies.",
+      "expected": "Only the exact foreign commit is deployed.",
+      "references": [
+        "doc/flatpak-install.xml"
+      ]
+    },
+    {
+      "id": "management.install-kinds",
+      "scenario": "management-install-kinds",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Reject opposite-kind candidates when installing by ID.",
+      "preconditions": "Available app/runtime refs and empty installation.",
+      "expected": "App-only rejects runtime ID; runtime-only rejects app ID; no deployment.",
+      "references": [
+        "doc/flatpak-install.xml"
+      ]
+    },
+    {
+      "id": "management.flatpakref",
+      "scenario": "management-flatpakref",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Install an application description.",
+      "preconditions": "Fresh state and A repository.",
+      "expected": "Described app and dependency commits installed.",
+      "references": [
+        "doc/flatpak-install.xml"
+      ]
+    },
+    {
+      "id": "management.install-local",
+      "scenario": "management-install-local",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Download A without deployment, then deploy locally with B advertised.",
+      "preconditions": "Fresh state and A/B repositories.",
+      "expected": "No refs installed after download; local deployment selects A.",
+      "references": [
+        "doc/flatpak-install.xml"
+      ]
+    },
+    {
+      "id": "management.install-no-deps",
+      "scenario": "management-install-no-deps",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Install app while suppressing dependency installation.",
+      "preconditions": "Fresh state and A repository.",
+      "expected": "Only application A is deployed.",
+      "references": [
+        "doc/flatpak-install.xml"
+      ]
+    },
+    {
+      "id": "management.or-update",
+      "scenario": "management-or-update",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Install again with or-update.",
+      "preconditions": "A installed, B advertised.",
+      "expected": "Installed app changes to B.",
+      "references": [
+        "doc/flatpak-install.xml"
+      ]
+    },
+    {
+      "id": "management.reinstall",
+      "scenario": "management-reinstall",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Reinstall existing app with newer tip available.",
+      "preconditions": "A installed, B advertised.",
+      "expected": "Reinstall replaces A with B.",
+      "references": [
+        "doc/flatpak-install.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "management.install-arch",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Competing architecture refs make ignoring selector observable.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.install.--arch",
+          "rationale": "Foreign-only installed ref set differs from available native default."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.install-kinds",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Opposite-kind available candidates must not be installed.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.install.--app",
+          "rationale": "App-only installation rejects an available runtime ID without deployment."
+        },
+        {
+          "id": "cli.option.install.--runtime",
+          "rationale": "Runtime-only installation rejects an available app ID without deployment."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.flatpakref",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.install.user.flatpakref"
+      ],
+      "rationale": "Description-driven installation deploys exact A app and runtime commits."
+    },
+    {
+      "behavior_id": "management.install-local",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.install.user.download-only",
+        "cli.install.user.local-deploy"
+      ],
+      "rationale": "Download leaves queries empty; no-pull installs A despite remote B."
+    },
+    {
+      "behavior_id": "management.install-no-deps",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.install.user.app"
+      ],
+      "rationale": "Application A installed and queryable with dependency suppression.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.install.--no-deps",
+          "rationale": "Exact deployed ref set contains app and excludes its available required runtime."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.or-update",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.install.user.or-update"
+      ],
+      "rationale": "Repeat install changes exact installed commit A to B."
+    },
+    {
+      "behavior_id": "management.reinstall",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.install.user.app"
+      ],
+      "rationale": "Reinstalled application has expected available B commit.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.install.--reinstall",
+          "rationale": "Existing A deployment is replaced by B instead of ignored as already installed."
+        }
+      ]
+    }
+  ]
+}

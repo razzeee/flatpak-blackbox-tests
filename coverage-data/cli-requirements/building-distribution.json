@@ -1,0 +1,431 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "limitations": [],
+  "requirements": [
+    {
+      "id": "cli.build-init.any.layout",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "build-init creates a build directory with metadata identifying the requested app, SDK and runtime, and empty files and var subdirectories.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-init.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-init"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "build-tools"
+      ]
+    },
+    {
+      "id": "cli.build-init.any.already-initialized",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "build-init without --update reports an error for a directory already initialized as a build directory.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-init.xml",
+          "anchor": "It is an error to run build-init on a directory that has already been initialized"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-init"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "build-tools"
+      ]
+    },
+    {
+      "id": "cli.build.any.artifacts",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "A build command uses the declared SDK at /usr and can write artifacts through /app and /var that persist in the build directory across commands.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "build-tools",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.build.any.readonly",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "build --readonly prevents the command from changing the normally writable build destination directories.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build.xml",
+          "anchor": "--readonly"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build",
+        "cli.option.build.--readonly"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "build-tools",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.build-finish.any.exports",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "Finalizing an initialized build copies eligible desktop files, icons, D-Bus service files and AppStream metainfo from files into the export subdirectory.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-finish.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-finish"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "build-tools",
+        "appstream"
+      ]
+    },
+    {
+      "id": "cli.build-finish.any.command",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "build-finish --command records the supplied default launch command in the metadata Application group.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-finish.xml",
+          "anchor": "Description"
+        },
+        {
+          "path": "doc/flatpak-build-finish.xml",
+          "anchor": "--command=COMMAND"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-finish",
+        "cli.option.build-finish.--command"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "build-tools"
+      ]
+    },
+    {
+      "id": "cli.build-finish.any.invalid-state",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "build-finish reports an error when the directory has not been initialized or has already been finalized.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-finish.xml",
+          "anchor": "It is an error to run build-finish"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-finish"
+      ],
+      "required_capabilities": [
+        "cli",
+        "build-tools"
+      ]
+    },
+    {
+      "id": "cli.build-export.any.contents",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "Exporting a finalized app creates the app/APPNAME/ARCH/BRANCH repository commit containing files, export and metadata while excluding other build-directory contents.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-export.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-export"
+      ],
+      "required_capabilities": [
+        "cli",
+        "build-tools",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.build-export.any.runtime",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "build-export --runtime exports a runtime using the build directory's usr subtree as its files.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-export.xml",
+          "anchor": "--runtime"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-export",
+        "cli.option.build-export.--runtime"
+      ],
+      "required_capabilities": [
+        "cli",
+        "build-tools",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.build-bundle.any.app",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "build-bundle creates the requested single-file bundle carrying the selected application branch from the local repository, suitable for bundle installation or import.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-bundle.xml",
+          "anchor": "Description"
+        },
+        {
+          "path": "doc/flatpak-build-import-bundle.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-bundle"
+      ],
+      "required_capabilities": [
+        "cli",
+        "build-tools",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.build-bundle.any.update-origin",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "A bundle created with --repo-url configures a remote for that URL when installed, providing the application's update source.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-bundle.xml",
+          "anchor": "--repo-url=URL"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-bundle",
+        "cli.option.build-bundle.--repo-url"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "build-tools",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.build-import-bundle.any.import",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "Importing a valid build-bundle output makes its ref and contents available in the destination repository.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-import-bundle.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-import-bundle"
+      ],
+      "required_capabilities": [
+        "cli",
+        "build-tools",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.build-sign.any.signature",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "build-sign adds a signature from the requested GPG key to the selected local application or runtime commit, verifiable with that key's public material.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-sign.xml",
+          "anchor": "Description"
+        },
+        {
+          "path": "doc/flatpak-build-sign.xml",
+          "anchor": "--gpg-sign=KEYID"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-sign",
+        "cli.option.build-sign.--gpg-sign"
+      ],
+      "required_capabilities": [
+        "cli",
+        "build-tools",
+        "local-repository",
+        "repository-signing"
+      ]
+    },
+    {
+      "id": "cli.build-update-repo.any.summary",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "Updating repository metadata generates a summary that makes the repository's current refs discoverable through remote-ls.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-update-repo.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-update-repo"
+      ],
+      "required_capabilities": [
+        "cli",
+        "build-tools",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.build-update-repo.any.prune",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "build-update-repo --prune removes unreferenced repository objects.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-update-repo.xml",
+          "anchor": "--prune"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-update-repo",
+        "cli.option.build-update-repo.--prune"
+      ],
+      "required_capabilities": [
+        "cli",
+        "build-tools",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.build-commit-from.any.contents",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "build-commit-from creates a destination-branch commit with the selected source branch's contents without importing the source's parent history or signatures.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-commit-from.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-commit-from"
+      ],
+      "required_capabilities": [
+        "cli",
+        "build-tools",
+        "local-repository",
+        "repository-signing"
+      ]
+    },
+    {
+      "id": "cli.repo.any.branches",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "repo --branches lists the branches present in the specified local repository.",
+      "sources": [
+        {
+          "path": "doc/flatpak-repo.xml",
+          "anchor": "--branches"
+        }
+      ],
+      "surfaces": [
+        "cli.command.repo",
+        "cli.option.repo.--branches"
+      ],
+      "required_capabilities": [
+        "cli",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.repo.any.metadata",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "repo --metadata prints the metadata for the selected branch of the local repository.",
+      "sources": [
+        {
+          "path": "doc/flatpak-repo.xml",
+          "anchor": "--metadata=BRANCH"
+        }
+      ],
+      "surfaces": [
+        "cli.command.repo",
+        "cli.option.repo.--metadata"
+      ],
+      "required_capabilities": [
+        "cli",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.create-usb.user.offline",
+      "interface": "cli",
+      "profile": "user",
+      "category": "building-distribution",
+      "description": "create-usb copies selected user refs with dependencies and metadata so a destination with the matching collection-ID remotes configured can install those refs offline from the copied repository.",
+      "sources": [
+        {
+          "path": "doc/flatpak-create-usb.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.create-usb"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "sideload-repository",
+        "multiple-installations"
+      ]
+    }
+  ]
+}

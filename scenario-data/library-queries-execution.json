@@ -1,0 +1,262 @@
+{
+  "schema": 1,
+  "client": {
+    "source": "client-queries.c",
+    "entry": "blackbox_queries_main"
+  },
+  "behaviors": [
+    {
+      "id": "queryx.instance-processes",
+      "scenario": "queryx-instance-processes",
+      "handler": "library_query_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus",
+        "concurrent-processes"
+      ],
+      "description": "Identify the controlled sandbox's application process and supervising parent.",
+      "preconditions": "DO_NOT_REAP launches held alive until explicit release; public procfs exposes process executable and ancestry.",
+      "expected": "Child PID becomes positive and executable bytes match the deployed probe; process ancestry reaches outer PID; child watch confirms successful exit.",
+      "references": [
+        "common/flatpak-instance.c: flatpak_instance_get_pid, flatpak_instance_get_child_pid"
+      ]
+    },
+    {
+      "id": "queryx.launch",
+      "scenario": "queryx-launch",
+      "handler": "library_query_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus",
+        "concurrent-processes"
+      ],
+      "description": "Launch selected installed builds through libflatpak and enumerate live instances.",
+      "preconditions": "Two controlled probe apps copy their internal flatpak-info and remain alive until the client releases them.",
+      "expected": "Direct launch succeeds twice; both report version A; distinct enumerated IDs, full app/runtime identities and snapshot-matching info while alive.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_launch",
+        "common/flatpak-instance.c: public enumeration and identity getters"
+      ]
+    },
+    {
+      "id": "queryx.launch-full",
+      "scenario": "queryx-launch-full",
+      "handler": "library_query_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus",
+        "concurrent-processes"
+      ],
+      "description": "Track launched instances with caller-owned child watches.",
+      "preconditions": "Two DO_NOT_REAP launches return instances; probes hold lifetime until explicit release.",
+      "expected": "Returned instances have exact live identities and info; watches observe successful exit; retained instances then report not running.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_launch_full",
+        "common/flatpak-instance.c: flatpak_instance_is_running"
+      ]
+    },
+    {
+      "id": "queryx.ref-file",
+      "scenario": "queryx-ref-file",
+      "handler": "library_query_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Configure a ref-file remote without deploying its app.",
+      "preconditions": "Initially empty installation and valid literal flatpakref pointing at controlled repository.",
+      "expected": "Returned ref has exact identity and NULL commit; its remote exists at expected URL; installed list remains empty.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_install_ref_file"
+      ]
+    },
+    {
+      "id": "queryx.bundle",
+      "scenario": "queryx-bundle",
+      "handler": "library_query_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "bundle-files",
+        "appstream"
+      ],
+      "description": "Read real bundle payloads and retain owned results.",
+      "preconditions": "Reference-exported bundles with and without URLs, distinct 64/128 PNGs, compressed XML and metadata.",
+      "expected": "Identity, commit, file, metadata, XML, size, icons and URLs match; owned file, bytes and origin survive bundle destruction.",
+      "references": [
+        "common/flatpak-bundle-ref.c: public constructors and getters"
+      ]
+    },
+    {
+      "id": "queryx.legacy-lifecycle",
+      "scenario": "queryx-legacy-lifecycle",
+      "handler": "library_query_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Install, update and uninstall through deprecated direct APIs.",
+      "preconditions": "Runtime satisfied; independent repositories A then B.",
+      "expected": "Direct install returns deployed A, direct update returns deployed B, direct uninstall leaves NOT_INSTALLED.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_install, flatpak_installation_update, flatpak_installation_uninstall"
+      ]
+    },
+    {
+      "id": "queryx.legacy-noop",
+      "scenario": "queryx-legacy-noop",
+      "handler": "library_query_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Distinguish direct no-op and absent updates.",
+      "preconditions": "Current app and a separate absent advertised app.",
+      "expected": "update_full returns NULL with Flatpak ALREADY_INSTALLED or NOT_INSTALLED respectively.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_update_full"
+      ]
+    },
+    {
+      "id": "queryx.legacy-pull",
+      "scenario": "queryx-legacy-pull",
+      "handler": "library_query_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Pull without deployment, then deploy the pulled ref.",
+      "preconditions": "Runtime satisfied and app initially absent.",
+      "expected": "NO_DEPLOY returns ONLY_PULLED and leaves app absent; NO_PULL returns fixture commit and deploys it.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_install_full"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "queryx.launch",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.launch.application",
+        "library.instance.session-enumeration",
+        "library.instance.app-runtime-identity",
+        "library.instance.info"
+      ],
+      "rationale": "Direct library launches synchronize on two real sandbox probes; independently expected commits and identities, distinct enumeration IDs and every sandbox snapshot key are asserted."
+    },
+    {
+      "behavior_id": "queryx.launch-full",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.launch.instance-child-watch",
+        "library.instance.liveness"
+      ],
+      "rationale": "DO_NOT_REAP returns exact fixture instances; explicit probe release, successful child watches and post-exit FALSE liveness checked on retained instances."
+    },
+    {
+      "behavior_id": "queryx.instance-processes",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.instance.processes"
+      ],
+      "rationale": "Synchronized child PID must identify the deployed probe executable; its ancestry must reach the outer PID; caller child watch confirms exit."
+    },
+    {
+      "behavior_id": "queryx.ref-file",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.legacy.ref-file-configures-only"
+      ],
+      "rationale": "Direct ref-file API returns NULL-commit ref, configures a lookup-visible expected remote URL and leaves installation empty."
+    },
+    {
+      "behavior_id": "queryx.bundle",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.bundle.identity-file",
+        "library.bundle.payload-metadata",
+        "library.bundle.icons",
+        "library.bundle.origin-runtime-repository",
+        "library.ownership.bundle-results"
+      ],
+      "rationale": "Actual bundles assert all payload fields against independent inputs, both optional URL cases and retained transfer-full results after destruction."
+    },
+    {
+      "behavior_id": "queryx.legacy-lifecycle",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.legacy.install-update-uninstall"
+      ],
+      "rationale": "All three deprecated functions execute; returned and queried commits match A/B and final lookup yields NOT_INSTALLED."
+    },
+    {
+      "behavior_id": "queryx.legacy-noop",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.legacy.update-noop-error"
+      ],
+      "rationale": "update_full NULL and exact public domain/code asserted for current and absent fixtures."
+    },
+    {
+      "behavior_id": "queryx.legacy-pull",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.legacy.install-only-pulled"
+      ],
+      "rationale": "NO_DEPLOY exact ONLY_PULLED plus absent deployment, then NO_PULL exact deployed commit."
+    }
+  ]
+}

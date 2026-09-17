@@ -14,8 +14,8 @@ from catalogue_schema import (
     Requirement,
     executable_behavior,
     indexed,
+    load_requirements,
     parse_catalogue,
-    parse_requirements,
 )
 from json_validation import json_value, load_json
 from report_schema import (
@@ -172,7 +172,7 @@ class CoverageModel:
         requirements: list[Requirement] = []
         for interface in ("cli", "library"):
             path = self.suite / f"coverage-data/{interface}-requirements.json"
-            document = parse_requirements(load_json(path), str(path))
+            document = load_requirements(path)
             if document["scope"] != interface:
                 raise ValueError("requirement file has incorrect interface scope")
             self.limitations.extend(document["limitations"])
@@ -244,7 +244,7 @@ class CoverageModel:
 
     def snapshot(self) -> Definition:
         paths = [self.suite / "inventory.json"]
-        paths += sorted((self.suite / "coverage-data").glob("*.json"))
+        paths += sorted((self.suite / "coverage-data").rglob("*.json"))
         paths += sorted((self.suite / "scenario-data").glob("*.json"))
         paths += sorted(
             path for pattern in ("*.py", "*.c", "*.h") for path in self.suite.glob(pattern)

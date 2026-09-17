@@ -1,0 +1,260 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "limitations": [],
+  "requirements": [
+    {
+      "id": "library.remote.user.title-persistence",
+      "interface": "library",
+      "profile": "user",
+      "category": "remote-properties",
+      "description": "Setting a remote title and committing it persists the supplied title across reopening the installation. Setting title NULL and committing removes the title in a fixture without a fallback title.",
+      "sources": [
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_set_title"
+        },
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_get_title"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_modify_remote"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_remote_set_title",
+        "library.function.flatpak_remote_get_title",
+        "library.function.flatpak_installation_modify_remote"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "library.remote.user.description-persistence",
+      "interface": "library",
+      "profile": "user",
+      "category": "remote-properties",
+      "description": "Explicit comment, description, and homepage edits committed to a user remote are returned unchanged by the corresponding getters after reopening the installation.",
+      "sources": [
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_set_comment"
+        },
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_set_description"
+        },
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_set_homepage"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_modify_remote"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_remote_set_comment",
+        "library.function.flatpak_remote_get_comment",
+        "library.function.flatpak_remote_set_description",
+        "library.function.flatpak_remote_get_description",
+        "library.function.flatpak_remote_set_homepage",
+        "library.function.flatpak_remote_get_homepage",
+        "library.function.flatpak_installation_modify_remote"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "library.remote.user.policy-persistence",
+      "interface": "library",
+      "profile": "user",
+      "category": "remote-properties",
+      "description": "Committing explicit disabled, noenumerate, and nodeps values persists each flag independently, including toggling each back to FALSE, as verified by getters after reopening the installation.",
+      "sources": [
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_set_disabled"
+        },
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_set_noenumerate"
+        },
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_set_nodeps"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_modify_remote"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_remote_set_disabled",
+        "library.function.flatpak_remote_get_disabled",
+        "library.function.flatpak_remote_set_noenumerate",
+        "library.function.flatpak_remote_get_noenumerate",
+        "library.function.flatpak_remote_set_nodeps",
+        "library.function.flatpak_remote_get_nodeps",
+        "library.function.flatpak_installation_modify_remote"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "library.remote.user.priority-persistence",
+      "interface": "library",
+      "profile": "user",
+      "category": "remote-properties",
+      "description": "A committed remote priority change is returned by get_prio after reopening the installation and changes the ordering relative to another remote of intervening priority.",
+      "sources": [
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_set_prio"
+        },
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_get_prio"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_remotes"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_modify_remote"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_remote_set_prio",
+        "library.function.flatpak_remote_get_prio",
+        "library.function.flatpak_installation_modify_remote",
+        "library.function.flatpak_installation_list_remotes"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "library.remote.user.verification-persistence",
+      "interface": "library",
+      "profile": "user",
+      "category": "remote-properties",
+      "description": "Committing GPG verification TRUE and then FALSE on a remote without a collection ID persists each value as reported by get_gpg_verify after reopening the installation.",
+      "sources": [
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_set_gpg_verify"
+        },
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_get_gpg_verify"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_modify_remote"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_remote_set_gpg_verify",
+        "library.function.flatpak_remote_get_gpg_verify",
+        "library.function.flatpak_installation_modify_remote"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "library.remote.branch-collection-persistence",
+      "interface": "library",
+      "profile": "any",
+      "category": "remote-properties",
+      "description": "With a valid signed remote fixture, committed default-branch and collection-ID settings survive reopening. Explicit NULL values unset each setting and the getters then return NULL.",
+      "sources": [
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_set_default_branch"
+        },
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_get_default_branch"
+        },
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_set_collection_id"
+        },
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_get_collection_id"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_modify_remote"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_remote_set_default_branch",
+        "library.function.flatpak_remote_get_default_branch",
+        "library.function.flatpak_remote_set_collection_id",
+        "library.function.flatpak_remote_get_collection_id",
+        "library.function.flatpak_installation_modify_remote"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "repository-signing"
+      ]
+    },
+    {
+      "id": "library.remote.filter-main-ref-persistence",
+      "interface": "library",
+      "profile": "any",
+      "category": "remote-properties",
+      "description": "A valid filter pathname and explicit main ref committed to a remote are returned by their getters after reopening the installation.",
+      "sources": [
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_set_filter"
+        },
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_get_filter"
+        },
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_set_main_ref"
+        },
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_get_main_ref"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_modify_remote"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_remote_set_filter",
+        "library.function.flatpak_remote_get_filter",
+        "library.function.flatpak_remote_set_main_ref",
+        "library.function.flatpak_remote_get_main_ref",
+        "library.function.flatpak_installation_modify_remote"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation"
+      ]
+    }
+  ]
+}

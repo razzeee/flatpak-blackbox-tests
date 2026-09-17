@@ -1,0 +1,234 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "limitations": [],
+  "requirements": [
+    {
+      "id": "library.signal.ready-resolved",
+      "interface": "library",
+      "profile": "any",
+      "category": "signals",
+      "description": "ready is emitted after refs are resolved to commits and required authentication is obtained; its handler can inspect the complete set of operations that will execute.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "FlatpakTransaction::ready"
+        }
+      ],
+      "surfaces": [
+        "library.signal.FlatpakTransaction.ready",
+        "library.function.flatpak_transaction_get_operations"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "session-bus",
+        "authentication"
+      ]
+    },
+    {
+      "id": "library.signal.ready-abort",
+      "interface": "library",
+      "profile": "any",
+      "category": "signals",
+      "description": "Returning FALSE from ready aborts the transaction before executing its resolved operations; returning TRUE permits their execution.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "FlatpakTransaction::ready"
+        }
+      ],
+      "surfaces": [
+        "library.signal.FlatpakTransaction.ready",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.signal.operation-sequence",
+      "interface": "library",
+      "profile": "any",
+      "category": "signals",
+      "description": "For each executed operation, new-operation arrives first with that operation and its progress object, followed by either operation-done for completion or operation-error for failure. Completed operations' done signals identify the corresponding commit when applicable.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "FlatpakTransaction"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "FlatpakTransaction::new-operation"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "FlatpakTransaction::operation-done"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "FlatpakTransaction::operation-error"
+        }
+      ],
+      "surfaces": [
+        "library.signal.FlatpakTransaction.new-operation",
+        "library.signal.FlatpakTransaction.operation-done",
+        "library.signal.FlatpakTransaction.operation-error"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "fault-injection"
+      ]
+    },
+    {
+      "id": "library.signal.executing-thread",
+      "interface": "library",
+      "profile": "any",
+      "category": "signals",
+      "description": "Transaction signals are emitted in the thread executing the blocking run call, and run does not return while that transaction is still executing.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "FlatpakTransaction"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_run"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_run",
+        "library.signal.FlatpakTransaction.ready",
+        "library.signal.FlatpakTransaction.new-operation",
+        "library.signal.FlatpakTransaction.operation-done"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.signal.operation-error-decision",
+      "interface": "library",
+      "profile": "any",
+      "category": "signals",
+      "description": "For a recoverable operation failure with an independent remaining operation, returning TRUE from operation-error permits the transaction to continue, while returning FALSE stops it. The handler receives the failing operation's GError and error details. This follows the signal documentation despite the contradictory ABORTED enum comment.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "FlatpakTransaction::operation-error"
+        },
+        {
+          "path": "common/flatpak-transaction.h",
+          "anchor": "FlatpakTransactionErrorDetails"
+        }
+      ],
+      "surfaces": [
+        "library.signal.FlatpakTransaction.operation-error",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "fault-injection"
+      ]
+    },
+    {
+      "id": "library.signal.choose-remote",
+      "interface": "library",
+      "profile": "any",
+      "category": "signals",
+      "description": "When multiple remotes supply a needed runtime, choose-remote-for-ref receives the app ref, runtime ref, and remotes in priority order. Returning an index selects that remote; returning -1 declines selection and fails resolution.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "FlatpakTransaction::choose-remote-for-ref"
+        }
+      ],
+      "surfaces": [
+        "library.signal.FlatpakTransaction.choose-remote-for-ref",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.signal.add-new-remote",
+      "interface": "library",
+      "profile": "any",
+      "category": "signals",
+      "description": "When a transaction suggests a new remote, add-new-remote supplies its reason, originating app/runtime ID, suggested name, and URL; returning TRUE adds it and returning FALSE declines the suggestion.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "FlatpakTransaction::add-new-remote"
+        },
+        {
+          "path": "common/flatpak-transaction.h",
+          "anchor": "FlatpakTransactionRemoteReason"
+        }
+      ],
+      "surfaces": [
+        "library.signal.FlatpakTransaction.add-new-remote"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.signal.eol-notification",
+      "interface": "library",
+      "profile": "any",
+      "category": "signals",
+      "description": "Processing a ref marked end-of-life emits end-of-lifed with the correct ref, reason, and optional rebase target.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "FlatpakTransaction::end-of-lifed"
+        }
+      ],
+      "surfaces": [
+        "library.signal.FlatpakTransaction.end-of-lifed"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.signal.eol-rebase-decision",
+      "interface": "library",
+      "profile": "any",
+      "category": "signals",
+      "description": "end-of-lifed-with-rebase occurs before execution and supplies the remote, old ref, reason, target, and previous IDs. Its handler can add a rebase-and-uninstall and return TRUE to skip the old operation, or return FALSE to retain it.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "FlatpakTransaction::end-of-lifed-with-rebase"
+        }
+      ],
+      "surfaces": [
+        "library.signal.FlatpakTransaction.end-of-lifed-with-rebase",
+        "library.function.flatpak_transaction_add_rebase_and_uninstall"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    }
+  ]
+}

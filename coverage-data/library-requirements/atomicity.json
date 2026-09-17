@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "limitations": [],
+  "requirements": [
+    {
+      "id": "library.update.user.failed-download-preserves",
+      "interface": "library",
+      "profile": "user",
+      "category": "atomicity",
+      "description": "With A installed, B advertised, and the runtime unchanged, a denied required B payload download is attempted and the update fails. The deployed app and runtime commits remain A and the original runtime commit.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "FlatpakTransaction"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_run"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository",
+        "network-fault-injection"
+      ]
+    },
+    {
+      "id": "library.transaction.completed-operations-survive",
+      "interface": "library",
+      "profile": "any",
+      "category": "atomicity",
+      "description": "In a multi-operation transaction, an operation completed before a later injected failure remains visible and installed after the transaction stops; the already completed operation is not rolled back.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "FlatpakTransaction"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "fault-injection"
+      ]
+    }
+  ]
+}

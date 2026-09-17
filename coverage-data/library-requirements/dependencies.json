@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "limitations": [],
+  "requirements": [
+    {
+      "id": "library.install.user.runtime-dependency",
+      "interface": "library",
+      "profile": "user",
+      "category": "dependencies",
+      "description": "Installing an app with default dependency resolution into a fresh user installation also installs its available required runtime at the fixture runtime commit without an explicit runtime install request.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_new_for_installation"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_add_dependency_source"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_add_install",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.transaction.extra-dependency-source",
+      "interface": "library",
+      "profile": "any",
+      "category": "dependencies",
+      "description": "Adding an installation as a dependency source allows an app to rely on its already installed required runtime without installing a second copy in the transaction's target installation.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_add_dependency_source"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_add_dependency_source",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "multiple-installations",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.transaction.system.default-dependency-sources",
+      "interface": "library",
+      "profile": "system",
+      "category": "dependencies",
+      "description": "Adding default dependency sources makes runtimes in all defined system installations available as dependencies, including a named system installation, without adding per-user installations as dependency sources.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_add_default_dependency_sources"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_add_default_dependency_sources",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ]
+    }
+  ]
+}

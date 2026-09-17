@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "limitations": [],
+  "requirements": [
+    {
+      "id": "library.transaction.sideload-repository",
+      "interface": "library",
+      "profile": "any",
+      "category": "sideload",
+      "description": "A dynamically added local sideload repository supplies matching installation data in addition to configured sideload repositories, allowing a fixture payload to be obtained without downloading that payload from the remote.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_add_sideload_repo"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_add_sideload_repo",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "sideload-repository",
+        "network-observation"
+      ]
+    },
+    {
+      "id": "library.transaction.sideload-images",
+      "interface": "library",
+      "profile": "any",
+      "category": "sideload",
+      "description": "Adding an OCI image collection using an oci: directory or oci-archive: location makes its matching images available to an OCI remote without collection-ID matching.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_add_sideload_image_collection"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_add_sideload_image_collection",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "container-images",
+        "sideload-repository"
+      ]
+    }
+  ]
+}

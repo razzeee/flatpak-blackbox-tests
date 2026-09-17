@@ -1,0 +1,321 @@
+{
+  "schema": 1,
+  "client": {
+    "source": "client-system.c",
+    "entry": "blackbox_system_main"
+  },
+  "notes": [
+    "Every target call enters two disposable bubblewrap user/mount namespace layers. The outer root maps only to the invoking host UID; inner root maps only to outer root. Inherited host mounts are locked read-only, checked by a denied bind-remount before every target call. Private PID/network namespaces and writable installation state are case-local; generated state is removed after each case while command evidence is retained.",
+    "Target environment keys BLACKBOX_SYSTEM_INSTALL_DIR and BLACKBOX_SYSTEM_CONFIG_DIR specify the expected compiled defaults; their reference-build defaults are /var/local/lib/flatpak and /usr/local/etc/flatpak. The namespace mounts private data at those paths, and CLI/C-client assertions still check the target's actual default location. These keys never become FLATPAK_SYSTEM_DIR or FLATPAK_CONFIG_DIR redirects. Set them under the target JSON environment object, not the host shell environment.",
+    "Readonly exposure includes only the suite directory, selected target executables, configured helpers and LD_LIBRARY_PATH directories. Uninstalled targets can explicitly add colon-separated absolute paths with BLACKBOX_TARGET_READONLY_PATHS in the target environment. No repository ancestor is inferred. Paths that cover private namespace roots or overlap protected installation/service content are rejected, including symlink aliases.",
+    "CLI deployment location checks use the public returned location, verify containment in the selected public installation base, locate the controlled bin/blackbox-probe payload there and execute it to distinguish A from B. They never construct a deployment path from a ref or commit, and never recursively search a general installation root for content.",
+    "Direct-root mutations may satisfy explicitly selected installation outcomes. These cases do not assert polkit authorization, non-root helper behavior, or multiple-user access. No requirement demanding those outcomes is mapped.",
+    "The named override case intentionally asserts the documented isolation contract; the reference target currently fails it, so that option receives no verified credit from that case."
+  ],
+  "behaviors": [
+    {
+      "id": "system-selectors.lifecycle",
+      "scenario": "system-selectors-lifecycle",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Install default, named and user copies, update each independently, then remove each independently.",
+      "preconditions": "Direct namespace-root access to private system stores; immutable A/B repositories.",
+      "expected": "Implicit install selects the actual default path; each update/removal leaves all other copies at their expected commits.",
+      "references": [
+        "doc/flatpak-install.xml",
+        "doc/flatpak-update.xml",
+        "doc/flatpak-uninstall.xml",
+        "doc/flatpak-info.xml"
+      ]
+    },
+    {
+      "id": "system-selectors.install-options",
+      "scenario": "system-selectors-install-options",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Explicit system reinstall after removal, or-update, and reinstall of an older installed version.",
+      "preconditions": "Independent default A, named B, and user A deployments.",
+      "expected": "--system recreates the removed default copy; or-update and reinstall reach B while user A survives.",
+      "references": [
+        "doc/flatpak-install.xml"
+      ]
+    },
+    {
+      "id": "system-selectors.queries",
+      "scenario": "system-selectors-queries",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Query installation-specific ref identity, actual location, metadata and typed lists.",
+      "preconditions": "A default/user app, B named app and explicit runtime copies.",
+      "expected": "Exact selected ref/commit/metadata and kind/architecture-filtered sets; public locations contain corresponding fixture content; emptied default list excludes user-only refs.",
+      "references": [
+        "doc/flatpak-info.xml",
+        "doc/flatpak-list.xml"
+      ]
+    },
+    {
+      "id": "system-selectors.ambiguous",
+      "scenario": "system-selectors-ambiguous",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Reject an unselected uninstall when the same full ref exists in multiple installations.",
+      "preconditions": "Default, named and user copies are installed.",
+      "expected": "Noninteractive ambiguity error identifies the app and every deployment retains its commit.",
+      "references": [
+        "doc/flatpak-uninstall.xml"
+      ]
+    },
+    {
+      "id": "system-selectors.run",
+      "scenario": "system-selectors-run",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus"
+      ],
+      "description": "Execute independently selected system, named and user applications.",
+      "preconditions": "Private session bus, nested sandbox capabilities, A/B fixture deployments.",
+      "expected": "Each selector executes its installation's version, including default system B versus user A.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "system-selectors.lifecycle",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [
+        "cli.install.system.default",
+        "cli.install.system.named",
+        "cli.update.system.selected",
+        "cli.uninstall.system.selected"
+      ],
+      "rationale": "Direct namespace-root install/update/uninstall outcomes are verified at actual system/named paths, including unchanged user commits and removal-query failure. No non-root authorization claim.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.install.--installation",
+          "rationale": "Named install creates B under alt while default remains A and user remains empty."
+        },
+        {
+          "id": "cli.option.install.--user",
+          "rationale": "User install creates A under user path while named B and default A remain separate."
+        },
+        {
+          "id": "cli.option.update.--system",
+          "rationale": "Default A changes to B while separately installed user A remains unchanged."
+        },
+        {
+          "id": "cli.option.update.--installation",
+          "rationale": "Named B downgrades to A while default B and user A are retained."
+        },
+        {
+          "id": "cli.option.update.--user",
+          "rationale": "User A changes to B while default B and named A are retained."
+        },
+        {
+          "id": "cli.option.update.--commit",
+          "rationale": "Explicit A commit replaces named B even though origin still advertises B."
+        },
+        {
+          "id": "cli.option.uninstall.--system",
+          "rationale": "Default app becomes unqueryable while named A and user B survive."
+        },
+        {
+          "id": "cli.option.uninstall.--installation",
+          "rationale": "Named app becomes unqueryable while user B survives."
+        },
+        {
+          "id": "cli.option.uninstall.--user",
+          "rationale": "User app becomes unqueryable while both competing system app copies and all explicitly installed runtimes remain."
+        }
+      ]
+    },
+    {
+      "behavior_id": "system-selectors.install-options",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [],
+      "rationale": "Selected install operations are verified through exact commits and untouched user copy.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.install.--system",
+          "rationale": "A removed default app is recreated at A while named B and user A remain unchanged."
+        },
+        {
+          "id": "cli.option.install.--or-update",
+          "rationale": "Repeat install changes default A to available B while user A survives."
+        },
+        {
+          "id": "cli.option.install.--reinstall",
+          "rationale": "Reinstall replaces explicitly downgraded default A with available B while user A survives."
+        }
+      ]
+    },
+    {
+      "behavior_id": "system-selectors.queries",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [
+        "cli.list.system.scope"
+      ],
+      "rationale": "All selected identity/metadata/type/architecture queries are exact; after emptying default, system list excludes the still-installed user app.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.info.--system",
+          "rationale": "Default info returns A and actual default deployment path, not named B."
+        },
+        {
+          "id": "cli.option.info.--installation",
+          "rationale": "Named info returns B and actual alt deployment path, not default/user A."
+        },
+        {
+          "id": "cli.option.info.--user",
+          "rationale": "User info returns A and actual root-user deployment path, not named B."
+        },
+        {
+          "id": "cli.option.info.--show-ref",
+          "rationale": "Full installed ref matches requested identity exactly."
+        },
+        {
+          "id": "cli.option.info.--show-commit",
+          "rationale": "Selected installed commit equals A or B fixture commit."
+        },
+        {
+          "id": "cli.option.info.--show-location",
+          "rationale": "The public returned directory lies within the selected public installation base and contains the controlled probe reporting the expected A/B version; a root or general installation path is rejected without deriving a backend ref/commit path."
+        },
+        {
+          "id": "cli.option.info.--show-origin",
+          "rationale": "Selected installed origin equals fixture."
+        },
+        {
+          "id": "cli.option.info.--show-runtime",
+          "rationale": "Selected app runtime equals fixture runtime/arch/branch."
+        },
+        {
+          "id": "cli.option.info.--show-sdk",
+          "rationale": "Selected app SDK equals fixture runtime/arch/branch."
+        },
+        {
+          "id": "cli.option.info.--show-metadata",
+          "rationale": "Parsed Application fields equal all four fixture metadata fields."
+        },
+        {
+          "id": "cli.option.list.--system",
+          "rationale": "After default uninstall-all, default list is empty while named/user copies remain installed."
+        },
+        {
+          "id": "cli.option.list.--installation",
+          "rationale": "Named enumeration contains its explicitly installed app and runtime."
+        },
+        {
+          "id": "cli.option.list.--user",
+          "rationale": "User enumeration contains its explicitly installed app and runtime."
+        },
+        {
+          "id": "cli.option.list.--app",
+          "rationale": "App-only result excludes installed runtime."
+        },
+        {
+          "id": "cli.option.list.--runtime",
+          "rationale": "Runtime-only result excludes installed app."
+        },
+        {
+          "id": "cli.option.list.--arch",
+          "rationale": "Matching architecture yields both refs; nonexistent architecture yields neither."
+        },
+        {
+          "id": "cli.option.list.--columns",
+          "rationale": "Ref-only output equals exact installed ref sets."
+        },
+        {
+          "id": "cli.option.uninstall.--all",
+          "rationale": "Default uninstall-all removes app and runtime while user/named copies remain."
+        }
+      ]
+    },
+    {
+      "behavior_id": "system-selectors.ambiguous",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [
+        "cli.uninstall.system.ambiguous-installation"
+      ],
+      "rationale": "Unselected noninteractive uninstall reports matching installed refs and retains all three exact commits."
+    },
+    {
+      "behavior_id": "system-selectors.run",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [
+        "cli.run.system.selected"
+      ],
+      "rationale": "Actual app output distinguishes default system B from separately installed user A, using a private session bus and nested sandbox.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--system",
+          "rationale": "Executes default B while user A remains installed."
+        },
+        {
+          "id": "cli.option.run.--installation",
+          "rationale": "Executes named B from alt installation."
+        },
+        {
+          "id": "cli.option.run.--user",
+          "rationale": "Executes user A while default/named are B."
+        }
+      ]
+    }
+  ]
+}

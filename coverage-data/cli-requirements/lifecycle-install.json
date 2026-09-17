@@ -1,0 +1,257 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "limitations": [],
+  "requirements": [
+    {
+      "id": "cli.install.user.app",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "Installing an available application ref in the user installation succeeds and makes application version A installed and queryable.",
+      "sources": [
+        {
+          "path": "doc/flatpak-install.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.install"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.install.user.runtime-dependency",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "Installing a user application with an available, initially absent required runtime also installs the declared runtime ref and its expected commit.",
+      "sources": [
+        {
+          "path": "doc/flatpak-install.xml",
+          "anchor": "--no-deps"
+        },
+        {
+          "path": "doc/flatpak-remote-add.xml",
+          "anchor": "--prio=PRIO"
+        }
+      ],
+      "surfaces": [
+        "cli.command.install"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.install.user.already-installed",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "Installing an already installed user application without --or-update succeeds with an already-installed warning and keeps A installed and runnable even when B is available.",
+      "sources": [
+        {
+          "path": "doc/flatpak-install.xml",
+          "anchor": "--or-update"
+        }
+      ],
+      "surfaces": [
+        "cli.command.install"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.install.user.missing-ref",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "Installing a nonexistent full ref fails with a diagnostic identifying the requested application as unavailable and leaves a fresh user installation's ref enumeration empty.",
+      "sources": [
+        {
+          "path": "doc/flatpak-install.xml",
+          "anchor": "Description"
+        },
+        {
+          "path": "doc/flatpak-list.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.install",
+        "cli.command.list"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.install.user.or-update",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "Installing an already installed user ref with --or-update updates it to the available branch tip.",
+      "sources": [
+        {
+          "path": "doc/flatpak-install.xml",
+          "anchor": "--or-update"
+        }
+      ],
+      "surfaces": [
+        "cli.command.install",
+        "cli.option.install.--or-update"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.install.user.bundle",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "Installing a valid .flatpak single-file bundle deploys the application carried by that bundle in the user installation.",
+      "sources": [
+        {
+          "path": "doc/flatpak-install.xml",
+          "anchor": "--bundle"
+        }
+      ],
+      "surfaces": [
+        "cli.command.install",
+        "cli.option.install.--bundle"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.install.user.flatpakref",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "Installing from a valid .flatpakref application description installs the application identified by that description.",
+      "sources": [
+        {
+          "path": "doc/flatpak-install.xml",
+          "anchor": "--from"
+        }
+      ],
+      "surfaces": [
+        "cli.command.install",
+        "cli.option.install.--from"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.install.user.download-only",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "Installing with --no-deploy downloads the latest ref contents without making the ref installed as a deployment.",
+      "sources": [
+        {
+          "path": "doc/flatpak-install.xml",
+          "anchor": "--no-deploy"
+        }
+      ],
+      "surfaces": [
+        "cli.command.install",
+        "cli.option.install.--no-deploy"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.install.user.local-deploy",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "Installing with --no-pull deploys locally available ref contents without downloading a newer remote version.",
+      "sources": [
+        {
+          "path": "doc/flatpak-install.xml",
+          "anchor": "--no-pull"
+        }
+      ],
+      "surfaces": [
+        "cli.command.install",
+        "cli.option.install.--no-pull"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.install.system.default",
+      "interface": "cli",
+      "profile": "system",
+      "category": "lifecycle",
+      "description": "Installing with no installation selector deploys the requested application in the default system-wide installation.",
+      "sources": [
+        {
+          "path": "doc/flatpak-install.xml",
+          "anchor": "Unless overridden with the --user or the --installation option"
+        }
+      ],
+      "surfaces": [
+        "cli.command.install"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "system-authorization",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.install.system.named",
+      "interface": "cli",
+      "profile": "system",
+      "category": "lifecycle",
+      "description": "Installing with --installation=NAME deploys the requested ref in the named configured system installation rather than the default installation.",
+      "sources": [
+        {
+          "path": "doc/flatpak-install.xml",
+          "anchor": "--installation=NAME"
+        }
+      ],
+      "surfaces": [
+        "cli.command.install",
+        "cli.option.install.--installation"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "system-authorization",
+        "multiple-installations",
+        "local-repository"
+      ]
+    }
+  ]
+}

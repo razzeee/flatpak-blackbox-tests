@@ -1,0 +1,212 @@
+{
+  "schema": 1,
+  "client": {
+    "source": "client-objects.c",
+    "entry": "blackbox_objects_main"
+  },
+  "behaviors": [
+    {
+      "id": "objects.ref-roundtrip",
+      "scenario": "objects-ref-roundtrip",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "libflatpak"
+      ],
+      "description": "Parse app and runtime literal refs.",
+      "preconditions": "Literal full refs for x86_64 and aarch64.",
+      "expected": "Kind, name, arch, branch and allocating format match the literals; commit is NULL.",
+      "references": [
+        "common/flatpak-ref.c: flatpak_ref_parse and public getters"
+      ]
+    },
+    {
+      "id": "objects.ref-invalid",
+      "scenario": "objects-ref-invalid",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "libflatpak"
+      ],
+      "description": "Reject malformed full refs.",
+      "preconditions": "Empty, missing-component, invalid-kind, empty-name and extra-component inputs.",
+      "expected": "Each returns NULL and a GError.",
+      "references": [
+        "common/flatpak-ref.c: flatpak_ref_parse"
+      ]
+    },
+    {
+      "id": "objects.ref-cache",
+      "scenario": "objects-ref-cache",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "libflatpak"
+      ],
+      "description": "Check cached formatting and independently owned strings.",
+      "preconditions": "Live parsed app and runtime refs.",
+      "expected": "Cached pointer is stable and literal-correct; freeing one allocated string preserves the ref and cache; the other string survives ref destruction.",
+      "references": [
+        "common/flatpak-ref.c: flatpak_ref_format_ref, flatpak_ref_format_ref_cached"
+      ]
+    },
+    {
+      "id": "objects.ref-properties",
+      "scenario": "objects-ref-properties",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "libflatpak"
+      ],
+      "description": "Read explicit ref commit and collection ID from a public-property fixture.",
+      "preconditions": "Public construct-only properties supply literal values; no repository metadata is read.",
+      "expected": "Getters return the supplied 64-character commit and collection ID. This checks the Ref object contract only, not collection-ID propagation from a repository or bundle.",
+      "references": [
+        "common/flatpak-ref.c: public commit and collection-id properties; flatpak_ref_get_collection_id"
+      ]
+    },
+    {
+      "id": "objects.related-policy",
+      "scenario": "objects-related-policy",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "libflatpak"
+      ],
+      "description": "Read related-ref policy booleans from public-property fixtures.",
+      "preconditions": "Public properties set opposite download/delete values and both autoprune values; no extension metadata is parsed.",
+      "expected": "Each getter matches its own explicit boolean. This checks policy reporting only, not extension discovery, policy derivation or transaction execution.",
+      "references": [
+        "common/flatpak-related-ref.c: public should-download, should-delete, should-autoprune properties and getters"
+      ]
+    },
+    {
+      "id": "objects.related-subpaths",
+      "scenario": "objects-related-subpaths",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "libflatpak"
+      ],
+      "description": "Read partial and full related-ref subpaths from public-property fixtures.",
+      "preconditions": "Public subpaths property is /en,/sv or NULL; no repository or installation supplies the object.",
+      "expected": "The partial result contains exactly the two paths and terminator; full result is NULL. This checks subpath reporting only, not selection or deployment of files.",
+      "references": [
+        "common/flatpak-related-ref.c: flatpak_related_ref_get_subpaths"
+      ]
+    },
+    {
+      "id": "objects.eol",
+      "scenario": "objects-eol",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "libflatpak"
+      ],
+      "description": "Roundtrip installed-ref and remote-ref public EOL properties.",
+      "preconditions": "Constructed objects receive explicit reason/rebase properties or NULL; neither object is obtained by querying metadata.",
+      "expected": "All four getters return the literal properties, including NULL. This partial getter test earns no installed or remote EOL metadata requirement credit.",
+      "references": [
+        "common/flatpak-installed-ref.c: public end-of-life properties and getters",
+        "common/flatpak-remote-ref.c: public end-of-life properties and getters"
+      ]
+    },
+    {
+      "id": "objects.appdata",
+      "scenario": "objects-appdata",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "libflatpak"
+      ],
+      "description": "Roundtrip public AppStream-related object properties.",
+      "preconditions": "Constructed objects receive literal version, MIT license, OARS type and two rating attributes or NULL; no AppStream document is loaded.",
+      "expected": "Version, license, type and complete rating map match the supplied properties; missing values return NULL. This partial getter test earns no AppStream metadata requirement credit.",
+      "references": [
+        "common/flatpak-installed-ref.c: public appdata properties and getters"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "objects.ref-roundtrip",
+      "driver": "library",
+      "profile": "any",
+      "requirements": [
+        "library.ref.parse-roundtrip",
+        "library.ref.parse-no-commit"
+      ],
+      "rationale": "Both literal ref kinds have all identity components, formatting and absent commit asserted."
+    },
+    {
+      "behavior_id": "objects.ref-invalid",
+      "driver": "library",
+      "profile": "any",
+      "requirements": [
+        "library.ref.parse-invalid"
+      ],
+      "rationale": "All malformed inputs require NULL and a non-NULL error, including missing component and invalid kind."
+    },
+    {
+      "behavior_id": "objects.ref-cache",
+      "driver": "library",
+      "profile": "any",
+      "requirements": [
+        "library.ref.cached-format",
+        "library.ownership.formatted-string"
+      ],
+      "rationale": "Literal equality, borrowed pointer stability, independent frees, live-ref inspection and post-destruction owned-string inspection are asserted."
+    },
+    {
+      "behavior_id": "objects.ref-properties",
+      "driver": "library",
+      "profile": "any",
+      "requirements": [
+        "library.ref.collection-id"
+      ],
+      "rationale": "The requirement's explicit-ID ref fixture is supplied through the public collection-id property and verified by the getter. Credit covers object-level exposure only; this does not verify repository or bundle metadata propagation."
+    },
+    {
+      "behavior_id": "objects.related-policy",
+      "driver": "library",
+      "profile": "any",
+      "requirements": [
+        "library.related.autoprune-policy"
+      ],
+      "rationale": "Autoprune explicitly permits public-property fixtures. Download/delete getters remain useful property checks but receive no metadata-to-policy derivation credit here; that contract is tested by queryx-related-policy using actual extension declarations."
+    },
+    {
+      "behavior_id": "objects.related-subpaths",
+      "driver": "library",
+      "profile": "any",
+      "requirements": [
+        "library.related.subpaths"
+      ],
+      "rationale": "The public subpaths property supplies the fixture's declared partial set; exact paths and terminator, plus NULL for all files, are asserted through the getter. This covers object-level reporting, not subpath selection from metadata or partial deployment."
+    }
+  ]
+}

@@ -1,0 +1,382 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "management.remote-properties",
+      "scenario": "management-remote-properties",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Read back added and modified remote presentation properties.",
+      "preconditions": "Fresh state and local repository.",
+      "expected": "Comment, description, homepage and icon match both sets of supplied values.",
+      "references": [
+        "doc/flatpak-remote-add.xml",
+        "doc/flatpak-remote-modify.xml",
+        "doc/flatpak-remotes.xml"
+      ]
+    },
+    {
+      "id": "management.remote-enumerate",
+      "scenario": "management-remote-enumerate",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Persist enumeration policy through add and opposing modifications.",
+      "preconditions": "Fresh user remote.",
+      "expected": "Public options reports no-enumerate, clears it, then reports it again.",
+      "references": [
+        "doc/flatpak-remote-add.xml",
+        "doc/flatpak-remote-modify.xml"
+      ]
+    },
+    {
+      "id": "management.remote-dependencies",
+      "scenario": "management-remote-dependencies",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Exercise dependency policy through add and opposing modifications.",
+      "preconditions": "Filtered app-only remote and separate dependency remote.",
+      "expected": "Excluding dependency remote blocks install; enabling it permits exact app/runtime commits.",
+      "references": [
+        "doc/flatpak-remote-add.xml",
+        "doc/flatpak-remote-modify.xml"
+      ]
+    },
+    {
+      "id": "management.remote-gpg",
+      "scenario": "management-remote-gpg",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Enable verification against unsigned input, then disable it.",
+      "preconditions": "Unsigned A repository.",
+      "expected": "Signature verification prevents deployment until disabled.",
+      "references": [
+        "doc/flatpak-remote-modify.xml"
+      ]
+    },
+    {
+      "id": "management.duplicate-remote",
+      "scenario": "management-duplicate-remote",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Add duplicate remote with conflicting properties.",
+      "preconditions": "Fresh user state and A repository.",
+      "expected": "Original URL, title and priority survive.",
+      "references": [
+        "doc/flatpak-remote-add.xml"
+      ]
+    },
+    {
+      "id": "management.flatpakrepo",
+      "scenario": "management-flatpakrepo",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Add description-file remote.",
+      "preconditions": "Fresh state and local description.",
+      "expected": "Description URL and title are reported exactly.",
+      "references": [
+        "doc/flatpakrepo.xml"
+      ]
+    },
+    {
+      "id": "management.filter",
+      "scenario": "management-filter",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Deny all with an explicit runtime allowance, then clear filter.",
+      "preconditions": "A app/runtime repository.",
+      "expected": "Only runtime is visible and installable; clearing restores both refs.",
+      "references": [
+        "doc/flatpak-remote-modify.xml"
+      ]
+    },
+    {
+      "id": "management.filter-replacement",
+      "scenario": "management-filter-replacement",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Replace and clear filter using duplicate description-file additions.",
+      "preconditions": "Filtered A repository.",
+      "expected": "Runtime-only changes to app-only, then both refs.",
+      "references": [
+        "doc/flatpakrepo.xml"
+      ]
+    },
+    {
+      "id": "management.remote-available",
+      "scenario": "management-remote-available",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Enumerate uninstalled remote refs with type and architecture filters.",
+      "preconditions": "Empty installation and A repository.",
+      "expected": "Exact app/runtime sets for each query.",
+      "references": [
+        "doc/flatpak-remote-ls.xml"
+      ]
+    },
+    {
+      "id": "management.disabled",
+      "scenario": "management-disabled",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Disable origin during available update, then enable.",
+      "preconditions": "A installed and B advertised.",
+      "expected": "Disabled remote is only shown on request, blocks update, and enabling permits B.",
+      "references": [
+        "doc/flatpak-remote-modify.xml",
+        "doc/flatpak-remotes.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "management.remote-properties",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent public readback of supplied presentation values.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--comment",
+          "rationale": "Public comment column equals supplied nondefault text."
+        },
+        {
+          "id": "cli.option.remote-add.--description",
+          "rationale": "Public description column equals supplied nondefault text."
+        },
+        {
+          "id": "cli.option.remote-add.--homepage",
+          "rationale": "Public homepage column equals supplied URL."
+        },
+        {
+          "id": "cli.option.remote-add.--icon",
+          "rationale": "Public icon column equals supplied URL."
+        },
+        {
+          "id": "cli.option.remote-modify.--comment",
+          "rationale": "Public comment changes to replacement text."
+        },
+        {
+          "id": "cli.option.remote-modify.--description",
+          "rationale": "Public description changes to replacement text."
+        },
+        {
+          "id": "cli.option.remote-modify.--homepage",
+          "rationale": "Public homepage changes to replacement URL."
+        },
+        {
+          "id": "cli.option.remote-modify.--icon",
+          "rationale": "Public icon changes to replacement URL."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.remote-enumerate",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Public stored enumeration policy changes in both directions.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--no-enumerate",
+          "rationale": "Added remote publicly reports no-enumerate."
+        },
+        {
+          "id": "cli.option.remote-modify.--enumerate",
+          "rationale": "Clears previously stored no-enumerate marker."
+        },
+        {
+          "id": "cli.option.remote-modify.--no-enumerate",
+          "rationale": "Restores marker after explicit enumeration enablement."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.remote-dependencies",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Dependency resolution tests stored policy in both directions.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--no-use-for-deps",
+          "rationale": "Excluded dependency remote makes install fail atomically despite available required runtime."
+        },
+        {
+          "id": "cli.option.remote-modify.--use-for-deps",
+          "rationale": "Enabling dependency resolution permits exact app/runtime installation after failed resolution."
+        },
+        {
+          "id": "cli.option.remote-modify.--no-use-for-deps",
+          "rationale": "Disabling again prevents runtime resolution on the next fresh install."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.remote-gpg",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Signature policy changes install acceptance for unsigned source.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-modify.--gpg-verify",
+          "rationale": "Enabling verification makes unsigned source fail with signature diagnostic and no deployment."
+        },
+        {
+          "id": "cli.option.remote-modify.--no-gpg-verify",
+          "rationale": "Disabling verification permits exact A installation after signature rejection."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.duplicate-remote",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.remote-add.user.if-not-exists"
+      ],
+      "rationale": "Exact original URL/title/priority survive conflicting duplicate addition."
+    },
+    {
+      "behavior_id": "management.flatpakrepo",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.remote-add.user.flatpakrepo"
+      ],
+      "rationale": "Public remotes query matches description URL and title."
+    },
+    {
+      "behavior_id": "management.filter",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.remote-modify.user.filter"
+      ],
+      "rationale": "Explicit allow defeats deny for runtime; app hidden and rejected; no-filter restores both.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-modify.--no-filter",
+          "rationale": "Clearing runtime-only filter restores exact app/runtime ref set."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.filter-replacement",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.remote-add.user.flatpakrepo-filter-replacement"
+      ],
+      "rationale": "Duplicate description switches runtime-only filter to app-only and omission clears it."
+    },
+    {
+      "behavior_id": "management.remote-available",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.remote-ls.user.available"
+      ],
+      "rationale": "Empty local installation, exact remote app/runtime sets.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-ls.--app",
+          "rationale": "Excludes runtime from populated remote."
+        },
+        {
+          "id": "cli.option.remote-ls.--runtime",
+          "rationale": "Excludes app from populated remote."
+        },
+        {
+          "id": "cli.option.remote-ls.--arch",
+          "rationale": "Matching architecture includes both refs; nonexistent architecture includes neither."
+        },
+        {
+          "id": "cli.option.remote-ls.--columns",
+          "rationale": "Ref-only output equals exact expected ref strings."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.disabled",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.remotes.user.disabled",
+        "cli.remote-modify.user.disable",
+        "cli.remote-modify.user.enable"
+      ],
+      "rationale": "Disabled listing is explicit; global update retains A until enabling allows B."
+    }
+  ]
+}

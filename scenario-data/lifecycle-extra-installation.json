@@ -1,0 +1,249 @@
+{
+  "schema": 1,
+  "client": {
+    "source": "client-lifecycle-extra.c",
+    "entry": "blackbox_lifecycle_extra_main"
+  },
+  "behaviors": [
+    {
+      "id": "lifex.unused-pinned",
+      "scenario": "lifex-unused-pinned",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository",
+        "runtime-extensions",
+        "multiple-architectures"
+      ],
+      "description": "Enumerate typed unused and pinned refs with architecture filters.",
+      "preconditions": "App using runtime/SDK and an unpinned extension; separate unused runtime; native and foreign pinned runtimes.",
+      "expected": "Exact unused and pinned membership for unrestricted, native, foreign and absent architectures; every returned element is an installed ref.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_list_unused_refs, flatpak_installation_list_pinned_refs"
+      ]
+    },
+    {
+      "id": "lifex.monitor",
+      "scenario": "lifex-monitor",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe installation monitor notifications for direct lifecycle changes.",
+      "preconditions": "New public monitor connected before each install, update and uninstall; runtime satisfied and remote selected before monitoring.",
+      "expected": "Each operation produces a changed notification while main context is serviced and the expected deployment outcome.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_create_monitor"
+      ]
+    },
+    {
+      "id": "lifex.force-uninstall",
+      "scenario": "lifex-force-uninstall",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus"
+      ],
+      "description": "Control retention of files used by a running app during uninstall.",
+      "preconditions": "Held-live independent app probe; an open descriptor identifies its deployment across directory renames.",
+      "expected": "Both uninstalls remove installed identity; ordinary uninstall retains running files, force_uninstall removes them; process is killed and reaped.",
+      "references": [
+        "common/flatpak-transaction.c: flatpak_transaction_set_force_uninstall"
+      ]
+    },
+    {
+      "id": "lifex.appdata",
+      "scenario": "lifex-appdata",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository",
+        "appstream"
+      ],
+      "description": "Read release and rating fields from actual deployed AppStream.",
+      "preconditions": "Independent rich Query app and QuerySecond without optional AppStream fields.",
+      "expected": "Exact version, MIT license, oars-1.1 type and single violence-cartoon=none attribute; all optional getters NULL for second app.",
+      "references": [
+        "common/flatpak-installed-ref.c: AppStream getters"
+      ]
+    },
+    {
+      "id": "lifex.eol",
+      "scenario": "lifex-eol",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Read actual installed and remote end-of-life metadata.",
+      "preconditions": "Independent transaction A, EOL and REBASE commits.",
+      "expected": "Both typed refs expose absent, reason-only and reason-plus-full-rebase values matching independent exports.",
+      "references": [
+        "common/flatpak-installed-ref.c: flatpak_installed_ref_get_eol",
+        "common/flatpak-remote-ref.c: flatpak_remote_ref_get_eol"
+      ]
+    },
+    {
+      "id": "lifex.runtime-instance",
+      "scenario": "lifex-runtime-instance",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus"
+      ],
+      "description": "Inspect a held-live runtime-only sandbox.",
+      "preconditions": "CLI launches independent runtime probe and reports instance ID; probe confirms execution before inspection.",
+      "expected": "Exactly that live instance reports NULL app, expected runtime and runtime commit; sandbox is explicitly killed and reaped.",
+      "references": [
+        "common/flatpak-instance.c: flatpak_instance_get_app"
+      ]
+    },
+    {
+      "id": "lifex.prune",
+      "scenario": "lifex-prune",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Check public deployment preservation across cleanup and pruning.",
+      "preconditions": "Independent deployed and pulled-only apps; positive no-pull deployment control for the second app before resetting it to pulled-only state.",
+      "expected": "Cleanup and prune succeed; no-pull install of the cleaned ref fails before and after pruning; deployed app and runtime commits stay intact. Orphaned-object deletion is not established.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_cleanup_local_refs_sync, flatpak_installation_prune_local_repo"
+      ]
+    },
+    {
+      "id": "lifex.deferred-triggers",
+      "scenario": "lifex-deferred-triggers",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Defer and explicitly refresh exported MIME associations.",
+      "preconditions": "Independent desktop app A/B with different MIME types; desktop MIME trigger installed.",
+      "expected": "NO_TRIGGERS install/update/uninstall leaves cache unchanged until public run_triggers produces A/B/absent association respectively.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_run_triggers",
+        "common/flatpak-installation.h: NO_TRIGGERS flags"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "lifex.unused-pinned",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.cleanup.unused-pinned"
+      ],
+      "rationale": "Typed results exclude the app, its used runtime/SDK and unpinned related extension; include only the separate unused runtime; pinned native/foreign refs and all architecture filters checked exactly."
+    },
+    {
+      "behavior_id": "lifex.monitor",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.monitor.installation-changes"
+      ],
+      "rationale": "Independent monitor registration immediately before each direct lifecycle operation, with context-driven event delivery and exact deployment checks."
+    },
+    {
+      "behavior_id": "lifex.force-uninstall",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Additional public force_uninstall contract has no exact row in the fixed denominator; held running files distinguish TRUE from FALSE."
+    },
+    {
+      "behavior_id": "lifex.appdata",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.query.installed.appdata-release-rating"
+      ],
+      "rationale": "Real rich and field-absent deployments exercise all four typed getters including exact attribute membership and NULL cases."
+    },
+    {
+      "behavior_id": "lifex.eol",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.query.installed.eol",
+        "library.remote-ref.eol"
+      ],
+      "rationale": "Both typed installed and remote getters checked against independently exported absent, EOL-only and rebase metadata."
+    },
+    {
+      "behavior_id": "lifex.runtime-instance",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.instance.runtime-only"
+      ],
+      "rationale": "Synchronized actual runtime sandbox selected by launch-reported instance ID has NULL application getter."
+    },
+    {
+      "behavior_id": "lifex.prune",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Layout-independent partial check: cleanup and pruning preserve deployments and the cleaned ref cannot be installed without pulling. The orphaned-objects obligation is withheld because actual object reclamation is unobserved."
+    },
+    {
+      "behavior_id": "lifex.deferred-triggers",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.legacy.deferred-triggers"
+      ],
+      "rationale": "Install/update/uninstall NO_TRIGGERS observed against real exported desktop MIME cache; run_triggers must refresh each deferred change."
+    }
+  ]
+}

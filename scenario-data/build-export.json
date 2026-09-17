@@ -1,0 +1,444 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "build.options.runtime-repo",
+      "scenario": "build-option-runtime-repo",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository",
+        "user-installation"
+      ],
+      "description": "Embed runtime repository descriptor URL in application bundle.",
+      "preconditions": "Independent A repo; no installed runtime or configured remotes.",
+      "expected": "Bundle installation fetches descriptor and installs exact runtime dependency.",
+      "references": [
+        "doc/flatpak-build-bundle.xml"
+      ]
+    },
+    {
+      "id": "build.options.export-subset",
+      "scenario": "build-option-export-subset",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository"
+      ],
+      "description": "Mark exported app as belonging to selected subset.",
+      "preconditions": "Independent finalized app tree without subset marker.",
+      "expected": "Public commit xa.subsets equals requested singleton list.",
+      "references": [
+        "doc/flatpak-build-export.xml"
+      ]
+    },
+    {
+      "id": "build.options.arch-export",
+      "scenario": "build-option-arch-export",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository"
+      ],
+      "description": "Export runtime under nondefault architecture.",
+      "preconditions": "Independent runtime tree and supported alternate architecture.",
+      "expected": "Alternate ref exists and native ref is absent.",
+      "references": [
+        "doc/flatpak-build-export.xml"
+      ]
+    },
+    {
+      "id": "build.export.signed",
+      "scenario": "build-export-signed",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository",
+        "repository-signing",
+        "appstream"
+      ],
+      "description": "Sign exported app and attach rebase destination while updating AppStream.",
+      "preconditions": "Independent finalized app tree and disposable signing material.",
+      "expected": "Public-key signature verifies, EOL rebase equals requested ref and AppStream branch exists.",
+      "references": [
+        "doc/flatpak-build-export.xml"
+      ]
+    },
+    {
+      "id": "build.export.contents",
+      "scenario": "build-export-contents",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository"
+      ],
+      "description": "Export independently finalized app contents.",
+      "preconditions": "Reference finalized app tree with extra build-only data.",
+      "expected": "Public OSTree checkout contains identical executable, export and metadata, excluding var and build-only data.",
+      "references": [
+        "doc/flatpak-build-export.xml"
+      ]
+    },
+    {
+      "id": "build.export.runtime",
+      "scenario": "build-export-runtime",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository"
+      ],
+      "description": "Export usr as runtime files.",
+      "preconditions": "Independent runtime tree with a usr marker.",
+      "expected": "Runtime ref checkout has marker under files.",
+      "references": [
+        "doc/flatpak-build-export.xml"
+      ]
+    },
+    {
+      "id": "build.export.options",
+      "scenario": "build-export-options",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository"
+      ],
+      "description": "Apply export filters, commit message/date, EOL and collection ID.",
+      "preconditions": "Independent finalized app tree with matching include/exclude candidates.",
+      "expected": "Exact selected files, commit fields and repo collection ID; summary absent.",
+      "references": [
+        "doc/flatpak-build-export.xml"
+      ]
+    },
+    {
+      "id": "build.export.alternate",
+      "scenario": "build-export-alternate",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository"
+      ],
+      "description": "Select alternate payload and metadata files.",
+      "preconditions": "Independent finalized tree with distinct alternate inputs.",
+      "expected": "Only alternate payload and alternate command metadata exported.",
+      "references": [
+        "doc/flatpak-build-export.xml"
+      ]
+    },
+    {
+      "id": "build.options.summary-sign",
+      "scenario": "build-option-summary-sign",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository",
+        "repository-signing"
+      ],
+      "description": "Sign repository summary and advertise imported public key.",
+      "preconditions": "Independent unsigned A repository and disposable signing material.",
+      "expected": "Independent OSTree remote with mandatory summary verification reads refs; advertised public key bytes equal input.",
+      "references": [
+        "doc/flatpak-build-update-repo.xml"
+      ]
+    },
+    {
+      "id": "build.options.arch-sign",
+      "scenario": "build-option-arch-sign",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository",
+        "repository-signing"
+      ],
+      "description": "Sign nondefault-architecture app commit.",
+      "preconditions": "Independent repo containing both architectures and disposable signing key.",
+      "expected": "Alternate commit verifies with public key.",
+      "references": [
+        "doc/flatpak-build-sign.xml"
+      ]
+    },
+    {
+      "id": "build.sign.app",
+      "scenario": "build-sign-app",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository",
+        "repository-signing"
+      ],
+      "description": "Sign an existing app commit using disposable GPG material.",
+      "preconditions": "Independent unsigned A distribution repo and disposable key.",
+      "expected": "Commit unchanged and independent GPG verification succeeds.",
+      "references": [
+        "doc/flatpak-build-sign.xml"
+      ]
+    },
+    {
+      "id": "build.sign.runtime",
+      "scenario": "build-sign-runtime",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository",
+        "repository-signing"
+      ],
+      "description": "Sign an existing runtime commit.",
+      "preconditions": "Independent unsigned runtime and disposable GPG home.",
+      "expected": "Runtime commit unchanged and independent GPG verification succeeds.",
+      "references": [
+        "doc/flatpak-build-sign.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "build.options.runtime-repo",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Bundle dependency unavailable without embedded descriptor; descriptor request and exact dependency installation observed.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-bundle.--runtime-repo",
+          "rationale": "Bundle causes descriptor fetch and dependency install into initially empty user installation."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.options.export-subset",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Public commit metadata records new subset membership.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-export.--subset",
+          "rationale": "xa.subsets equals selected singleton rather than absent membership."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.options.arch-export",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Foreign metadata-only selection differs from native default.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-export.--arch",
+          "rationale": "Only nondefault architecture ref is exported."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.export.signed",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Independent public-key verification and public commit/ref observations.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-export.--gpg-sign",
+          "rationale": "Exported commit verifies using only requested key public material."
+        },
+        {
+          "id": "cli.option.build-export.--gpg-homedir",
+          "rationale": "Signing uses key available only in designated disposable home."
+        },
+        {
+          "id": "cli.option.build-export.--end-of-life-rebase",
+          "rationale": "Commit rebase destination equals successor app ref."
+        },
+        {
+          "id": "cli.option.build-export.--update-appstream",
+          "rationale": "Fresh exported repo includes AppStream branch."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.export.contents",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.build-export.any.contents"
+      ],
+      "rationale": "Public OSTree checkout compares app bytes and required/excluded paths."
+    },
+    {
+      "behavior_id": "build.export.runtime",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Runtime ref has usr marker under files, but runtime is inferred from metadata even when --runtime is omitted. No requirement mapping that implicitly credits this ignored flag."
+    },
+    {
+      "behavior_id": "build.export.options",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Independent public commit and config inspection checks option effects.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-export.--subject",
+          "rationale": "Commit contains exact subject."
+        },
+        {
+          "id": "cli.option.build-export.--body",
+          "rationale": "Commit contains exact body."
+        },
+        {
+          "id": "cli.option.build-export.--timestamp",
+          "rationale": "Commit shows fixed requested UTC date."
+        },
+        {
+          "id": "cli.option.build-export.--exclude",
+          "rationale": "Matching file absent from checkout."
+        },
+        {
+          "id": "cli.option.build-export.--include",
+          "rationale": "Included file survives matching exclusion."
+        },
+        {
+          "id": "cli.option.build-export.--collection-id",
+          "rationale": "Public core.collection-id equals requested ID."
+        },
+        {
+          "id": "cli.option.build-export.--end-of-life",
+          "rationale": "Public ostree.endoflife equals requested reason."
+        },
+        {
+          "id": "cli.option.build-export.--no-update-summary",
+          "rationale": "New repo has no summary."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.export.alternate",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Export contents select distinct alternate inputs.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-export.--files",
+          "rationale": "Alternate marker present and default executable absent."
+        },
+        {
+          "id": "cli.option.build-export.--metadata",
+          "rationale": "Alternate command metadata exported."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.options.summary-sign",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Independent public-key verifier requires valid summary signature; raw summary key bytes compared.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-update-repo.--gpg-sign",
+          "rationale": "Mandatory GPG summary verification succeeds for initially unsigned repository."
+        },
+        {
+          "id": "cli.option.build-update-repo.--gpg-homedir",
+          "rationale": "Signing key is available only in designated disposable home."
+        },
+        {
+          "id": "cli.option.build-update-repo.--gpg-import",
+          "rationale": "Summary advertises byte-for-byte imported public key."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.options.arch-sign",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Independent repo contains both native and alternate commits.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-sign.--arch",
+          "rationale": "Alternate candidate receives signature verifiable by public key."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.sign.app",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.build-sign.any.signature"
+      ],
+      "rationale": "Independent OSTree GPG verification of requested key signing unchanged app commit.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-sign.--gpg-homedir",
+          "rationale": "Signing succeeds with key available only in disposable specified home."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.sign.runtime",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.build-sign.any.signature"
+      ],
+      "rationale": "Independent GPG verification of unchanged runtime commit.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-sign.--runtime",
+          "rationale": "Requested runtime commit gains verifiable signature."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,177 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "limitations": [],
+  "requirements": [
+    {
+      "id": "library.install.user.already-installed",
+      "interface": "library",
+      "profile": "user",
+      "category": "errors",
+      "description": "Repeating a plain transaction install of app A after its healthy remote advertises B fails with domain FLATPAK_ERROR and code FLATPAK_ERROR_ALREADY_INSTALLED. It preserves A and its unchanged runtime rather than upgrading to B.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_add_install"
+        },
+        {
+          "path": "common/flatpak-error.h",
+          "anchor": "FlatpakError"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_add_install",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.install.user.missing-ref",
+      "interface": "library",
+      "profile": "user",
+      "category": "errors",
+      "description": "Installing a well-formed ref absent from a healthy configured remote fails with domain FLATPAK_ERROR and code FLATPAK_ERROR_REF_NOT_FOUND. Successful installed-ref enumeration afterward returns an empty array in the initially empty user installation.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_add_install"
+        },
+        {
+          "path": "common/flatpak-error.h",
+          "anchor": "FlatpakError"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_installed_refs"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_add_install",
+        "library.function.flatpak_transaction_run",
+        "library.function.flatpak_installation_list_installed_refs"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.query.user.absent-ref",
+      "interface": "library",
+      "profile": "user",
+      "category": "errors",
+      "description": "Querying a well-formed ref not installed in the user installation returns NULL with domain FLATPAK_ERROR and code FLATPAK_ERROR_NOT_INSTALLED.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_installed_ref"
+        },
+        {
+          "path": "common/flatpak-error.h",
+          "anchor": "FlatpakError"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_get_installed_ref"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "library.uninstall.user.absent-ref",
+      "interface": "library",
+      "profile": "user",
+      "category": "errors",
+      "description": "A transaction uninstall request for a well-formed absent user ref fails with domain FLATPAK_ERROR and code FLATPAK_ERROR_NOT_INSTALLED and preserves the commits of an existing app and runtime.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_add_uninstall"
+        },
+        {
+          "path": "common/flatpak-error.h",
+          "anchor": "FlatpakError"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_add_uninstall",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.ref.parse-invalid",
+      "interface": "library",
+      "profile": "any",
+      "category": "errors",
+      "description": "Parsing malformed full refs, including a missing component and an invalid kind, fails with NULL and a GError instead of producing a usable ref. No diagnostic text or undocumented exact error code is required.",
+      "sources": [
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_parse"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_ref_parse"
+      ],
+      "required_capabilities": [
+        "libflatpak"
+      ]
+    },
+    {
+      "id": "library.remote.add-duplicate-error",
+      "interface": "library",
+      "profile": "any",
+      "category": "errors",
+      "description": "Adding an existing remote name with if_needed FALSE fails with FLATPAK_ERROR and ALREADY_INSTALLED and preserves its existing configuration.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_add_remote"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_add_remote"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation"
+      ]
+    },
+    {
+      "id": "library.errors.domain-identity",
+      "interface": "library",
+      "profile": "any",
+      "category": "errors",
+      "description": "The public Flatpak and portal error-domain functions each return a stable nonzero quark on repeated calls, and the two domains are distinct for matching their respective public error enums.",
+      "sources": [
+        {
+          "path": "common/flatpak-error.h",
+          "anchor": "FLATPAK_ERROR"
+        },
+        {
+          "path": "common/flatpak-portal-error.h",
+          "anchor": "FLATPAK_PORTAL_ERROR"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_error_quark",
+        "library.function.flatpak_portal_error_quark"
+      ],
+      "required_capabilities": [
+        "libflatpak"
+      ]
+    }
+  ]
+}

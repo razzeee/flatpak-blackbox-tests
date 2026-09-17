@@ -1,0 +1,232 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "limitations": [],
+  "requirements": [
+    {
+      "id": "cli.mask.user.blocks-update",
+      "interface": "cli",
+      "profile": "user",
+      "category": "maintenance",
+      "description": "An installed user ref matching a stored mask pattern remains at its current version when an update is available.",
+      "sources": [
+        {
+          "path": "doc/flatpak-mask.xml",
+          "anchor": "A masked ref will never be updated or automatically installed"
+        }
+      ],
+      "surfaces": [
+        "cli.command.mask"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.mask.user.remove",
+      "interface": "cli",
+      "profile": "user",
+      "category": "maintenance",
+      "description": "Removing a stored user mask pattern removes it from later mask enumeration.",
+      "sources": [
+        {
+          "path": "doc/flatpak-mask.xml",
+          "anchor": "--remove"
+        },
+        {
+          "path": "doc/flatpak-mask.xml",
+          "anchor": "To list the current set of masks"
+        }
+      ],
+      "surfaces": [
+        "cli.command.mask",
+        "cli.option.mask.--remove"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.pin.user.prevents-removal",
+      "interface": "cli",
+      "profile": "user",
+      "category": "maintenance",
+      "description": "A user runtime matching a stored pin remains installed when unused runtimes are automatically removed.",
+      "sources": [
+        {
+          "path": "doc/flatpak-pin.xml",
+          "anchor": "A pinned ref will never be automatically uninstalled"
+        }
+      ],
+      "surfaces": [
+        "cli.command.pin"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.pin.user.remove",
+      "interface": "cli",
+      "profile": "user",
+      "category": "maintenance",
+      "description": "Removing a user pin pattern removes it from later pin enumeration.",
+      "sources": [
+        {
+          "path": "doc/flatpak-pin.xml",
+          "anchor": "--remove"
+        },
+        {
+          "path": "doc/flatpak-pin.xml",
+          "anchor": "To list the current set of pins"
+        }
+      ],
+      "surfaces": [
+        "cli.command.pin",
+        "cli.option.pin.--remove"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.history.user.changes",
+      "interface": "cli",
+      "profile": "user",
+      "category": "maintenance",
+      "description": "When the relevant journal records are available, user history reports the installation, update and removal changes made to user refs.",
+      "sources": [
+        {
+          "path": "doc/flatpak-history.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.history"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "journal"
+      ]
+    },
+    {
+      "id": "cli.repair.user.restore",
+      "interface": "cli",
+      "profile": "user",
+      "category": "maintenance",
+      "description": "Repairing a user installation reinstalls deployed refs whose required repository objects are missing or invalid, restoring usable deployed content when the source is available.",
+      "sources": [
+        {
+          "path": "doc/flatpak-repair.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.repair"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "filesystem-fault-injection"
+      ]
+    },
+    {
+      "id": "cli.repair.user.dry-run",
+      "interface": "cli",
+      "profile": "user",
+      "category": "maintenance",
+      "description": "Repair --dry-run reports installation inconsistencies without changing the installation.",
+      "sources": [
+        {
+          "path": "doc/flatpak-repair.xml",
+          "anchor": "--dry-run"
+        }
+      ],
+      "surfaces": [
+        "cli.command.repair",
+        "cli.option.repair.--dry-run"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "filesystem-fault-injection"
+      ]
+    },
+    {
+      "id": "cli.repair.system.root-required",
+      "interface": "cli",
+      "profile": "system",
+      "category": "maintenance",
+      "description": "Repair of the system installation requires root privileges; an unprivileged invocation cannot perform the system repair.",
+      "sources": [
+        {
+          "path": "doc/flatpak-repair.xml",
+          "anchor": "flatpak repair has to be run with root privileges to operate on the system installation."
+        }
+      ],
+      "surfaces": [
+        "cli.command.repair",
+        "cli.option.repair.--system"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "system-authorization"
+      ]
+    },
+    {
+      "id": "cli.preinstall.system.synchronize",
+      "interface": "cli",
+      "profile": "system",
+      "category": "maintenance",
+      "description": "Preinstall with no action options synchronizes system-installed vendor flatpaks with the selected .preinstall definitions by installing or removing the designated refs.",
+      "sources": [
+        {
+          "path": "doc/flatpak-preinstall.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.preinstall"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "system-authorization",
+        "local-repository",
+        "vendor-preinstall"
+      ]
+    },
+    {
+      "id": "cli.preinstall.system.opt-out",
+      "interface": "cli",
+      "profile": "system",
+      "category": "maintenance",
+      "description": "A vendor-preinstalled flatpak explicitly uninstalled by the user is not automatically reinstalled by a later preinstall synchronization.",
+      "sources": [
+        {
+          "path": "doc/flatpak-preinstall.xml",
+          "anchor": "Users can opt out of preinstalled flatpaks by simply uninstalling them"
+        }
+      ],
+      "surfaces": [
+        "cli.command.preinstall"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "system-authorization",
+        "local-repository",
+        "vendor-preinstall"
+      ]
+    }
+  ]
+}

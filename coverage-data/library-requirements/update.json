@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "limitations": [],
+  "requirements": [
+    {
+      "id": "library.update.user.latest",
+      "interface": "library",
+      "profile": "user",
+      "category": "update",
+      "description": "With app A installed and B advertised, an update transaction with commit NULL succeeds and deploys B; an unchanged required runtime retains its commit.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_add_update"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_run"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_add_update",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.update.user.noop",
+      "interface": "library",
+      "profile": "user",
+      "category": "update",
+      "description": "An update transaction against a healthy remote advertising the already installed app and runtime commits succeeds and preserves both commits. This does not require an operation-done signal for a skipped update.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_add_update"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_operation_get_is_skipped"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_add_update",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.update.system.latest",
+      "interface": "library",
+      "profile": "system",
+      "category": "update",
+      "description": "An authorized update transaction on system-installed A with commit NULL deploys advertised B in the selected system installation and preserves an unchanged runtime.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_add_update"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_run"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_add_update",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "system-installation",
+        "system-authorization",
+        "local-repository"
+      ]
+    }
+  ]
+}

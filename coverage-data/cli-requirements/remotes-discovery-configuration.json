@@ -1,0 +1,387 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "limitations": [],
+  "requirements": [
+    {
+      "id": "cli.remote-add.user.url",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Adding a named user remote with a repository URL persists that name and URL so a later remotes query reports the same pair.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-add.xml",
+          "anchor": "Description"
+        },
+        {
+          "path": "doc/flatpak-remotes.xml",
+          "anchor": "url"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-add",
+        "cli.command.remotes"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.remote-add.user.title",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "The title supplied when adding a user remote persists and is returned unchanged by a later remotes title query.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-add.xml",
+          "anchor": "--title=TITLE"
+        },
+        {
+          "path": "doc/flatpak-remotes.xml",
+          "anchor": "title"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-add",
+        "cli.option.remote-add.--title",
+        "cli.command.remotes"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.remote-add.user.priority",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "The numeric priority supplied when adding a user remote persists and is reported by a later remotes priority query.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-add.xml",
+          "anchor": "--prio=PRIO"
+        },
+        {
+          "path": "doc/flatpak-remotes.xml",
+          "anchor": "priority"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-add",
+        "cli.option.remote-add.--prio",
+        "cli.command.remotes"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.remote-add.user.if-not-exists",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Adding an existing user remote from a repository URL with --if-not-exists leaves its previously configured URL, title and priority unchanged despite different supplied values.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-add.xml",
+          "anchor": "--if-not-exists"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-add",
+        "cli.option.remote-add.--if-not-exists"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.remote-add.user.flatpakrepo",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Adding a remote from a .flatpakrepo description configures the repository URL and title defined by that description.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-add.xml",
+          "anchor": "--from"
+        },
+        {
+          "path": "doc/flatpakrepo.xml",
+          "anchor": "Url"
+        },
+        {
+          "path": "doc/flatpakrepo.xml",
+          "anchor": "Title"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-add",
+        "cli.option.remote-add.--from"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.remote-add.user.flatpakrepo-filter-replacement",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Adding an existing remote from a .flatpakrepo file with --if-not-exists replaces its filter with the file's Filter value, or clears the existing filter when the file omits Filter.",
+      "sources": [
+        {
+          "path": "doc/flatpakrepo.xml",
+          "anchor": "Filter"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-add",
+        "cli.option.remote-add.--if-not-exists"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.remote-modify.user.url",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Changing a user remote's URL persists the new URL, which a subsequent remotes URL query reports for that remote.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-modify.xml",
+          "anchor": "--url=URL"
+        },
+        {
+          "path": "doc/flatpak-remotes.xml",
+          "anchor": "url"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-modify",
+        "cli.option.remote-modify.--url",
+        "cli.command.remotes"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.remote-modify.user.title",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Changing a user remote's title persists the replacement title, which a subsequent remotes title query reports.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-modify.xml",
+          "anchor": "--title=TITLE"
+        },
+        {
+          "path": "doc/flatpak-remotes.xml",
+          "anchor": "title"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-modify",
+        "cli.option.remote-modify.--title",
+        "cli.command.remotes"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.remote-modify.user.priority",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Changing a user remote's priority persists the replacement number, which a subsequent remotes priority query reports.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-modify.xml",
+          "anchor": "--prio=PRIO"
+        },
+        {
+          "path": "doc/flatpak-remotes.xml",
+          "anchor": "priority"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-modify",
+        "cli.option.remote-modify.--prio",
+        "cli.command.remotes"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.remote-modify.user.disable",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Disabling a user remote persists its disabled state, preventing automatic updates from that remote in a later update invocation.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-modify.xml",
+          "anchor": "--disable"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-modify",
+        "cli.option.remote-modify.--disable"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.remote-modify.user.enable",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Enabling a disabled user remote persists its enabled state so a later update can obtain an available update from it.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-modify.xml",
+          "anchor": "--enable"
+        },
+        {
+          "path": "doc/flatpak-remote-modify.xml",
+          "anchor": "--disable"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-modify",
+        "cli.option.remote-modify.--enable"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.remote-modify.user.filter",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "A configured user remote filter denies refs matching a deny rule except refs explicitly matched by an allow rule.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-modify.xml",
+          "anchor": "--filter=FILE"
+        },
+        {
+          "path": "doc/flatpak-remote-add.xml",
+          "anchor": "--filter=PATH"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-modify",
+        "cli.option.remote-modify.--filter"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.remote-delete.user.removed",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Deleting an unused user remote persists its removal: later remotes enumeration, including disabled remotes, contains no entry for that name while other remotes remain configured.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-delete.xml",
+          "anchor": "Description"
+        },
+        {
+          "path": "doc/flatpak-remotes.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-delete",
+        "cli.command.remotes"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.remote-delete.user.force",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Deleting a user remote with --force removes its configuration even when installed apps or runtimes use it.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-delete.xml",
+          "anchor": "--force"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-delete",
+        "cli.option.remote-delete.--force"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.remote-add.system.scope",
+      "interface": "cli",
+      "profile": "system",
+      "category": "remotes-discovery",
+      "description": "Adding a remote with --system persists it in the default system configuration and does not create a user remote of that name.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-add.xml",
+          "anchor": "--system"
+        },
+        {
+          "path": "doc/flatpak-remotes.xml",
+          "anchor": "--system"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-add",
+        "cli.option.remote-add.--system",
+        "cli.command.remotes"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "user-installation",
+        "system-authorization",
+        "multiple-installations",
+        "local-repository"
+      ]
+    }
+  ]
+}

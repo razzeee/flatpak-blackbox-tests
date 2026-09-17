@@ -8,8 +8,9 @@ This standalone suite tests a selected CLI and source-compatible libflatpak
 implementation through public interfaces. It covers installation lifecycles,
 remote configuration, sandbox observations, build/distribution output, library
 objects, transactions, cancellation, signals, and isolated system selectors.
-The current full run contains 326 driver/profile cases, with 308 passing,
-17 failing checks and one unmet prerequisite against reference Flatpak 1.19.1.
+The current full run contains 326 driver/profile cases, with 308 passing and
+18 failing checks against reference Flatpak 1.19.1. Its report is
+`/home/razze/dev/flatpak/_build/blackbox-artifacts/readable-json-full-01/report.json`.
 
 For measured percentages, denominators, and known reference discrepancies, read
 [`COVERAGE.md`](COVERAGE.md). Each execution now writes `coverage.md` and embeds
@@ -83,7 +84,8 @@ repository and its commit map. The other transaction-contract cases accept query
 fixtures without those optional fields.
 
 The six SDK/debug, operation-cause, migration, dependency-query and remote-trust
-cases are registered in `scenario-data/six-contracts.json`. Full preparation adds
+cases are registered in the transaction-contracts, library-queries-installed,
+and library-objects-remotes JSON groups under `scenario-data/`. Full preparation adds
 the optional, validated `contracts` manifest group. It contains two runnable apps,
 a shared runtime, a distinct SDK, app/runtime/SDK debug refs, and shared extensions.
 Separate repository snapshots change only the runtime, a shared app extension, or
@@ -322,6 +324,34 @@ URL, fixture metadata, and scenario name. Optional `client` metadata names a C
 source and a `blackbox_GROUP_main` entry point returning -1 for unhandled commands.
 The shared header provides `CALL_API` and `TRACE_SIGNAL` instrumentation.
 
+Keep each behavior and all its driver mappings in the same flat topic file,
+usually 200–500 lines. Build topics cover initialization, execution, finish,
+export/signing, bundles, and repositories. Other large groups are split into
+queries, configuration, installation, or transaction topics. Shared client
+registrations may appear in several files; the loader deduplicates them.
+
+`coverage-data/cli-requirements.json` and `library-requirements.json` are explicit
+indexes. They retain interface scope and limitations and list category documents
+in their `includes` arrays. The category directories use the existing requirement
+categories; CLI lifecycle and remote discovery have further semantic subdivisions.
+Each shard has schema, scope, limitations, and requirements fields. Includes are
+relative to the index directory, must stay inside it, and cannot recurse. Legacy
+documents with inline requirements still work. Coverage fingerprints hash every
+JSON file below `coverage-data/`, including category shards.
+
+All static JSON uses two-space indentation and a final newline. Small categories
+remain small files. The generated `coverage-data/surfaces.json` stays intact so
+`catalogue.py --check` can compare its mechanical output. Format after editing:
+
+```sh
+python3 format_json.py --write
+python3 format_json.py --check
+```
+
+The formatter validates JSON first, preserves key order, and rejects duplicate
+keys. It visits root JSON and the scenario/coverage data directories, excluding
+build reports and virtual environments.
+
 Map only fully asserted existing requirement IDs. Option-only cases can declare
 `surface_assertions`, each naming an existing CLI-option ID and the specific
 observed effect. They do not create behavior obligations or command coverage.
@@ -344,6 +374,7 @@ uv sync --locked
 uv run --locked ty check .
 uv run --locked mypy
 uv run --locked ruff check .
+uv run --locked python format_json.py --check
 uv run --locked python -m unittest discover -p 'test_*.py'
 ```
 
@@ -377,7 +408,8 @@ from Meson's internal tests; it requires prepared fixtures and an explicit targe
 ## GitHub Actions
 
 `Development checks` runs on pushes and pull requests, and can also be started
-manually. It runs Ruff, ty, strict mypy, Bash syntax checks, and ShellCheck. Unit
+manually. It runs Ruff, ty, strict mypy, static JSON formatting, Bash syntax checks,
+and ShellCheck. Unit
 tests run on Python 3.10 and 3.14 with D-Bus installed so the runner integration
 tests execute. The optional prepared-fixture round-trip test is skipped because
 this workflow does not generate full fixtures. Python tools use `uv.lock`; the

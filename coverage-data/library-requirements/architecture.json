@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "limitations": [],
+  "requirements": [
+    {
+      "id": "library.arches.priority",
+      "interface": "library",
+      "profile": "any",
+      "category": "architecture",
+      "description": "Supported architectures are canonical names in a zero-terminated priority-ordered array whose first element equals the canonical default architecture for the fixture machine.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_get_default_arch"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_get_supported_arches"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_get_default_arch",
+        "library.function.flatpak_get_supported_arches"
+      ],
+      "required_capabilities": [
+        "libflatpak"
+      ]
+    }
+  ]
+}

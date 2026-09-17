@@ -1,0 +1,176 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "limitations": [],
+  "requirements": [
+    {
+      "id": "library.ownership.formatted-string",
+      "interface": "library",
+      "profile": "any",
+      "category": "ownership",
+      "description": "A transfer-full string from format_ref remains valid after releasing its source ref and can be freed independently. Repeated allocating calls can each be freed without affecting a live ref or its cached borrowed formatter result.",
+      "sources": [
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_format_ref"
+        },
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_format_ref_cached"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_ref_format_ref",
+        "library.function.flatpak_ref_format_ref_cached"
+      ],
+      "required_capabilities": [
+        "libflatpak"
+      ]
+    },
+    {
+      "id": "library.ownership.installation-path",
+      "interface": "library",
+      "profile": "any",
+      "category": "ownership",
+      "description": "The transfer-full GFile returned by get_path remains usable after the installation object is released and can be unreferenced independently.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_path"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_get_path"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation"
+      ]
+    },
+    {
+      "id": "library.ownership.returned-installed-ref",
+      "interface": "library",
+      "profile": "any",
+      "category": "ownership",
+      "description": "An installed ref returned with transfer full remains usable for identity and commit inspection after its installation object is released, and the caller can release the ref independently.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_installed_ref"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_get_installed_ref"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.ownership.bundle-results",
+      "interface": "library",
+      "profile": "any",
+      "category": "ownership",
+      "description": "Transfer-full bundle file, metadata bytes, and origin string results remain valid after releasing the bundle ref, and each result can be released independently using its documented GLib ownership convention.",
+      "sources": [
+        {
+          "path": "common/flatpak-bundle-ref.c",
+          "anchor": "flatpak_bundle_ref_get_file"
+        },
+        {
+          "path": "common/flatpak-bundle-ref.c",
+          "anchor": "flatpak_bundle_ref_get_metadata"
+        },
+        {
+          "path": "common/flatpak-bundle-ref.c",
+          "anchor": "flatpak_bundle_ref_get_origin"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_bundle_ref_get_file",
+        "library.function.flatpak_bundle_ref_get_metadata",
+        "library.function.flatpak_bundle_ref_get_origin"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "bundle-files"
+      ]
+    },
+    {
+      "id": "library.ownership.remote-owned-and-borrowed",
+      "interface": "library",
+      "profile": "any",
+      "category": "ownership",
+      "description": "A remote's transfer-full URL result survives releasing the remote. Remote-ref metadata is borrowed; taking an explicit GBytes reference while the remote ref is alive permits retaining those bytes after releasing the remote ref.",
+      "sources": [
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_get_url"
+        },
+        {
+          "path": "common/flatpak-remote-ref.c",
+          "anchor": "flatpak_remote_ref_get_metadata"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_remote_get_url",
+        "library.function.flatpak_remote_ref_get_metadata"
+      ],
+      "required_capabilities": [
+        "libflatpak"
+      ]
+    },
+    {
+      "id": "library.ownership.transaction-results",
+      "interface": "library",
+      "profile": "any",
+      "category": "ownership",
+      "description": "The transfer-full operations list and its operation objects, and the transfer-full installation returned by a transaction, can be retained and inspected after releasing the transaction. Borrowed related-to-ops graph elements remain safe to inspect while their parent transaction is alive; retaining an operation alone does not extend that documented graph lifetime.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_get_operations"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_get_installation"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_operation_get_related_to_ops"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_get_operations",
+        "library.function.flatpak_transaction_get_installation",
+        "library.function.flatpak_transaction_operation_get_related_to_ops"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.ownership.progress-status",
+      "interface": "library",
+      "profile": "any",
+      "category": "ownership",
+      "description": "A transfer-full progress status string can be retained after releasing its progress object and freed independently of later status results.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_progress_get_status"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_progress_get_status"
+      ],
+      "required_capabilities": [
+        "libflatpak"
+      ]
+    }
+  ]
+}

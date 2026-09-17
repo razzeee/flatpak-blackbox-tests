@@ -1,0 +1,480 @@
+{
+  "schema": 1,
+  "client": {
+    "source": "client-system.c",
+    "entry": "blackbox_system_main"
+  },
+  "notes": [
+    "Every target call enters two disposable bubblewrap user/mount namespace layers. The outer root maps only to the invoking host UID; inner root maps only to outer root. Inherited host mounts are locked read-only, checked by a denied bind-remount before every target call. Private PID/network namespaces and writable installation state are case-local; generated state is removed after each case while command evidence is retained.",
+    "Target environment keys BLACKBOX_SYSTEM_INSTALL_DIR and BLACKBOX_SYSTEM_CONFIG_DIR specify the expected compiled defaults; their reference-build defaults are /var/local/lib/flatpak and /usr/local/etc/flatpak. The namespace mounts private data at those paths, and CLI/C-client assertions still check the target's actual default location. These keys never become FLATPAK_SYSTEM_DIR or FLATPAK_CONFIG_DIR redirects. Set them under the target JSON environment object, not the host shell environment.",
+    "Readonly exposure includes only the suite directory, selected target executables, configured helpers and LD_LIBRARY_PATH directories. Uninstalled targets can explicitly add colon-separated absolute paths with BLACKBOX_TARGET_READONLY_PATHS in the target environment. No repository ancestor is inferred. Paths that cover private namespace roots or overlap protected installation/service content are rejected, including symlink aliases.",
+    "CLI deployment location checks use the public returned location, verify containment in the selected public installation base, locate the controlled bin/blackbox-probe payload there and execute it to distinguish A from B. They never construct a deployment path from a ref or commit, and never recursively search a general installation root for content.",
+    "Direct-root mutations may satisfy explicitly selected installation outcomes. These cases do not assert polkit authorization, non-root helper behavior, or multiple-user access. No requirement demanding those outcomes is mapped.",
+    "The named override case intentionally asserts the documented isolation contract; the reference target currently fails it, so that option receives no verified credit from that case."
+  ],
+  "behaviors": [
+    {
+      "id": "system-selectors.config",
+      "scenario": "system-selectors-config",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations"
+      ],
+      "description": "Set, read and unset distinct installation configurations, including implicit default selection.",
+      "preconditions": "Disposable namespace with fresh default, named alt, and root-user stores.",
+      "expected": "Writes and unsets change only the selected installation; implicit write selects default system.",
+      "references": [
+        "doc/flatpak-config.xml"
+      ]
+    },
+    {
+      "id": "system-selectors.remotes",
+      "scenario": "system-selectors-remotes",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Add, modify, enumerate and delete installation-scoped remotes.",
+      "preconditions": "Three private installations and file-URI repositories.",
+      "expected": "Unique sentinels and same-name remote properties remain isolated across mutations and deletion.",
+      "references": [
+        "doc/flatpak-remote-add.xml",
+        "doc/flatpak-remotes.xml",
+        "doc/flatpak-remote-modify.xml",
+        "doc/flatpak-remote-delete.xml"
+      ]
+    },
+    {
+      "id": "system-selectors.remote-queries",
+      "scenario": "system-selectors-remote-queries",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Query different remote commits and independently filtered remote ref sets.",
+      "preconditions": "Same remote name points to A or B in each installation; independent allow/deny filters.",
+      "expected": "remote-info selects the correct commit and remote-ls the exact selected ref set, without deployments.",
+      "references": [
+        "doc/flatpak-remote-info.xml",
+        "doc/flatpak-remote-ls.xml",
+        "doc/flatpak-remote-modify.xml"
+      ]
+    },
+    {
+      "id": "system-selectors.remote-force",
+      "scenario": "system-selectors-remote-force",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Force-delete selected origins while retaining their deployed applications.",
+      "preconditions": "Installed apps use same-name remotes in each private installation.",
+      "expected": "Ordinary deletion refuses installed refs; force removes selected remote configuration and retains the app commit.",
+      "references": [
+        "doc/flatpak-remote-delete.xml"
+      ]
+    },
+    {
+      "id": "system-selectors.disabled",
+      "scenario": "system-selectors-disabled",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Disable only the default origin while an independent user origin remains enabled.",
+      "preconditions": "Default and user A installed with B available.",
+      "expected": "Default A is held and omitted from ordinary remote listing while user updates to B; enabling permits default B.",
+      "references": [
+        "doc/flatpak-remote-modify.xml",
+        "doc/flatpak-remotes.xml",
+        "doc/flatpak-update.xml"
+      ]
+    },
+    {
+      "id": "system-selectors.overrides",
+      "scenario": "system-selectors-overrides",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations"
+      ],
+      "description": "Store and reset independently selected default-system and user overrides.",
+      "preconditions": "No overrides exist in either private store.",
+      "expected": "Exact environment values survive public show; reset clears only the selected store.",
+      "references": [
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "system-selectors.override-named",
+      "scenario": "system-selectors-override-named",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations"
+      ],
+      "description": "Assert that the named override selector is independent of the default system override.",
+      "preconditions": "Fresh default, named and user stores; default override is written first.",
+      "expected": "Named show is initially empty, and subsequent writes/resets affect only their selected store. Reference target currently fails this contract.",
+      "references": [
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "system-selectors.patterns",
+      "scenario": "system-selectors-patterns",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations"
+      ],
+      "description": "Add, query and remove installation-specific mask and pin patterns.",
+      "preconditions": "Fresh default, named and user stores.",
+      "expected": "Each exact pattern appears and disappears only in the selected installation. This case does not assert dependency retention or update blocking.",
+      "references": [
+        "doc/flatpak-mask.xml",
+        "doc/flatpak-pin.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "system-selectors.config",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [
+        "cli.config.system.named"
+      ],
+      "rationale": "Named languages value persists while default/user values remain independent; default and unset writes are checked across fresh calls.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.config.--system",
+          "rationale": "Explicit default write and get select default languages while alt/user retain distinct values."
+        },
+        {
+          "id": "cli.option.config.--user",
+          "rationale": "User languages remain independent of default and named writes."
+        },
+        {
+          "id": "cli.option.config.--installation",
+          "rationale": "Named languages survive default writes and only named unset restores its original value."
+        },
+        {
+          "id": "cli.option.config.--set",
+          "rationale": "Exact stored value changes after each set."
+        },
+        {
+          "id": "cli.option.config.--get",
+          "rationale": "Get returns exact selected installation value."
+        },
+        {
+          "id": "cli.option.config.--unset",
+          "rationale": "Unset restores the pre-write public value only in the selected installation."
+        }
+      ]
+    },
+    {
+      "behavior_id": "system-selectors.remotes",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [
+        "cli.remote-add.system.scope",
+        "cli.remotes.system.named"
+      ],
+      "rationale": "Exact selected remote sets, same-name property isolation and untouched sentinel remotes are asserted after additions, modifications and removals.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--system",
+          "rationale": "Default-only sentinel is present only in the default store."
+        },
+        {
+          "id": "cli.option.remote-add.--installation",
+          "rationale": "Named-only sentinel is present only in alt."
+        },
+        {
+          "id": "cli.option.remote-add.--user",
+          "rationale": "User-only sentinel is present only in user store."
+        },
+        {
+          "id": "cli.option.remotes.--system",
+          "rationale": "Enumeration returns exact default sentinel and selected properties."
+        },
+        {
+          "id": "cli.option.remotes.--installation",
+          "rationale": "Enumeration returns exact alt sentinel and selected properties."
+        },
+        {
+          "id": "cli.option.remotes.--user",
+          "rationale": "Enumeration returns exact user sentinel and selected properties."
+        },
+        {
+          "id": "cli.option.remotes.--columns",
+          "rationale": "Exact tab-separated name/title/priority/URL rows match configured values and requested order."
+        },
+        {
+          "id": "cli.option.remote-modify.--system",
+          "rationale": "Changing fixture in default store leaves same-name alt/user properties unchanged."
+        },
+        {
+          "id": "cli.option.remote-modify.--installation",
+          "rationale": "Changing alt fixture leaves user fixture unchanged and default sentinel intact."
+        },
+        {
+          "id": "cli.option.remote-modify.--user",
+          "rationale": "Changing user fixture leaves same-name default and named remote properties unchanged."
+        },
+        {
+          "id": "cli.option.remote-modify.--title",
+          "rationale": "Selected persisted title equals the supplied replacement."
+        },
+        {
+          "id": "cli.option.remote-modify.--prio",
+          "rationale": "Selected persisted numeric priority equals the supplied replacement."
+        },
+        {
+          "id": "cli.option.remote-modify.--url",
+          "rationale": "Selected persisted URL changes from file repository A to B."
+        },
+        {
+          "id": "cli.option.remote-delete.--system",
+          "rationale": "Removing default fixture leaves same-name alt/user remotes present."
+        },
+        {
+          "id": "cli.option.remote-delete.--installation",
+          "rationale": "Removing alt fixture leaves same-name user remote present and all sentinels intact."
+        },
+        {
+          "id": "cli.option.remote-delete.--user",
+          "rationale": "Removing user fixture leaves same-name default/alt remotes and every sentinel intact."
+        }
+      ]
+    },
+    {
+      "behavior_id": "system-selectors.remote-queries",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [],
+      "rationale": "Selected remote commits and distinct filtered ref sets are checked without installing anything.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-info.--system",
+          "rationale": "Default origin reports exact A commit while named origin reports B."
+        },
+        {
+          "id": "cli.option.remote-info.--installation",
+          "rationale": "Named origin reports exact B commit while default/user report A."
+        },
+        {
+          "id": "cli.option.remote-info.--user",
+          "rationale": "After changing only the user origin to B, user lookup returns B while default lookup still returns A."
+        },
+        {
+          "id": "cli.option.remote-info.--show-ref",
+          "rationale": "Machine-readable identity equals the requested full app ref."
+        },
+        {
+          "id": "cli.option.remote-info.--show-commit",
+          "rationale": "Machine-readable commit equals selected repository A or B."
+        },
+        {
+          "id": "cli.option.remote-ls.--system",
+          "rationale": "Default listing contains app and runtime, unlike independently filtered alt/user lists."
+        },
+        {
+          "id": "cli.option.remote-ls.--installation",
+          "rationale": "Named listing contains runtime only, then both refs after clearing its filter."
+        },
+        {
+          "id": "cli.option.remote-ls.--user",
+          "rationale": "User listing contains app only, including after named filter is cleared."
+        },
+        {
+          "id": "cli.option.remote-ls.--columns",
+          "rationale": "Ref-only output matches exact full-ref sets."
+        },
+        {
+          "id": "cli.option.remote-modify.--filter",
+          "rationale": "Separate explicit allow/deny files yield runtime-only and app-only selected views."
+        },
+        {
+          "id": "cli.option.remote-modify.--no-filter",
+          "rationale": "Clearing named filter restores both refs while user remains filtered."
+        }
+      ]
+    },
+    {
+      "behavior_id": "system-selectors.remote-force",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [],
+      "rationale": "Forced deletion is contrasted with installed-origin refusal and followed by remote absence and preserved app query.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-delete.--force",
+          "rationale": "Force removes an origin that ordinary deletion refuses, without removing the app deployment."
+        }
+      ]
+    },
+    {
+      "behavior_id": "system-selectors.disabled",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [],
+      "rationale": "Only selected default origin is disabled; user independently updates and re-enabling permits default update.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remotes.--show-disabled",
+          "rationale": "Disabled fixture is absent ordinarily and present when explicitly requested."
+        },
+        {
+          "id": "cli.option.remote-modify.--disable",
+          "rationale": "Default A remains installed despite available B while independently enabled user updates."
+        },
+        {
+          "id": "cli.option.remote-modify.--enable",
+          "rationale": "Re-enabling default origin permits the previously blocked B update."
+        }
+      ]
+    },
+    {
+      "behavior_id": "system-selectors.overrides",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [],
+      "rationale": "Public show observes independent persisted default/user values; reset removes only the selected value.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.override.--system",
+          "rationale": "Default override write is absent from user show, and default reset preserves user value."
+        },
+        {
+          "id": "cli.option.override.--user",
+          "rationale": "User override write preserves default value, and user reset removes its own value."
+        },
+        {
+          "id": "cli.option.override.--env",
+          "rationale": "Exact SELECTOR value persists in public override output."
+        },
+        {
+          "id": "cli.option.override.--show",
+          "rationale": "Public show returns the stored Environment entry and becomes empty after reset."
+        },
+        {
+          "id": "cli.option.override.--reset",
+          "rationale": "Selected stored Environment entry disappears while other store remains unchanged."
+        }
+      ]
+    },
+    {
+      "behavior_id": "system-selectors.override-named",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [],
+      "rationale": "Named overrides must be independent of default overrides; a failure receives no verified credit.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.override.--installation",
+          "rationale": "Named show must exclude a default-only override; selected writes and resets must remain isolated."
+        }
+      ]
+    },
+    {
+      "behavior_id": "system-selectors.patterns",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [],
+      "rationale": "Exact mask/pin lists change only in the selected installation after each add/remove.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.mask.--system",
+          "rationale": "Default mask add/remove affects only default pattern list."
+        },
+        {
+          "id": "cli.option.mask.--installation",
+          "rationale": "Named mask add/remove affects only named pattern list."
+        },
+        {
+          "id": "cli.option.mask.--user",
+          "rationale": "User mask add/remove affects only user pattern list."
+        },
+        {
+          "id": "cli.option.mask.--remove",
+          "rationale": "Exact previously stored mask disappears only from selected store."
+        },
+        {
+          "id": "cli.option.pin.--system",
+          "rationale": "Default pin add/remove affects only default pattern list."
+        },
+        {
+          "id": "cli.option.pin.--installation",
+          "rationale": "Named pin add/remove affects only named pattern list."
+        },
+        {
+          "id": "cli.option.pin.--user",
+          "rationale": "User pin add/remove affects only user pattern list."
+        },
+        {
+          "id": "cli.option.pin.--remove",
+          "rationale": "Exact previously stored pin disappears only from selected store."
+        }
+      ]
+    }
+  ]
+}

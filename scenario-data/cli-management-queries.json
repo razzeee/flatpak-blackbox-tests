@@ -1,0 +1,324 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "management.query-fields",
+      "scenario": "management-query-fields",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Inspect permissions, remote metadata and commit parent.",
+      "preconditions": "Reference-exported queries fixture metadata and A/B ancestry.",
+      "expected": "Network permission, exact reference metadata and independently known A parent.",
+      "references": [
+        "doc/flatpak-info.xml",
+        "doc/flatpak-remote-info.xml"
+      ]
+    },
+    {
+      "id": "management.remote-info-arch",
+      "scenario": "management-remote-info-arch",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Query foreign remote copy instead of native alternative.",
+      "preconditions": "queries fixture contains both architectures.",
+      "expected": "Exact foreign full ref and reference commit.",
+      "references": [
+        "doc/flatpak-remote-info.xml"
+      ]
+    },
+    {
+      "id": "management.installed-arch",
+      "scenario": "management-installed-arch",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Select installed architecture in list and info.",
+      "preconditions": "Both native and foreign copies installed.",
+      "expected": "Lists exclude competing architecture; info selects exact foreign commit.",
+      "references": [
+        "doc/flatpak-list.xml",
+        "doc/flatpak-info.xml"
+      ]
+    },
+    {
+      "id": "management.remote-info-kinds",
+      "scenario": "management-remote-info-kinds",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Reject opposite-kind candidates in remote queries by ID.",
+      "preconditions": "Available app/runtime refs.",
+      "expected": "App-only rejects runtime ID; runtime-only rejects app ID.",
+      "references": [
+        "doc/flatpak-remote-info.xml"
+      ]
+    },
+    {
+      "id": "management.config",
+      "scenario": "management-config",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation"
+      ],
+      "description": "Persist languages through two writes.",
+      "preconditions": "Fresh user state.",
+      "expected": "Each get returns exactly the last value.",
+      "references": [
+        "doc/flatpak-config.xml"
+      ]
+    },
+    {
+      "id": "management.installed-queries",
+      "scenario": "management-installed-queries",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Query installed metadata, origin, runtime and typed ref lists.",
+      "preconditions": "Fixture app and runtime installed.",
+      "expected": "Exact fixture metadata and selected refs.",
+      "references": [
+        "doc/flatpak-info.xml",
+        "doc/flatpak-list.xml"
+      ]
+    },
+    {
+      "id": "management.file-access",
+      "scenario": "management-file-access",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Query path access before and after filesystem grants.",
+      "preconditions": "Installed app with no host filesystem grant.",
+      "expected": "Hidden, read-only, then read-write access.",
+      "references": [
+        "doc/flatpak-info.xml"
+      ]
+    },
+    {
+      "id": "management.remote-info",
+      "scenario": "management-remote-info",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Query remote commit while older local app is installed.",
+      "preconditions": "A installed and B advertised.",
+      "expected": "Remote ref/commit is exactly B; local deployment stays A.",
+      "references": [
+        "doc/flatpak-remote-info.xml"
+      ]
+    },
+    {
+      "id": "management.remote-log",
+      "scenario": "management-remote-log",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Query remote commit history.",
+      "preconditions": "B repository retains A ancestry.",
+      "expected": "Both exact A and B commits appear.",
+      "references": [
+        "doc/flatpak-remote-info.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "management.query-fields",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Reference-generated metadata and parent commit provide independent oracles.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.info.--show-permissions",
+          "rationale": "Exact output is the fixture network Context, not general info or full metadata."
+        },
+        {
+          "id": "cli.option.remote-info.--show-metadata",
+          "rationale": "Output equals independently reference-exported metadata file."
+        },
+        {
+          "id": "cli.option.remote-info.--show-parent",
+          "rationale": "Output equals exact A parent of reference-generated B commit."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.remote-info-arch",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Native competitor distinguishes architecture selection.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-info.--arch",
+          "rationale": "Architecture-free name resolves to exact foreign ref and commit instead of native."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.installed-arch",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.info.user.ref-commit"
+      ],
+      "rationale": "Exact selected installed foreign full ref and commit.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.info.--arch",
+          "rationale": "With both copies installed, architecture-free info selects foreign copy over native."
+        },
+        {
+          "id": "cli.option.list.--arch",
+          "rationale": "Native and foreign list queries each exclude the other installed copy."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.remote-info-kinds",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Opposite-kind available candidates must not be queried.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-info.--app",
+          "rationale": "App-only remote query rejects an available runtime ID."
+        },
+        {
+          "id": "cli.option.remote-info.--runtime",
+          "rationale": "Runtime-only remote query rejects an available app ID."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.config",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.config.user.roundtrip"
+      ],
+      "rationale": "Two separate get calls match each preceding languages write."
+    },
+    {
+      "behavior_id": "management.installed-queries",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.info.user.metadata",
+        "cli.info.user.ref-commit"
+      ],
+      "rationale": "Exact app/runtime metadata sections and fields and full ref/commit queries match fixture.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.info.--show-origin",
+          "rationale": "Installed origin equals configured fixture remote."
+        },
+        {
+          "id": "cli.option.info.--show-runtime",
+          "rationale": "Installed runtime equals fixture runtime/arch/branch."
+        },
+        {
+          "id": "cli.option.info.--show-sdk",
+          "rationale": "SDK query returns exact SDK declared by fixture metadata."
+        },
+        {
+          "id": "cli.option.list.--runtime",
+          "rationale": "Runtime-only list excludes installed app."
+        },
+        {
+          "id": "cli.option.list.--columns",
+          "rationale": "Ref-only queries return exact expected refs."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.file-access",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.info.user.file-access"
+      ],
+      "rationale": "Public access query changes from hidden to read-only to read-write after grants."
+    },
+    {
+      "behavior_id": "management.remote-info",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.remote-info.user.ref-commit"
+      ],
+      "rationale": "Exact remote full ref and B commit differ from verified local A.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-info.--commit",
+          "rationale": "Explicit A commit query returns A while default remote query returns B."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.remote-log",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.remote-info.user.history"
+      ],
+      "rationale": "History contains exact old A and current B commits."
+    }
+  ]
+}

@@ -1,0 +1,341 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "limitations": [],
+  "requirements": [
+    {
+      "id": "cli.document-export.any.read-grant",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "Exporting a local file for an app creates a document ID and lets that app read the file through the document portal despite lacking direct host-path access.",
+      "sources": [
+        {
+          "path": "doc/flatpak-document-export.xml",
+          "anchor": "Description"
+        },
+        {
+          "path": "doc/flatpak-document-export.xml",
+          "anchor": "--app=APPID"
+        }
+      ],
+      "surfaces": [
+        "cli.command.document-export",
+        "cli.option.document-export.--app"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "sandbox-execution",
+        "desktop-portals",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.document-export.any.unique",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "Exporting a previously exported file with --unique creates a different document ID instead of reusing its existing ID.",
+      "sources": [
+        {
+          "path": "doc/flatpak-document-export.xml",
+          "anchor": "--unique"
+        }
+      ],
+      "surfaces": [
+        "cli.command.document-export",
+        "cli.option.document-export.--unique"
+      ],
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.document-export.any.write-revocation",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "Revoking an app's document write permission with --forbid-write prevents that app from writing through its document grant.",
+      "sources": [
+        {
+          "path": "doc/flatpak-document-export.xml",
+          "anchor": "--forbid-write"
+        }
+      ],
+      "surfaces": [
+        "cli.command.document-export",
+        "cli.option.document-export.--forbid-write"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "sandbox-execution",
+        "desktop-portals",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.documents.any.enumerate",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "documents lists exported files with their document IDs and full origin paths.",
+      "sources": [
+        {
+          "path": "doc/flatpak-documents.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.documents"
+      ],
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.documents.any.app-filter",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "documents APPID lists only files exported to that application, excluding documents granted only to another app.",
+      "sources": [
+        {
+          "path": "doc/flatpak-documents.xml",
+          "anchor": "If an APPID is specified"
+        }
+      ],
+      "surfaces": [
+        "cli.command.documents"
+      ],
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.document-info.any.identity-permissions",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "document-info reports an exported file's document ID, FUSE path, original location and per-application permissions consistently with its current grant.",
+      "sources": [
+        {
+          "path": "doc/flatpak-document-info.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.document-info"
+      ],
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.document-unexport.any.revoke",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "Unexporting a file removes its document ID and makes that document unavailable to all sandboxed applications.",
+      "sources": [
+        {
+          "path": "doc/flatpak-document-unexport.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.document-unexport"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "sandbox-execution",
+        "desktop-portals",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.document-unexport.any.by-id",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "Unexporting with --doc-id removes the specified document even when its original file has been deleted.",
+      "sources": [
+        {
+          "path": "doc/flatpak-document-unexport.xml",
+          "anchor": "--doc-id"
+        }
+      ],
+      "surfaces": [
+        "cli.command.document-unexport",
+        "cli.option.document-unexport.--doc-id"
+      ],
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.permission-set.any.persist",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "Setting an application's permissions for a table/object entry stores the supplied permission strings so a later permission query returns them.",
+      "sources": [
+        {
+          "path": "doc/flatpak-permission-set.xml",
+          "anchor": "Description"
+        },
+        {
+          "path": "doc/flatpak-permissions.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.permission-set"
+      ],
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.permission-set.any.data",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "permission-set --data associates the supplied serialized GVariant with the specified permission-store entry.",
+      "sources": [
+        {
+          "path": "doc/flatpak-permission-set.xml",
+          "anchor": "--data=DATA"
+        }
+      ],
+      "surfaces": [
+        "cli.command.permission-set",
+        "cli.option.permission-set.--data"
+      ],
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.permissions.any.selection",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "permissions TABLE ID returns the requested entry from that table rather than entries for other object IDs or tables.",
+      "sources": [
+        {
+          "path": "doc/flatpak-permissions.xml",
+          "anchor": "When called with two arguments"
+        }
+      ],
+      "surfaces": [
+        "cli.command.permissions"
+      ],
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.permission-show.any.app",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "permission-show lists the dynamic permissions stored for the requested application.",
+      "sources": [
+        {
+          "path": "doc/flatpak-permission-show.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.permission-show"
+      ],
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.permission-remove.any.app",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "Removing permissions with an APP_ID removes only that application's entry for the selected table/object, retaining another application's entry.",
+      "sources": [
+        {
+          "path": "doc/flatpak-permission-remove.xml",
+          "anchor": "If APP_ID is specified"
+        }
+      ],
+      "surfaces": [
+        "cli.command.permission-remove"
+      ],
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.permission-remove.any.object",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "Removing a permission-store table/object entry without APP_ID removes the entire selected object entry.",
+      "sources": [
+        {
+          "path": "doc/flatpak-permission-remove.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.permission-remove"
+      ],
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.permission-reset.any.app",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "Resetting permissions for an application removes all of its permissions across the permission store.",
+      "sources": [
+        {
+          "path": "doc/flatpak-permission-reset.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.permission-reset"
+      ],
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "limitations": [],
+  "requirements": [
+    {
+      "id": "library.remote-query.membership",
+      "interface": "library",
+      "profile": "any",
+      "category": "remote-query",
+      "description": "Listing refs by configured remote name and by its URI returns the available fixture app and runtime identities, including refs not installed locally.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_remote_refs_sync"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_list_remote_refs_sync"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.remote-query.current-ref",
+      "interface": "library",
+      "profile": "any",
+      "category": "remote-query",
+      "description": "Fetching a remote ref returns the remote's current commit and originating remote name even when a different commit of that ref is installed locally.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_fetch_remote_ref_sync"
+        },
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_get_commit"
+        },
+        {
+          "path": "common/flatpak-remote-ref.c",
+          "anchor": "flatpak_remote_ref_get_remote_name"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_fetch_remote_ref_sync",
+        "library.function.flatpak_ref_get_commit",
+        "library.function.flatpak_remote_ref_get_remote_name"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.remote-query.sideloaded-only",
+      "interface": "library",
+      "profile": "any",
+      "category": "remote-query",
+      "description": "Remote-ref listing with ONLY_SIDELOADED includes only refs available from the fixture's sideload repositories, excluding remote-only refs.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.h",
+          "anchor": "FlatpakQueryFlags"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_list_remote_refs_sync_full"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "sideload-repository"
+      ]
+    },
+    {
+      "id": "library.remote-query.all-arches",
+      "interface": "library",
+      "profile": "any",
+      "category": "remote-query",
+      "description": "Remote-ref listing with ALL_ARCHES includes advertised refs for fixture architectures outside the machine's primary architectures.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.h",
+          "anchor": "FlatpakQueryFlags"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_list_remote_refs_sync_full"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "multiple-architectures"
+      ]
+    },
+    {
+      "id": "library.remote-query.direct-metadata-size",
+      "interface": "library",
+      "profile": "any",
+      "category": "remote-query",
+      "description": "Direct metadata and size queries for a known remote ref return the fixture metadata, maximum download size, and installed size. A partially cached download may transfer fewer bytes than that maximum.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_fetch_remote_metadata_sync"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_fetch_remote_size_sync"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_fetch_remote_metadata_sync",
+        "library.function.flatpak_installation_fetch_remote_size_sync"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    }
+  ]
+}

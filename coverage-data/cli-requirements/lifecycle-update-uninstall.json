@@ -1,0 +1,324 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "limitations": [],
+  "requirements": [
+    {
+      "id": "cli.update.user.latest",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "Updating a user application when version B is the branch tip succeeds, makes B the installed commit, and runs B's contents.",
+      "sources": [
+        {
+          "path": "doc/flatpak-update.xml",
+          "anchor": "Normally, this command updates the application to the tip of its branch."
+        }
+      ],
+      "surfaces": [
+        "cli.command.update"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.update.user.failed-download-preserves",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "An update whose required application payload cannot be downloaded fails and leaves the previously installed application A and its runtime at their prior commits, with A still runnable.",
+      "sources": [
+        {
+          "path": "doc/flatpak-update.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.update"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "network-fault-injection"
+      ]
+    },
+    {
+      "id": "cli.update.user.noop",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "Updating a user application already at the branch tip succeeds without changing its installed app/runtime commits or runnable contents.",
+      "sources": [
+        {
+          "path": "doc/flatpak-update.xml",
+          "anchor": "Normally, this command updates the application to the tip of its branch."
+        }
+      ],
+      "surfaces": [
+        "cli.command.update"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.uninstall.user.absent-ref",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "Uninstalling a ref absent from the user installation fails with a diagnostic identifying that ref as not installed, while an unrelated installed app and runtime retain their commits and runnable contents.",
+      "sources": [
+        {
+          "path": "doc/flatpak-uninstall.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.uninstall"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.uninstall.user.app",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "Uninstalling an installed user application succeeds and makes that application unavailable to an installed-ref query.",
+      "sources": [
+        {
+          "path": "doc/flatpak-uninstall.xml",
+          "anchor": "Description"
+        },
+        {
+          "path": "doc/flatpak-info.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.uninstall"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.update.user.retry",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "After a required payload download failure, retrying the user update once the source is available succeeds in fetching the needed data and installs runnable version B with the expected app/runtime commits.",
+      "sources": [
+        {
+          "path": "doc/flatpak-update.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.update"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "network-fault-injection"
+      ]
+    },
+    {
+      "id": "cli.update.user.commit",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "Updating with --commit deploys the specified available commit rather than the branch tip, including when selecting an older version.",
+      "sources": [
+        {
+          "path": "doc/flatpak-update.xml",
+          "anchor": "--commit=COMMIT"
+        }
+      ],
+      "surfaces": [
+        "cli.command.update",
+        "cli.option.update.--commit"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.update.user.all",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "A user update with no ref updates all eligible installed apps and runtimes to their available branch tips.",
+      "sources": [
+        {
+          "path": "doc/flatpak-update.xml",
+          "anchor": "If no REF is given, everything is updated"
+        }
+      ],
+      "surfaces": [
+        "cli.command.update"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.update.user.ambiguous-ref",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "An update whose partial ref matches multiple installed user refs fails with an error listing the alternatives.",
+      "sources": [
+        {
+          "path": "doc/flatpak-update.xml",
+          "anchor": "if there are multiple matches an error message will list the alternatives."
+        }
+      ],
+      "surfaces": [
+        "cli.command.update"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.uninstall.user.delete-data",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "Uninstalling an app with --delete-data removes its data under ~/.var/app and its permissions in the permission store.",
+      "sources": [
+        {
+          "path": "doc/flatpak-uninstall.xml",
+          "anchor": "--delete-data"
+        }
+      ],
+      "surfaces": [
+        "cli.command.uninstall",
+        "cli.option.uninstall.--delete-data"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "desktop-portals",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.uninstall.user.unused",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "Uninstalling with --unused removes an unpinned runtime that is no longer needed by any installed application.",
+      "sources": [
+        {
+          "path": "doc/flatpak-uninstall.xml",
+          "anchor": "--unused"
+        },
+        {
+          "path": "doc/flatpak-pin.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.uninstall",
+        "cli.option.uninstall.--unused"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.update.system.selected",
+      "interface": "cli",
+      "profile": "system",
+      "category": "lifecycle",
+      "description": "Updating with --system updates the matching ref in the default system installation while leaving a separately installed user copy unchanged.",
+      "sources": [
+        {
+          "path": "doc/flatpak-update.xml",
+          "anchor": "--system"
+        }
+      ],
+      "surfaces": [
+        "cli.command.update",
+        "cli.option.update.--system"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "user-installation",
+        "system-authorization",
+        "multiple-installations",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.uninstall.system.selected",
+      "interface": "cli",
+      "profile": "system",
+      "category": "lifecycle",
+      "description": "Uninstalling with --system removes the matching system deployment while retaining a separately installed user copy.",
+      "sources": [
+        {
+          "path": "doc/flatpak-uninstall.xml",
+          "anchor": "--system"
+        }
+      ],
+      "surfaces": [
+        "cli.command.uninstall",
+        "cli.option.uninstall.--system"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "user-installation",
+        "system-authorization",
+        "multiple-installations"
+      ]
+    },
+    {
+      "id": "cli.uninstall.system.ambiguous-installation",
+      "interface": "cli",
+      "profile": "system",
+      "category": "lifecycle",
+      "description": "Uninstalling without an installation selector fails when the requested ref is installed in both the default system and user installations.",
+      "sources": [
+        {
+          "path": "doc/flatpak-uninstall.xml",
+          "anchor": "errors out if it exists in more than one."
+        }
+      ],
+      "surfaces": [
+        "cli.command.uninstall"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "user-installation",
+        "multiple-installations"
+      ]
+    }
+  ]
+}

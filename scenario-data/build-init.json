@@ -1,0 +1,249 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "build.options.arch-init",
+      "scenario": "build-option-arch-init",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository",
+        "user-installation"
+      ],
+      "description": "Initialize nondefault-architecture metadata without executing foreign code.",
+      "preconditions": "Independent alternate-architecture runtime.",
+      "expected": "Both SDK and runtime metadata select alternate architecture.",
+      "references": [
+        "doc/flatpak-build-init.xml"
+      ]
+    },
+    {
+      "id": "build.options.sdk-dir",
+      "scenario": "build-option-sdk-dir",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "user-installation",
+        "sandbox-execution"
+      ],
+      "description": "Select independently copied custom SDK tree.",
+      "preconditions": "Default SDK lacks marker; custom SDK contains it.",
+      "expected": "Default read fails, custom SDK read yields marker.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    },
+    {
+      "id": "build.init.metadata",
+      "scenario": "build-init-metadata",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "user-installation"
+      ],
+      "description": "Initialize requested architecture, tags and extension metadata independently of writable SDK copying.",
+      "preconditions": "Independent runtime installed from fixture A.",
+      "expected": "Exact architecture, both tags and extension directory in public build metadata.",
+      "references": [
+        "doc/flatpak-build-init.xml"
+      ]
+    },
+    {
+      "id": "build.init.layout",
+      "scenario": "build-init-layout",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "user-installation"
+      ],
+      "description": "Initialize a fresh application build tree.",
+      "preconditions": "Independent runtime installed from fixture A.",
+      "expected": "Requested app, SDK and runtime metadata and empty files/var directories.",
+      "references": [
+        "doc/flatpak-build-init.xml"
+      ]
+    },
+    {
+      "id": "build.init.existing",
+      "scenario": "build-init-existing",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "user-installation"
+      ],
+      "description": "Reject an independently initialized build tree.",
+      "preconditions": "Reference checkout with metadata and files.",
+      "expected": "Nonzero status, diagnostic and unchanged metadata.",
+      "references": [
+        "doc/flatpak-build-init.xml"
+      ]
+    },
+    {
+      "id": "build.init.options",
+      "scenario": "build-init-options",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "user-installation"
+      ],
+      "description": "Initialize and refresh a custom writable SDK with tags and extension metadata.",
+      "preconditions": "Independent runtime installed from fixture A.",
+      "expected": "SDK payload in custom directory, exact tags/extension and update replaces SDK additions.",
+      "references": [
+        "doc/flatpak-build-init.xml"
+      ]
+    },
+    {
+      "id": "build.init.base",
+      "scenario": "build-init-base",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "user-installation"
+      ],
+      "description": "Initialize files from a specified base application branch.",
+      "preconditions": "Independent A app and runtime installed.",
+      "expected": "Base executable bytes copied into build files.",
+      "references": [
+        "doc/flatpak-build-init.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "build.options.arch-init",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Foreign metadata-only selection differs from native default.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-init.--arch",
+          "rationale": "Metadata selects nondefault architecture."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.options.sdk-dir",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Read custom marker with failing default-SDK control.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build.--sdk-dir",
+          "rationale": "Marker visible only under selected custom SDK."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.init.metadata",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Metadata-only initialization options observed separately from strict empty-var and writable SDK contracts.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-init.--tag",
+          "rationale": "Both requested tags in Application metadata."
+        },
+        {
+          "id": "cli.option.build-init.--extension",
+          "rationale": "Exact requested extension directory metadata."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.init.layout",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.build-init.any.layout"
+      ],
+      "rationale": "Exact requested metadata and independently empty files/var assertions; native architecture alone earns no selector credit."
+    },
+    {
+      "behavior_id": "build.init.existing",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.build-init.any.already-initialized"
+      ],
+      "rationale": "Independent initialized input rejected without metadata changes."
+    },
+    {
+      "behavior_id": "build.init.options",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Observe writable SDK payload, refresh, tags and extension metadata.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-init.--writable-sdk",
+          "rationale": "SDK executable copied into build tree."
+        },
+        {
+          "id": "cli.option.build-init.--sdk-dir",
+          "rationale": "SDK executable appears in requested custom directory."
+        },
+        {
+          "id": "cli.option.build-init.--update",
+          "rationale": "Reinitialization succeeds and replaces a local SDK addition."
+        },
+        {
+          "id": "cli.option.build-init.--tag",
+          "rationale": "Both tags persisted in Application metadata."
+        },
+        {
+          "id": "cli.option.build-init.--extension",
+          "rationale": "Extension directory metadata equals requested value."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.init.base",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Base application executable bytes equal reference A.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-init.--base",
+          "rationale": "Base app files copied into new build tree."
+        },
+        {
+          "id": "cli.option.build-init.--base-version",
+          "rationale": "Nondefault test branch base executable copied."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,240 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "limitations": [],
+  "requirements": [
+    {
+      "id": "cli.remotes.user.priority-order",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Listing user remotes returns configured remotes in priority order, with higher numeric priorities first.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remotes.xml",
+          "anchor": "Lists the known remote repositories, in priority order."
+        },
+        {
+          "path": "doc/flatpak-remote-add.xml",
+          "anchor": "--prio=PRIO"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remotes"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.remotes.user.columns",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "A remotes query selecting name,url,title,priority returns the configured values for those fields in the requested column order.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remotes.xml",
+          "anchor": "--columns=FIELD"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remotes",
+        "cli.option.remotes.--columns"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.remotes.user.disabled",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "A user remotes query with --show-disabled includes a configured disabled remote.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remotes.xml",
+          "anchor": "--show-disabled"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remotes",
+        "cli.option.remotes.--show-disabled"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.remotes.system.named",
+      "interface": "cli",
+      "profile": "system",
+      "category": "remotes-discovery",
+      "description": "A remotes query with --installation=NAME lists the remotes configured in the named system installation.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remotes.xml",
+          "anchor": "--installation=NAME"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remotes",
+        "cli.option.remotes.--installation"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "multiple-installations"
+      ]
+    },
+    {
+      "id": "cli.remote-ls.user.available",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "remote-ls reports the available application and runtime refs from the specified configured user remote, including refs not installed locally.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-ls.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-ls"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.remote-ls.user.updates",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "remote-ls --updates reports only refs with updates available, excluding installed refs already at their remote tip.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-ls.xml",
+          "anchor": "--updates"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-ls",
+        "cli.option.remote-ls.--updates"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.remote-info.user.ref-commit",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "A remote-info machine-readable query returns the matched full ref and its remote commit ID, rather than the commit of an older local deployment.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-info.xml",
+          "anchor": "--show-ref"
+        },
+        {
+          "path": "doc/flatpak-remote-info.xml",
+          "anchor": "--show-commit"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-info",
+        "cli.option.remote-info.--show-ref",
+        "cli.option.remote-info.--show-commit"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.remote-info.user.history",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "remote-info --log displays available previous versions of the requested remote ref.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-info.xml",
+          "anchor": "--log"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-info",
+        "cli.option.remote-info.--log"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.search.user.appstream",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Searching user remotes for matching text returns the applications or runtimes described by their AppStream data.",
+      "sources": [
+        {
+          "path": "doc/flatpak-search.xml",
+          "anchor": "Description"
+        },
+        {
+          "path": "doc/flatpak-search.xml",
+          "anchor": "--user"
+        }
+      ],
+      "surfaces": [
+        "cli.command.search"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "appstream"
+      ]
+    },
+    {
+      "id": "cli.update.user.appstream",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Updating AppStream for a specified user remote makes its updated application descriptions available to subsequent search.",
+      "sources": [
+        {
+          "path": "doc/flatpak-update.xml",
+          "anchor": "--appstream"
+        },
+        {
+          "path": "doc/flatpak-search.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.update",
+        "cli.option.update.--appstream"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "appstream"
+      ]
+    }
+  ]
+}

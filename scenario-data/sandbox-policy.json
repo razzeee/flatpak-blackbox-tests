@@ -1,0 +1,317 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "sandbox.override-extra",
+      "scenario": "sandbox-override-extra",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Persist USB queries, generic policy and accessibility name policy.",
+      "preconditions": "Fresh overrides and controlled USB query file.",
+      "expected": "Exact public allow/hide query sets, policy additions/denial and accessibility own value.",
+      "references": [
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "sandbox.run-extra",
+      "scenario": "sandbox-run-extra",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Report USB queries, generic policy and accessibility name policy.",
+      "preconditions": "Installed app and controlled USB query file.",
+      "expected": "Exact public sandbox-info USB query sets, effective policy and accessibility own value.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "sandbox.override-conditional",
+      "scenario": "sandbox-override-conditional",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Persist explicit conditional permission expressions.",
+      "preconditions": "Fresh overrides and conditional permission support.",
+      "expected": "Exact true/false conditions on network, wayland, shm and devel in override show.",
+      "references": [
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "sandbox.run-conditional",
+      "scenario": "sandbox-run-conditional",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Enforce conditional shared-memory access and report conditional expressions.",
+      "preconditions": "Installed app, controlled host /dev/shm marker and conditional permission support.",
+      "expected": "Marker unreadable by default, readable with shm:true and unreadable with shm:false; expression metadata also preserved.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "sandbox.override-policy",
+      "scenario": "sandbox-override-policy",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Persist session and system bus name policies.",
+      "preconditions": "Fresh app overrides.",
+      "expected": "Public override show has exact own/talk policies and subsequent explicit denials.",
+      "references": [
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "sandbox.run-policy",
+      "scenario": "sandbox-run-policy",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Report selected session and system bus policies inside the sandbox.",
+      "preconditions": "Installed A app.",
+      "expected": "Public /.flatpak-info contains exact selected own/talk name policies.",
+      "references": [
+        "doc/flatpak-run.xml",
+        "doc/flatpak-metadata.xml"
+      ]
+    },
+    {
+      "id": "sandbox.override-context",
+      "scenario": "sandbox-override-context",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Persist explicit namespace, device and feature permission values.",
+      "preconditions": "Fresh app overrides.",
+      "expected": "Public show grants ipc/dri/devel and explicitly denies network/kvm/multiarch.",
+      "references": [
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "sandbox.run-context",
+      "scenario": "sandbox-run-context",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Report effective namespace, device and feature permission values.",
+      "preconditions": "Installed A app.",
+      "expected": "Public /.flatpak-info reports exactly ipc/dri/devel without denied network/kvm/multiarch.",
+      "references": [
+        "doc/flatpak-run.xml",
+        "doc/flatpak-metadata.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "sandbox.override-extra",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Exact persisted metadata values only. USB and accessibility checks receive no option credit where absent from the fixed catalogue.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.override.--add-policy",
+          "rationale": "Both requested generic policy values persisted."
+        },
+        {
+          "id": "cli.option.override.--remove-policy",
+          "rationale": "Previously present value stored as explicit denial."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.run-extra",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Exact public sandbox metadata only; no USB hardware enforcement claim. Accessibility ownership and USB list switches receive no option credit.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--usb",
+          "rationale": "Vendor/product query in sandbox info allow set."
+        },
+        {
+          "id": "cli.option.run.--nousb",
+          "rationale": "Class wildcard query in sandbox info hide set."
+        },
+        {
+          "id": "cli.option.run.--add-policy",
+          "rationale": "Both generic values in effective policy set."
+        },
+        {
+          "id": "cli.option.run.--remove-policy",
+          "rationale": "Previously granted value absent from effective policy set."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.override-conditional",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Conditional expression persistence only.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.override.--share-if",
+          "rationale": "network:false persisted exactly."
+        },
+        {
+          "id": "cli.option.override.--socket-if",
+          "rationale": "wayland:true persisted exactly."
+        },
+        {
+          "id": "cli.option.override.--device-if",
+          "rationale": "shm:true persisted exactly."
+        },
+        {
+          "id": "cli.option.override.--allow-if",
+          "rationale": "devel:false persisted exactly."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.run-conditional",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Controlled host shared-memory access checks device condition enforcement. Feature expression serialization receives no option credit.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--device-if",
+          "rationale": "Host /dev/shm marker is unreadable by default, readable with shm:true, and unreadable with shm:false."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.override-policy",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Exact public persisted bus policies only; no filtered-bus communication credit.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.override.--own-name",
+          "rationale": "Exact session name has own policy in public override show."
+        },
+        {
+          "id": "cli.option.override.--talk-name",
+          "rationale": "Exact session name has talk policy in public override show."
+        },
+        {
+          "id": "cli.option.override.--system-own-name",
+          "rationale": "Exact system name has own policy in public override show."
+        },
+        {
+          "id": "cli.option.override.--system-talk-name",
+          "rationale": "Exact system name has talk policy in public override show."
+        },
+        {
+          "id": "cli.option.override.--no-talk-name",
+          "rationale": "Previously granted session name changes to none policy."
+        },
+        {
+          "id": "cli.option.override.--system-no-talk-name",
+          "rationale": "Previously granted system name changes to none policy."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.run-policy",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Public bus policy serialization only; this case receives no grant or ownership option credit."
+    },
+    {
+      "behavior_id": "sandbox.override-context",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Persisted permission values only; no physical dri/kvm or feature enforcement claim.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.override.--device",
+          "rationale": "Public stored device set grants dri."
+        },
+        {
+          "id": "cli.option.override.--nodevice",
+          "rationale": "Public stored device set explicitly denies kvm."
+        },
+        {
+          "id": "cli.option.override.--allow",
+          "rationale": "Public stored feature set grants devel."
+        },
+        {
+          "id": "cli.option.override.--disallow",
+          "rationale": "Public stored feature set explicitly denies multiarch."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.run-context",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Public permission serialization only; this case receives no device or feature enforcement option credit."
+    }
+  ]
+}

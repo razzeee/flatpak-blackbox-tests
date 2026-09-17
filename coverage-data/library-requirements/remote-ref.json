@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "limitations": [],
+  "requirements": [
+    {
+      "id": "library.remote-ref.sizes-metadata",
+      "interface": "library",
+      "profile": "any",
+      "category": "remote-ref",
+      "description": "A remote ref backed by a populated metadata cache reports the fixture's installed size, download size, and metadata bytes. The metadata getter may return NULL when metadata is unavailable.",
+      "sources": [
+        {
+          "path": "common/flatpak-remote-ref.c",
+          "anchor": "flatpak_remote_ref_get_installed_size"
+        },
+        {
+          "path": "common/flatpak-remote-ref.c",
+          "anchor": "flatpak_remote_ref_get_download_size"
+        },
+        {
+          "path": "common/flatpak-remote-ref.c",
+          "anchor": "flatpak_remote_ref_get_metadata"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_remote_ref_get_installed_size",
+        "library.function.flatpak_remote_ref_get_download_size",
+        "library.function.flatpak_remote_ref_get_metadata"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.remote-ref.eol",
+      "interface": "library",
+      "profile": "any",
+      "category": "remote-ref",
+      "description": "Remote-ref getters expose the fixture's end-of-life reason and rebased ref; a non-EOL ref returns NULL for both.",
+      "sources": [
+        {
+          "path": "common/flatpak-remote-ref.c",
+          "anchor": "flatpak_remote_ref_get_eol"
+        },
+        {
+          "path": "common/flatpak-remote-ref.c",
+          "anchor": "flatpak_remote_ref_get_eol_rebase"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_remote_ref_get_eol",
+        "library.function.flatpak_remote_ref_get_eol_rebase"
+      ],
+      "required_capabilities": [
+        "libflatpak"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,249 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "build.options.metadata",
+      "scenario": "build-option-metadata",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "user-installation",
+        "sandbox-execution"
+      ],
+      "description": "Select alternate build metadata.",
+      "preconditions": "Default metadata names missing SDK; alternate metadata names installed SDK.",
+      "expected": "Default command fails; alternate metadata command runs probe.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    },
+    {
+      "id": "build.finish.inheritance",
+      "scenario": "build-finish-inheritance",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "user-installation"
+      ],
+      "description": "Compare normal permission inheritance with explicit suppression.",
+      "preconditions": "Reference build-init output using independently prepared installed runtime with network permission.",
+      "expected": "Default finalization inherits network permission; --no-inherit-permissions omits it.",
+      "references": [
+        "doc/flatpak-build-finish.xml"
+      ]
+    },
+    {
+      "id": "build.finish.extra-data",
+      "scenario": "build-finish-extra-data",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools"
+      ],
+      "description": "Persist extra-data download metadata.",
+      "preconditions": "Independent unfinished app tree.",
+      "expected": "Exact name, digest, URI, download size and installed size in public metadata.",
+      "references": [
+        "doc/flatpak-build-finish.xml",
+        "doc/flatpak-metadata.xml"
+      ]
+    },
+    {
+      "id": "build.finish.extension-priority",
+      "scenario": "build-finish-extension-priority",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools"
+      ],
+      "description": "Set extension library priority.",
+      "preconditions": "Independent unfinished extension metadata with zero priority.",
+      "expected": "Public ExtensionOf priority parses as requested integer.",
+      "references": [
+        "doc/flatpak-build-finish.xml",
+        "doc/flatpak-metadata.xml"
+      ]
+    },
+    {
+      "id": "build.finish.metadata",
+      "scenario": "build-finish-metadata",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools"
+      ],
+      "description": "Set launch, runtime, SDK, generic and extension metadata.",
+      "preconditions": "Independent unfinished app tree with removable extension.",
+      "expected": "Exact strings, independently parsed true/false booleans and absent removed extension.",
+      "references": [
+        "doc/flatpak-build-finish.xml",
+        "doc/flatpak-metadata.xml"
+      ]
+    },
+    {
+      "id": "build.finish.exports",
+      "scenario": "build-finish-exports",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "appstream"
+      ],
+      "description": "Export desktop, service, icon and metainfo files.",
+      "preconditions": "Independent unfinished tree with eligible app-ID-prefixed files.",
+      "expected": "All four public export paths exist, per the documented contract.",
+      "references": [
+        "doc/flatpak-build-finish.xml"
+      ]
+    },
+    {
+      "id": "build.finish.no-exports",
+      "scenario": "build-finish-no-exports",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools"
+      ],
+      "description": "Suppress eligible desktop integration exports.",
+      "preconditions": "Independent unfinished tree with eligible desktop integration files.",
+      "expected": "No supplied file is copied into export.",
+      "references": [
+        "doc/flatpak-build-finish.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "build.options.metadata",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Different SDK availability makes metadata selection observable.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build.--metadata",
+          "rationale": "Alternate metadata executes probe while default SDK is unavailable."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.finish.inheritance",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Two independently initialized inputs compare public metadata inheritance only.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-finish.--no-inherit-permissions",
+          "rationale": "Runtime network permission inherited by control and absent with suppression."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.finish.extra-data",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Extra-data metadata only; no downloader or sandbox claim.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-finish.--extra-data",
+          "rationale": "Name/digest/URI and both integer sizes equal requested values."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.finish.extension-priority",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Public extension priority metadata only.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-finish.--extension-priority",
+          "rationale": "Priority changes from zero to requested integer."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.finish.metadata",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.build-finish.any.command"
+      ],
+      "rationale": "Launch command and other public metadata fields checked independently.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-finish.--require-version",
+          "rationale": "required-flatpak equals requested version."
+        },
+        {
+          "id": "cli.option.build-finish.--runtime",
+          "rationale": "Runtime ID changes while omitted arch/branch stay intact."
+        },
+        {
+          "id": "cli.option.build-finish.--sdk",
+          "rationale": "SDK ID changes while omitted arch/branch stay intact."
+        },
+        {
+          "id": "cli.option.build-finish.--metadata",
+          "rationale": "Implicit true, explicit false and literal string parsed independently."
+        },
+        {
+          "id": "cli.option.build-finish.--extension",
+          "rationale": "Directory and independently parsed true/false values match."
+        },
+        {
+          "id": "cli.option.build-finish.--remove-extension",
+          "rationale": "Preexisting extension group removed."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.finish.exports",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.build-finish.any.exports"
+      ],
+      "rationale": "All four documented eligible export kinds required, including metainfo."
+    },
+    {
+      "behavior_id": "build.finish.no-exports",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Eligible export paths all absent.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-finish.--no-exports",
+          "rationale": "Desktop, icon, service and metainfo exports suppressed."
+        }
+      ]
+    }
+  ]
+}

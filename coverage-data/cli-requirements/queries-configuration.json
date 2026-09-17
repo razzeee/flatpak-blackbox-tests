@@ -1,0 +1,269 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "limitations": [],
+  "requirements": [
+    {
+      "id": "cli.info.user.ref-commit",
+      "interface": "cli",
+      "profile": "user",
+      "category": "queries-configuration",
+      "description": "Querying an installed user ref with --show-ref and --show-commit returns the exact requested full ref and its installed commit in machine-readable output.",
+      "sources": [
+        {
+          "path": "doc/flatpak-info.xml",
+          "anchor": "--show-ref"
+        },
+        {
+          "path": "doc/flatpak-info.xml",
+          "anchor": "--show-commit"
+        },
+        {
+          "path": "doc/flatpak-info.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.info",
+        "cli.option.info.--show-ref",
+        "cli.option.info.--show-commit"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.info.user.absent-ref",
+      "interface": "cli",
+      "profile": "user",
+      "category": "queries-configuration",
+      "description": "Querying a ref absent from the user installation fails with a diagnostic identifying that ref as not installed, while an unrelated installed app and runtime retain their commits and runnable contents.",
+      "sources": [
+        {
+          "path": "doc/flatpak-info.xml",
+          "anchor": "Show info about an installed application or runtime."
+        }
+      ],
+      "surfaces": [
+        "cli.command.info"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.list.user.apps-empty",
+      "interface": "cli",
+      "profile": "user",
+      "category": "queries-configuration",
+      "description": "Application-only enumeration succeeds with no application entries when no user applications remain, even if a runtime is still installed.",
+      "sources": [
+        {
+          "path": "doc/flatpak-list.xml",
+          "anchor": "--app"
+        }
+      ],
+      "surfaces": [
+        "cli.command.list",
+        "cli.option.list.--app"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.list.user.empty",
+      "interface": "cli",
+      "profile": "user",
+      "category": "queries-configuration",
+      "description": "Enumeration of the empty user installation succeeds with no installed application or runtime entries.",
+      "sources": [
+        {
+          "path": "doc/flatpak-list.xml",
+          "anchor": "Lists the names of the installed applications and runtimes."
+        }
+      ],
+      "surfaces": [
+        "cli.command.list"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.info.user.metadata",
+      "interface": "cli",
+      "profile": "user",
+      "category": "queries-configuration",
+      "description": "info --show-metadata returns the metadata belonging to the installed user application or runtime.",
+      "sources": [
+        {
+          "path": "doc/flatpak-info.xml",
+          "anchor": "--show-metadata"
+        }
+      ],
+      "surfaces": [
+        "cli.command.info",
+        "cli.option.info.--show-metadata"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.info.user.file-access",
+      "interface": "cli",
+      "profile": "user",
+      "category": "queries-configuration",
+      "description": "info --file-access reports the application's level of access to the requested path in machine-readable output.",
+      "sources": [
+        {
+          "path": "doc/flatpak-info.xml",
+          "anchor": "--file-access=PATH"
+        },
+        {
+          "path": "doc/flatpak-info.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.info",
+        "cli.option.info.--file-access"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.list.user.runtime-filter",
+      "interface": "cli",
+      "profile": "user",
+      "category": "queries-configuration",
+      "description": "Listing with --app-runtime returns installed user applications using the specified runtime and excludes applications using another runtime.",
+      "sources": [
+        {
+          "path": "doc/flatpak-list.xml",
+          "anchor": "--app-runtime=RUNTIME"
+        }
+      ],
+      "surfaces": [
+        "cli.command.list",
+        "cli.option.list.--app-runtime"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.list.system.scope",
+      "interface": "cli",
+      "profile": "system",
+      "category": "queries-configuration",
+      "description": "Listing with --system reports default system-installed refs and excludes refs installed only in the user installation.",
+      "sources": [
+        {
+          "path": "doc/flatpak-list.xml",
+          "anchor": "--system"
+        }
+      ],
+      "surfaces": [
+        "cli.command.list",
+        "cli.option.list.--system"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "user-installation",
+        "multiple-installations"
+      ]
+    },
+    {
+      "id": "cli.config.user.roundtrip",
+      "interface": "cli",
+      "profile": "user",
+      "category": "queries-configuration",
+      "description": "Setting the user languages configuration persists the supplied value, which a later config --get languages returns.",
+      "sources": [
+        {
+          "path": "doc/flatpak-config.xml",
+          "anchor": "languages"
+        },
+        {
+          "path": "doc/flatpak-config.xml",
+          "anchor": "--set"
+        },
+        {
+          "path": "doc/flatpak-config.xml",
+          "anchor": "--get"
+        }
+      ],
+      "surfaces": [
+        "cli.command.config",
+        "cli.option.config.--set",
+        "cli.option.config.--get"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.config.user.unset",
+      "interface": "cli",
+      "profile": "user",
+      "category": "queries-configuration",
+      "description": "Unsetting languages removes the explicit user setting so locale inclusion again follows extra-languages and the current locale.",
+      "sources": [
+        {
+          "path": "doc/flatpak-config.xml",
+          "anchor": "languages"
+        },
+        {
+          "path": "doc/flatpak-config.xml",
+          "anchor": "--unset"
+        }
+      ],
+      "surfaces": [
+        "cli.command.config",
+        "cli.option.config.--unset"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "runtime-extensions"
+      ]
+    },
+    {
+      "id": "cli.config.system.named",
+      "interface": "cli",
+      "profile": "system",
+      "category": "queries-configuration",
+      "description": "A configuration change with --installation=NAME is stored in that named system installation rather than another installation.",
+      "sources": [
+        {
+          "path": "doc/flatpak-config.xml",
+          "anchor": "--installation=NAME"
+        }
+      ],
+      "surfaces": [
+        "cli.command.config",
+        "cli.option.config.--installation"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "system-authorization",
+        "multiple-installations"
+      ]
+    }
+  ]
+}
