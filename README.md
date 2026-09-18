@@ -20,6 +20,11 @@ npm --prefix web run dev
 
 Copy published `history.json` to `web/public/history.json` to preview real data.
 
+The active baseline is configured in `ci/baselines.json`. Add a version/commit pair
+and update `current` when upgrading; retain older definitions for historical labels.
+Manual runs accept a baseline version or commit. Compare old and new baselines
+using the same suite revision; their daily coverage and timings stay separate.
+
 ## Requirements
 
 - Linux, Python 3.10+, D-Bus, and working unprivileged user/mount namespaces.

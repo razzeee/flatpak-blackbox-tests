@@ -8,12 +8,11 @@ import {
   daily,
   series,
   seriesNames,
-  tracks,
   utcDay,
   type Series,
   type Snapshot,
-  type Track,
 } from "./history.ts";
+import { targetKey, targetOptions } from "./targets.ts";
 
 const behaviors: Series[] = ["cli", "library"];
 const surfaces: Series[] = [
@@ -135,6 +134,9 @@ function DailyCounts({ entries }: { entries: Snapshot[] }) {
                   Suite {entry.suite_commit.slice(0, 12)}
                   <br />
                   Target {entry.target_commit.slice(0, 12)}
+                  <small>
+                    Reported: {entry.target_version ?? "not recorded"}
+                  </small>
                 </td>
               </tr>
             ))}
@@ -146,10 +148,13 @@ function DailyCounts({ entries }: { entries: Snapshot[] }) {
 }
 
 export function App({ history }: { history: Snapshot[] }) {
-  const [track, setTrack] = useState<Track>("pinned");
+  const options = useMemo(() => targetOptions(history), [history]);
+  const [selection, setSelection] = useState("");
+  const selected =
+    options.find((item) => item.key === selection) ?? options[0]!;
   const entries = useMemo(
-    () => daily(history).filter((entry) => entry.track === track),
-    [history, track],
+    () => daily(history).filter((entry) => targetKey(entry) === selected.key),
+    [history, selected.key],
   );
   return (
     <main>
@@ -161,12 +166,12 @@ export function App({ history }: { history: Snapshot[] }) {
         <label>
           Target{" "}
           <select
-            value={track}
-            onChange={(event) => setTrack(event.target.value as Track)}
+            value={selected.key}
+            onChange={(event) => setSelection(event.target.value)}
           >
-            {Object.entries(tracks).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
+            {options.map((item) => (
+              <option key={item.key} value={item.key}>
+                {item.label}
               </option>
             ))}
           </select>
@@ -174,9 +179,9 @@ export function App({ history }: { history: Snapshot[] }) {
         <a href="./history.json">Download history</a>
       </div>
       <p>
-        Latest complete run per UTC day. Gaps mean missing or unverified
-        evidence. Percentages describe the catalogue and public interface reach;
-        catalogue totals can change.
+        Latest complete run per target and UTC day. Gaps mean missing or
+        unverified evidence. Percentages describe the catalogue and public
+        interface reach; catalogue totals can change.
       </p>
       {entries.length ? (
         <>
@@ -195,11 +200,11 @@ export function App({ history }: { history: Snapshot[] }) {
             title="Public interface reach"
           />
           <DailyCounts entries={entries} />
-          <PerformancePanel entries={entries} key={track} />
+          <PerformancePanel entries={entries} key={selected.key} />
         </>
       ) : (
         <p className="empty">
-          No recorded runs for {tracks[track]} yet. History starts with the
+          No recorded runs for {selected.label} yet. History starts with the
           first published CI run.
         </p>
       )}

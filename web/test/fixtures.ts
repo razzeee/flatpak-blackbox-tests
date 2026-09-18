@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 import { seriesNames, type Snapshot, type Track } from "../src/history.ts";
+import { currentBaseline } from "../src/baselines.ts";
 
 export function entry(
   timestamp = "2026-09-17T21:00:00Z",
@@ -12,7 +13,13 @@ export function entry(
     complete: true,
     verification: "current",
     suite_commit: "a".repeat(40),
-    target_commit: "b".repeat(40),
+    target_commit: track === "pinned" ? currentBaseline.commit : "b".repeat(40),
+    ...(track === "pinned"
+      ? {
+          baseline: { ...currentBaseline },
+          target_version: `Flatpak ${currentBaseline.version}`,
+        }
+      : {}),
     run_url: "https://github.com/example/suite/actions/runs/123",
     fingerprint: "c".repeat(64),
     metrics: Object.fromEntries(

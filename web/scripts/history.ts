@@ -9,6 +9,7 @@ import {
   trackSchema,
 } from "../src/history.ts";
 import { optionalJson, readJson, record } from "./record.ts";
+import { withBaseline } from "../src/targets.ts";
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
@@ -58,7 +59,7 @@ try {
     const existing = await optionalJson(path);
     const history = historySchema.parse(existing === undefined ? [] : existing);
     const snapshot = snapshotSchema.parse(await readJson(required("snapshot")));
-    await save(path, daily(history, snapshot));
+    await save(path, daily(history, snapshot).map(withBaseline));
   } else {
     throw new Error("Usage: history record|update [options]");
   }
