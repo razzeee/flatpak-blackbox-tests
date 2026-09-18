@@ -8,10 +8,11 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
-    "check": "tsc --noEmit && prettier --check .",
-    "format": "prettier --write .",
+    "check": "tsc --noEmit && prettier --check . ../ci/baselines.json",
+    "format": "prettier --write . ../ci/baselines.json",
     "test": "tsx --test test/*.test.ts",
     "history": "tsx scripts/history.ts",
+    "baseline": "tsx scripts/baseline.ts",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {

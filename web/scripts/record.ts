@@ -13,6 +13,7 @@ import {
   type Track,
 } from "../src/history.ts";
 import { hasCaseTiming } from "../src/performance.ts";
+import { findBaseline } from "../src/baselines.ts";
 
 export async function readJson(path: string): Promise<unknown> {
   return JSON.parse(await readFile(path, "utf8"));
@@ -40,6 +41,7 @@ const summarySchema = z.object({
 const reportMetadata = z.object({
   complete: z.boolean().optional(),
   finished_at: timestampSchema.optional(),
+  target_version: z.string().optional(),
 });
 const timingMetadata = z.object({
   duration_seconds: secondsSchema.optional(),
@@ -56,6 +58,13 @@ export interface RecordOptions {
 }
 
 export async function record(options: RecordOptions): Promise<Snapshot> {
+  const baseline =
+    options.track === "pinned" ? findBaseline(options.targetCommit) : undefined;
+  if (options.track === "pinned" && !baseline) {
+    throw new Error(
+      `Unknown pinned commit ${options.targetCommit}; add it to ci/baselines.json`,
+    );
+  }
   const rawReport = await optionalJson(options.report);
   const report =
     rawReport === undefined ? undefined : reportMetadata.parse(rawReport);
@@ -77,6 +86,16 @@ export async function record(options: RecordOptions): Promise<Snapshot> {
     );
   }
   const summary = summarySchema.parse(JSON.parse(result.stdout));
+  if (
+    baseline &&
+    summary.verification.status === "current" &&
+    report?.target_version &&
+    report.target_version.trim() !== `Flatpak ${baseline.version}`
+  ) {
+    throw new Error(
+      `Reported version ${report.target_version} does not match baseline ${baseline.version}`,
+    );
+  }
   let performance: Snapshot["performance"];
   if (report?.complete && summary.verification.status === "current") {
     const timings = timingMetadata.parse(rawReport);
@@ -103,6 +122,8 @@ export async function record(options: RecordOptions): Promise<Snapshot> {
     verification: summary.verification.status,
     suite_commit: options.suiteCommit,
     target_commit: options.targetCommit,
+    baseline,
+    target_version: report?.target_version,
     run_url: options.runUrl,
     fingerprint: summary.definition.fingerprint,
     metrics: { ...summary.metrics.behaviors, ...summary.metrics.surfaces },

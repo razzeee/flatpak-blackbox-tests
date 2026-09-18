@@ -5,6 +5,11 @@ on:
     branches-ignore: [coverage-history]
   pull_request:
   workflow_dispatch:
+    inputs:
+      baseline:
+        description: "Pinned baseline version or commit (blank uses current)"
+        type: string
+        default: ""
   schedule:
     - cron: "0 21 * * *"
 
@@ -12,25 +17,37 @@ permissions:
   contents: read
 
 concurrency:
-  group: compatibility-${{ github.event_name == 'schedule' && 'upstream-main' || github.event.pull_request.number || github.ref }}
+  group: compatibility-${{ github.event_name == 'schedule' && 'upstream-main' || github.event.pull_request.number || github.ref }}-${{ inputs.baseline || 'current' }}
   cancel-in-progress: true
 
 jobs:
   compatibility:
-    name: ${{ github.event_name == 'schedule' && 'Full suite against upstream main' || 'Full suite against pinned Flatpak 1.19.1' }}
+    name: ${{ github.event_name == 'schedule' && 'Full suite against upstream main' || 'Full suite against pinned baseline' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     defaults:
       run:
         shell: bash
-    env:
-      # Scheduled runs replace this with a resolved upstream main commit.
-      FLATPAK_REFERENCE_COMMIT: 1a6ec6a1f720fb30d76c76e656ac624fcaa237e9
     steps:
       - name: Check out suite
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+
+      - name: Set up Node for baseline and coverage tools
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+
+      - name: Install baseline and coverage tools
+        run: npm --prefix web ci
+
+      - name: Select pinned baseline
+        if: github.event_name != 'schedule'
+        env:
+          BASELINE: ${{ inputs.baseline }}
+        run: |
+          npm --prefix web run --silent baseline -- --baseline "$BASELINE" >> "$GITHUB_ENV"
 
       - name: Resolve latest upstream main
         if: github.event_name == 'schedule'
@@ -80,16 +97,6 @@ jobs:
         env:
           BB_CI_ROOT: ${{ runner.temp }}/bb-compat
         run: bash ci/compatibility.sh summary
-
-      - name: Set up Node for coverage history
-        if: always() && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event_name != 'pull_request'
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: "24"
-
-      - name: Install coverage tools
-        if: always() && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event_name != 'pull_request'
-        run: npm --prefix web ci
 
       - name: Record daily coverage snapshot
         if: always() && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event_name != 'pull_request'

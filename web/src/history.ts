@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 import { z } from "zod";
+import { baselineSchema } from "./baselines.ts";
+import { targetKey } from "./targets.ts";
 
 export const tracks = {
-  pinned: "Pinned Flatpak 1.19.1",
+  pinned: "Pinned baseline",
   upstream: "Upstream main",
 } as const;
 export const series = {
@@ -69,26 +71,36 @@ export const metricSchema = z
       (value.passed === null || value.passed <= value.total),
     "Counts exceed denominator",
   );
-export const snapshotSchema = z.object({
-  schema: z.literal(1),
-  track: trackSchema,
-  timestamp: timestampSchema,
-  complete: z.boolean(),
-  verification: z.enum([
-    "current",
-    "not-run",
-    "incomplete",
-    "stale",
-    "invalid",
-    "unversioned",
-  ]),
-  suite_commit: z.string(),
-  target_commit: z.string(),
-  run_url: z.string(),
-  fingerprint: z.string(),
-  metrics: z.record(z.string(), metricSchema),
-  performance: performanceSchema.optional(),
-});
+export const snapshotSchema = z
+  .object({
+    schema: z.literal(1),
+    track: trackSchema,
+    timestamp: timestampSchema,
+    complete: z.boolean(),
+    verification: z.enum([
+      "current",
+      "not-run",
+      "incomplete",
+      "stale",
+      "invalid",
+      "unversioned",
+    ]),
+    suite_commit: z.string(),
+    target_commit: z.string(),
+    baseline: baselineSchema.optional(),
+    target_version: z.string().optional(),
+    run_url: z.string(),
+    fingerprint: z.string(),
+    metrics: z.record(z.string(), metricSchema),
+    performance: performanceSchema.optional(),
+  })
+  .refine(
+    (entry) =>
+      entry.baseline === undefined ||
+      (entry.track === "pinned" &&
+        entry.baseline.commit === entry.target_commit),
+    "Baseline must identify the pinned target commit",
+  );
 export const historySchema = z.array(snapshotSchema);
 export type Snapshot = z.infer<typeof snapshotSchema>;
 export type Metric = z.infer<typeof metricSchema>;
@@ -104,7 +116,7 @@ export function daily(
 ): Snapshot[] {
   const selected = new Map<string, Snapshot>();
   for (const item of entry ? [...history, entry] : history) {
-    const key = `${item.track}/${utcDay(item.timestamp)}`;
+    const key = `${targetKey(item)}/${utcDay(item.timestamp)}`;
     const previous = selected.get(key);
     if (
       !previous ||

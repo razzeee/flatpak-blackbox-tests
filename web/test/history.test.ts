@@ -17,6 +17,7 @@ import {
   type CaseTiming,
 } from "../src/history.ts";
 import { record } from "../scripts/record.ts";
+import { currentBaseline } from "../src/baselines.ts";
 import { entry, timedEntry } from "./fixtures.ts";
 
 test("latest complete UTC-day run wins, including out-of-order reruns", () => {
@@ -119,7 +120,7 @@ test("snapshot CLI handles absent reports and update preserves existing history"
     "--suite-commit",
     "suite",
     "--target-commit",
-    "target",
+    currentBaseline.commit,
     "--run-url",
     "https://github.com/example/suite/actions/runs/1",
     "--output",
@@ -218,6 +219,7 @@ print(json.dumps({
   ) as {
     coverage_definition: { fingerprint: string };
     complete: boolean;
+    target_version?: string;
     duration_seconds?: number;
     results: CaseTiming[];
   };
@@ -227,7 +229,7 @@ print(json.dumps({
     track: "pinned" as const,
     timestamp: "2026-09-18T01:00:00Z",
     suiteCommit: "suite",
-    targetCommit: "target",
+    targetCommit: currentBaseline.commit,
     runUrl: "https://github.com/example/suite",
   };
   const value = await record(options);
@@ -235,6 +237,9 @@ print(json.dumps({
   assert.equal(value.timestamp, "2026-09-17T22:00:00.000Z");
   assert.deepEqual(credit(value, "cli"), { passed: 0, total: 136, percent: 0 });
   assert.equal(value.performance, undefined);
+  assert.deepEqual(value.baseline, currentBaseline);
+  assert.equal(value.target_version, undefined);
+  report.target_version = `Flatpak ${currentBaseline.version}`;
   report.duration_seconds = 450;
   for (const result of report.results) {
     result.duration_seconds = 1;
@@ -251,6 +256,7 @@ print(json.dumps({
   delete report.results[2]!.timings;
   await writeFile(reportPath, JSON.stringify(report));
   const timed = await record(options);
+  assert.equal(timed.target_version, report.target_version);
   assert.equal(timed.performance?.duration_seconds, 450);
   assert.equal(timed.performance?.cases.length, report.results.length - 3);
   assert.deepEqual(timed.performance?.cases[0], report.results[3]);
@@ -260,6 +266,21 @@ print(json.dumps({
     "setup-error": 1,
     failed: report.results.length - 3,
   });
+  report.target_version = "Flatpak 0.0.0";
+  await writeFile(reportPath, JSON.stringify(report));
+  await assert.rejects(record(options), /does not match baseline/);
+  const upstream = await record({
+    ...options,
+    track: "upstream",
+    targetCommit: "c".repeat(40),
+  });
+  assert.equal(upstream.baseline, undefined);
+  assert.equal(upstream.target_version, "Flatpak 0.0.0");
+  await assert.rejects(
+    record({ ...options, targetCommit: "c".repeat(40) }),
+    /Unknown pinned commit/,
+  );
+  report.target_version = `Flatpak ${currentBaseline.version}`;
   report.complete = false;
   await writeFile(reportPath, JSON.stringify(report));
   assert.equal((await record(options)).performance, undefined);
