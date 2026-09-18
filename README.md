@@ -4,6 +4,22 @@ Compatibility tests for the Flatpak CLI and source-compatible libflatpak
 implementations, using public interfaces and independently prepared fixtures.
 See [COVERAGE.md](COVERAGE.md) for coverage measurements and known failures.
 
+## Daily coverage charts
+
+Default-branch CI publishes daily coverage to GitHub Pages, with separate pinned
+and upstream-main views. It keeps the latest complete run per UTC day; missing or
+unverified evidence leaves gaps. Run and per-case timing trends include outcomes
+and setup/execution/cleanup breakdowns. Snapshots persist on `coverage-history`.
+
+The TypeScript/React site uses TanStack Charts. For local development with Node 22.12+:
+
+```sh
+npm --prefix web ci
+npm --prefix web run dev
+```
+
+Copy published `history.json` to `web/public/history.json` to preview real data.
+
 ## Requirements
 
 - Linux, Python 3.10+, D-Bus, and working unprivileged user/mount namespaces.

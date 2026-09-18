@@ -1,0 +1,157 @@
+/* SPDX-License-Identifier: LGPL-2.1-or-later */
+:root {
+  color-scheme: light;
+  font-family: "Segoe UI", "Liberation Sans", sans-serif;
+  color: #202d3b;
+  background: #fff;
+  line-height: 1.55;
+}
+body {
+  margin: 0;
+  border-top: 6px solid #1756a9;
+}
+main {
+  max-width: 1080px;
+  margin: auto;
+  padding: 36px 24px 64px;
+}
+header p {
+  font-size: 1.2rem;
+  margin-top: 0;
+}
+h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  letter-spacing: -0.035em;
+  margin-bottom: 4px;
+}
+h2 {
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+}
+h3 {
+  font-size: 1.15rem;
+  margin: 28px 0 0;
+}
+p {
+  max-width: 78ch;
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  align-items: center;
+  padding: 16px 0;
+}
+select,
+button {
+  font: inherit;
+  color: inherit;
+}
+select {
+  background: white;
+  border: 1px solid #8193a7;
+  border-radius: 4px;
+  padding: 8px;
+  margin-left: 8px;
+}
+.case-select {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 8px 0 20px;
+}
+button {
+  cursor: pointer;
+}
+a {
+  color: #1756a9;
+  text-underline-offset: 3px;
+}
+a:hover {
+  text-decoration-thickness: 2px;
+}
+:focus-visible {
+  outline: 3px solid #a84b00;
+  outline-offset: 4px;
+}
+.chart-section {
+  border-top: 1px solid #cad5df;
+  margin-top: 28px;
+  padding-top: 12px;
+}
+.chart-section h2 {
+  font-size: 1.25rem;
+}
+.date-range {
+  color: #435569;
+  font-variant-numeric: tabular-nums;
+}
+.empty {
+  padding: 32px 0;
+}
+.legend {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+.legend button {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 8px 4px;
+}
+.legend button:hover {
+  border-color: #8193a7;
+}
+.legend button[aria-pressed="false"] {
+  text-decoration: line-through;
+  color: #657585;
+}
+.legend span {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+details {
+  margin-top: 24px;
+}
+summary {
+  cursor: pointer;
+  color: #1756a9;
+  padding: 8px 0;
+}
+.table-scroll {
+  overflow-x: auto;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+caption {
+  text-align: left;
+  padding: 12px 0;
+}
+th,
+td {
+  text-align: left;
+  padding: 12px 10px;
+  border-bottom: 1px solid #dce4ec;
+}
+thead {
+  background: #eef4fa;
+}
+small {
+  display: block;
+  font-weight: normal;
+  color: #435569;
+}
+@media (max-width: 600px) {
+  main {
+    padding: 20px 12px;
+  }
+}
