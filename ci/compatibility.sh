@@ -4,6 +4,16 @@
 set -euo pipefail
 
 : "${BB_CI_ROOT:?Set BB_CI_ROOT to a new absolute work directory}"
+phase=${1:?Usage: bash ci/compatibility.sh init|host|build|probe|prepare|run|summary}
+if [[ "$phase" = summary ]]; then
+    # This must also work when init, dependencies, or the runner failed early.
+    # Actions assigns a different summary path to each step; use the delivery marker.
+    if [[ ! -s "$BB_CI_ROOT/results/job-summary.md" ]]; then
+        printf '\n\n## Flatpak compatibility\n\n**INCOMPLETE**\n\nNo completed report summary is available. See the job logs and uploaded artifacts. Coverage and timings are unverified.\n' \
+            >> "${GITHUB_STEP_SUMMARY:?Actions summary path is required}"
+    fi
+    exit 0
+fi
 : "${TMPDIR:?Set TMPDIR to a short absolute temporary directory}"
 : "${FLATPAK_REFERENCE_COMMIT:?Set the pinned upstream commit}"
 [[ "$BB_CI_ROOT" = /* && "$TMPDIR" = /* ]]
@@ -13,7 +23,6 @@ set -euo pipefail
 suite=$(pwd -P)
 source_dir="$BB_CI_ROOT/source"
 build_dir="$BB_CI_ROOT/build"
-phase=${1:?Usage: bash ci/compatibility.sh init|host|build|probe|prepare|run}
 
 if [[ "$phase" = init ]]; then
     # mkdir fails atomically on stale work rather than mixing runs or replacing it.
@@ -141,6 +150,8 @@ prepare() {
 }
 
 run() {
+    # Inherit GITHUB_STEP_SUMMARY for the parent runner's report-based summary.
+    # Case environments are sanitized and never receive that output path.
     uv run --locked python run.py --target "$BB_CI_ROOT/target.json" \
         --fixtures "$BB_CI_ROOT/fixtures" --output "$BB_CI_ROOT/results" --timeout 90 \
         --color always

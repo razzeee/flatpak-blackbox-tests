@@ -63,7 +63,7 @@ Use a new output directory for each run. Useful options:
 - `--timeout 120` sets the per-command timeout in seconds.
 - `--color auto|always|never` controls console color; `auto` uses color on a TTY.
   CI uses `always` for piped logs. A nonempty `NO_COLOR` disables color in every mode.
-  Progress is flushed after each case; timings include cleanup and stay out of JSON.
+  Progress is flushed after each case and uses the timings saved in JSON.
 
 Each case gets isolated state and a private session bus. If `/tmp` is too small,
 set `TMPDIR` to a short path on a filesystem with enough space.
@@ -73,6 +73,18 @@ set `TMPDIR` to a short path on a filesystem with enough space.
 The output directory contains `report.json` with command evidence and provenance,
 and `coverage.md` with the coverage summary. Failed checks, missing prerequisites,
 unsupported capabilities, and setup errors make the run unsuccessful.
+
+Console output and the GitHub Actions job summary show passing coverage and the
+ten slowest executed cases. Unverified coverage receives no passing credit.
+Reports store optional `duration_seconds` and per-case `timings` with
+`setup_seconds`, `execution_seconds`, and `cleanup_seconds`. Setup includes state,
+adapter, bus and repository startup; cleanup includes shutdown and state deletion.
+Run duration includes shared preflight, client builds and final coverage accounting,
+but excludes final report/summary writes. Cases blocked by preflight have no timings.
+When `GITHUB_STEP_SUMMARY` is set, the runner appends there, then saves `job-summary.md`
+as its delivery marker. Write failures return failure after saving the reports.
+CI adds an unverified fallback summary if delivery failed or the runner never ran.
+Without the environment variable, no extra summary file is created.
 
 A passing run covers only its selected, implemented cases. It does not establish
 full Flatpak compatibility. Coverage reports are tied to the suite definitions;

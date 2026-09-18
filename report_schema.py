@@ -5,11 +5,12 @@ Optional fields support reports written while a run is still in progress. Their
 presence does not establish coverage eligibility; coverage_report checks that.
 """
 
+import math
 from typing import TypedDict
 
 from catalogue_schema import GapBehavior, parse_gap
 from fixture_manifest import FixtureManifest, parse_fixture
-from json_validation import JSONValue, integer
+from json_validation import JSONValue, ValidationError, integer
 from typed_json import parse_typed as parse_typed
 
 
@@ -72,7 +73,15 @@ class _CaseStatus(CaseIdentity):
     status: str
 
 
+class CaseTimings(TypedDict):
+    setup_seconds: float
+    execution_seconds: float
+    cleanup_seconds: float
+
+
 class CaseResult(_CaseStatus, total=False):
+    duration_seconds: float
+    timings: CaseTimings
     evidence: list[EvidenceRecord]
     cleanup_complete: bool
     cleanup_error: str
@@ -117,6 +126,7 @@ class _ReportSchema(TypedDict):
 
 
 class RunReport(_ReportSchema, total=False):
+    duration_seconds: float
     results: list[CaseResult]
     coverage_definition: Definition
     complete: bool
@@ -190,6 +200,8 @@ def _check_observations(evidence: list[EvidenceRecord], path: str) -> None:
 def parse_report(value: object, path: str = "report") -> RunReport:
     """Validate all present report fields before returning a detached typed DTO."""
     report = parse_typed(value, RunReport, path)
+    if "duration_seconds" in report:
+        _seconds(report["duration_seconds"], f"{path}.duration_seconds")
     if "fixture" in report:
         report["fixture"] = parse_fixture(report["fixture"], f"{path}.fixture")
     if "gaps" in report:
@@ -197,5 +209,21 @@ def parse_report(value: object, path: str = "report") -> RunReport:
                           for index, gap in enumerate(report["gaps"])]
     _check_observations(report.get("setup_evidence", []), f"{path}.setup_evidence")
     for index, result in enumerate(report.get("results", [])):
+        prefix = f"{path}.results[{index}]"
+        if "duration_seconds" in result:
+            _seconds(result["duration_seconds"], f"{prefix}.duration_seconds")
+        for key, value in result.get("timings", {}).items():
+            _seconds(value, f"{prefix}.timings.{key}")
         _check_observations(result.get("evidence", []), f"{path}.results[{index}].evidence")
     return report
+
+
+def _seconds(value: object, path: str) -> None:
+    if type(value) not in (int, float) or not isinstance(value, (int, float)):
+        raise ValidationError(f"{path}: expected finite nonnegative seconds")
+    try:
+        valid = math.isfinite(value) and value >= 0
+    except OverflowError:
+        valid = False
+    if not valid:
+        raise ValidationError(f"{path}: expected finite nonnegative seconds")
