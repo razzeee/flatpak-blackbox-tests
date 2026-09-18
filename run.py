@@ -14,14 +14,16 @@ import subprocess
 import sys
 import tempfile
 import threading
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager, suppress
 from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from time import monotonic
 from xml.sax.saxutils import escape
 
 from catalogue_schema import parse_gap
+from console_output import ConsoleOutput, use_color
 from coverage_report import CoverageModel, digest, format_summary, write_json
 from fixture_manifest import FixtureManifest, load_fixture
 from json_validation import decode_json
@@ -502,12 +504,15 @@ def build_client(target: TargetConfig, output: Path,
     return client
 
 
-def main() -> int:
+def main(*, clock: Callable[[], float] = monotonic) -> int:
+    started = clock()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--target", required=True, type=Path)
     parser.add_argument("--fixtures", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path, help="new results directory")
     parser.add_argument("--driver", choices=["cli", "library", "all"], default="all")
+    parser.add_argument("--color", choices=["auto", "always", "never"], default="auto",
+                        help="console color (nonempty NO_COLOR overrides all modes)")
     try:
         inventory = load_behaviors(HERE)
     except (OSError, ValueError, KeyError, TypeError) as error:
@@ -560,6 +565,10 @@ def main() -> int:
             }
             cases[key] = result
             report["results"].append(result)
+    console = ConsoleOutput(
+        [result for result in cases.values() if result["status"] == "pending"], sys.stdout,
+        color=use_color(args.color, sys.stdout, os.environ), clock=clock, started=started,
+    )
     status = 0
     artifacts: dict[str, str] = {}
     write_json(output / "report.json", report)
@@ -576,6 +585,7 @@ def main() -> int:
             raise ValueError("unsupported_capabilities must map known capabilities to reasons")
         report["declared_unsupported_capabilities"] = unsupported
         for result in cases.values():
+            case_started = clock()
             missing = {capability: unsupported[capability]
                        for capability in result["required_capabilities"]
                        if capability in unsupported}
@@ -591,6 +601,8 @@ def main() -> int:
                 result.update({"status": "unsupported",
                                "error": "System-profile execution requires a VM runner."})
                 status = 1
+            if result["status"] == "unsupported":
+                console.case_finished(result, case_started)
         if not any(result["status"] == "pending" for result in cases.values()):
             raise UnsupportedCapability("target declares all selected scenarios unsupported")
         fixture = load_fixture(fixtures / "fixture.json")
@@ -661,6 +673,7 @@ def main() -> int:
                 result = cases[behavior["id"], kind, behavior["profile"]]
                 if result["status"] != "pending":
                     continue
+                case_started = clock()
                 # Unix-domain socket paths must fit even when --output is deep.
                 root = Path(tempfile.mkdtemp(prefix="fp-bb-"))
                 result["state_directory"] = str(root)
@@ -710,7 +723,7 @@ def main() -> int:
                         result.update({"status": "setup-error", "cleanup_error": str(error)})
                         status = 1
                     write_json(output / "report.json", report)
-                print(f"{kind}: {behavior['id']}: {result['status']}")
+                console.case_finished(result, case_started)
     except (OSError, ValueError, KeyError, TypeError, PrerequisiteError,
             ContractFailure, UnsupportedCapability) as error:
         report["setup_error"] = str(error)
@@ -718,8 +731,9 @@ def main() -> int:
         for result in cases.values():
             if result["status"] == "pending":
                 result.update({"status": failure_status(error), "error": str(error)})
+                console.case_finished(result, started)
         status = 1
-        print(str(error), file=sys.stderr)
+        console.setup_error(report["setup_status"], str(error))
     finally:
         report["complete"] = all(result["status"] != "pending" for result in cases.values())
         report["finished_at"] = datetime.now(timezone.utc).isoformat()
@@ -731,8 +745,7 @@ def main() -> int:
             status = 1
         write_json(output / "report.json", report)
         (output / "coverage.md").write_text(format_summary(report["coverage"]))
-    print(f"Results: {output / 'report.json'}; full compatibility coverage is incomplete")
-    print(f"Coverage: {output / 'coverage.md'}")
+    console.summary(report, output, status)
     return status
 
 

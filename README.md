@@ -61,6 +61,9 @@ Use a new output directory for each run. Useful options:
 - `--driver cli|library|all` selects an interface.
 - `--scenario lifecycle` selects one scenario; `--help` lists all names.
 - `--timeout 120` sets the per-command timeout in seconds.
+- `--color auto|always|never` controls console color; `auto` uses color on a TTY.
+  CI uses `always` for piped logs. A nonempty `NO_COLOR` disables color in every mode.
+  Progress is flushed after each case; timings include cleanup and stay out of JSON.
 
 Each case gets isolated state and a private session bus. If `/tmp` is too small,
 set `TMPDIR` to a short path on a filesystem with enough space.

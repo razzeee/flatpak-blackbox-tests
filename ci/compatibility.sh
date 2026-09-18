@@ -142,7 +142,8 @@ prepare() {
 
 run() {
     uv run --locked python run.py --target "$BB_CI_ROOT/target.json" \
-        --fixtures "$BB_CI_ROOT/fixtures" --output "$BB_CI_ROOT/results" --timeout 90
+        --fixtures "$BB_CI_ROOT/fixtures" --output "$BB_CI_ROOT/results" --timeout 90 \
+        --color always
 }
 
 case "$phase" in
