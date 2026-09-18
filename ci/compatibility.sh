@@ -15,7 +15,7 @@ if [[ "$phase" = summary ]]; then
     exit 0
 fi
 : "${TMPDIR:?Set TMPDIR to a short absolute temporary directory}"
-: "${FLATPAK_REFERENCE_COMMIT:?Set the pinned upstream commit}"
+: "${FLATPAK_REFERENCE_COMMIT:?Set the exact upstream commit}"
 [[ "$BB_CI_ROOT" = /* && "$TMPDIR" = /* ]]
 [[ "$FLATPAK_REFERENCE_COMMIT" =~ ^[0-9a-f]{40}$ ]]
 [[ $EUID -ne 0 ]] || { printf 'Run this script as an ordinary user.\n' >&2; exit 1; }
@@ -61,13 +61,14 @@ host() {
 }
 
 build() {
+    printf '%s\n' "$FLATPAK_REFERENCE_COMMIT" > "$BB_CI_ROOT/logs/reference-commit.txt"
     git init "$source_dir"
     git -C "$source_dir" remote add origin https://github.com/flatpak/flatpak.git
     git -C "$source_dir" fetch --depth=1 origin "$FLATPAK_REFERENCE_COMMIT"
     git -C "$source_dir" checkout --detach FETCH_HEAD
     [[ $(git -C "$source_dir" rev-parse HEAD) = "$FLATPAK_REFERENCE_COMMIT" ]]
-    # Meson fetches libglnx, bubblewrap and variant-schema-compiler at the
-    # revisions in this commit's wrap files. Ubuntu's bwrap is too old for 1.19.1.
+    # Meson fetches subprojects at the revisions in this commit's wrap files.
+    # Use the bundled bubblewrap required by the selected Flatpak source.
     # Absolute system paths make the selector expectations below unambiguous.
     meson setup "$build_dir" "$source_dir" \
         --prefix="$BB_CI_ROOT/prefix" --sysconfdir=/etc --localstatedir=/var \
@@ -91,7 +92,7 @@ build = root / "build"
 helpers = ("FLATPAK_BWRAP", "FLATPAK_DBUSPROXY", "FLATPAK_TRIGGERSDIR",
            "FLATPAK_VALIDATE_ICON", "FLATPAK_PORTAL")
 target = {
-    "name": "Flatpak 1.19.1 reference " + os.environ["FLATPAK_REFERENCE_COMMIT"],
+    "name": "Flatpak reference " + os.environ["FLATPAK_REFERENCE_COMMIT"],
     "cli": str(build / "app/flatpak"),
     "adapter": ["python3", str(suite / "flatpak-adapter.py")],
     "environment": {

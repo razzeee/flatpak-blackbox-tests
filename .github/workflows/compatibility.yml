@@ -4,30 +4,42 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+  schedule:
+    - cron: "0 21 * * *"
 
 permissions:
   contents: read
 
 concurrency:
-  group: compatibility-${{ github.event.pull_request.number || github.ref }}
+  group: compatibility-${{ github.event_name == 'schedule' && 'upstream-main' || github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   compatibility:
-    name: Full suite against pinned Flatpak 1.19.1
+    name: ${{ github.event_name == 'schedule' && 'Full suite against upstream main' || 'Full suite against pinned Flatpak 1.19.1' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     defaults:
       run:
         shell: bash
     env:
-      # Fixed reference exporter and target, not an arbitrary implementation selector.
+      # Scheduled runs replace this with a resolved upstream main commit.
       FLATPAK_REFERENCE_COMMIT: 1a6ec6a1f720fb30d76c76e656ac624fcaa237e9
     steps:
       - name: Check out suite
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+
+      - name: Resolve latest upstream main
+        if: github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          commit=$(gh api repos/flatpak/flatpak/commits/main --jq .sha)
+          [[ "$commit" =~ ^[0-9a-f]{40}$ ]]
+          printf 'FLATPAK_REFERENCE_COMMIT=%s\n' "$commit" >> "$GITHUB_ENV"
+          printf 'Testing flatpak/flatpak main at %s\n' "$commit"
 
       - name: Initialize isolated CI directories
         run: |
@@ -49,7 +61,7 @@ jobs:
       - name: Install locked Python tools
         run: uv sync --locked 2>&1 | tee "$BB_CI_ROOT/logs/uv-sync.log"
 
-      - name: Build pinned reference Flatpak
+      - name: Build selected reference Flatpak
         run: bash ci/compatibility.sh build
 
       - name: Probe ordinary-user and nested sandbox support

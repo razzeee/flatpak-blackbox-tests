@@ -133,6 +133,11 @@ logs are uploaded even when a run fails.
 
 Both [workflows](.github/workflows/) can also be started from GitHub's Actions tab.
 
+At **21:00 UTC daily**, compatibility tests also run against upstream
+`flatpak/flatpak`'s latest `main`. Each run resolves the branch to an exact commit
+and records it in the target configuration and uploaded `logs/reference-commit.txt`.
+Scheduled runs use a separate concurrency group from push and PR checks.
+
 ## License
 
 [LGPL-2.1-or-later](COPYING).
