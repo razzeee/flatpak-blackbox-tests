@@ -1,0 +1,221 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "transaction.choose-remote",
+      "scenario": "tx-choose-remote",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Runtime remote priorities, selection and refusal.",
+      "preconditions": [],
+      "expected": [
+        "Callback identifies exact refs and ordered candidates; index selects remote and -1 fails resolution."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    },
+    {
+      "id": "transaction.flatpakref",
+      "scenario": "tx-flatpakref",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Flatpakref suggested remote addition decisions and installation.",
+      "preconditions": [],
+      "expected": [
+        "Callback reason, source ID, name and URL match; remote persistence follows decision; accepted ref installs."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    },
+    {
+      "id": "transaction.ready",
+      "scenario": "tx-ready",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Both ready decisions with resolved fixture refs.",
+      "preconditions": [],
+      "expected": [
+        "Refusal fails before execution and preserves empty state; acceptance deploys exact commits."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    },
+    {
+      "id": "transaction.pre-auth",
+      "scenario": "tx-pre-auth",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Unauthenticated pre-auth inspection and abort decisions.",
+      "preconditions": [],
+      "expected": [
+        "Resolved refs require no token; refusal precedes ready and execution; acceptance succeeds."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    },
+    {
+      "id": "transaction.eol",
+      "scenario": "tx-eol",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "End-of-life notification with exact payload.",
+      "preconditions": [
+        "prepare_transactions.py extras.transactions"
+      ],
+      "expected": [
+        "Notification identifies retired ref and reason with NULL replacement; update deploys retired commit."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    },
+    {
+      "id": "transaction.eol-rebase",
+      "scenario": "tx-eol-rebase",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "End-of-life rebase decisions before execution.",
+      "preconditions": [
+        "prepare_transactions.py extras.transactions"
+      ],
+      "expected": [
+        "FALSE retains old update; TRUE adds rebase-and-uninstall and skips old update; exact signal payload and previous IDs."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    },
+    {
+      "id": "transaction.independent-errors",
+      "scenario": "tx-independent-errors",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Continue and stop after mandatory independent operation failure.",
+      "preconditions": [
+        "prepare_transactions.py extras.transactions"
+      ],
+      "expected": [
+        "FALSE stops before second operation; TRUE completes independent operation; failed deployment preserved."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    },
+    {
+      "id": "transaction.error-sequence",
+      "scenario": "tx-error-sequence",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Failed and successful operation lifecycle payloads.",
+      "preconditions": [],
+      "expected": [
+        "Denied download begins then errors with mandatory-error details; retry begins then completes at B."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "transaction.choose-remote",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.signal.choose-remote"
+      ],
+      "rationale": "Two remotes have unequal priorities; callback payload exact ordered candidates and refs, -1 prevents execution, index zero resolves runtime operation to high-priority remote and deploys commits."
+    },
+    {
+      "behavior_id": "transaction.flatpakref",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.signal.add-new-remote",
+        "library.transaction.install-flatpakref"
+      ],
+      "rationale": "Exact generic suggestion reason/source/name/URL for declined and accepted suggestions; remote enumeration asserts decision persistence; accepted flatpakref deploys exact fixture commits."
+    },
+    {
+      "behavior_id": "transaction.ready",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.signal.ready-abort"
+      ],
+      "rationale": "Both callback decisions, exact resolved refs, absence of execution and installed-state checks."
+    },
+    {
+      "behavior_id": "transaction.eol",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.signal.eol-notification"
+      ],
+      "rationale": "Reference exporter supplies known EOL metadata; exact emitted ref/reason checked both without replacement and with a non-NULL target, plus exact deployed EOL commits."
+    },
+    {
+      "behavior_id": "transaction.eol-rebase",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.signal.eol-rebase-decision"
+      ],
+      "rationale": "Both decisions inspect exact remote/ref/reason/replacement/previous IDs before any new-operation; FALSE updates old ref; TRUE calls public rebase-and-uninstall, installs replacement then uninstalls old ref with skipped original update."
+    },
+    {
+      "behavior_id": "transaction.independent-errors",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.signal.operation-error-decision"
+      ],
+      "rationale": "Probe resolved independent app order, deny unique payload of first operation, then test FALSE stops and TRUE runs remaining independent operation with exact done commit and persisted deployment. Failing operation GError and fatal details checked separately from outer error."
+    },
+    {
+      "behavior_id": "transaction.error-sequence",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.signal.operation-sequence"
+      ],
+      "rationale": "Failed required B download emits exactly new then error with operation identity and GError; retry emits new then done with exact B commit, with C pointer/order checks."
+    }
+  ]
+}

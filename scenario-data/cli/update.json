@@ -1,0 +1,228 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "management.update-arch",
+      "scenario": "management-update-arch",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Update only foreign copy by architecture-free app name.",
+      "preconditions": "Both architectures installed at A and both advertise B.",
+      "expected": "Foreign advances to B; native remains A.",
+      "references": [
+        "doc/flatpak-update.xml"
+      ]
+    },
+    {
+      "id": "management.update-kinds",
+      "scenario": "management-update-kinds",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Select apps and runtimes independently during updates.",
+      "preconditions": "Reference app and runtime each have A/B versions.",
+      "expected": "Each type selector changes selected kind to B and retains excluded kind at A.",
+      "references": [
+        "doc/flatpak-update.xml"
+      ]
+    },
+    {
+      "id": "management.update-no-deps",
+      "scenario": "management-update-no-deps",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Update app with its runtime absent but available.",
+      "preconditions": "App installed without dependencies and B advertised.",
+      "expected": "App reaches B without installing its required runtime.",
+      "references": [
+        "doc/flatpak-update.xml"
+      ]
+    },
+    {
+      "id": "management.update-all",
+      "scenario": "management-update-all",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Update two distinct apps and an updatable runtime without a ref selector.",
+      "preconditions": "Independent queries A/B repositories contain distinct commits for Query/test, QuerySecond/test and Query.Data/next; all three are installed at A.",
+      "expected": "A no-ref update advances both apps and the runtime to their exact independently prepared B commits, retaining the unchanged base runtime commit.",
+      "references": [
+        "doc/flatpak-update.xml"
+      ]
+    },
+    {
+      "id": "management.update-local",
+      "scenario": "management-update-local",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "network-fault-injection"
+      ],
+      "description": "Download B without deployment, then deploy without pulling.",
+      "preconditions": "A installed; B available; payload faults controllable.",
+      "expected": "Download leaves A installed; local deployment reaches B despite denied payloads.",
+      "references": [
+        "doc/flatpak-update.xml"
+      ]
+    },
+    {
+      "id": "management.commit",
+      "scenario": "management-commit",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Downgrade B to explicitly selected A.",
+      "preconditions": "B repository retains A ancestry.",
+      "expected": "A installed while remote tip remains B.",
+      "references": [
+        "doc/flatpak-update.xml"
+      ]
+    },
+    {
+      "id": "coverage.appstream-update",
+      "scenario": "coverage-appstream-update",
+      "handler": "coverage_next_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "appstream"
+      ],
+      "description": "Refresh a specified remote's changed AppStream data.",
+      "preconditions": "Cached A descriptions and independently exported B descriptions served at the same URL.",
+      "expected": "Search remains A before refresh, then returns B-only text and excludes A-only text after explicit refresh, without deployments.",
+      "references": [
+        "doc/flatpak-update.xml",
+        "doc/flatpak-search.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "management.update-arch",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Both copies have updates but only selected copy advances.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.update.--arch",
+          "rationale": "Foreign reaches B while native remains A despite available B."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.update-kinds",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "App and runtime each have independently prepared updates.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.update.--runtime",
+          "rationale": "Runtime advances to B while app with available B stays A."
+        },
+        {
+          "id": "cli.option.update.--app",
+          "rationale": "App advances to B while runtime with available B stays A."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.update-no-deps",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Absent required dependency remains absent after app update.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.update.--no-deps",
+          "rationale": "App advances to B without installing available required runtime."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.update-all",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.update.user.all"
+      ],
+      "rationale": "Three independently exported refs have verified distinct A/B commits. After installing both distinct apps and the runtime at A, a no-ref update must put every one at its exact B commit; the base runtime remains at its unchanged tip."
+    },
+    {
+      "behavior_id": "management.update-local",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Additional documented update option contracts.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.update.--no-deploy",
+          "rationale": "Successful B download leaves exact installed commit A."
+        },
+        {
+          "id": "cli.option.update.--no-pull",
+          "rationale": "Before downloading B, no-pull retains local A despite advertised B; after explicit download it deploys local B."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.commit",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.update.user.commit"
+      ],
+      "rationale": "Explicit commit downgrades installed B to A while remote-info still reports B."
+    },
+    {
+      "behavior_id": "coverage.appstream-update",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.update.user.appstream"
+      ],
+      "rationale": "Same remote URL switches A to B; searches prove cached A before explicit --appstream refresh and B-only results with A excluded afterward."
+    }
+  ]
+}

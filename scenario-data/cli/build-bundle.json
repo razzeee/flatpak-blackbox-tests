@@ -1,0 +1,232 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "build.options.oci",
+      "scenario": "build-option-oci",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository",
+        "container-images"
+      ],
+      "description": "Export OCI layout with nondefault zstd compression.",
+      "preconditions": "Independent B repository.",
+      "expected": "OCI layout/index/manifest and digest-valid blobs with zstd media types and magic.",
+      "references": [
+        "doc/flatpak-build-bundle.xml"
+      ]
+    },
+    {
+      "id": "build.options.delta-bundle",
+      "scenario": "build-option-delta-bundle",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository"
+      ],
+      "description": "Create delta bundle based on A.",
+      "preconditions": "Independent B repository containing A parent.",
+      "expected": "Independent delta inspector identifies exact A base and B target.",
+      "references": [
+        "doc/flatpak-build-bundle.xml"
+      ]
+    },
+    {
+      "id": "build.options.arch-bundle",
+      "scenario": "build-option-arch-bundle",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository"
+      ],
+      "description": "Select alternate app when bundling two architectures.",
+      "preconditions": "Independent repo containing distinct native and alternate commits.",
+      "expected": "Independent OSTree application of bundle yields known alternate commit.",
+      "references": [
+        "doc/flatpak-build-bundle.xml"
+      ]
+    },
+    {
+      "id": "build.bundle.app",
+      "scenario": "build-bundle-app",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository",
+        "user-installation"
+      ],
+      "description": "Create an application bundle from an independent repository.",
+      "preconditions": "Reference A distribution repo; runtime preinstalled before bundle installation.",
+      "expected": "Bundle installs exact A app commit.",
+      "references": [
+        "doc/flatpak-build-bundle.xml"
+      ]
+    },
+    {
+      "id": "build.bundle.runtime",
+      "scenario": "build-bundle-runtime",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository",
+        "user-installation"
+      ],
+      "description": "Create a runtime bundle with explicit architecture.",
+      "preconditions": "Reference A distribution repository.",
+      "expected": "Bundle installs exact runtime commit.",
+      "references": [
+        "doc/flatpak-build-bundle.xml"
+      ]
+    },
+    {
+      "id": "build.bundle.origin",
+      "scenario": "build-bundle-origin",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository",
+        "user-installation"
+      ],
+      "description": "Create a bundle carrying its update URL.",
+      "preconditions": "Reference A repository and preinstalled runtime.",
+      "expected": "Exact app commit installed with an origin whose URL matches --repo-url.",
+      "references": [
+        "doc/flatpak-build-bundle.xml"
+      ]
+    },
+    {
+      "id": "build.options.runtime-repo",
+      "scenario": "build-option-runtime-repo",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository",
+        "user-installation"
+      ],
+      "description": "Embed runtime repository descriptor URL in application bundle.",
+      "preconditions": "Independent A repo; no installed runtime or configured remotes.",
+      "expected": "Bundle installation fetches descriptor and installs exact runtime dependency.",
+      "references": [
+        "doc/flatpak-build-bundle.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "build.options.oci",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Standard OCI JSON and blob digest/compression observations.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-bundle.--oci",
+          "rationale": "Output is OCI layout directory instead of flatpak bundle file."
+        },
+        {
+          "id": "cli.option.build-bundle.--oci-layer-compress",
+          "rationale": "Layer descriptor and frame magic select zstd rather than default gzip."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.options.delta-bundle",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Independent OSTree application fails without A and succeeds with A.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-bundle.--from-commit",
+          "rationale": "Delta requires exact A base and then produces B; from-empty mutation would succeed without A."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.options.arch-bundle",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Independent repo contains both native and alternate commits.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-bundle.--arch",
+          "rationale": "Bundle yields alternate commit rather than native candidate."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.bundle.app",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.build-bundle.any.app"
+      ],
+      "rationale": "Target bundle installs exact independently known A commit; native architecture alone earns no selector credit."
+    },
+    {
+      "behavior_id": "build.bundle.runtime",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Runtime bundle installs exact independently known runtime commit.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-bundle.--runtime",
+          "rationale": "Installed bundle is runtime ref, not application."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.bundle.origin",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.build-bundle.any.update-origin"
+      ],
+      "rationale": "Bundle installed commit and public origin remote URL checked."
+    },
+    {
+      "behavior_id": "build.options.runtime-repo",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Bundle dependency unavailable without embedded descriptor; descriptor request and exact dependency installation observed.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-bundle.--runtime-repo",
+          "rationale": "Bundle causes descriptor fetch and dependency install into initially empty user installation."
+        }
+      ]
+    }
+  ]
+}

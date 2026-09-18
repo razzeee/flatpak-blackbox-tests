@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "maintenance.library-preinstall",
+      "scenario": "maintenance-library-preinstall",
+      "handler": "maintenance_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "library"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "multiple-installations",
+        "local-repository",
+        "vendor-preinstall"
+      ],
+      "description": "Synchronize vendor definitions through the public transaction API.",
+      "preconditions": "Fresh system installation with fixture remote and app/runtime preinstall definitions.",
+      "expected": "Ready operations are exactly two installs followed by one app uninstall after configuration changes; public installed queries match both results.",
+      "references": [
+        "common/flatpak-transaction.c",
+        "doc/flatpak-preinstall.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "maintenance.library-preinstall",
+      "driver": "library",
+      "profile": "system",
+      "requirements": [
+        "library.transaction.system.sync-preinstalled"
+      ],
+      "rationale": "CALL_API sync adds exact typed ready operations for both installation and vendor app removal; running each changes public installed sets and preserves other stores."
+    }
+  ],
+  "notes": [
+    "Uses system_selector_scenarios.Namespace with two disposable root user namespace layers and fixture-owned preinstall.d configuration. No non-root polkit or multiuser claim.",
+    "Only public .preinstall definitions, CLI queries and fixture payloads at publicly returned deployment locations are inspected. No installed repository backend paths are constructed.",
+    "The preinstall manual in this checkout is doc/flatpak-preinstall.xml. Install=false explicitly removes the app; the runtime remains designated for installation.",
+    "History uses an actual systemd-journald process and journalctl --sync within one guarded namespace invocation. Each nested CLI argv, exit status, stdout and stderr is retained as JSON lines in outer command evidence. User history refers to namespace root's per-user installation, not an ordinary user's authorization behavior. Lifecycle checks require ordered installation/update/removal concepts for controlled refs, accepting noun/verb aliases and an optional deployment prefix. Unknown auxiliary labels and repeated events do not satisfy missing lifecycle steps and do not impose fixed record counts. The documented installation column must identify the selected store; auxiliary records may identify temporary repository paths. Pure helper controls accept extra auxiliary records and reject wrong selectors, missing steps, wrong order and swapped columns.",
+    "Repair adds a third disposable user namespace mapping actual UID/GID 1000 to enclosing namespace UID/GID 0. Both callers query the same populated default system installation without installation/config redirects. Exact ref/commit checks bracket authorized root repair, which may rebuild filesystem objects. Device/inode identities at public installation/deployment paths are captured after root repair and must match across the non-root namespace and its read-only repair. The inherited host root remains read-only and no host bus is present. Coverage is limited to actual non-root refusal to mutate, including automatic dry-run; repository-object recovery and dry-run inconsistency detection remain unmapped.",
+    "Preinstall --system receives no option assertion because ignoring it still selects the default system installation. No preinstall --no-pull assertion is claimed: the attempted cached setup returned Nothing to do even without that flag. Download-only is verified by empty installed queries and subsequent ordinary offline installation of its downloaded content."
+  ],
+  "client": {
+    "source": "client-maintenance.c",
+    "entry": "blackbox_maintenance_main"
+  }
+}

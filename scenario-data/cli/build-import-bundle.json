@@ -1,0 +1,118 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "build.options.import-signed",
+      "scenario": "build-option-import-signed",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository",
+        "repository-signing",
+        "appstream"
+      ],
+      "description": "Sign imported bundle while selecting summary and AppStream updates.",
+      "preconditions": "Independent reference bundle and disposable key.",
+      "expected": "Signature verifies, summary absent and AppStream branch exists.",
+      "references": [
+        "doc/flatpak-build-import-bundle.xml"
+      ]
+    },
+    {
+      "id": "build.options.import-oci",
+      "scenario": "build-option-import-oci",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository",
+        "container-images"
+      ],
+      "description": "Select a named image from independent multi-image OCI layout.",
+      "preconditions": "Reference OCI layout containing distinct A and B images supplied by prepare_options.",
+      "expected": "Only requested B branch appears with exact B payload bytes.",
+      "references": [
+        "doc/flatpak-build-import-bundle.xml"
+      ]
+    },
+    {
+      "id": "build.import.bundle",
+      "scenario": "build-import",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository"
+      ],
+      "description": "Import an independently prepared bundle.",
+      "preconditions": "prepare_build supplies reference-created A app bundle.",
+      "expected": "Public repository ref resolves to A and all objects pass OSTree fsck.",
+      "references": [
+        "doc/flatpak-build-import-bundle.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "build.options.import-signed",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Independent unsigned bundle imported and observed through public distribution format.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-import-bundle.--gpg-sign",
+          "rationale": "Imported commit signature verifies with public key."
+        },
+        {
+          "id": "cli.option.build-import-bundle.--gpg-homedir",
+          "rationale": "Key exists only in selected disposable home."
+        },
+        {
+          "id": "cli.option.build-import-bundle.--no-update-summary",
+          "rationale": "Fresh destination summary absent."
+        },
+        {
+          "id": "cli.option.build-import-bundle.--update-appstream",
+          "rationale": "Fresh destination contains AppStream ref."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.options.import-oci",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Independent OCI layout contains competing A/B images.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-import-bundle.--oci",
+          "rationale": "OCI layout directory successfully imports expected payload."
+        },
+        {
+          "id": "cli.option.build-import-bundle.--ref",
+          "rationale": "Selected B ref exists with exact B payload and unselected A ref is absent."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.import.bundle",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.build-import-bundle.any.import"
+      ],
+      "rationale": "Reference-created bundle imported to target distribution repo with exact checksum and fsck."
+    }
+  ]
+}

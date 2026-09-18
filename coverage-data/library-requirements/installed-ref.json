@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "requirements": [
+    {
+      "id": "library.query.installed.origin-location-size",
+      "interface": "library",
+      "profile": "any",
+      "category": "installed-ref",
+      "description": "An installed fixture ref reports its origin remote, its actual deployment directory, and the expected installed size for that ref.",
+      "sources": [
+        {
+          "path": "common/flatpak-installed-ref.c",
+          "anchor": "flatpak_installed_ref_get_origin"
+        },
+        {
+          "path": "common/flatpak-installed-ref.c",
+          "anchor": "flatpak_installed_ref_get_deploy_dir"
+        },
+        {
+          "path": "common/flatpak-installed-ref.c",
+          "anchor": "flatpak_installed_ref_get_installed_size"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installed_ref_get_origin",
+        "library.function.flatpak_installed_ref_get_deploy_dir",
+        "library.function.flatpak_installed_ref_get_installed_size"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.query.installed.subpaths",
+      "interface": "library",
+      "profile": "any",
+      "category": "installed-ref",
+      "description": "A partially installed fixture ref reports its installed subpath set; a fully installed fixture ref reports NULL rather than a partial subpath list.",
+      "sources": [
+        {
+          "path": "common/flatpak-installed-ref.c",
+          "anchor": "flatpak_installed_ref_get_subpaths"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installed_ref_get_subpaths"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.query.installed.metadata",
+      "interface": "library",
+      "profile": "any",
+      "category": "installed-ref",
+      "description": "Loading metadata for a deployed fixture ref returns its metadata file contents, including the fixture's declared runtime and permissions.",
+      "sources": [
+        {
+          "path": "common/flatpak-installed-ref.c",
+          "anchor": "flatpak_installed_ref_load_metadata"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installed_ref_load_metadata"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.query.installed.appdata",
+      "interface": "library",
+      "profile": "any",
+      "category": "installed-ref",
+      "description": "For an app with embedded AppStream data, loading appdata returns compressed XML matching the fixture; the name and summary getters return the fixture's localized fields under a controlled locale.",
+      "sources": [
+        {
+          "path": "common/flatpak-installed-ref.c",
+          "anchor": "flatpak_installed_ref_load_appdata"
+        },
+        {
+          "path": "common/flatpak-installed-ref.c",
+          "anchor": "flatpak_installed_ref_get_appdata_name"
+        },
+        {
+          "path": "common/flatpak-installed-ref.c",
+          "anchor": "flatpak_installed_ref_get_appdata_summary"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installed_ref_load_appdata",
+        "library.function.flatpak_installed_ref_get_appdata_name",
+        "library.function.flatpak_installed_ref_get_appdata_summary"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "appstream"
+      ]
+    },
+    {
+      "id": "library.query.installed.appdata-release-rating",
+      "interface": "library",
+      "profile": "any",
+      "category": "installed-ref",
+      "description": "For controlled AppStream metadata, installed-ref getters return the default version, license, content-rating type, and attribute-to-value mapping. Missing optional fields return the documented NULL values.",
+      "sources": [
+        {
+          "path": "common/flatpak-installed-ref.c",
+          "anchor": "flatpak_installed_ref_get_appdata_version"
+        },
+        {
+          "path": "common/flatpak-installed-ref.c",
+          "anchor": "flatpak_installed_ref_get_appdata_license"
+        },
+        {
+          "path": "common/flatpak-installed-ref.c",
+          "anchor": "flatpak_installed_ref_get_appdata_content_rating_type"
+        },
+        {
+          "path": "common/flatpak-installed-ref.c",
+          "anchor": "flatpak_installed_ref_get_appdata_content_rating"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installed_ref_get_appdata_version",
+        "library.function.flatpak_installed_ref_get_appdata_license",
+        "library.function.flatpak_installed_ref_get_appdata_content_rating_type",
+        "library.function.flatpak_installed_ref_get_appdata_content_rating"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "appstream"
+      ]
+    },
+    {
+      "id": "library.query.installed.eol",
+      "interface": "library",
+      "profile": "any",
+      "category": "installed-ref",
+      "description": "Installed refs with explicit end-of-life reason and rebase metadata expose those values; a non-EOL fixture returns NULL for both getters.",
+      "sources": [
+        {
+          "path": "common/flatpak-installed-ref.c",
+          "anchor": "flatpak_installed_ref_get_eol"
+        },
+        {
+          "path": "common/flatpak-installed-ref.c",
+          "anchor": "flatpak_installed_ref_get_eol_rebase"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installed_ref_get_eol",
+        "library.function.flatpak_installed_ref_get_eol_rebase"
+      ],
+      "required_capabilities": [
+        "libflatpak"
+      ]
+    }
+  ],
+  "limitations": []
+}

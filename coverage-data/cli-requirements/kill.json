@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.kill.any.instance",
+      "interface": "cli",
+      "profile": "any",
+      "category": "sandbox-execution",
+      "description": "Killing a running Flatpak by its instance ID stops that instance.",
+      "sources": [
+        {
+          "path": "doc/flatpak-kill.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.kill"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "sandbox-execution",
+        "concurrent-processes"
+      ]
+    }
+  ],
+  "limitations": []
+}

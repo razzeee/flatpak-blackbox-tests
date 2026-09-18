@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "requirements": [
+    {
+      "id": "library.progress.changed-values",
+      "interface": "library",
+      "profile": "any",
+      "category": "progress",
+      "description": "During a controlled transfer, changed notifications permit reading the current status, estimating flag, progress in the range 0 through 100, transferred bytes, and monotonic start time from the operation's progress object.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "FlatpakTransactionProgress::changed"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_progress_get_status"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_progress_get_is_estimating"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_progress_get_progress"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_progress_get_bytes_transferred"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_progress_get_start_time"
+        }
+      ],
+      "surfaces": [
+        "library.signal.FlatpakTransactionProgress.changed",
+        "library.function.flatpak_transaction_progress_get_status",
+        "library.function.flatpak_transaction_progress_get_is_estimating",
+        "library.function.flatpak_transaction_progress_get_progress",
+        "library.function.flatpak_transaction_progress_get_bytes_transferred",
+        "library.function.flatpak_transaction_progress_get_start_time"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "controlled-transfers"
+      ]
+    },
+    {
+      "id": "library.progress.initial-transfer-rate",
+      "interface": "library",
+      "profile": "any",
+      "category": "progress",
+      "description": "The transfer-rate getter reports bytes per second and returns zero during the first second while the rate is being established; a sustained controlled transfer subsequently reports a nonzero rate.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_progress_get_bytes_per_second"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_progress_get_bytes_per_second"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "controlled-transfers"
+      ]
+    },
+    {
+      "id": "library.ownership.progress-status",
+      "interface": "library",
+      "profile": "any",
+      "category": "ownership",
+      "description": "A transfer-full progress status string can be retained after releasing its progress object and freed independently of later status results.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_progress_get_status"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_progress_get_status"
+      ],
+      "required_capabilities": [
+        "libflatpak"
+      ]
+    }
+  ],
+  "limitations": []
+}

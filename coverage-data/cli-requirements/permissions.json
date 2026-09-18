@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.permissions.any.selection",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "permissions TABLE ID returns the requested entry from that table rather than entries for other object IDs or tables.",
+      "sources": [
+        {
+          "path": "doc/flatpak-permissions.xml",
+          "anchor": "When called with two arguments"
+        }
+      ],
+      "surfaces": [
+        "cli.command.permissions"
+      ],
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ]
+    }
+  ],
+  "limitations": []
+}

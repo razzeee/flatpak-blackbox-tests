@@ -1,0 +1,239 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "queryx.ref-file",
+      "scenario": "queryx-ref-file",
+      "handler": "library_query_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Configure a ref-file remote without deploying its app.",
+      "preconditions": "Initially empty installation and valid literal flatpakref pointing at controlled repository.",
+      "expected": "Returned ref has exact identity and NULL commit; its remote exists at expected URL; installed list remains empty.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_install_ref_file"
+      ]
+    },
+    {
+      "id": "queryx.legacy-lifecycle",
+      "scenario": "queryx-legacy-lifecycle",
+      "handler": "library_query_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Install, update and uninstall through deprecated direct APIs.",
+      "preconditions": "Runtime satisfied; independent repositories A then B.",
+      "expected": "Direct install returns deployed A, direct update returns deployed B, direct uninstall leaves NOT_INSTALLED.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_install, flatpak_installation_update, flatpak_installation_uninstall"
+      ]
+    },
+    {
+      "id": "queryx.legacy-noop",
+      "scenario": "queryx-legacy-noop",
+      "handler": "library_query_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Distinguish direct no-op and absent updates.",
+      "preconditions": "Current app and a separate absent advertised app.",
+      "expected": "update_full returns NULL with Flatpak ALREADY_INSTALLED or NOT_INSTALLED respectively.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_update_full"
+      ]
+    },
+    {
+      "id": "queryx.legacy-pull",
+      "scenario": "queryx-legacy-pull",
+      "handler": "library_query_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Pull without deployment, then deploy the pulled ref.",
+      "preconditions": "Runtime satisfied and app initially absent.",
+      "expected": "NO_DEPLOY returns ONLY_PULLED and leaves app absent; NO_PULL returns fixture commit and deploys it.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_install_full"
+      ]
+    },
+    {
+      "id": "lifex.direct-bundle",
+      "scenario": "lifex-direct-bundle",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "bundle-files",
+        "local-repository"
+      ],
+      "description": "Install a bundle with the deprecated direct API.",
+      "preconditions": "Independent unsigned app bundle and already installed runtime.",
+      "expected": "Returned and queried identity/commit match exported input; repeat yields ALREADY_INSTALLED without changing deployment.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_install_bundle"
+      ]
+    },
+    {
+      "id": "lifex.local-ref",
+      "scenario": "lifex-local-ref",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Check public local-deployment outcomes after removing an undeployed ref.",
+      "preconditions": "Independent deployed app and second app; positive no-pull deployment control followed by uninstall and another pull-only operation.",
+      "expected": "Removing the deployed ref fails; removing the pulled-only ref succeeds and subsequent no-pull install fails; existing app and runtime commits remain intact. Object retention is not established.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_remove_local_ref_sync"
+      ]
+    },
+    {
+      "id": "lifex.prune",
+      "scenario": "lifex-prune",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Check public deployment preservation across cleanup and pruning.",
+      "preconditions": "Independent deployed and pulled-only apps; positive no-pull deployment control for the second app before resetting it to pulled-only state.",
+      "expected": "Cleanup and prune succeed; no-pull install of the cleaned ref fails before and after pruning; deployed app and runtime commits stay intact. Orphaned-object deletion is not established.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_cleanup_local_refs_sync, flatpak_installation_prune_local_repo"
+      ]
+    },
+    {
+      "id": "lifex.deferred-triggers",
+      "scenario": "lifex-deferred-triggers",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Defer and explicitly refresh exported MIME associations.",
+      "preconditions": "Independent desktop app A/B with different MIME types; desktop MIME trigger installed.",
+      "expected": "NO_TRIGGERS install/update/uninstall leaves cache unchanged until public run_triggers produces A/B/absent association respectively.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_run_triggers",
+        "common/flatpak-installation.h: NO_TRIGGERS flags"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "queryx.ref-file",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.legacy.ref-file-configures-only"
+      ],
+      "rationale": "Direct ref-file API returns NULL-commit ref, configures a lookup-visible expected remote URL and leaves installation empty."
+    },
+    {
+      "behavior_id": "queryx.legacy-lifecycle",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.legacy.install-update-uninstall"
+      ],
+      "rationale": "All three deprecated functions execute; returned and queried commits match A/B and final lookup yields NOT_INSTALLED."
+    },
+    {
+      "behavior_id": "queryx.legacy-noop",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.legacy.update-noop-error"
+      ],
+      "rationale": "update_full NULL and exact public domain/code asserted for current and absent fixtures."
+    },
+    {
+      "behavior_id": "queryx.legacy-pull",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.legacy.install-only-pulled"
+      ],
+      "rationale": "NO_DEPLOY exact ONLY_PULLED plus absent deployment, then NO_PULL exact deployed commit."
+    },
+    {
+      "behavior_id": "lifex.direct-bundle",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Direct bundle success and repeat error are additional public checks; existing deprecated lifecycle obligation names different entry points."
+    },
+    {
+      "behavior_id": "lifex.local-ref",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Layout-independent partial check: deployed removal is rejected, no-pull installation stops working after undeployed removal, and existing commits survive. The full local-ref-protection obligation is withheld because object retention is unobserved."
+    },
+    {
+      "behavior_id": "lifex.prune",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Layout-independent partial check: cleanup and pruning preserve deployments and the cleaned ref cannot be installed without pulling. The orphaned-objects obligation is withheld because actual object reclamation is unobserved."
+    },
+    {
+      "behavior_id": "lifex.deferred-triggers",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.legacy.deferred-triggers"
+      ],
+      "rationale": "Install/update/uninstall NO_TRIGGERS observed against real exported desktop MIME cache; run_triggers must refresh each deferred change."
+    }
+  ],
+  "client": {
+    "source": "client-lifecycle-extra.c",
+    "entry": "blackbox_lifecycle_extra_main"
+  }
+}

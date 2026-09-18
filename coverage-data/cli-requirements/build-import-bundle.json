@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.build-import-bundle.any.import",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "Importing a valid build-bundle output makes its ref and contents available in the destination repository.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-import-bundle.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-import-bundle"
+      ],
+      "required_capabilities": [
+        "cli",
+        "build-tools",
+        "local-repository"
+      ]
+    }
+  ],
+  "limitations": []
+}

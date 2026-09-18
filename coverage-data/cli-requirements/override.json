@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.override.user.persist",
+      "interface": "cli",
+      "profile": "user",
+      "category": "sandbox-execution",
+      "description": "A per-app user environment override persists across invocations and changes that variable in subsequent application runs.",
+      "sources": [
+        {
+          "path": "doc/flatpak-override.xml",
+          "anchor": "Description"
+        },
+        {
+          "path": "doc/flatpak-override.xml",
+          "anchor": "--env=VAR=VALUE"
+        }
+      ],
+      "surfaces": [
+        "cli.command.override",
+        "cli.option.override.--env"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.override.user.show",
+      "interface": "cli",
+      "profile": "user",
+      "category": "sandbox-execution",
+      "description": "override --show APP reports the stored overrides for the specified application.",
+      "sources": [
+        {
+          "path": "doc/flatpak-override.xml",
+          "anchor": "--show"
+        }
+      ],
+      "surfaces": [
+        "cli.command.override",
+        "cli.option.override.--show"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.override.user.reset",
+      "interface": "cli",
+      "profile": "user",
+      "category": "sandbox-execution",
+      "description": "override --reset APP removes that app's stored overrides so they no longer affect subsequent launches.",
+      "sources": [
+        {
+          "path": "doc/flatpak-override.xml",
+          "anchor": "--reset"
+        }
+      ],
+      "surfaces": [
+        "cli.command.override",
+        "cli.option.override.--reset"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "sandbox-execution"
+      ]
+    }
+  ],
+  "limitations": []
+}

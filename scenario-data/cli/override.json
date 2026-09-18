@@ -1,0 +1,339 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "sandbox.override-env",
+      "scenario": "sandbox-override-env",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Persist, show, replace, unset and reset application environment overrides.",
+      "preconditions": "A metadata environment and isolated user installation.",
+      "expected": "Public stored value and repeated run values match; run wins; unset removes; reset restores metadata.",
+      "references": [
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "sandbox.global-override",
+      "scenario": "sandbox-global-override",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Observe global and app-specific override precedence.",
+      "preconditions": "Isolated user installation with metadata environment.",
+      "expected": "Global value, app value, restored global value, restored metadata value.",
+      "references": [
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "sandbox.override-extra",
+      "scenario": "sandbox-override-extra",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Persist USB queries, generic policy and accessibility name policy.",
+      "preconditions": "Fresh overrides and controlled USB query file.",
+      "expected": "Exact public allow/hide query sets, policy additions/denial and accessibility own value.",
+      "references": [
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "sandbox.override-conditional",
+      "scenario": "sandbox-override-conditional",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Persist explicit conditional permission expressions.",
+      "preconditions": "Fresh overrides and conditional permission support.",
+      "expected": "Exact true/false conditions on network, wayland, shm and devel in override show.",
+      "references": [
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "sandbox.override-policy",
+      "scenario": "sandbox-override-policy",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Persist session and system bus name policies.",
+      "preconditions": "Fresh app overrides.",
+      "expected": "Public override show has exact own/talk policies and subsequent explicit denials.",
+      "references": [
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "sandbox.override-context",
+      "scenario": "sandbox-override-context",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Persist explicit namespace, device and feature permission values.",
+      "preconditions": "Fresh app overrides.",
+      "expected": "Public show grants ipc/dri/devel and explicitly denies network/kvm/multiarch.",
+      "references": [
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "system-selectors.overrides",
+      "scenario": "system-selectors-overrides",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations"
+      ],
+      "description": "Store and reset independently selected default-system and user overrides.",
+      "preconditions": "No overrides exist in either private store.",
+      "expected": "Exact environment values survive public show; reset clears only the selected store.",
+      "references": [
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "system-selectors.override-named",
+      "scenario": "system-selectors-override-named",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations"
+      ],
+      "description": "Assert that the named override selector is independent of the default system override.",
+      "preconditions": "Fresh default, named and user stores; default override is written first.",
+      "expected": "Named show is initially empty, and subsequent writes/resets affect only their selected store. Reference target currently fails this contract.",
+      "references": [
+        "doc/flatpak-override.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "sandbox.override-env",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.override.user.persist",
+        "cli.override.user.show",
+        "cli.override.user.reset"
+      ],
+      "rationale": "Exact public stored env, repeated probe runs, unset and reset to known metadata.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.override.--unset-env",
+          "rationale": "Persistent unset removes previously present metadata variable from launch."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.global-override",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Global/app/run layering observed through actual variable values."
+    },
+    {
+      "behavior_id": "sandbox.override-extra",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Exact persisted metadata values only. USB and accessibility checks receive no option credit where absent from the fixed catalogue.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.override.--add-policy",
+          "rationale": "Both requested generic policy values persisted."
+        },
+        {
+          "id": "cli.option.override.--remove-policy",
+          "rationale": "Previously present value stored as explicit denial."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.override-conditional",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Conditional expression persistence only.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.override.--share-if",
+          "rationale": "network:false persisted exactly."
+        },
+        {
+          "id": "cli.option.override.--socket-if",
+          "rationale": "wayland:true persisted exactly."
+        },
+        {
+          "id": "cli.option.override.--device-if",
+          "rationale": "shm:true persisted exactly."
+        },
+        {
+          "id": "cli.option.override.--allow-if",
+          "rationale": "devel:false persisted exactly."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.override-policy",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Exact public persisted bus policies only; no filtered-bus communication credit.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.override.--own-name",
+          "rationale": "Exact session name has own policy in public override show."
+        },
+        {
+          "id": "cli.option.override.--talk-name",
+          "rationale": "Exact session name has talk policy in public override show."
+        },
+        {
+          "id": "cli.option.override.--system-own-name",
+          "rationale": "Exact system name has own policy in public override show."
+        },
+        {
+          "id": "cli.option.override.--system-talk-name",
+          "rationale": "Exact system name has talk policy in public override show."
+        },
+        {
+          "id": "cli.option.override.--no-talk-name",
+          "rationale": "Previously granted session name changes to none policy."
+        },
+        {
+          "id": "cli.option.override.--system-no-talk-name",
+          "rationale": "Previously granted system name changes to none policy."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.override-context",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Persisted permission values only; no physical dri/kvm or feature enforcement claim.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.override.--device",
+          "rationale": "Public stored device set grants dri."
+        },
+        {
+          "id": "cli.option.override.--nodevice",
+          "rationale": "Public stored device set explicitly denies kvm."
+        },
+        {
+          "id": "cli.option.override.--allow",
+          "rationale": "Public stored feature set grants devel."
+        },
+        {
+          "id": "cli.option.override.--disallow",
+          "rationale": "Public stored feature set explicitly denies multiarch."
+        }
+      ]
+    },
+    {
+      "behavior_id": "system-selectors.overrides",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [],
+      "rationale": "Public show observes independent persisted default/user values; reset removes only the selected value.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.override.--system",
+          "rationale": "Default override write is absent from user show, and default reset preserves user value."
+        },
+        {
+          "id": "cli.option.override.--user",
+          "rationale": "User override write preserves default value, and user reset removes its own value."
+        },
+        {
+          "id": "cli.option.override.--env",
+          "rationale": "Exact SELECTOR value persists in public override output."
+        },
+        {
+          "id": "cli.option.override.--show",
+          "rationale": "Public show returns the stored Environment entry and becomes empty after reset."
+        },
+        {
+          "id": "cli.option.override.--reset",
+          "rationale": "Selected stored Environment entry disappears while other store remains unchanged."
+        }
+      ]
+    },
+    {
+      "behavior_id": "system-selectors.override-named",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [],
+      "rationale": "Named overrides must be independent of default overrides; a failure receives no verified credit.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.override.--installation",
+          "rationale": "Named show must exclude a default-only override; selected writes and resets must remain isolated."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Every target call enters two disposable bubblewrap user/mount namespace layers. The outer root maps only to the invoking host UID; inner root maps only to outer root. Inherited host mounts are locked read-only, checked by a denied bind-remount before every target call. Private PID/network namespaces and writable installation state are case-local; generated state is removed after each case while command evidence is retained.",
+    "Target environment keys BLACKBOX_SYSTEM_INSTALL_DIR and BLACKBOX_SYSTEM_CONFIG_DIR specify the expected compiled defaults; their reference-build defaults are /var/local/lib/flatpak and /usr/local/etc/flatpak. The namespace mounts private data at those paths, and CLI/C-client assertions still check the target's actual default location. These keys never become FLATPAK_SYSTEM_DIR or FLATPAK_CONFIG_DIR redirects. Set them under the target JSON environment object, not the host shell environment.",
+    "Readonly exposure includes only the suite directory, selected target executables, configured helpers and LD_LIBRARY_PATH directories. Uninstalled targets can explicitly add colon-separated absolute paths with BLACKBOX_TARGET_READONLY_PATHS in the target environment. No repository ancestor is inferred. Paths that cover private namespace roots or overlap protected installation/service content are rejected, including symlink aliases.",
+    "CLI deployment location checks use the public returned location, verify containment in the selected public installation base, locate the controlled bin/blackbox-probe payload there and execute it to distinguish A from B. They never construct a deployment path from a ref or commit, and never recursively search a general installation root for content.",
+    "Direct-root mutations may satisfy explicitly selected installation outcomes. These cases do not assert polkit authorization, non-root helper behavior, or multiple-user access. No requirement demanding those outcomes is mapped.",
+    "The named override case intentionally asserts the documented isolation contract; the reference target currently fails it, so that option receives no verified credit from that case."
+  ]
+}

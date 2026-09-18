@@ -82,11 +82,12 @@ def _output(driver: HelpDriver, *arguments: str) -> str:
 def _help(driver: HelpDriver, command: str | None) -> str:
     arguments = (command, "--help") if command else ("--help",)
     output = _output(driver, *arguments)
-    # Permit a different executable basename and GLib's ASCII/Unicode ellipsis.
+    # GLib may render the ellipsis as '?' when stdout uses the C locale's charset.
+    # Keep checking command identity and syntax independently of that rendering.
     usage = r"(?m)^\s*\S+\s+"
     if command:
         usage += re.escape(command) + r"\s+"
-    usage += r"\[OPTION(?:…|\.{3})?\]"
+    usage += r"\[OPTION(?:…|\.{3}|\?)?\]"
     if command is None:
         usage += r"\s+COMMAND\b"
     driver.check(output.startswith("Usage:\n") and re.search(usage, output) is not None,

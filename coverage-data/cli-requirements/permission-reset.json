@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.permission-reset.any.app",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "Resetting permissions for an application removes all of its permissions across the permission store.",
+      "sources": [
+        {
+          "path": "doc/flatpak-permission-reset.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.permission-reset"
+      ],
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ]
+    }
+  ],
+  "limitations": []
+}

@@ -1,0 +1,200 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "management.duplicate-remote",
+      "scenario": "management-duplicate-remote",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Add duplicate remote with conflicting properties.",
+      "preconditions": "Fresh user state and A repository.",
+      "expected": "Original URL, title and priority survive.",
+      "references": [
+        "doc/flatpak-remote-add.xml"
+      ]
+    },
+    {
+      "id": "management.flatpakrepo",
+      "scenario": "management-flatpakrepo",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Add description-file remote.",
+      "preconditions": "Fresh state and local description.",
+      "expected": "Description URL and title are reported exactly.",
+      "references": [
+        "doc/flatpakrepo.xml"
+      ]
+    },
+    {
+      "id": "management.filter-replacement",
+      "scenario": "management-filter-replacement",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Replace and clear filter using duplicate description-file additions.",
+      "preconditions": "Filtered A repository.",
+      "expected": "Runtime-only changes to app-only, then both refs.",
+      "references": [
+        "doc/flatpakrepo.xml"
+      ]
+    },
+    {
+      "id": "system-selectors.remotes",
+      "scenario": "system-selectors-remotes",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Add, modify, enumerate and delete installation-scoped remotes.",
+      "preconditions": "Three private installations and file-URI repositories.",
+      "expected": "Unique sentinels and same-name remote properties remain isolated across mutations and deletion.",
+      "references": [
+        "doc/flatpak-remote-add.xml",
+        "doc/flatpak-remotes.xml",
+        "doc/flatpak-remote-modify.xml",
+        "doc/flatpak-remote-delete.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "management.duplicate-remote",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.remote-add.user.if-not-exists"
+      ],
+      "rationale": "Exact original URL/title/priority survive conflicting duplicate addition."
+    },
+    {
+      "behavior_id": "management.flatpakrepo",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.remote-add.user.flatpakrepo"
+      ],
+      "rationale": "Public remotes query matches description URL and title."
+    },
+    {
+      "behavior_id": "management.filter-replacement",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.remote-add.user.flatpakrepo-filter-replacement"
+      ],
+      "rationale": "Duplicate description switches runtime-only filter to app-only and omission clears it."
+    },
+    {
+      "behavior_id": "system-selectors.remotes",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [
+        "cli.remote-add.system.scope",
+        "cli.remotes.system.named"
+      ],
+      "rationale": "Exact selected remote sets, same-name property isolation and untouched sentinel remotes are asserted after additions, modifications and removals.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--system",
+          "rationale": "Default-only sentinel is present only in the default store."
+        },
+        {
+          "id": "cli.option.remote-add.--installation",
+          "rationale": "Named-only sentinel is present only in alt."
+        },
+        {
+          "id": "cli.option.remote-add.--user",
+          "rationale": "User-only sentinel is present only in user store."
+        },
+        {
+          "id": "cli.option.remotes.--system",
+          "rationale": "Enumeration returns exact default sentinel and selected properties."
+        },
+        {
+          "id": "cli.option.remotes.--installation",
+          "rationale": "Enumeration returns exact alt sentinel and selected properties."
+        },
+        {
+          "id": "cli.option.remotes.--user",
+          "rationale": "Enumeration returns exact user sentinel and selected properties."
+        },
+        {
+          "id": "cli.option.remotes.--columns",
+          "rationale": "Exact tab-separated name/title/priority/URL rows match configured values and requested order."
+        },
+        {
+          "id": "cli.option.remote-modify.--system",
+          "rationale": "Changing fixture in default store leaves same-name alt/user properties unchanged."
+        },
+        {
+          "id": "cli.option.remote-modify.--installation",
+          "rationale": "Changing alt fixture leaves user fixture unchanged and default sentinel intact."
+        },
+        {
+          "id": "cli.option.remote-modify.--user",
+          "rationale": "Changing user fixture leaves same-name default and named remote properties unchanged."
+        },
+        {
+          "id": "cli.option.remote-modify.--title",
+          "rationale": "Selected persisted title equals the supplied replacement."
+        },
+        {
+          "id": "cli.option.remote-modify.--prio",
+          "rationale": "Selected persisted numeric priority equals the supplied replacement."
+        },
+        {
+          "id": "cli.option.remote-modify.--url",
+          "rationale": "Selected persisted URL changes from file repository A to B."
+        },
+        {
+          "id": "cli.option.remote-delete.--system",
+          "rationale": "Removing default fixture leaves same-name alt/user remotes present."
+        },
+        {
+          "id": "cli.option.remote-delete.--installation",
+          "rationale": "Removing alt fixture leaves same-name user remote present and all sentinels intact."
+        },
+        {
+          "id": "cli.option.remote-delete.--user",
+          "rationale": "Removing user fixture leaves same-name default/alt remotes and every sentinel intact."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Every target call enters two disposable bubblewrap user/mount namespace layers. The outer root maps only to the invoking host UID; inner root maps only to outer root. Inherited host mounts are locked read-only, checked by a denied bind-remount before every target call. Private PID/network namespaces and writable installation state are case-local; generated state is removed after each case while command evidence is retained.",
+    "Target environment keys BLACKBOX_SYSTEM_INSTALL_DIR and BLACKBOX_SYSTEM_CONFIG_DIR specify the expected compiled defaults; their reference-build defaults are /var/local/lib/flatpak and /usr/local/etc/flatpak. The namespace mounts private data at those paths, and CLI/C-client assertions still check the target's actual default location. These keys never become FLATPAK_SYSTEM_DIR or FLATPAK_CONFIG_DIR redirects. Set them under the target JSON environment object, not the host shell environment.",
+    "Readonly exposure includes only the suite directory, selected target executables, configured helpers and LD_LIBRARY_PATH directories. Uninstalled targets can explicitly add colon-separated absolute paths with BLACKBOX_TARGET_READONLY_PATHS in the target environment. No repository ancestor is inferred. Paths that cover private namespace roots or overlap protected installation/service content are rejected, including symlink aliases.",
+    "CLI deployment location checks use the public returned location, verify containment in the selected public installation base, locate the controlled bin/blackbox-probe payload there and execute it to distinguish A from B. They never construct a deployment path from a ref or commit, and never recursively search a general installation root for content.",
+    "Direct-root mutations may satisfy explicitly selected installation outcomes. These cases do not assert polkit authorization, non-root helper behavior, or multiple-user access. No requirement demanding those outcomes is mapped.",
+    "The named override case intentionally asserts the documented isolation contract; the reference target currently fails it, so that option receives no verified credit from that case."
+  ]
+}

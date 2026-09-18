@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "lifex.sideload-image",
+      "scenario": "lifex-sideload-image",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository",
+        "container-images",
+        "sideload-repository"
+      ],
+      "description": "Supply an OCI remote from a local image collection without collection-ID matching.",
+      "preconditions": "Runtime installed; controlled empty HTTP OCI remote with no collection ID; independent local OCI image.",
+      "expected": "Dynamic image collection permits installation from OCI remote, with matching executable bytes and exact origin, despite remote containing no images.",
+      "references": [
+        "common/flatpak-transaction.c: flatpak_transaction_add_sideload_image_collection"
+      ]
+    },
+    {
+      "id": "lifex.signed-bundle",
+      "scenario": "lifex-signed-bundle",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "bundle-files",
+        "repository-signing",
+        "local-repository"
+      ],
+      "description": "Install signed bundles with explicit and embedded verification keys.",
+      "preconditions": "Independent signed bundle; runtime satisfied; prior bundle origin removed between installations.",
+      "expected": "Both transaction key modes deploy exact signed input commit.",
+      "references": [
+        "common/flatpak-transaction.c: flatpak_transaction_add_install_bundle"
+      ]
+    },
+    {
+      "id": "lifex.image",
+      "scenario": "lifex-image",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "container-images",
+        "local-repository"
+      ],
+      "description": "Install and replace local OCI images through the public transaction API.",
+      "preconditions": "Independent A/B images of one app; runtime already installed; second transaction explicitly enables reinstall.",
+      "expected": "Each deployed executable matches corresponding independent bytes; first creates an origin, second reuses it without adding a remote.",
+      "references": [
+        "common/flatpak-transaction.c: flatpak_transaction_add_install_image"
+      ]
+    },
+    {
+      "id": "lifex.sideload-install",
+      "scenario": "lifex-sideload-install",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository",
+        "sideload-repository",
+        "repository-signing",
+        "network-observation"
+      ],
+      "description": "Obtain app payload from a dynamically added sideload repository.",
+      "preconditions": "Signed HTTP remote and matching independently prepared sideload repo; runtime installed, app absent; remote payloads denied during transaction.",
+      "expected": "Transaction deploys exact signed app commit and makes no remote payload requests.",
+      "references": [
+        "common/flatpak-transaction.c: flatpak_transaction_add_sideload_repo"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "lifex.sideload-image",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.sideload-images"
+      ],
+      "rationale": "Independent local OCI collection supplies real deployed bytes for a collection-ID-free OCI remote whose controlled HTTP root has no images."
+    },
+    {
+      "behavior_id": "lifex.signed-bundle",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.install-bundle"
+      ],
+      "rationale": "Signed independent bundle installed with embedded key and again with supplied key after removal of deployment and origin trust."
+    },
+    {
+      "behavior_id": "lifex.image",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.install-image"
+      ],
+      "rationale": "Direct image transactions deploy byte-distinct A/B executables and assert origin creation then reuse and exact remote count."
+    },
+    {
+      "behavior_id": "lifex.sideload-install",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.sideload-repository"
+      ],
+      "rationale": "Dynamic sideload API supplies exact signed app while controlled remote denies payloads; HTTP request history asserts none requested."
+    }
+  ]
+}

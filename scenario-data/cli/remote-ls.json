@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "management.remote-available",
+      "scenario": "management-remote-available",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Enumerate uninstalled remote refs with type and architecture filters.",
+      "preconditions": "Empty installation and A repository.",
+      "expected": "Exact app/runtime sets for each query.",
+      "references": [
+        "doc/flatpak-remote-ls.xml"
+      ]
+    },
+    {
+      "id": "management.remote-updates",
+      "scenario": "management-remote-updates",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "List pending remote updates before and after deployment.",
+      "preconditions": "A app and unchanged runtime installed; B advertised.",
+      "expected": "Only app listed before update; no refs afterward.",
+      "references": [
+        "doc/flatpak-remote-ls.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "management.remote-available",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.remote-ls.user.available"
+      ],
+      "rationale": "Empty local installation, exact remote app/runtime sets.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-ls.--app",
+          "rationale": "Excludes runtime from populated remote."
+        },
+        {
+          "id": "cli.option.remote-ls.--runtime",
+          "rationale": "Excludes app from populated remote."
+        },
+        {
+          "id": "cli.option.remote-ls.--arch",
+          "rationale": "Matching architecture includes both refs; nonexistent architecture includes neither."
+        },
+        {
+          "id": "cli.option.remote-ls.--columns",
+          "rationale": "Ref-only output equals exact expected ref strings."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.remote-updates",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.remote-ls.user.updates"
+      ],
+      "rationale": "Exact update set excludes unchanged runtime and becomes empty after deployment."
+    }
+  ]
+}

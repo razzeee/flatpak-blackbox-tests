@@ -1,0 +1,212 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.update.user.latest",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "Updating a user application when version B is the branch tip succeeds, makes B the installed commit, and runs B's contents.",
+      "sources": [
+        {
+          "path": "doc/flatpak-update.xml",
+          "anchor": "Normally, this command updates the application to the tip of its branch."
+        }
+      ],
+      "surfaces": [
+        "cli.command.update"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.update.user.failed-download-preserves",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "An update whose required application payload cannot be downloaded fails and leaves the previously installed application A and its runtime at their prior commits, with A still runnable.",
+      "sources": [
+        {
+          "path": "doc/flatpak-update.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.update"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "network-fault-injection"
+      ]
+    },
+    {
+      "id": "cli.update.user.noop",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "Updating a user application already at the branch tip succeeds without changing its installed app/runtime commits or runnable contents.",
+      "sources": [
+        {
+          "path": "doc/flatpak-update.xml",
+          "anchor": "Normally, this command updates the application to the tip of its branch."
+        }
+      ],
+      "surfaces": [
+        "cli.command.update"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.update.user.retry",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "After a required payload download failure, retrying the user update once the source is available succeeds in fetching the needed data and installs runnable version B with the expected app/runtime commits.",
+      "sources": [
+        {
+          "path": "doc/flatpak-update.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.update"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "network-fault-injection"
+      ]
+    },
+    {
+      "id": "cli.update.user.commit",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "Updating with --commit deploys the specified available commit rather than the branch tip, including when selecting an older version.",
+      "sources": [
+        {
+          "path": "doc/flatpak-update.xml",
+          "anchor": "--commit=COMMIT"
+        }
+      ],
+      "surfaces": [
+        "cli.command.update",
+        "cli.option.update.--commit"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.update.user.all",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "A user update with no ref updates all eligible installed apps and runtimes to their available branch tips.",
+      "sources": [
+        {
+          "path": "doc/flatpak-update.xml",
+          "anchor": "If no REF is given, everything is updated"
+        }
+      ],
+      "surfaces": [
+        "cli.command.update"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.update.user.ambiguous-ref",
+      "interface": "cli",
+      "profile": "user",
+      "category": "lifecycle",
+      "description": "An update whose partial ref matches multiple installed user refs fails with an error listing the alternatives.",
+      "sources": [
+        {
+          "path": "doc/flatpak-update.xml",
+          "anchor": "if there are multiple matches an error message will list the alternatives."
+        }
+      ],
+      "surfaces": [
+        "cli.command.update"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.update.system.selected",
+      "interface": "cli",
+      "profile": "system",
+      "category": "lifecycle",
+      "description": "Updating with --system updates the matching ref in the default system installation while leaving a separately installed user copy unchanged.",
+      "sources": [
+        {
+          "path": "doc/flatpak-update.xml",
+          "anchor": "--system"
+        }
+      ],
+      "surfaces": [
+        "cli.command.update",
+        "cli.option.update.--system"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "user-installation",
+        "system-authorization",
+        "multiple-installations",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.update.user.appstream",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Updating AppStream for a specified user remote makes its updated application descriptions available to subsequent search.",
+      "sources": [
+        {
+          "path": "doc/flatpak-update.xml",
+          "anchor": "--appstream"
+        },
+        {
+          "path": "doc/flatpak-search.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.update",
+        "cli.option.update.--appstream"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "appstream"
+      ]
+    }
+  ],
+  "limitations": []
+}

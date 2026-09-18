@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.document-export.any.read-grant",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "Exporting a local file for an app creates a document ID and lets that app read the file through the document portal despite lacking direct host-path access.",
+      "sources": [
+        {
+          "path": "doc/flatpak-document-export.xml",
+          "anchor": "Description"
+        },
+        {
+          "path": "doc/flatpak-document-export.xml",
+          "anchor": "--app=APPID"
+        }
+      ],
+      "surfaces": [
+        "cli.command.document-export",
+        "cli.option.document-export.--app"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "sandbox-execution",
+        "desktop-portals",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.document-export.any.unique",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "Exporting a previously exported file with --unique creates a different document ID instead of reusing its existing ID.",
+      "sources": [
+        {
+          "path": "doc/flatpak-document-export.xml",
+          "anchor": "--unique"
+        }
+      ],
+      "surfaces": [
+        "cli.command.document-export",
+        "cli.option.document-export.--unique"
+      ],
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.document-export.any.write-revocation",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "Revoking an app's document write permission with --forbid-write prevents that app from writing through its document grant.",
+      "sources": [
+        {
+          "path": "doc/flatpak-document-export.xml",
+          "anchor": "--forbid-write"
+        }
+      ],
+      "surfaces": [
+        "cli.command.document-export",
+        "cli.option.document-export.--forbid-write"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "sandbox-execution",
+        "desktop-portals",
+        "session-bus"
+      ]
+    }
+  ],
+  "limitations": []
+}

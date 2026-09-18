@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.build-export.any.contents",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "Exporting a finalized app creates the app/APPNAME/ARCH/BRANCH repository commit containing files, export and metadata while excluding other build-directory contents.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-export.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-export"
+      ],
+      "required_capabilities": [
+        "cli",
+        "build-tools",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.build-export.any.runtime",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "build-export --runtime exports a runtime using the build directory's usr subtree as its files.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-export.xml",
+          "anchor": "--runtime"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-export",
+        "cli.option.build-export.--runtime"
+      ],
+      "required_capabilities": [
+        "cli",
+        "build-tools",
+        "local-repository"
+      ]
+    }
+  ],
+  "limitations": []
+}

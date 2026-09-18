@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.build-init.any.layout",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "build-init creates a build directory with metadata identifying the requested app, SDK and runtime, and empty files and var subdirectories.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-init.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-init"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "build-tools"
+      ]
+    },
+    {
+      "id": "cli.build-init.any.already-initialized",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "build-init without --update reports an error for a directory already initialized as a build directory.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-init.xml",
+          "anchor": "It is an error to run build-init on a directory that has already been initialized"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-init"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "build-tools"
+      ]
+    }
+  ],
+  "limitations": []
+}

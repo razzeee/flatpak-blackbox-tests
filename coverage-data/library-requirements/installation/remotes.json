@@ -1,0 +1,474 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "requirements": [
+    {
+      "id": "library.remote.add-duplicate-error",
+      "interface": "library",
+      "profile": "any",
+      "category": "errors",
+      "description": "Adding an existing remote name with if_needed FALSE fails with FLATPAK_ERROR and ALREADY_INSTALLED and preserves its existing configuration.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_add_remote"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_add_remote"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation"
+      ]
+    },
+    {
+      "id": "library.remote-query.cached-only",
+      "interface": "library",
+      "profile": "any",
+      "category": "cache",
+      "description": "With ONLY_CACHED, remote-ref fetching and listing use cached information without network I/O. A fixture with the required cache absent fails with FLATPAK_ERROR_NOT_CACHED rather than attempting a download; stale cached data is permitted.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.h",
+          "anchor": "FlatpakQueryFlags"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_fetch_remote_ref_sync_full",
+        "library.function.flatpak_installation_list_remote_refs_sync_full"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "network-observation"
+      ]
+    },
+    {
+      "id": "library.remote.user.add-persistence",
+      "interface": "library",
+      "profile": "user",
+      "category": "remotes",
+      "description": "Adding a new configured remote succeeds; a newly opened user installation lists and looks up that remote with its supplied name and URL.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_add_remote"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_remotes"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_remote_by_name"
+        },
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_get_name"
+        },
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_get_url"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_add_remote",
+        "library.function.flatpak_installation_list_remotes",
+        "library.function.flatpak_installation_get_remote_by_name",
+        "library.function.flatpak_remote_get_name",
+        "library.function.flatpak_remote_get_url"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "library.remote.user.delete-persistence",
+      "interface": "library",
+      "profile": "user",
+      "category": "remotes",
+      "description": "Removing an unused configured remote succeeds. A newly opened user installation excludes it from the remote list and lookup returns NULL with an error, while another configured remote remains available.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_remove_remote"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_remotes"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_remote_by_name"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_remove_remote",
+        "library.function.flatpak_installation_list_remotes",
+        "library.function.flatpak_installation_get_remote_by_name"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "library.remote.system.persistence",
+      "interface": "library",
+      "profile": "system",
+      "category": "remotes",
+      "description": "Authorized remote addition and URL modification in a named system installation persist for a second user's lookup. Removing the unused remote makes it absent there without changing the default system or per-user remote sets.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_add_remote"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_modify_remote"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_remove_remote"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_remote_by_name"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_add_remote",
+        "library.function.flatpak_installation_modify_remote",
+        "library.function.flatpak_installation_remove_remote",
+        "library.function.flatpak_installation_get_remote_by_name"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "system-installation",
+        "user-installation",
+        "system-authorization",
+        "multiple-users",
+        "multiple-installations"
+      ]
+    },
+    {
+      "id": "library.remote.add-if-needed",
+      "interface": "library",
+      "profile": "any",
+      "category": "remotes",
+      "description": "Adding an existing unfiltered remote with if_needed TRUE succeeds without replacing its URL or title, even when the supplied object's URL and title differ.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_add_remote"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_add_remote"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation"
+      ]
+    },
+    {
+      "id": "library.remote.add-if-needed-clear-filter",
+      "interface": "library",
+      "profile": "any",
+      "category": "remotes",
+      "description": "Adding an existing filtered remote with if_needed TRUE using a new remote object that explicitly unsets the filter resets the persisted filter, as the documented exception to the no-change rule.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_add_remote"
+        },
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_get_filter"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_add_remote",
+        "library.function.flatpak_remote_get_filter"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation"
+      ]
+    },
+    {
+      "id": "library.remote.list-priority",
+      "interface": "library",
+      "profile": "any",
+      "category": "remotes",
+      "description": "Listing several configured remotes returns them in descending priority, with earlier-added remotes before later-added remotes at equal priority.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_remotes"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_list_remotes"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation"
+      ]
+    },
+    {
+      "id": "library.remote.list-type-filter",
+      "interface": "library",
+      "profile": "any",
+      "category": "remotes",
+      "description": "Type-filtered remote listing includes static remotes when STATIC is requested and returns none for a USB/LAN-only request on this API version; returned remotes report STATIC.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_remotes_by_type"
+        },
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_get_remote_type"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_list_remotes_by_type",
+        "library.function.flatpak_remote_get_remote_type"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation"
+      ]
+    },
+    {
+      "id": "library.remote-query.membership",
+      "interface": "library",
+      "profile": "any",
+      "category": "remote-query",
+      "description": "Listing refs by configured remote name and by its URI returns the available fixture app and runtime identities, including refs not installed locally.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_remote_refs_sync"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_list_remote_refs_sync"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.remote-query.current-ref",
+      "interface": "library",
+      "profile": "any",
+      "category": "remote-query",
+      "description": "Fetching a remote ref returns the remote's current commit and originating remote name even when a different commit of that ref is installed locally.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_fetch_remote_ref_sync"
+        },
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_get_commit"
+        },
+        {
+          "path": "common/flatpak-remote-ref.c",
+          "anchor": "flatpak_remote_ref_get_remote_name"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_fetch_remote_ref_sync",
+        "library.function.flatpak_ref_get_commit",
+        "library.function.flatpak_remote_ref_get_remote_name"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.remote-query.sideloaded-only",
+      "interface": "library",
+      "profile": "any",
+      "category": "remote-query",
+      "description": "Remote-ref listing with ONLY_SIDELOADED includes only refs available from the fixture's sideload repositories, excluding remote-only refs.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.h",
+          "anchor": "FlatpakQueryFlags"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_list_remote_refs_sync_full"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "sideload-repository"
+      ]
+    },
+    {
+      "id": "library.remote-query.all-arches",
+      "interface": "library",
+      "profile": "any",
+      "category": "remote-query",
+      "description": "Remote-ref listing with ALL_ARCHES includes advertised refs for fixture architectures outside the machine's primary architectures.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.h",
+          "anchor": "FlatpakQueryFlags"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_list_remote_refs_sync_full"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "multiple-architectures"
+      ]
+    },
+    {
+      "id": "library.remote-query.direct-metadata-size",
+      "interface": "library",
+      "profile": "any",
+      "category": "remote-query",
+      "description": "Direct metadata and size queries for a known remote ref return the fixture metadata, maximum download size, and installed size. A partially cached download may transfer fewer bytes than that maximum.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_fetch_remote_metadata_sync"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_fetch_remote_size_sync"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_fetch_remote_metadata_sync",
+        "library.function.flatpak_installation_fetch_remote_size_sync"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.remote.appstream-refresh",
+      "interface": "library",
+      "profile": "any",
+      "category": "appstream",
+      "description": "Refreshing AppStream for a remote and architecture updates the local cached content; out_changed is TRUE for changed content and FALSE for an unchanged repeat. The remote's AppStream directory getter identifies that cached content location.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_update_appstream_sync"
+        },
+        {
+          "path": "common/flatpak-remote.c",
+          "anchor": "flatpak_remote_get_appstream_dir"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_update_appstream_sync",
+        "library.function.flatpak_remote_get_appstream_dir"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "appstream"
+      ]
+    },
+    {
+      "id": "library.related.remote-versus-installed",
+      "interface": "library",
+      "profile": "any",
+      "category": "related-refs",
+      "description": "Remote related-ref enumeration includes available related extensions, whereas installed related-ref enumeration includes only locally installed related refs, including an extension installed from another remote.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_remote_related_refs_sync"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_installed_related_refs_sync"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_list_remote_related_refs_sync",
+        "library.function.flatpak_installation_list_installed_related_refs_sync"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "runtime-extensions"
+      ]
+    },
+    {
+      "id": "library.related.installed-version",
+      "interface": "library",
+      "profile": "any",
+      "category": "related-refs",
+      "description": "When the installed app and remote app require different extension branches, remote-related-refs-for-installed returns the branch appropriate to the installed version.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_remote_related_refs_for_installed_sync"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_list_remote_related_refs_for_installed_sync"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "runtime-extensions"
+      ]
+    },
+    {
+      "id": "library.progress.callback-context",
+      "interface": "library",
+      "profile": "any",
+      "category": "progress",
+      "description": "A long-running AppStream refresh using the full API invokes the supplied progress callback with its user data in the caller's thread-default context; the callback is scoped to the call and reports display status, completion percentage, and estimating state.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.h",
+          "anchor": "FlatpakProgressCallback"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_update_appstream_full_sync"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_update_appstream_full_sync"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "appstream",
+        "controlled-transfers"
+      ]
+    }
+  ],
+  "limitations": []
+}

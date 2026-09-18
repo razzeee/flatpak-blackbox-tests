@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "requirements": [
+    {
+      "id": "library.related.download-delete-policy",
+      "interface": "library",
+      "profile": "any",
+      "category": "related-refs",
+      "description": "Related refs with different declared extension policies report whether each should be downloaded with or deleted with the main ref. Being listed does not itself imply either policy is TRUE.",
+      "sources": [
+        {
+          "path": "common/flatpak-related-ref.c",
+          "anchor": "flatpak_related_ref_should_download"
+        },
+        {
+          "path": "common/flatpak-related-ref.c",
+          "anchor": "flatpak_related_ref_should_delete"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_list_remote_related_refs_sync"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_related_ref_should_download",
+        "library.function.flatpak_related_ref_should_delete"
+      ],
+      "required_capabilities": [
+        "libflatpak"
+      ]
+    },
+    {
+      "id": "library.related.subpaths",
+      "interface": "library",
+      "profile": "any",
+      "category": "related-refs",
+      "description": "Related-ref subpaths identify the fixture's partial installation set, or return NULL when all files should be installed.",
+      "sources": [
+        {
+          "path": "common/flatpak-related-ref.c",
+          "anchor": "flatpak_related_ref_get_subpaths"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_related_ref_get_subpaths"
+      ],
+      "required_capabilities": [
+        "libflatpak"
+      ]
+    },
+    {
+      "id": "library.related.autoprune-policy",
+      "interface": "library",
+      "profile": "any",
+      "category": "related-refs",
+      "description": "For related-ref fixtures whose public should-autoprune property is TRUE or FALSE, should_autoprune returns whether the ref should be considered unused during pruning.",
+      "sources": [
+        {
+          "path": "common/flatpak-related-ref.c",
+          "anchor": "flatpak_related_ref_should_autoprune"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_related_ref_should_autoprune"
+      ],
+      "required_capabilities": [
+        "libflatpak"
+      ]
+    }
+  ],
+  "limitations": []
+}

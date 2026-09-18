@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.documents.any.enumerate",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "documents lists exported files with their document IDs and full origin paths.",
+      "sources": [
+        {
+          "path": "doc/flatpak-documents.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.documents"
+      ],
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.documents.any.app-filter",
+      "interface": "cli",
+      "profile": "any",
+      "category": "documents-permissions",
+      "description": "documents APPID lists only files exported to that application, excluding documents granted only to another app.",
+      "sources": [
+        {
+          "path": "doc/flatpak-documents.xml",
+          "anchor": "If an APPID is specified"
+        }
+      ],
+      "surfaces": [
+        "cli.command.documents"
+      ],
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ]
+    }
+  ],
+  "limitations": []
+}

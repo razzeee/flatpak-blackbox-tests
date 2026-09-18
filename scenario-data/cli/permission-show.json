@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "permissions.show",
+      "scenario": "permissions-show",
+      "handler": "permission_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ],
+      "description": "Query each application's dynamic permissions.",
+      "preconditions": "Two apps across three objects in two tables.",
+      "expected": "Exact rows contain only the selected application's grants across both tables; absent app has no rows.",
+      "references": [
+        "doc/flatpak-permission-show.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "permissions.show",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.permission-show.any.app"
+      ],
+      "rationale": "Exact selected-app rows across both tables and an empty absent-app query assert dynamic permissions and app isolation."
+    }
+  ],
+  "notes": [
+    "Uses a real xdg-permission-store on the case bus with isolated XDG_DATA_HOME; gdbus provides independent public fixture setup and mutation observations. No FUSE or document portal is needed.",
+    "All service output and termination status are retained, including failed cases. Fixed catalogues and denominators are unchanged."
+  ]
+}

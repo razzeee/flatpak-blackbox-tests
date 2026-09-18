@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "build.usb.offline",
+      "scenario": "build-create-usb",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "user-installation",
+        "local-repository",
+        "sideload-repository",
+        "multiple-installations"
+      ],
+      "description": "Transfer app and runtime through custom USB destination repository.",
+      "preconditions": "Independent signed collection-ID repository and fresh offline destination user installation.",
+      "expected": "Custom repo and discovery symlink exist; with origin URL unavailable destination installs exact app/runtime commits from USB.",
+      "references": [
+        "doc/flatpak-create-usb.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "build.usb.offline",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.create-usb.user.offline"
+      ],
+      "rationale": "Fresh destination installation with unavailable origin installs both exact signed commits using target-created USB repo. User/app flags are not credited without competing candidates.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.create-usb.--destination-repo",
+          "rationale": "Payload created under selected path with resolving discovery symlink."
+        }
+      ]
+    }
+  ]
+}

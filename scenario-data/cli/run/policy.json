@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "sandbox.run-extra",
+      "scenario": "sandbox-run-extra",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Report USB queries, generic policy and accessibility name policy.",
+      "preconditions": "Installed app and controlled USB query file.",
+      "expected": "Exact public sandbox-info USB query sets, effective policy and accessibility own value.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "sandbox.run-conditional",
+      "scenario": "sandbox-run-conditional",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Enforce conditional shared-memory access and report conditional expressions.",
+      "preconditions": "Installed app, controlled host /dev/shm marker and conditional permission support.",
+      "expected": "Marker unreadable by default, readable with shm:true and unreadable with shm:false; expression metadata also preserved.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "sandbox.run-policy",
+      "scenario": "sandbox-run-policy",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Report selected session and system bus policies inside the sandbox.",
+      "preconditions": "Installed A app.",
+      "expected": "Public /.flatpak-info contains exact selected own/talk name policies.",
+      "references": [
+        "doc/flatpak-run.xml",
+        "doc/flatpak-metadata.xml"
+      ]
+    },
+    {
+      "id": "sandbox.run-context",
+      "scenario": "sandbox-run-context",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Report effective namespace, device and feature permission values.",
+      "preconditions": "Installed A app.",
+      "expected": "Public /.flatpak-info reports exactly ipc/dri/devel without denied network/kvm/multiarch.",
+      "references": [
+        "doc/flatpak-run.xml",
+        "doc/flatpak-metadata.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "sandbox.run-extra",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Exact public sandbox metadata only; no USB hardware enforcement claim. Accessibility ownership and USB list switches receive no option credit.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--usb",
+          "rationale": "Vendor/product query in sandbox info allow set."
+        },
+        {
+          "id": "cli.option.run.--nousb",
+          "rationale": "Class wildcard query in sandbox info hide set."
+        },
+        {
+          "id": "cli.option.run.--add-policy",
+          "rationale": "Both generic values in effective policy set."
+        },
+        {
+          "id": "cli.option.run.--remove-policy",
+          "rationale": "Previously granted value absent from effective policy set."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.run-conditional",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Controlled host shared-memory access checks device condition enforcement. Feature expression serialization receives no option credit.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--device-if",
+          "rationale": "Host /dev/shm marker is unreadable by default, readable with shm:true, and unreadable with shm:false."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.run-policy",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Public bus policy serialization only; this case receives no grant or ownership option credit."
+    },
+    {
+      "behavior_id": "sandbox.run-context",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Public permission serialization only; this case receives no device or feature enforcement option credit."
+    }
+  ]
+}

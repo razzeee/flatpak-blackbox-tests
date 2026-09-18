@@ -1,13 +1,15 @@
-name: Manual reference compatibility
+name: Reference compatibility
 
 on:
+  push:
+  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: compatibility-${{ github.ref }}
+  group: compatibility-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -57,7 +59,14 @@ jobs:
         run: bash ci/compatibility.sh prepare
 
       - name: Run all CLI and library scenarios as the runner user
+        # run.py appends coverage and timings to the automatic GITHUB_STEP_SUMMARY.
         run: bash ci/compatibility.sh run
+
+      - name: Summarize an interrupted compatibility run
+        if: always()
+        env:
+          BB_CI_ROOT: ${{ runner.temp }}/bb-compat
+        run: bash ci/compatibility.sh summary
 
       - name: Upload reports and diagnostic logs
         if: always()
@@ -70,6 +79,7 @@ jobs:
           path: |
             ${{ runner.temp }}/bb-compat/results/report.json
             ${{ runner.temp }}/bb-compat/results/coverage.md
+            ${{ runner.temp }}/bb-compat/results/job-summary.md
             ${{ runner.temp }}/bb-compat/results/*.log
             ${{ runner.temp }}/bb-compat/logs/
             ${{ runner.temp }}/bb-compat/target.json

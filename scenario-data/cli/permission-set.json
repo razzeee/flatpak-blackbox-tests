@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "permissions.persist",
+      "scenario": "permissions-persist",
+      "handler": "permission_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ],
+      "description": "Create and replace permission strings through the CLI.",
+      "preconditions": "Real xdg-permission-store and gdbus; isolated case bus and data home.",
+      "expected": "Public Lookup and a later CLI query return exact supplied strings; another app's grant and existing data survive; a new table/object is created.",
+      "references": [
+        "doc/flatpak-permission-set.xml"
+      ]
+    },
+    {
+      "id": "permissions.data",
+      "scenario": "permissions-data",
+      "handler": "permission_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ],
+      "description": "Set typed GVariant data and reject malformed data.",
+      "preconditions": "Real permission store and gdbus with seeded string data.",
+      "expected": "Lookup returns the exact typed tuple replacing string data; omission preserves it; malformed data fails and leaves permissions and data unchanged.",
+      "references": [
+        "doc/flatpak-permission-set.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "permissions.persist",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.permission-set.any.persist"
+      ],
+      "rationale": "Separate CLI query and public Lookup return exact replacement strings; also asserts creation of a new entry."
+    },
+    {
+      "behavior_id": "permissions.data",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.permission-set.any.data"
+      ],
+      "rationale": "Public Lookup observes the typed tuple replacing initial string data and preserved on omission; invalid data leaves state intact.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.permission-set.--data",
+          "rationale": "Ignoring --data leaves the seed string instead of the asserted uint32/string tuple."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Uses a real xdg-permission-store on the case bus with isolated XDG_DATA_HOME; gdbus provides independent public fixture setup and mutation observations. No FUSE or document portal is needed.",
+    "All service output and termination status are retained, including failed cases. Fixed catalogues and denominators are unchanged."
+  ]
+}

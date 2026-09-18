@@ -4,6 +4,16 @@
 set -euo pipefail
 
 : "${BB_CI_ROOT:?Set BB_CI_ROOT to a new absolute work directory}"
+phase=${1:?Usage: bash ci/compatibility.sh init|host|build|probe|prepare|run|summary}
+if [[ "$phase" = summary ]]; then
+    # This must also work when init, dependencies, or the runner failed early.
+    # Actions assigns a different summary path to each step; use the delivery marker.
+    if [[ ! -s "$BB_CI_ROOT/results/job-summary.md" ]]; then
+        printf '\n\n## Flatpak compatibility\n\n**INCOMPLETE**\n\nNo completed report summary is available. See the job logs and uploaded artifacts. Coverage and timings are unverified.\n' \
+            >> "${GITHUB_STEP_SUMMARY:?Actions summary path is required}"
+    fi
+    exit 0
+fi
 : "${TMPDIR:?Set TMPDIR to a short absolute temporary directory}"
 : "${FLATPAK_REFERENCE_COMMIT:?Set the pinned upstream commit}"
 [[ "$BB_CI_ROOT" = /* && "$TMPDIR" = /* ]]
@@ -13,7 +23,6 @@ set -euo pipefail
 suite=$(pwd -P)
 source_dir="$BB_CI_ROOT/source"
 build_dir="$BB_CI_ROOT/build"
-phase=${1:?Usage: bash ci/compatibility.sh init|host|build|probe|prepare|run}
 
 if [[ "$phase" = init ]]; then
     # mkdir fails atomically on stale work rather than mixing runs or replacing it.
@@ -45,7 +54,7 @@ host() {
         libcurl4-openssl-dev libdconf-dev libfuse3-dev libgdk-pixbuf-2.0-dev \
         libglib2.0-dev libgpgme11-dev libjson-glib-dev libostree-dev \
         libseccomp-dev libsystemd-dev libxau-dev libxml2-dev libzstd-dev \
-        bubblewrap dbus dbus-daemon dbus-bin fuse3 gnupg ostree \
+        bubblewrap dbus dbus-daemon dbus-bin dbus-tests fuse3 gnupg ostree \
         desktop-file-utils shared-mime-info xdg-dbus-proxy xdg-desktop-portal \
         xauth attr systemd
     dpkg-query -W > "$BB_CI_ROOT/logs/packages.txt"
@@ -121,8 +130,10 @@ probe() {
     reference_environment
     # The selector backend uses host bwrap; Flatpak uses its newer bundled helper.
     # Match the backend's outer read-only mount and inner writable namespace.
+    # Mapping root into the inner user namespace requires CAP_SETFCAP in its
+    # parent namespace, as in system_selector_scenarios.Namespace.
     /usr/bin/bwrap --unshare-all --die-with-parent --new-session \
-        --ro-bind / / --proc /proc --dev /dev --uid 0 --gid 0 \
+        --ro-bind / / --proc /proc --dev /dev --uid 0 --gid 0 --cap-add CAP_SETFCAP \
         /usr/bin/bwrap --unshare-all --die-with-parent --new-session \
         --bind / / --proc /proc --dev /dev --uid 0 --gid 0 \
         /usr/bin/true
@@ -139,8 +150,11 @@ prepare() {
 }
 
 run() {
+    # Inherit GITHUB_STEP_SUMMARY for the parent runner's report-based summary.
+    # Case environments are sanitized and never receive that output path.
     uv run --locked python run.py --target "$BB_CI_ROOT/target.json" \
-        --fixtures "$BB_CI_ROOT/fixtures" --output "$BB_CI_ROOT/results" --timeout 90
+        --fixtures "$BB_CI_ROOT/fixtures" --output "$BB_CI_ROOT/results" --timeout 90 \
+        --color always
 }
 
 case "$phase" in

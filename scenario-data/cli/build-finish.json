@@ -1,0 +1,463 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "build.finish.inheritance",
+      "scenario": "build-finish-inheritance",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "user-installation"
+      ],
+      "description": "Compare normal permission inheritance with explicit suppression.",
+      "preconditions": "Reference build-init output using independently prepared installed runtime with network permission.",
+      "expected": "Default finalization inherits network permission; --no-inherit-permissions omits it.",
+      "references": [
+        "doc/flatpak-build-finish.xml"
+      ]
+    },
+    {
+      "id": "build.finish.extra-data",
+      "scenario": "build-finish-extra-data",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools"
+      ],
+      "description": "Persist extra-data download metadata.",
+      "preconditions": "Independent unfinished app tree.",
+      "expected": "Exact name, digest, URI, download size and installed size in public metadata.",
+      "references": [
+        "doc/flatpak-build-finish.xml",
+        "doc/flatpak-metadata.xml"
+      ]
+    },
+    {
+      "id": "build.finish.extension-priority",
+      "scenario": "build-finish-extension-priority",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools"
+      ],
+      "description": "Set extension library priority.",
+      "preconditions": "Independent unfinished extension metadata with zero priority.",
+      "expected": "Public ExtensionOf priority parses as requested integer.",
+      "references": [
+        "doc/flatpak-build-finish.xml",
+        "doc/flatpak-metadata.xml"
+      ]
+    },
+    {
+      "id": "build.finish.metadata",
+      "scenario": "build-finish-metadata",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools"
+      ],
+      "description": "Set launch, runtime, SDK, generic and extension metadata.",
+      "preconditions": "Independent unfinished app tree with removable extension.",
+      "expected": "Exact strings, independently parsed true/false booleans and absent removed extension.",
+      "references": [
+        "doc/flatpak-build-finish.xml",
+        "doc/flatpak-metadata.xml"
+      ]
+    },
+    {
+      "id": "build.finish.exports",
+      "scenario": "build-finish-exports",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "appstream"
+      ],
+      "description": "Export desktop, service, icon and metainfo files.",
+      "preconditions": "Independent unfinished tree with eligible app-ID-prefixed files.",
+      "expected": "All four public export paths exist, per the documented contract.",
+      "references": [
+        "doc/flatpak-build-finish.xml"
+      ]
+    },
+    {
+      "id": "build.finish.no-exports",
+      "scenario": "build-finish-no-exports",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools"
+      ],
+      "description": "Suppress eligible desktop integration exports.",
+      "preconditions": "Independent unfinished tree with eligible desktop integration files.",
+      "expected": "No supplied file is copied into export.",
+      "references": [
+        "doc/flatpak-build-finish.xml"
+      ]
+    },
+    {
+      "id": "build.finish.context",
+      "scenario": "build-finish-context",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools"
+      ],
+      "description": "Persist build-finish permission options in public metadata.",
+      "preconditions": "Independent unfinished app tree.",
+      "expected": "Exact allow/deny sets, filesystem modes, persistence, environment and session/system bus policies.",
+      "references": [
+        "doc/flatpak-build-finish.xml",
+        "doc/flatpak-metadata.xml"
+      ]
+    },
+    {
+      "id": "build.finish.policy",
+      "scenario": "build-finish-policy",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools"
+      ],
+      "description": "Add and remove generic policy values.",
+      "preconditions": "Independent metadata with old and retained values.",
+      "expected": "New/retained values and explicit denial of removed policy value.",
+      "references": [
+        "doc/flatpak-build-finish.xml",
+        "doc/flatpak-metadata.xml"
+      ]
+    },
+    {
+      "id": "build.finish.usb",
+      "scenario": "build-finish-usb",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools"
+      ],
+      "description": "Persist USB allow and hide queries from command arguments, lists and files.",
+      "preconditions": "Independent app tree and query file with comment.",
+      "expected": "Exact enumerable and hidden device query sets; comment not persisted.",
+      "references": [
+        "doc/flatpak-build-finish.xml",
+        "doc/flatpak-metadata.xml"
+      ]
+    },
+    {
+      "id": "build.finish.conditional",
+      "scenario": "build-finish-conditional",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools"
+      ],
+      "description": "Persist conditional permission expressions.",
+      "preconditions": "Independent unfinished app tree; target supporting conditional permissions.",
+      "expected": "Exact condition expressions associated with subsystem, socket, device and feature.",
+      "references": [
+        "doc/flatpak-build-finish.xml",
+        "doc/flatpak-metadata.xml"
+      ]
+    },
+    {
+      "id": "build.finish.invalid",
+      "scenario": "build-finish-invalid",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools"
+      ],
+      "description": "Reject uninitialized and already-finalized build trees under the documented contract.",
+      "preconditions": "Independent empty directory and finalized public build tree.",
+      "expected": "Both calls fail with diagnostics. Documentation contradictions remain strict failures.",
+      "references": [
+        "doc/flatpak-build-finish.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "build.finish.inheritance",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Two independently initialized inputs compare public metadata inheritance only.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-finish.--no-inherit-permissions",
+          "rationale": "Runtime network permission inherited by control and absent with suppression."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.finish.extra-data",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Extra-data metadata only; no downloader or sandbox claim.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-finish.--extra-data",
+          "rationale": "Name/digest/URI and both integer sizes equal requested values."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.finish.extension-priority",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Public extension priority metadata only.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-finish.--extension-priority",
+          "rationale": "Priority changes from zero to requested integer."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.finish.metadata",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.build-finish.any.command"
+      ],
+      "rationale": "Launch command and other public metadata fields checked independently.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-finish.--require-version",
+          "rationale": "required-flatpak equals requested version."
+        },
+        {
+          "id": "cli.option.build-finish.--runtime",
+          "rationale": "Runtime ID changes while omitted arch/branch stay intact."
+        },
+        {
+          "id": "cli.option.build-finish.--sdk",
+          "rationale": "SDK ID changes while omitted arch/branch stay intact."
+        },
+        {
+          "id": "cli.option.build-finish.--metadata",
+          "rationale": "Implicit true, explicit false and literal string parsed independently."
+        },
+        {
+          "id": "cli.option.build-finish.--extension",
+          "rationale": "Directory and independently parsed true/false values match."
+        },
+        {
+          "id": "cli.option.build-finish.--remove-extension",
+          "rationale": "Preexisting extension group removed."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.finish.exports",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.build-finish.any.exports"
+      ],
+      "rationale": "All four documented eligible export kinds required, including metainfo."
+    },
+    {
+      "behavior_id": "build.finish.no-exports",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Eligible export paths all absent.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-finish.--no-exports",
+          "rationale": "Desktop, icon, service and metainfo exports suppressed."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.finish.context",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Public metadata option contracts only; no runtime permission enforcement credit.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-finish.--share",
+          "rationale": "Context shared set contains network."
+        },
+        {
+          "id": "cli.option.build-finish.--unshare",
+          "rationale": "Context shared set explicitly denies ipc."
+        },
+        {
+          "id": "cli.option.build-finish.--socket",
+          "rationale": "Context sockets grants wayland."
+        },
+        {
+          "id": "cli.option.build-finish.--nosocket",
+          "rationale": "Context sockets denies x11."
+        },
+        {
+          "id": "cli.option.build-finish.--device",
+          "rationale": "Context devices grants dri."
+        },
+        {
+          "id": "cli.option.build-finish.--nodevice",
+          "rationale": "Context devices denies kvm."
+        },
+        {
+          "id": "cli.option.build-finish.--allow",
+          "rationale": "Context features grants devel."
+        },
+        {
+          "id": "cli.option.build-finish.--disallow",
+          "rationale": "Context features denies multiarch."
+        },
+        {
+          "id": "cli.option.build-finish.--filesystem",
+          "rationale": "Exact read-only and create path modes persisted."
+        },
+        {
+          "id": "cli.option.build-finish.--nofilesystem",
+          "rationale": "Explicit home denial persisted."
+        },
+        {
+          "id": "cli.option.build-finish.--persist",
+          "rationale": "Exact persistent home-relative path persisted."
+        },
+        {
+          "id": "cli.option.build-finish.--env",
+          "rationale": "Environment value including equals sign preserved."
+        },
+        {
+          "id": "cli.option.build-finish.--unset-env",
+          "rationale": "Variable appears in unset-environment."
+        },
+        {
+          "id": "cli.option.build-finish.--own-name",
+          "rationale": "Session policy is own for exact bus name."
+        },
+        {
+          "id": "cli.option.build-finish.--talk-name",
+          "rationale": "Session policy is talk for exact bus name."
+        },
+        {
+          "id": "cli.option.build-finish.--system-own-name",
+          "rationale": "System policy is own for exact bus name."
+        },
+        {
+          "id": "cli.option.build-finish.--system-talk-name",
+          "rationale": "System policy is talk for exact bus name."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.finish.policy",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Exact generic policy metadata values.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-finish.--add-policy",
+          "rationale": "New value present with retained value."
+        },
+        {
+          "id": "cli.option.build-finish.--remove-policy",
+          "rationale": "Removed value becomes explicit denial."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.finish.usb",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Exact USB query metadata only, not device access.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-finish.--usb",
+          "rationale": "Composed vendor/product allow query persisted."
+        },
+        {
+          "id": "cli.option.build-finish.--nousb",
+          "rationale": "Class wildcard hide query persisted."
+        },
+        {
+          "id": "cli.option.build-finish.--usb-list",
+          "rationale": "Allow and deny list entries persisted."
+        },
+        {
+          "id": "cli.option.build-finish.--usb-list-file",
+          "rationale": "File allow/deny entries persisted and comment omitted."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.finish.conditional",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Condition metadata only, no runtime condition evaluation credit.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-finish.--share-if",
+          "rationale": "Network condition persisted exactly."
+        },
+        {
+          "id": "cli.option.build-finish.--socket-if",
+          "rationale": "Negated Wayland condition persisted exactly."
+        },
+        {
+          "id": "cli.option.build-finish.--device-if",
+          "rationale": "Input-device condition persisted exactly."
+        },
+        {
+          "id": "cli.option.build-finish.--allow-if",
+          "rationale": "False feature condition persisted exactly."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.finish.invalid",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.build-finish.any.invalid-state"
+      ],
+      "rationale": "Both documented invalid states tested against independently constructed inputs."
+    }
+  ]
+}

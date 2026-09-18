@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.build.any.artifacts",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "A build command uses the declared SDK at /usr and can write artifacts through /app and /var that persist in the build directory across commands.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "build-tools",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.build.any.readonly",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "build --readonly prevents the command from changing the normally writable build destination directories.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build.xml",
+          "anchor": "--readonly"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build",
+        "cli.option.build.--readonly"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "build-tools",
+        "sandbox-execution"
+      ]
+    }
+  ],
+  "limitations": []
+}

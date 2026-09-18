@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.enter.any.command",
+      "interface": "cli",
+      "profile": "any",
+      "category": "sandbox-execution",
+      "description": "Entering an identified running sandbox creates a command process in that sandbox with the same environment and forwards its extra arguments.",
+      "sources": [
+        {
+          "path": "doc/flatpak-enter.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.enter"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "sandbox-execution",
+        "concurrent-processes"
+      ]
+    }
+  ],
+  "limitations": []
+}

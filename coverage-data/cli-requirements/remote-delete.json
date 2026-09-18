@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.remote-delete.user.removed",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Deleting an unused user remote persists its removal: later remotes enumeration, including disabled remotes, contains no entry for that name while other remotes remain configured.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-delete.xml",
+          "anchor": "Description"
+        },
+        {
+          "path": "doc/flatpak-remotes.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-delete",
+        "cli.command.remotes"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.remote-delete.user.force",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Deleting a user remote with --force removes its configuration even when installed apps or runtimes use it.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-delete.xml",
+          "anchor": "--force"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-delete",
+        "cli.option.remote-delete.--force"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    }
+  ],
+  "limitations": []
+}

@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.remote-modify.user.url",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Changing a user remote's URL persists the new URL, which a subsequent remotes URL query reports for that remote.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-modify.xml",
+          "anchor": "--url=URL"
+        },
+        {
+          "path": "doc/flatpak-remotes.xml",
+          "anchor": "url"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-modify",
+        "cli.option.remote-modify.--url",
+        "cli.command.remotes"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.remote-modify.user.title",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Changing a user remote's title persists the replacement title, which a subsequent remotes title query reports.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-modify.xml",
+          "anchor": "--title=TITLE"
+        },
+        {
+          "path": "doc/flatpak-remotes.xml",
+          "anchor": "title"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-modify",
+        "cli.option.remote-modify.--title",
+        "cli.command.remotes"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.remote-modify.user.priority",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Changing a user remote's priority persists the replacement number, which a subsequent remotes priority query reports.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-modify.xml",
+          "anchor": "--prio=PRIO"
+        },
+        {
+          "path": "doc/flatpak-remotes.xml",
+          "anchor": "priority"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-modify",
+        "cli.option.remote-modify.--prio",
+        "cli.command.remotes"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.remote-modify.user.disable",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Disabling a user remote persists its disabled state, preventing automatic updates from that remote in a later update invocation.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-modify.xml",
+          "anchor": "--disable"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-modify",
+        "cli.option.remote-modify.--disable"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.remote-modify.user.enable",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Enabling a disabled user remote persists its enabled state so a later update can obtain an available update from it.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-modify.xml",
+          "anchor": "--enable"
+        },
+        {
+          "path": "doc/flatpak-remote-modify.xml",
+          "anchor": "--disable"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-modify",
+        "cli.option.remote-modify.--enable"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "cli.remote-modify.user.filter",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "A configured user remote filter denies refs matching a deny rule except refs explicitly matched by an allow rule.",
+      "sources": [
+        {
+          "path": "doc/flatpak-remote-modify.xml",
+          "anchor": "--filter=FILE"
+        },
+        {
+          "path": "doc/flatpak-remote-add.xml",
+          "anchor": "--filter=PATH"
+        }
+      ],
+      "surfaces": [
+        "cli.command.remote-modify",
+        "cli.option.remote-modify.--filter"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ]
+    }
+  ],
+  "limitations": []
+}

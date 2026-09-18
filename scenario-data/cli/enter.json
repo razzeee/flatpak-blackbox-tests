@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "sandbox.enter",
+      "scenario": "sandbox-enter",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "concurrent-processes"
+      ],
+      "description": "Enter running instance with its environment and argument forwarding.",
+      "preconditions": "Probe holds background app with distinct environment value.",
+      "expected": "Entered probe sees app variable and exact arguments; instance cleaned through kill.",
+      "references": [
+        "doc/flatpak-enter.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "sandbox.enter",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.enter.any.command"
+      ],
+      "rationale": "Entered probe reports exact running app environment and forwards spaced/literal arguments."
+    }
+  ]
+}

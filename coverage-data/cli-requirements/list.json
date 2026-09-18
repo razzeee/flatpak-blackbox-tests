@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.list.user.apps-empty",
+      "interface": "cli",
+      "profile": "user",
+      "category": "queries-configuration",
+      "description": "Application-only enumeration succeeds with no application entries when no user applications remain, even if a runtime is still installed.",
+      "sources": [
+        {
+          "path": "doc/flatpak-list.xml",
+          "anchor": "--app"
+        }
+      ],
+      "surfaces": [
+        "cli.command.list",
+        "cli.option.list.--app"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.list.user.empty",
+      "interface": "cli",
+      "profile": "user",
+      "category": "queries-configuration",
+      "description": "Enumeration of the empty user installation succeeds with no installed application or runtime entries.",
+      "sources": [
+        {
+          "path": "doc/flatpak-list.xml",
+          "anchor": "Lists the names of the installed applications and runtimes."
+        }
+      ],
+      "surfaces": [
+        "cli.command.list"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.list.user.runtime-filter",
+      "interface": "cli",
+      "profile": "user",
+      "category": "queries-configuration",
+      "description": "Listing with --app-runtime returns installed user applications using the specified runtime and excludes applications using another runtime.",
+      "sources": [
+        {
+          "path": "doc/flatpak-list.xml",
+          "anchor": "--app-runtime=RUNTIME"
+        }
+      ],
+      "surfaces": [
+        "cli.command.list",
+        "cli.option.list.--app-runtime"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ]
+    },
+    {
+      "id": "cli.list.system.scope",
+      "interface": "cli",
+      "profile": "system",
+      "category": "queries-configuration",
+      "description": "Listing with --system reports default system-installed refs and excludes refs installed only in the user installation.",
+      "sources": [
+        {
+          "path": "doc/flatpak-list.xml",
+          "anchor": "--system"
+        }
+      ],
+      "surfaces": [
+        "cli.command.list",
+        "cli.option.list.--system"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "user-installation",
+        "multiple-installations"
+      ]
+    }
+  ],
+  "limitations": []
+}

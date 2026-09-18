@@ -1,0 +1,149 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "transaction.disable-related",
+      "scenario": "tx-disable-related",
+      "handler": "transaction_contract_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Related locale suppression and enabled control.",
+      "preconditions": [
+        "Prepared selection app with suggested locale"
+      ],
+      "expected": [
+        "Disabled case resolves and deploys only app/runtime; enabled case includes locale, with exact prepared commits."
+      ],
+      "references": [
+        "common/flatpak-transaction.c:flatpak_transaction_set_disable_related"
+      ]
+    },
+    {
+      "id": "transaction.extra-dependency-source",
+      "scenario": "tx-extra-dependency-source",
+      "handler": "transaction_contract_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Public custom-path dependency installation avoids runtime duplication.",
+      "preconditions": [
+        "Isolated source with installed runtime and two empty targets"
+      ],
+      "expected": [
+        "Registered source omits target runtime operation and deployment; unregistered control installs runtime; source remains unchanged."
+      ],
+      "references": [
+        "common/flatpak-transaction.c:flatpak_transaction_add_dependency_source"
+      ]
+    },
+    {
+      "id": "contracts.auto-sdk-debug",
+      "scenario": "tx-auto-sdk-debug",
+      "handler": "six_contract_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Automatic SDK and debug deployments with independent flag controls.",
+      "preconditions": [
+        "Distinct SDK and app/runtime/SDK debug refs"
+      ],
+      "expected": [
+        "All flag combinations deploy exact expected refs; update adds SDK/debug; uninstall-only adds no installs; getters reflect flags."
+      ],
+      "references": [
+        "common/flatpak-transaction.c:flatpak_transaction_set_auto_install_sdk",
+        "common/flatpak-transaction.c:flatpak_transaction_set_auto_install_debug"
+      ]
+    },
+    {
+      "id": "transaction.disable-dependencies",
+      "scenario": "tx-disable-dependencies",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Disabling dependencies excludes absent runtime from resolved operations.",
+      "preconditions": [],
+      "expected": [
+        "Only app resolves with flag enabled; default transaction installs both refs."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    },
+    {
+      "id": "transaction.auto-pin",
+      "scenario": "tx-auto-pin",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Explicit runtime automatic pinning and suppression.",
+      "preconditions": [],
+      "expected": [
+        "Normal runtime install pins; fresh unpinned runtime with disable-auto-pin stays unpinned."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "transaction.disable-related",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.disable-related"
+      ],
+      "rationale": "Set disable_related both TRUE and FALSE on independent transactions. Exact operation and installed-ref sets exclude/include suggested locale while retaining required runtime; verify prepared commits."
+    },
+    {
+      "behavior_id": "transaction.extra-dependency-source",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.extra-dependency-source"
+      ],
+      "rationale": "Public new_for_path creates isolated user source and targets. Native add_dependency_source with installed runtime removes runtime from resolved operations and target enumeration; omission control installs second runtime. Source enumeration and exact commit remain unchanged."
+    },
+    {
+      "behavior_id": "contracts.auto-sdk-debug",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.auto-sdk-debug"
+      ],
+      "rationale": "Independent SDK/debug flags and getters, exact prepared app/runtime/SDK/debug deployment sets, update control, and uninstall-only operation types and remaining refs."
+    },
+    {
+      "behavior_id": "transaction.disable-dependencies",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.disable-dependencies"
+      ],
+      "rationale": "Exact one-app resolved list excludes missing runtime with flag enabled, compared with default dependency install."
+    },
+    {
+      "behavior_id": "transaction.auto-pin",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.disable-auto-pin"
+      ],
+      "rationale": "Public pinned-ref enumeration includes normally explicitly installed runtime; remove pin via setup CLI, reinstall with suppression and require empty public pinned list."
+    }
+  ]
+}

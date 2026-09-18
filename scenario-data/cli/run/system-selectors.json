@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "system-selectors.run",
+      "scenario": "system-selectors-run",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus"
+      ],
+      "description": "Execute independently selected system, named and user applications.",
+      "preconditions": "Private session bus, nested sandbox capabilities, A/B fixture deployments.",
+      "expected": "Each selector executes its installation's version, including default system B versus user A.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "system-selectors.run",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [
+        "cli.run.system.selected"
+      ],
+      "rationale": "Actual app output distinguishes default system B from separately installed user A, using a private session bus and nested sandbox.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--system",
+          "rationale": "Executes default B while user A remains installed."
+        },
+        {
+          "id": "cli.option.run.--installation",
+          "rationale": "Executes named B from alt installation."
+        },
+        {
+          "id": "cli.option.run.--user",
+          "rationale": "Executes user A while default/named are B."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Every target call enters two disposable bubblewrap user/mount namespace layers. The outer root maps only to the invoking host UID; inner root maps only to outer root. Inherited host mounts are locked read-only, checked by a denied bind-remount before every target call. Private PID/network namespaces and writable installation state are case-local; generated state is removed after each case while command evidence is retained.",
+    "Target environment keys BLACKBOX_SYSTEM_INSTALL_DIR and BLACKBOX_SYSTEM_CONFIG_DIR specify the expected compiled defaults; their reference-build defaults are /var/local/lib/flatpak and /usr/local/etc/flatpak. The namespace mounts private data at those paths, and CLI/C-client assertions still check the target's actual default location. These keys never become FLATPAK_SYSTEM_DIR or FLATPAK_CONFIG_DIR redirects. Set them under the target JSON environment object, not the host shell environment.",
+    "Readonly exposure includes only the suite directory, selected target executables, configured helpers and LD_LIBRARY_PATH directories. Uninstalled targets can explicitly add colon-separated absolute paths with BLACKBOX_TARGET_READONLY_PATHS in the target environment. No repository ancestor is inferred. Paths that cover private namespace roots or overlap protected installation/service content are rejected, including symlink aliases.",
+    "CLI deployment location checks use the public returned location, verify containment in the selected public installation base, locate the controlled bin/blackbox-probe payload there and execute it to distinguish A from B. They never construct a deployment path from a ref or commit, and never recursively search a general installation root for content.",
+    "Direct-root mutations may satisfy explicitly selected installation outcomes. These cases do not assert polkit authorization, non-root helper behavior, or multiple-user access. No requirement demanding those outcomes is mapped.",
+    "The named override case intentionally asserts the documented isolation contract; the reference target currently fails it, so that option receives no verified credit from that case."
+  ]
+}

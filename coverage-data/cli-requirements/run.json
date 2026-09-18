@@ -1,0 +1,324 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.run.user.command",
+      "interface": "cli",
+      "profile": "user",
+      "category": "sandbox-execution",
+      "description": "Running an installed user application executes the command declared in its metadata and delivers that command's expected output.",
+      "sources": [
+        {
+          "path": "doc/flatpak-run.xml",
+          "anchor": "Description"
+        },
+        {
+          "path": "doc/flatpak-run.xml",
+          "anchor": "--command=COMMAND"
+        },
+        {
+          "path": "doc/flatpak-build-finish.xml",
+          "anchor": "--command=COMMAND"
+        }
+      ],
+      "surfaces": [
+        "cli.command.run"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.run.user.arguments",
+      "interface": "cli",
+      "profile": "user",
+      "category": "sandbox-execution",
+      "description": "Arguments after the application ref are passed to the application command in the sandbox.",
+      "sources": [
+        {
+          "path": "doc/flatpak-run.xml",
+          "anchor": "Extra arguments are passed on to the application."
+        }
+      ],
+      "surfaces": [
+        "cli.command.run"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.run.user.command-override",
+      "interface": "cli",
+      "profile": "user",
+      "category": "sandbox-execution",
+      "description": "run --command executes the specified sandbox command instead of the command declared in application metadata.",
+      "sources": [
+        {
+          "path": "doc/flatpak-run.xml",
+          "anchor": "--command=COMMAND"
+        }
+      ],
+      "surfaces": [
+        "cli.command.run",
+        "cli.option.run.--command"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.run.user.mounts",
+      "interface": "cli",
+      "profile": "user",
+      "category": "sandbox-execution",
+      "description": "The launched user application sees its application files at /app and its declared runtime files at /usr.",
+      "sources": [
+        {
+          "path": "doc/flatpak-run.xml",
+          "anchor": "Flatpak creates a sandboxed environment"
+        }
+      ],
+      "surfaces": [
+        "cli.command.run"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.run.user.persistent-var",
+      "interface": "cli",
+      "profile": "user",
+      "category": "sandbox-execution",
+      "description": "Application writes to its writable /var storage remain available on a later run of the same app.",
+      "sources": [
+        {
+          "path": "doc/flatpak-run.xml",
+          "anchor": "a writable directory at /var, whose content is preserved between application runs."
+        }
+      ],
+      "surfaces": [
+        "cli.command.run"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.run.user.environment",
+      "interface": "cli",
+      "profile": "user",
+      "category": "sandbox-execution",
+      "description": "An environment variable explicitly set with run --env has the supplied value inside the application, overriding its metadata value.",
+      "sources": [
+        {
+          "path": "doc/flatpak-run.xml",
+          "anchor": "--env=VAR=VALUE"
+        }
+      ],
+      "surfaces": [
+        "cli.command.run",
+        "cli.option.run.--env"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.run.user.clear-environment",
+      "interface": "cli",
+      "profile": "user",
+      "category": "sandbox-execution",
+      "description": "With --clear-env, an ordinary inherited host variable is absent from the sandbox while explicitly set application variables still apply.",
+      "sources": [
+        {
+          "path": "doc/flatpak-run.xml",
+          "anchor": "--clear-env"
+        }
+      ],
+      "surfaces": [
+        "cli.command.run",
+        "cli.option.run.--clear-env"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.run.user.readonly-filesystem",
+      "interface": "cli",
+      "profile": "user",
+      "category": "sandbox-execution",
+      "description": "A host path granted solely with --filesystem=PATH:ro is readable inside the app but cannot be written there.",
+      "sources": [
+        {
+          "path": "doc/flatpak-run.xml",
+          "anchor": "--filesystem=FILESYSTEM"
+        }
+      ],
+      "surfaces": [
+        "cli.command.run",
+        "cli.option.run.--filesystem"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.run.user.filesystem-reset",
+      "interface": "cli",
+      "profile": "user",
+      "category": "sandbox-execution",
+      "description": "run --nofilesystem=host:reset removes filesystem grants inherited from metadata and stored overrides, so a path available only through those grants is inaccessible.",
+      "sources": [
+        {
+          "path": "doc/flatpak-run.xml",
+          "anchor": "As a special case, --nofilesystem=host:reset"
+        }
+      ],
+      "surfaces": [
+        "cli.command.run",
+        "cli.option.run.--nofilesystem"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.run.user.network-revocation",
+      "interface": "cli",
+      "profile": "user",
+      "category": "sandbox-execution",
+      "description": "run --unshare=network prevents sharing the host network subsystem despite a network share granted in application metadata.",
+      "sources": [
+        {
+          "path": "doc/flatpak-run.xml",
+          "anchor": "--unshare=SUBSYSTEM"
+        }
+      ],
+      "surfaces": [
+        "cli.command.run",
+        "cli.option.run.--unshare"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.run.user.bus-policy",
+      "interface": "cli",
+      "profile": "user",
+      "category": "sandbox-execution",
+      "description": "Granting --talk-name for a session-bus service permits the sandboxed application to talk to that service through the filtered session bus.",
+      "sources": [
+        {
+          "path": "doc/flatpak-run.xml",
+          "anchor": "--talk-name=NAME"
+        }
+      ],
+      "surfaces": [
+        "cli.command.run",
+        "cli.option.run.--talk-name"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "sandbox-execution",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.run.user.conditional-socket",
+      "interface": "cli",
+      "profile": "user",
+      "category": "sandbox-execution",
+      "description": "A socket granted only through --socket-if is exposed when its runtime condition is true and is not exposed by that grant when the condition is false.",
+      "sources": [
+        {
+          "path": "doc/flatpak-run.xml",
+          "anchor": "--socket-if=SOCKET:CONDITION"
+        }
+      ],
+      "surfaces": [
+        "cli.command.run",
+        "cli.option.run.--socket-if"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "sandbox-execution"
+      ]
+    },
+    {
+      "id": "cli.run.user.file-forwarding",
+      "interface": "cli",
+      "profile": "user",
+      "category": "sandbox-execution",
+      "description": "With --file-forwarding, file arguments between @@ markers are replaced by document-portal paths that give the application nonpersistent read/write access.",
+      "sources": [
+        {
+          "path": "doc/flatpak-run.xml",
+          "anchor": "--file-forwarding"
+        }
+      ],
+      "surfaces": [
+        "cli.command.run",
+        "cli.option.run.--file-forwarding"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "sandbox-execution",
+        "desktop-portals",
+        "session-bus"
+      ]
+    },
+    {
+      "id": "cli.run.system.selected",
+      "interface": "cli",
+      "profile": "system",
+      "category": "sandbox-execution",
+      "description": "run --system executes the default system-installed application even when a different version of the same ref is installed for the user.",
+      "sources": [
+        {
+          "path": "doc/flatpak-run.xml",
+          "anchor": "--system"
+        }
+      ],
+      "surfaces": [
+        "cli.command.run",
+        "cli.option.run.--system"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "sandbox-execution"
+      ]
+    }
+  ],
+  "limitations": []
+}

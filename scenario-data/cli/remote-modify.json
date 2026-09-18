@@ -1,0 +1,305 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "management.remote-properties",
+      "scenario": "management-remote-properties",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Read back added and modified remote presentation properties.",
+      "preconditions": "Fresh state and local repository.",
+      "expected": "Comment, description, homepage and icon match both sets of supplied values.",
+      "references": [
+        "doc/flatpak-remote-add.xml",
+        "doc/flatpak-remote-modify.xml",
+        "doc/flatpak-remotes.xml"
+      ]
+    },
+    {
+      "id": "management.remote-enumerate",
+      "scenario": "management-remote-enumerate",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Persist enumeration policy through add and opposing modifications.",
+      "preconditions": "Fresh user remote.",
+      "expected": "Public options reports no-enumerate, clears it, then reports it again.",
+      "references": [
+        "doc/flatpak-remote-add.xml",
+        "doc/flatpak-remote-modify.xml"
+      ]
+    },
+    {
+      "id": "management.remote-dependencies",
+      "scenario": "management-remote-dependencies",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Exercise dependency policy through add and opposing modifications.",
+      "preconditions": "Filtered app-only remote and separate dependency remote.",
+      "expected": "Excluding dependency remote blocks install; enabling it permits exact app/runtime commits.",
+      "references": [
+        "doc/flatpak-remote-add.xml",
+        "doc/flatpak-remote-modify.xml"
+      ]
+    },
+    {
+      "id": "management.remote-gpg",
+      "scenario": "management-remote-gpg",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Enable verification against unsigned input, then disable it.",
+      "preconditions": "Unsigned A repository.",
+      "expected": "Signature verification prevents deployment until disabled.",
+      "references": [
+        "doc/flatpak-remote-modify.xml"
+      ]
+    },
+    {
+      "id": "management.filter",
+      "scenario": "management-filter",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Deny all with an explicit runtime allowance, then clear filter.",
+      "preconditions": "A app/runtime repository.",
+      "expected": "Only runtime is visible and installable; clearing restores both refs.",
+      "references": [
+        "doc/flatpak-remote-modify.xml"
+      ]
+    },
+    {
+      "id": "management.disabled",
+      "scenario": "management-disabled",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Disable origin during available update, then enable.",
+      "preconditions": "A installed and B advertised.",
+      "expected": "Disabled remote is only shown on request, blocks update, and enabling permits B.",
+      "references": [
+        "doc/flatpak-remote-modify.xml",
+        "doc/flatpak-remotes.xml"
+      ]
+    },
+    {
+      "id": "system-selectors.disabled",
+      "scenario": "system-selectors-disabled",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Disable only the default origin while an independent user origin remains enabled.",
+      "preconditions": "Default and user A installed with B available.",
+      "expected": "Default A is held and omitted from ordinary remote listing while user updates to B; enabling permits default B.",
+      "references": [
+        "doc/flatpak-remote-modify.xml",
+        "doc/flatpak-remotes.xml",
+        "doc/flatpak-update.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "management.remote-properties",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent public readback of supplied presentation values.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--comment",
+          "rationale": "Public comment column equals supplied nondefault text."
+        },
+        {
+          "id": "cli.option.remote-add.--description",
+          "rationale": "Public description column equals supplied nondefault text."
+        },
+        {
+          "id": "cli.option.remote-add.--homepage",
+          "rationale": "Public homepage column equals supplied URL."
+        },
+        {
+          "id": "cli.option.remote-add.--icon",
+          "rationale": "Public icon column equals supplied URL."
+        },
+        {
+          "id": "cli.option.remote-modify.--comment",
+          "rationale": "Public comment changes to replacement text."
+        },
+        {
+          "id": "cli.option.remote-modify.--description",
+          "rationale": "Public description changes to replacement text."
+        },
+        {
+          "id": "cli.option.remote-modify.--homepage",
+          "rationale": "Public homepage changes to replacement URL."
+        },
+        {
+          "id": "cli.option.remote-modify.--icon",
+          "rationale": "Public icon changes to replacement URL."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.remote-enumerate",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Public stored enumeration policy changes in both directions.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--no-enumerate",
+          "rationale": "Added remote publicly reports no-enumerate."
+        },
+        {
+          "id": "cli.option.remote-modify.--enumerate",
+          "rationale": "Clears previously stored no-enumerate marker."
+        },
+        {
+          "id": "cli.option.remote-modify.--no-enumerate",
+          "rationale": "Restores marker after explicit enumeration enablement."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.remote-dependencies",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Dependency resolution tests stored policy in both directions.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--no-use-for-deps",
+          "rationale": "Excluded dependency remote makes install fail atomically despite available required runtime."
+        },
+        {
+          "id": "cli.option.remote-modify.--use-for-deps",
+          "rationale": "Enabling dependency resolution permits exact app/runtime installation after failed resolution."
+        },
+        {
+          "id": "cli.option.remote-modify.--no-use-for-deps",
+          "rationale": "Disabling again prevents runtime resolution on the next fresh install."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.remote-gpg",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Signature policy changes install acceptance for unsigned source.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-modify.--gpg-verify",
+          "rationale": "Enabling verification makes unsigned source fail with signature diagnostic and no deployment."
+        },
+        {
+          "id": "cli.option.remote-modify.--no-gpg-verify",
+          "rationale": "Disabling verification permits exact A installation after signature rejection."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.filter",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.remote-modify.user.filter"
+      ],
+      "rationale": "Explicit allow defeats deny for runtime; app hidden and rejected; no-filter restores both.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-modify.--no-filter",
+          "rationale": "Clearing runtime-only filter restores exact app/runtime ref set."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.disabled",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.remotes.user.disabled",
+        "cli.remote-modify.user.disable",
+        "cli.remote-modify.user.enable"
+      ],
+      "rationale": "Disabled listing is explicit; global update retains A until enabling allows B."
+    },
+    {
+      "behavior_id": "system-selectors.disabled",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [],
+      "rationale": "Only selected default origin is disabled; user independently updates and re-enabling permits default update.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remotes.--show-disabled",
+          "rationale": "Disabled fixture is absent ordinarily and present when explicitly requested."
+        },
+        {
+          "id": "cli.option.remote-modify.--disable",
+          "rationale": "Default A remains installed despite available B while independently enabled user updates."
+        },
+        {
+          "id": "cli.option.remote-modify.--enable",
+          "rationale": "Re-enabling default origin permits the previously blocked B update."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Every target call enters two disposable bubblewrap user/mount namespace layers. The outer root maps only to the invoking host UID; inner root maps only to outer root. Inherited host mounts are locked read-only, checked by a denied bind-remount before every target call. Private PID/network namespaces and writable installation state are case-local; generated state is removed after each case while command evidence is retained.",
+    "Target environment keys BLACKBOX_SYSTEM_INSTALL_DIR and BLACKBOX_SYSTEM_CONFIG_DIR specify the expected compiled defaults; their reference-build defaults are /var/local/lib/flatpak and /usr/local/etc/flatpak. The namespace mounts private data at those paths, and CLI/C-client assertions still check the target's actual default location. These keys never become FLATPAK_SYSTEM_DIR or FLATPAK_CONFIG_DIR redirects. Set them under the target JSON environment object, not the host shell environment.",
+    "Readonly exposure includes only the suite directory, selected target executables, configured helpers and LD_LIBRARY_PATH directories. Uninstalled targets can explicitly add colon-separated absolute paths with BLACKBOX_TARGET_READONLY_PATHS in the target environment. No repository ancestor is inferred. Paths that cover private namespace roots or overlap protected installation/service content are rejected, including symlink aliases.",
+    "CLI deployment location checks use the public returned location, verify containment in the selected public installation base, locate the controlled bin/blackbox-probe payload there and execute it to distinguish A from B. They never construct a deployment path from a ref or commit, and never recursively search a general installation root for content.",
+    "Direct-root mutations may satisfy explicitly selected installation outcomes. These cases do not assert polkit authorization, non-root helper behavior, or multiple-user access. No requirement demanding those outcomes is mapped.",
+    "The named override case intentionally asserts the documented isolation contract; the reference target currently fails it, so that option receives no verified credit from that case."
+  ]
+}

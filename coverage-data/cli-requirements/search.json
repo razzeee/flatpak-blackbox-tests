@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.search.user.appstream",
+      "interface": "cli",
+      "profile": "user",
+      "category": "remotes-discovery",
+      "description": "Searching user remotes for matching text returns the applications or runtimes described by their AppStream data.",
+      "sources": [
+        {
+          "path": "doc/flatpak-search.xml",
+          "anchor": "Description"
+        },
+        {
+          "path": "doc/flatpak-search.xml",
+          "anchor": "--user"
+        }
+      ],
+      "surfaces": [
+        "cli.command.search"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "appstream"
+      ]
+    }
+  ],
+  "limitations": []
+}

@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "objects.related-policy",
+      "scenario": "objects-related-policy",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "libflatpak"
+      ],
+      "description": "Read related-ref policy booleans from public-property fixtures.",
+      "preconditions": "Public properties set opposite download/delete values and both autoprune values; no extension metadata is parsed.",
+      "expected": "Each getter matches its own explicit boolean. This checks policy reporting only, not extension discovery, policy derivation or transaction execution.",
+      "references": [
+        "common/flatpak-related-ref.c: public should-download, should-delete, should-autoprune properties and getters"
+      ]
+    },
+    {
+      "id": "objects.related-subpaths",
+      "scenario": "objects-related-subpaths",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "libflatpak"
+      ],
+      "description": "Read partial and full related-ref subpaths from public-property fixtures.",
+      "preconditions": "Public subpaths property is /en,/sv or NULL; no repository or installation supplies the object.",
+      "expected": "The partial result contains exactly the two paths and terminator; full result is NULL. This checks subpath reporting only, not selection or deployment of files.",
+      "references": [
+        "common/flatpak-related-ref.c: flatpak_related_ref_get_subpaths"
+      ]
+    },
+    {
+      "id": "queryx.related-policy",
+      "scenario": "queryx-related-policy",
+      "handler": "library_query_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository",
+        "runtime-extensions"
+      ],
+      "description": "Resolve contrasting download/delete policies from declared extensions.",
+      "preconditions": "Independent policy repository; empty installation; Automatic declares no-autodownload=false/autodelete=false and Optional declares both true.",
+      "expected": "Exactly both extension identities and fixture commits; should_download/should_delete are true/false for Automatic and false/true for Optional; fetched main metadata matches independent exported declarations.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_list_remote_related_refs_sync",
+        "common/flatpak-related-ref.c: flatpak_related_ref_should_download, flatpak_related_ref_should_delete",
+        "doc/flatpak-metadata.xml: Extension no-autodownload and autodelete"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "objects.related-policy",
+      "driver": "library",
+      "profile": "any",
+      "requirements": [
+        "library.related.autoprune-policy"
+      ],
+      "rationale": "Autoprune explicitly permits public-property fixtures. Download/delete getters remain useful property checks but receive no metadata-to-policy derivation credit here; that contract is tested by queryx-related-policy using actual extension declarations."
+    },
+    {
+      "behavior_id": "objects.related-subpaths",
+      "driver": "library",
+      "profile": "any",
+      "requirements": [
+        "library.related.subpaths"
+      ],
+      "rationale": "The public subpaths property supplies the fixture's declared partial set; exact paths and terminator, plus NULL for all files, are asserted through the getter. This covers object-level reporting, not subpath selection from metadata or partial deployment."
+    },
+    {
+      "behavior_id": "queryx.related-policy",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.related.download-delete-policy"
+      ],
+      "rationale": "Real reference-exported extension declarations produce opposite download/delete results on public related-ref enumeration; exact membership, commits, absent installed state and fetched declaration bytes are asserted without fabricated result properties."
+    }
+  ]
+}

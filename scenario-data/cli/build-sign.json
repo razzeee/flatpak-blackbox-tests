@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "build.options.arch-sign",
+      "scenario": "build-option-arch-sign",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository",
+        "repository-signing"
+      ],
+      "description": "Sign nondefault-architecture app commit.",
+      "preconditions": "Independent repo containing both architectures and disposable signing key.",
+      "expected": "Alternate commit verifies with public key.",
+      "references": [
+        "doc/flatpak-build-sign.xml"
+      ]
+    },
+    {
+      "id": "build.sign.app",
+      "scenario": "build-sign-app",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository",
+        "repository-signing"
+      ],
+      "description": "Sign an existing app commit using disposable GPG material.",
+      "preconditions": "Independent unsigned A distribution repo and disposable key.",
+      "expected": "Commit unchanged and independent GPG verification succeeds.",
+      "references": [
+        "doc/flatpak-build-sign.xml"
+      ]
+    },
+    {
+      "id": "build.sign.runtime",
+      "scenario": "build-sign-runtime",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "build-tools",
+        "local-repository",
+        "repository-signing"
+      ],
+      "description": "Sign an existing runtime commit.",
+      "preconditions": "Independent unsigned runtime and disposable GPG home.",
+      "expected": "Runtime commit unchanged and independent GPG verification succeeds.",
+      "references": [
+        "doc/flatpak-build-sign.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "build.options.arch-sign",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [],
+      "rationale": "Independent repo contains both native and alternate commits.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-sign.--arch",
+          "rationale": "Alternate candidate receives signature verifiable by public key."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.sign.app",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.build-sign.any.signature"
+      ],
+      "rationale": "Independent OSTree GPG verification of requested key signing unchanged app commit.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-sign.--gpg-homedir",
+          "rationale": "Signing succeeds with key available only in disposable specified home."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.sign.runtime",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.build-sign.any.signature"
+      ],
+      "rationale": "Independent GPG verification of unchanged runtime commit.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-sign.--runtime",
+          "rationale": "Requested runtime commit gains verifiable signature."
+        }
+      ]
+    }
+  ]
+}

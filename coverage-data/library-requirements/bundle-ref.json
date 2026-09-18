@@ -1,0 +1,148 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "requirements": [
+    {
+      "id": "library.bundle.identity-file",
+      "interface": "library",
+      "profile": "any",
+      "category": "bundle-ref",
+      "description": "Opening a valid app or runtime bundle produces a bundle ref for that artifact, whose full ref, commit, and file getter match the bundle fixture and supplied file.",
+      "sources": [
+        {
+          "path": "common/flatpak-bundle-ref.c",
+          "anchor": "flatpak_bundle_ref_new"
+        },
+        {
+          "path": "common/flatpak-bundle-ref.c",
+          "anchor": "flatpak_bundle_ref_get_file"
+        },
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_format_ref"
+        },
+        {
+          "path": "common/flatpak-ref.c",
+          "anchor": "flatpak_ref_get_commit"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_bundle_ref_new",
+        "library.function.flatpak_bundle_ref_get_file",
+        "library.function.flatpak_ref_format_ref",
+        "library.function.flatpak_ref_get_commit"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "bundle-files"
+      ]
+    },
+    {
+      "id": "library.bundle.payload-metadata",
+      "interface": "library",
+      "profile": "any",
+      "category": "bundle-ref",
+      "description": "Bundle metadata, compressed AppStream, and installed-size getters return the embedded fixture values. Optional metadata and AppStream contents may be NULL when absent.",
+      "sources": [
+        {
+          "path": "common/flatpak-bundle-ref.c",
+          "anchor": "flatpak_bundle_ref_get_metadata"
+        },
+        {
+          "path": "common/flatpak-bundle-ref.c",
+          "anchor": "flatpak_bundle_ref_get_appstream"
+        },
+        {
+          "path": "common/flatpak-bundle-ref.c",
+          "anchor": "flatpak_bundle_ref_get_installed_size"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_bundle_ref_get_metadata",
+        "library.function.flatpak_bundle_ref_get_appstream",
+        "library.function.flatpak_bundle_ref_get_installed_size"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "bundle-files",
+        "appstream"
+      ]
+    },
+    {
+      "id": "library.bundle.icons",
+      "interface": "library",
+      "profile": "any",
+      "category": "bundle-ref",
+      "description": "For a bundle containing distinct 64-pixel and 128-pixel icons, get_icon with each documented size returns the matching embedded PNG bytes.",
+      "sources": [
+        {
+          "path": "common/flatpak-bundle-ref.c",
+          "anchor": "flatpak_bundle_ref_get_icon"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_bundle_ref_get_icon"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "bundle-files"
+      ]
+    },
+    {
+      "id": "library.bundle.origin-runtime-repository",
+      "interface": "library",
+      "profile": "any",
+      "category": "bundle-ref",
+      "description": "Origin and runtime-repository URL getters return the URLs stored in the bundle; fixtures lacking those optional values return NULL.",
+      "sources": [
+        {
+          "path": "common/flatpak-bundle-ref.c",
+          "anchor": "flatpak_bundle_ref_get_origin"
+        },
+        {
+          "path": "common/flatpak-bundle-ref.c",
+          "anchor": "flatpak_bundle_ref_get_runtime_repo_url"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_bundle_ref_get_origin",
+        "library.function.flatpak_bundle_ref_get_runtime_repo_url"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "bundle-files"
+      ]
+    },
+    {
+      "id": "library.ownership.bundle-results",
+      "interface": "library",
+      "profile": "any",
+      "category": "ownership",
+      "description": "Transfer-full bundle file, metadata bytes, and origin string results remain valid after releasing the bundle ref, and each result can be released independently using its documented GLib ownership convention.",
+      "sources": [
+        {
+          "path": "common/flatpak-bundle-ref.c",
+          "anchor": "flatpak_bundle_ref_get_file"
+        },
+        {
+          "path": "common/flatpak-bundle-ref.c",
+          "anchor": "flatpak_bundle_ref_get_metadata"
+        },
+        {
+          "path": "common/flatpak-bundle-ref.c",
+          "anchor": "flatpak_bundle_ref_get_origin"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_bundle_ref_get_file",
+        "library.function.flatpak_bundle_ref_get_metadata",
+        "library.function.flatpak_bundle_ref_get_origin"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "bundle-files"
+      ]
+    }
+  ],
+  "limitations": []
+}

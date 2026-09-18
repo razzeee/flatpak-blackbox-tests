@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.build-sign.any.signature",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "build-sign adds a signature from the requested GPG key to the selected local application or runtime commit, verifiable with that key's public material.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-sign.xml",
+          "anchor": "Description"
+        },
+        {
+          "path": "doc/flatpak-build-sign.xml",
+          "anchor": "--gpg-sign=KEYID"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-sign",
+        "cli.option.build-sign.--gpg-sign"
+      ],
+      "required_capabilities": [
+        "cli",
+        "build-tools",
+        "local-repository",
+        "repository-signing"
+      ]
+    }
+  ],
+  "limitations": []
+}

@@ -1,0 +1,216 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "sandbox.file-forwarding",
+      "scenario": "sandbox-file-forwarding",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "desktop-portals",
+        "session-bus",
+        "concurrent-processes"
+      ],
+      "description": "Forward file arguments through a private document portal.",
+      "preconditions": "Private permission store/document portal executables and usable FUSE device.",
+      "expected": "Argument becomes document path; probe reads and writes host document; export disappears after portal restart.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "sandbox.mount-paths",
+      "scenario": "sandbox-mount-paths",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Replace application and runtime mounts and retain originals under parent mounts.",
+      "preconditions": "Independent reference checkouts with distinct added markers.",
+      "expected": "Replacement marker appears only under selected mount; original executable redirected; empty app-path omits app contents.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "sandbox.filesystem",
+      "scenario": "sandbox-filesystem",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Enforce absent, read-only and read-write host filesystem grants.",
+      "preconditions": "Host marker outside default grants.",
+      "expected": "Ungrant read fails; ro read succeeds and write fails without host change; rw changes host bytes.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "sandbox.filesystem-create",
+      "scenario": "sandbox-filesystem-create",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Create a granted host directory.",
+      "preconditions": "Requested host directory absent.",
+      "expected": "Probe writes exact content into newly created host directory.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "sandbox.filesystem-reset",
+      "scenario": "sandbox-filesystem-reset",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Revoke metadata and stored filesystem grants per run.",
+      "preconditions": "Independent host markers available through separate metadata-only and override-only grants.",
+      "expected": "Both readable controls become denied under host:reset and readable again on ordinary runs; stored deny/ro/rw/reset effects also checked.",
+      "references": [
+        "doc/flatpak-run.xml",
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "sandbox.persist",
+      "scenario": "sandbox-persist",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Persist a home-relative directory through run and override permissions.",
+      "preconditions": "Unshared isolated home.",
+      "expected": "Bytes survive separate runs and stored permission; host home-relative marker is absent.",
+      "references": [
+        "doc/flatpak-run.xml",
+        "doc/flatpak-override.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "sandbox.file-forwarding",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.run.user.file-forwarding"
+      ],
+      "rationale": "Actual document-path replacement, read/write host effects, public document listing and nonpersistent export across private portal restart."
+    },
+    {
+      "behavior_id": "sandbox.mount-paths",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent replacement files and original executables observed inside sandbox.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--app-path",
+          "rationale": "Replacement marker mounted at /app, original executable under /run/parent/app; empty value makes /app executable absent."
+        },
+        {
+          "id": "cli.option.run.--usr-path",
+          "rationale": "Replacement marker mounted at /usr while original runtime executable remains under /run/parent/usr."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.filesystem",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.run.user.readonly-filesystem"
+      ],
+      "rationale": "Probe reads granted host bytes, ro write fails in probe and preserves host bytes, rw changes bytes."
+    },
+    {
+      "behavior_id": "sandbox.filesystem-create",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Create-mode host directory and marker appear.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--filesystem",
+          "rationale": "Absent directory is created and receives exact sandbox-written content with :create."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.filesystem-reset",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.run.user.filesystem-reset"
+      ],
+      "rationale": "Independent metadata-only and override-only paths are readable in controls, both denied by host:reset, and both restored on ordinary subsequent runs.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.override.--filesystem",
+          "rationale": "Stored ro permits read but denies write; stored rw changes host bytes."
+        },
+        {
+          "id": "cli.option.override.--nofilesystem",
+          "rationale": "Stored explicit host path denial makes probe read fail."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.persist",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Actual bytes survive separate launches without appearing in host home-relative directory.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--persist",
+          "rationale": "Home-relative marker persists across separate invocations with this permission."
+        },
+        {
+          "id": "cli.option.override.--persist",
+          "rationale": "Stored persist permission exposes prior marker and persists subsequent writes."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,308 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "build.options.unset-env",
+      "scenario": "build-option-unset-env",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "user-installation",
+        "sandbox-execution"
+      ],
+      "description": "Remove inherited build environment variable.",
+      "preconditions": "Environment control returns exact inherited sentinel.",
+      "expected": "Unset option makes probe report missing variable.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    },
+    {
+      "id": "build.options.filesystem",
+      "scenario": "build-option-filesystem",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "user-installation",
+        "sandbox-execution"
+      ],
+      "description": "Grant and revoke access to host build input.",
+      "preconditions": "Host marker outside default sandbox access.",
+      "expected": "Control denied, explicit grant reads marker, explicit denial defeats grant.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    },
+    {
+      "id": "build.execution.readonly-app",
+      "scenario": "build-readonly-app",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "user-installation",
+        "sandbox-execution"
+      ],
+      "description": "Prevent modifications to app build destination independently of the var contract.",
+      "preconditions": "Independent initialized tree with known app artifact and installed SDK.",
+      "expected": "Write fails and original app artifact bytes survive.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    },
+    {
+      "id": "build.execution.artifacts",
+      "scenario": "build-artifacts",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "user-installation",
+        "sandbox-execution"
+      ],
+      "description": "Accumulate app and var artifacts using the SDK probe.",
+      "preconditions": "Independent initialized tree and installed SDK with file-capable probe.",
+      "expected": "Writes reach files/var and survive later independent build commands.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    },
+    {
+      "id": "build.execution.readonly",
+      "scenario": "build-readonly",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "user-installation",
+        "sandbox-execution"
+      ],
+      "description": "Prevent modifications to both build destinations.",
+      "preconditions": "Independent initialized tree with known app/var artifacts and installed SDK.",
+      "expected": "Both writes fail and original bytes survive.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    },
+    {
+      "id": "build.execution.options",
+      "scenario": "build-command-options",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "user-installation",
+        "sandbox-execution"
+      ],
+      "description": "Select build bind mount, working directory and environment.",
+      "preconditions": "Independent initialized tree, installed SDK and host marker.",
+      "expected": "Relative read reaches bound marker and environment query equals requested value.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    },
+    {
+      "id": "build.execution.runtime",
+      "scenario": "build-runtime-selection",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "user-installation",
+        "sandbox-execution"
+      ],
+      "description": "Select non-devel runtime instead of missing SDK.",
+      "preconditions": "Independent tree names unavailable SDK but available runtime.",
+      "expected": "Default build fails identifying SDK; --runtime executes runtime probe.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    },
+    {
+      "id": "build.options.metadata",
+      "scenario": "build-option-metadata",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "user-installation",
+        "sandbox-execution"
+      ],
+      "description": "Select alternate build metadata.",
+      "preconditions": "Default metadata names missing SDK; alternate metadata names installed SDK.",
+      "expected": "Default command fails; alternate metadata command runs probe.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    },
+    {
+      "id": "build.options.sdk-dir",
+      "scenario": "build-option-sdk-dir",
+      "handler": "build_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "build-tools",
+        "user-installation",
+        "sandbox-execution"
+      ],
+      "description": "Select independently copied custom SDK tree.",
+      "preconditions": "Default SDK lacks marker; custom SDK contains it.",
+      "expected": "Default read fails, custom SDK read yields marker.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "build.options.unset-env",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Exact positive inherited-value control precedes absence check.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build.--unset-env",
+          "rationale": "Inherited sentinel disappears with explicit unset."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.options.filesystem",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Denied/granted/revoked reads of same host marker.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build.--filesystem",
+          "rationale": "Explicit grant changes inaccessible marker to readable."
+        },
+        {
+          "id": "cli.option.build.--nofilesystem",
+          "rationale": "Explicit denial changes granted marker back to inaccessible."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.execution.readonly-app",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "App-only readonly option effect remains separate from broader strict app/var obligation.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build.--readonly",
+          "rationale": "Write through /app fails and seeded build files bytes remain unchanged."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.execution.artifacts",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.build.any.artifacts"
+      ],
+      "rationale": "SDK executable writes both public build destinations and subsequent commands read exact persisted bytes."
+    },
+    {
+      "behavior_id": "build.execution.readonly",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.build.any.readonly"
+      ],
+      "rationale": "Readonly command writes fail and independently seeded files/var bytes remain intact."
+    },
+    {
+      "behavior_id": "build.execution.options",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Observe selected build input and environment.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build.--bind-mount",
+          "rationale": "Relative read returns marker from explicit host bind source."
+        },
+        {
+          "id": "cli.option.build.--build-dir",
+          "rationale": "Relative read resolves inside requested build working directory."
+        },
+        {
+          "id": "cli.option.build.--env",
+          "rationale": "Probe returns exact requested environment value."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.execution.runtime",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Distinct valid runtime and unavailable SDK make selection observable.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build.--runtime",
+          "rationale": "Runtime probe succeeds while default SDK selection fails."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.options.metadata",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Different SDK availability makes metadata selection observable.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build.--metadata",
+          "rationale": "Alternate metadata executes probe while default SDK is unavailable."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build.options.sdk-dir",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Read custom marker with failing default-SDK control.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build.--sdk-dir",
+          "rationale": "Marker visible only under selected custom SDK."
+        }
+      ]
+    }
+  ]
+}

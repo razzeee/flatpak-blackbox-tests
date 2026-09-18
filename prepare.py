@@ -37,6 +37,23 @@ def copy_dependencies(binary: Path, runtime: Path) -> None:
                 shutil.copy2(word, runtime / "usr/lib" / Path(word).name)
 
 
+def copy_ldconfig(runtime: Path) -> None:
+    """Install the cache builder at the location used by Flatpak's sandbox PATH."""
+    # Debian/Ubuntu's ldconfig is a dpkg-trigger shell wrapper. The fixture
+    # needs the underlying executable, without the host's shell or dpkg.
+    search_path = os.defpath + ":/usr/sbin:/sbin"
+    ldconfig = (shutil.which("ldconfig.real", path=search_path)
+                or shutil.which("ldconfig", path=search_path))
+    if ldconfig is None:
+        raise RuntimeError("fixture preparation requires ldconfig")
+    with Path(ldconfig).open("rb") as executable:
+        if executable.read(4) != b"\x7fELF":
+            raise RuntimeError(f"fixture preparation requires an ELF ldconfig: {ldconfig}")
+    shutil.copy2(ldconfig, runtime / "usr/bin/ldconfig")
+    # Some hosts ship a dynamically linked ldconfig rather than a static one.
+    copy_dependencies(Path(ldconfig), runtime)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path, help="new fixture directory")
@@ -60,13 +77,7 @@ def main() -> None:
         (runtime / "usr/lib").mkdir()
         (runtime / "files").mkdir()
         (runtime / "metadata").write_text(f"[Runtime]\nname={RUNTIME}\n")
-        # Flatpak invokes ldconfig during sandbox setup. Include its shared
-        # libraries when the preparation host does not ship a static ldconfig.
-        ldconfig = shutil.which("ldconfig", path=os.defpath + ":/usr/sbin:/sbin")
-        if ldconfig is None:
-            raise RuntimeError("fixture preparation requires ldconfig")
-        shutil.copy2(ldconfig, runtime / "usr/bin/ldconfig")
-        copy_dependencies(Path(ldconfig), runtime)
+        copy_ldconfig(runtime)
         (runtime / "usr/lib64").symlink_to("lib")
         (runtime / "usr/lib32").symlink_to("lib")
         command(args.cc, "-O2", '-DVERSION="A"',

@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.repair.user.restore",
+      "interface": "cli",
+      "profile": "user",
+      "category": "maintenance",
+      "description": "Repairing a user installation reinstalls deployed refs whose required repository objects are missing or invalid, restoring usable deployed content when the source is available.",
+      "sources": [
+        {
+          "path": "doc/flatpak-repair.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.repair"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "filesystem-fault-injection"
+      ]
+    },
+    {
+      "id": "cli.repair.user.dry-run",
+      "interface": "cli",
+      "profile": "user",
+      "category": "maintenance",
+      "description": "Repair --dry-run reports installation inconsistencies without changing the installation.",
+      "sources": [
+        {
+          "path": "doc/flatpak-repair.xml",
+          "anchor": "--dry-run"
+        }
+      ],
+      "surfaces": [
+        "cli.command.repair",
+        "cli.option.repair.--dry-run"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository",
+        "filesystem-fault-injection"
+      ]
+    },
+    {
+      "id": "cli.repair.system.root-required",
+      "interface": "cli",
+      "profile": "system",
+      "category": "maintenance",
+      "description": "Repair of the system installation requires root privileges; an unprivileged invocation cannot perform the system repair.",
+      "sources": [
+        {
+          "path": "doc/flatpak-repair.xml",
+          "anchor": "flatpak repair has to be run with root privileges to operate on the system installation."
+        }
+      ],
+      "surfaces": [
+        "cli.command.repair",
+        "cli.option.repair.--system"
+      ],
+      "required_capabilities": [
+        "cli",
+        "system-installation",
+        "system-authorization"
+      ]
+    }
+  ],
+  "limitations": []
+}

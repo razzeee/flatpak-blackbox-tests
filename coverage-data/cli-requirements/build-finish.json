@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.build-finish.any.exports",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "Finalizing an initialized build copies eligible desktop files, icons, D-Bus service files and AppStream metainfo from files into the export subdirectory.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-finish.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-finish"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "build-tools",
+        "appstream"
+      ]
+    },
+    {
+      "id": "cli.build-finish.any.command",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "build-finish --command records the supplied default launch command in the metadata Application group.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-finish.xml",
+          "anchor": "Description"
+        },
+        {
+          "path": "doc/flatpak-build-finish.xml",
+          "anchor": "--command=COMMAND"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-finish",
+        "cli.option.build-finish.--command"
+      ],
+      "required_capabilities": [
+        "cli",
+        "installation",
+        "build-tools"
+      ]
+    },
+    {
+      "id": "cli.build-finish.any.invalid-state",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "build-finish reports an error when the directory has not been initialized or has already been finalized.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-finish.xml",
+          "anchor": "It is an error to run build-finish"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-finish"
+      ],
+      "required_capabilities": [
+        "cli",
+        "build-tools"
+      ]
+    }
+  ],
+  "limitations": []
+}

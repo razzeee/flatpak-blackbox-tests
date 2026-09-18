@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "requirements": [
+    {
+      "id": "library.errors.domain-identity",
+      "interface": "library",
+      "profile": "any",
+      "category": "errors",
+      "description": "The public Flatpak and portal error-domain functions each return a stable nonzero quark on repeated calls, and the two domains are distinct for matching their respective public error enums.",
+      "sources": [
+        {
+          "path": "common/flatpak-error.h",
+          "anchor": "FLATPAK_ERROR"
+        },
+        {
+          "path": "common/flatpak-portal-error.h",
+          "anchor": "FLATPAK_PORTAL_ERROR"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_error_quark",
+        "library.function.flatpak_portal_error_quark"
+      ],
+      "required_capabilities": [
+        "libflatpak"
+      ]
+    }
+  ],
+  "limitations": []
+}

@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "queryx.launch",
+      "scenario": "queryx-launch",
+      "handler": "library_query_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus",
+        "concurrent-processes"
+      ],
+      "description": "Launch selected installed builds through libflatpak and enumerate live instances.",
+      "preconditions": "Two controlled probe apps copy their internal flatpak-info and remain alive until the client releases them.",
+      "expected": "Direct launch succeeds twice; both report version A; distinct enumerated IDs, full app/runtime identities and snapshot-matching info while alive.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_launch",
+        "common/flatpak-instance.c: public enumeration and identity getters"
+      ]
+    },
+    {
+      "id": "queryx.launch-full",
+      "scenario": "queryx-launch-full",
+      "handler": "library_query_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus",
+        "concurrent-processes"
+      ],
+      "description": "Track launched instances with caller-owned child watches.",
+      "preconditions": "Two DO_NOT_REAP launches return instances; probes hold lifetime until explicit release.",
+      "expected": "Returned instances have exact live identities and info; watches observe successful exit; retained instances then report not running.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_launch_full",
+        "common/flatpak-instance.c: flatpak_instance_is_running"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "queryx.launch",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.launch.application",
+        "library.instance.session-enumeration",
+        "library.instance.app-runtime-identity",
+        "library.instance.info"
+      ],
+      "rationale": "Direct library launches synchronize on two real sandbox probes; independently expected commits and identities, distinct enumeration IDs and every sandbox snapshot key are asserted."
+    },
+    {
+      "behavior_id": "queryx.launch-full",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.launch.instance-child-watch",
+        "library.instance.liveness"
+      ],
+      "rationale": "DO_NOT_REAP returns exact fixture instances; explicit probe release, successful child watches and post-exit FALSE liveness checked on retained instances."
+    }
+  ]
+}

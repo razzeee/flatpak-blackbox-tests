@@ -1,0 +1,229 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "lifex.force-uninstall",
+      "scenario": "lifex-force-uninstall",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus"
+      ],
+      "description": "Control retention of files used by a running app during uninstall.",
+      "preconditions": "Held-live independent app probe; an open descriptor identifies its deployment across directory renames.",
+      "expected": "Both uninstalls remove installed identity; ordinary uninstall retains running files, force_uninstall removes them; process is killed and reaped.",
+      "references": [
+        "common/flatpak-transaction.c: flatpak_transaction_set_force_uninstall"
+      ]
+    },
+    {
+      "id": "transaction.file-uri-origin",
+      "scenario": "tx-file-uri-origin",
+      "handler": "transaction_contract_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Install directly from local repository URI.",
+      "preconditions": [
+        "Empty public custom-path installation"
+      ],
+      "expected": [
+        "Native add_install accepts file URI, deploys exact commit, and installed origin resolves to a remote with that URI."
+      ],
+      "references": [
+        "common/flatpak-transaction.c:flatpak_transaction_add_install"
+      ]
+    },
+    {
+      "id": "transaction.download-only",
+      "scenario": "tx-download-only",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "No-deploy downloads update while preserving deployed commits.",
+      "preconditions": [],
+      "expected": [
+        "B payload is requested, A remains deployed, and fresh transaction getter accepts FALSE."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    },
+    {
+      "id": "transaction.no-pull",
+      "scenario": "tx-no-pull",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "No-pull deploys previously downloaded B without requests.",
+      "preconditions": [],
+      "expected": [
+        "Flag roundtrips and B deploys entirely offline."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    },
+    {
+      "id": "transaction.explicit-commit",
+      "scenario": "tx-explicit-commit",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Explicit A update overrides advertised B.",
+      "preconditions": [],
+      "expected": [
+        "B deploys, explicit A update deploys A, unchanged runtime remains."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    },
+    {
+      "id": "transaction.no-deploy-uninstall",
+      "scenario": "tx-no-deploy-uninstall",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "No-deploy ignores uninstall request.",
+      "preconditions": [],
+      "expected": [
+        "App and runtime retain exact installed commits."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    },
+    {
+      "id": "transaction.cancel-download",
+      "scenario": "tx-cancel-download",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Cancel required payload after first byte while remainder is gated.",
+      "preconditions": [],
+      "expected": [
+        "Run returns FALSE and GError after synchronized cancellation; app A and runtime remain."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    },
+    {
+      "id": "transaction.completed-survive",
+      "scenario": "tx-completed-survive",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Earlier completed operation survives later payload failure.",
+      "preconditions": [
+        "prepare_transactions.py extras.transactions"
+      ],
+      "expected": [
+        "Exact completion order and commit remain deployed after later failure stops run."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "lifex.force-uninstall",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Additional public force_uninstall contract has no exact row in the fixed denominator; held running files distinguish TRUE from FALSE."
+    },
+    {
+      "behavior_id": "transaction.file-uri-origin",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.file-uri-origin"
+      ],
+      "rationale": "Native add_install receives prepared file URI in empty installation without remote setup. Exact installed commit and public origin getter followed by remote lookup/URL verify the created source remote without assuming its generated name."
+    },
+    {
+      "behavior_id": "transaction.download-only",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.download-only"
+      ],
+      "rationale": "Getter TRUE, required payload request, exact A/runtime preserved, fresh getter FALSE."
+    },
+    {
+      "behavior_id": "transaction.no-pull",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.no-pull"
+      ],
+      "rationale": "Download B without deployment then no-pull deploy B with zero HTTP requests; getter both settings."
+    },
+    {
+      "behavior_id": "transaction.explicit-commit",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.update-explicit-commit"
+      ],
+      "rationale": "Install B then explicitly update to available A while server continues advertising B, verify exact A/runtime."
+    },
+    {
+      "behavior_id": "transaction.no-deploy-uninstall",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.no-deploy-uninstall"
+      ],
+      "rationale": "Ignored uninstall completes successfully and preserves exact app/runtime commits."
+    },
+    {
+      "behavior_id": "transaction.cancel-download",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.cancel-download"
+      ],
+      "rationale": "HTTP server sends one payload byte, records and publishes in-flight marker, gates remainder. C watcher cancels live run; require failure/GError and exact preserved A/runtime."
+    },
+    {
+      "behavior_id": "transaction.completed-survive",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.completed-operations-survive"
+      ],
+      "rationale": "Deny unique payload of second resolved operation; first completes at exact B before failure, and remains publicly queryable at B after run fails."
+    }
+  ]
+}

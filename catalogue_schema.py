@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Literal, TypedDict, TypeVar
 
 from catalogue import Catalogue, Source
-from json_validation import ValidationError, array, object_map, required, string
+from json_validation import ValidationError, array, load_json, object_map, required, string
 from typed_json import parse_typed
 
 Interface = Literal["cli", "library"]
@@ -109,11 +109,15 @@ class Requirement(Identified):
     required_capabilities: list[str]
 
 
-class RequirementsDocument(TypedDict):
+class RequirementsRequired(TypedDict):
     schema: int
     scope: Interface
     limitations: list[str]
     requirements: list[Requirement]
+
+
+class RequirementsDocument(RequirementsRequired, total=False):
+    includes: list[str]
 
 
 Item = TypeVar("Item", bound=Identified)
@@ -222,5 +226,32 @@ def parse_mappings(value: object, path: str = "mappings") -> MappingDocument:
 
 def parse_requirements(value: object, path: str = "requirements") -> RequirementsDocument:
     result = parse_typed(value, RequirementsDocument, path)
+    indexed(result["requirements"], "requirement")
+    return result
+
+
+def load_requirements(path: Path) -> RequirementsDocument:
+    """Load an index and its direct category shards, or a legacy monolithic document."""
+    result = parse_requirements(load_json(path), str(path))
+    directory = path.parent.resolve()
+    seen: set[Path] = set()
+    for include in result.get("includes", []):
+        relative = Path(include)
+        shard = (directory / relative).resolve()
+        if (relative.is_absolute() or relative.suffix != ".json"
+                or not shard.is_relative_to(directory) or shard == path.resolve()):
+            raise ValidationError(f"{path}: invalid requirement include path: {include}")
+        if shard in seen:
+            raise ValidationError(f"{path}: duplicate requirement include: {include}")
+        seen.add(shard)
+        document = parse_requirements(load_json(shard), str(shard))
+        if "includes" in document:
+            raise ValidationError(f"{shard}: recursive requirement includes are not supported")
+        if document["scope"] != result["scope"] or any(
+            item["interface"] != result["scope"] for item in document["requirements"]
+        ):
+            raise ValidationError(f"{shard}: requirement shard has incorrect interface scope")
+        result["requirements"].extend(document["requirements"])
+        result["limitations"].extend(document["limitations"])
     indexed(result["requirements"], "requirement")
     return result

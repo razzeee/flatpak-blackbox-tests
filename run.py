@@ -14,14 +14,16 @@ import subprocess
 import sys
 import tempfile
 import threading
-from collections.abc import Iterator
-from contextlib import contextmanager, suppress
+from collections.abc import Callable, Iterator
+from contextlib import ExitStack, contextmanager, suppress
 from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from time import monotonic
 from xml.sax.saxutils import escape
 
 from catalogue_schema import parse_gap
+from console_output import ConsoleOutput, github_summary, use_color
 from coverage_report import CoverageModel, digest, format_summary, write_json
 from fixture_manifest import FixtureManifest, load_fixture
 from json_validation import decode_json
@@ -106,7 +108,8 @@ def execute(argv: list[str], env: dict[str, str], cwd: Path,
 
 
 @contextmanager
-def session_bus(env: dict[str, str], root: Path) -> Iterator[None]:
+def session_bus(env: dict[str, str], root: Path, *,
+                on_cleanup: Callable[[], None] | None = None) -> Iterator[None]:
     # A private address alone still permits host desktop-service activation.
     # Adapters can supply the target's required services in this directory.
     services = root / "services"
@@ -140,9 +143,13 @@ def session_bus(env: dict[str, str], root: Path) -> Iterator[None]:
             env["DBUS_SESSION_BUS_ADDRESS"] = address
             yield
         finally:
-            terminate(process)
-            if process.stdout:
-                process.stdout.close()
+            if on_cleanup is not None:
+                on_cleanup()
+            try:
+                terminate(process)
+            finally:
+                if process.stdout:
+                    process.stdout.close()
 
 
 class RepositoryServer:
@@ -153,7 +160,7 @@ class RepositoryServer:
         self.requests: list[RepositoryRequest] = []
 
     @contextmanager
-    def serving(self) -> Iterator[str]:
+    def serving(self, *, on_cleanup: Callable[[], None] | None = None) -> Iterator[str]:
         repository = self
 
         class Handler(SimpleHTTPRequestHandler):
@@ -175,14 +182,28 @@ class RepositoryServer:
                 pass
 
         server = ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(Handler))
-        thread = threading.Thread(target=server.serve_forever, daemon=True)
-        thread.start()
+        thread: threading.Thread | None = None
+        thread_started = False
+        shutdown_complete = False
         try:
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            thread_started = True
             yield f"http://127.0.0.1:{server.server_port}"
         finally:
-            server.shutdown()
-            server.server_close()
-            thread.join()
+            if on_cleanup is not None:
+                on_cleanup()
+            try:
+                if thread_started:
+                    server.shutdown()
+                    shutdown_complete = True
+            finally:
+                try:
+                    server.server_close()
+                finally:
+                    # A failed shutdown must not block the remaining cleanup in join().
+                    if shutdown_complete and thread is not None:
+                        thread.join()
 
 
 class Driver:
@@ -502,12 +523,15 @@ def build_client(target: TargetConfig, output: Path,
     return client
 
 
-def main() -> int:
+def main(*, clock: Callable[[], float] = monotonic) -> int:
+    started = clock()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--target", required=True, type=Path)
     parser.add_argument("--fixtures", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path, help="new results directory")
     parser.add_argument("--driver", choices=["cli", "library", "all"], default="all")
+    parser.add_argument("--color", choices=["auto", "always", "never"], default="auto",
+                        help="console color (nonempty NO_COLOR overrides all modes)")
     try:
         inventory = load_behaviors(HERE)
     except (OSError, ValueError, KeyError, TypeError) as error:
@@ -560,6 +584,10 @@ def main() -> int:
             }
             cases[key] = result
             report["results"].append(result)
+    console = ConsoleOutput(
+        [result for result in cases.values() if result["status"] == "pending"], sys.stdout,
+        color=use_color(args.color, sys.stdout, os.environ),
+    )
     status = 0
     artifacts: dict[str, str] = {}
     write_json(output / "report.json", report)
@@ -591,6 +619,8 @@ def main() -> int:
                 result.update({"status": "unsupported",
                                "error": "System-profile execution requires a VM runner."})
                 status = 1
+            if result["status"] == "unsupported":
+                console.case_finished(result)
         if not any(result["status"] == "pending" for result in cases.values()):
             raise UnsupportedCapability("target declares all selected scenarios unsupported")
         fixture = load_fixture(fixtures / "fixture.json")
@@ -661,13 +691,30 @@ def main() -> int:
                 result = cases[behavior["id"], kind, behavior["profile"]]
                 if result["status"] != "pending":
                     continue
-                # Unix-domain socket paths must fit even when --output is deep.
-                root = Path(tempfile.mkdtemp(prefix="fp-bb-"))
-                result["state_directory"] = str(root)
-                repository = RepositoryServer(fixtures)
+                if client_error:
+                    result.update({"status": failure_status(client_error),
+                                   "error": str(client_error)})
+                    status = 1
+                    console.case_finished(result)
+                    continue
+                case_started = clock()
+                execution_started: float | None = None
+                cleanup_started: float | None = None
+
+                def begin_cleanup() -> None:
+                    # A context may roll back inside __enter__, before ExitStack owns it.
+                    nonlocal cleanup_started
+                    if cleanup_started is None:
+                        cleanup_started = clock()
+
+                root: Path | None = None
+                repository: RepositoryServer | None = None
+                contexts = ExitStack()
                 try:
-                    if client_error:
-                        raise client_error
+                    # Unix-domain socket paths must fit even when --output is deep.
+                    root = Path(tempfile.mkdtemp(prefix="fp-bb-"))
+                    result["state_directory"] = str(root)
+                    repository = RepositoryServer(fixtures)
                     env = environment(root, target)
                     adapter = execute([*adapter_command, str(root)], env, target_path.parent,
                                       result["evidence"], args.timeout)
@@ -685,32 +732,53 @@ def main() -> int:
                                 "explicit absolute runtime library dirs required"
                             )
                         env["LD_LIBRARY_PATH"] = os.pathsep.join(directories)
-                    with session_bus(env, root), repository.serving() as url:
-                        driver = Driver(kind, cli, client, env, root,
-                                        result["evidence"], args.timeout)
-                        if "handler" in behavior:
-                            module_name, function_name = behavior["handler"].split(":")
-                            handler = getattr(importlib.import_module(module_name), function_name)
-                            handler(driver, repository, url, fixture, name)
-                        else:
-                            scenario(driver, repository, url, fixture, name)
+                    contexts.enter_context(session_bus(env, root, on_cleanup=begin_cleanup))
+                    url = contexts.enter_context(repository.serving(on_cleanup=begin_cleanup))
+                    driver = Driver(kind, cli, client, env, root,
+                                    result["evidence"], args.timeout)
+                    execution_started = clock()
+                    if "handler" in behavior:
+                        module_name, function_name = behavior["handler"].split(":")
+                        handler = getattr(importlib.import_module(module_name), function_name)
+                        handler(driver, repository, url, fixture, name)
+                    else:
+                        scenario(driver, repository, url, fixture, name)
                     result["status"] = "passed"
                 except (PrerequisiteError, ContractFailure, OSError, ValueError,
                         KeyError, TypeError) as error:
                     result.update({"status": failure_status(error), "error": str(error)})
                     status = 1
                 finally:
-                    result["repository_requests"] = repository.requests
+                    begin_cleanup()
+                    assert cleanup_started is not None
                     try:
-                        if (root / "dbus.log").exists():
-                            shutil.copy2(root / "dbus.log", output / f"{kind}-{name}-dbus.log")
-                        shutil.rmtree(root)
+                        try:
+                            contexts.close()
+                        finally:
+                            if repository is not None:
+                                result["repository_requests"] = repository.requests
+                            if root is not None:
+                                if (root / "dbus.log").exists():
+                                    shutil.copy2(root / "dbus.log",
+                                                 output / f"{kind}-{name}-dbus.log")
+                                shutil.rmtree(root)
                         result["cleanup_complete"] = True
-                    except OSError as error:
+                    except (OSError, ValueError, KeyError, TypeError,
+                            PrerequisiteError, ContractFailure) as error:
                         result.update({"status": "setup-error", "cleanup_error": str(error)})
                         status = 1
+                    finally:
+                        finished = clock()
+                        result["duration_seconds"] = finished - case_started
+                        result["timings"] = {
+                            "setup_seconds": (execution_started if execution_started is not None
+                                              else cleanup_started) - case_started,
+                            "execution_seconds": (cleanup_started - execution_started
+                                                  if execution_started is not None else 0.0),
+                            "cleanup_seconds": finished - cleanup_started,
+                        }
                     write_json(output / "report.json", report)
-                print(f"{kind}: {behavior['id']}: {result['status']}")
+                console.case_finished(result)
     except (OSError, ValueError, KeyError, TypeError, PrerequisiteError,
             ContractFailure, UnsupportedCapability) as error:
         report["setup_error"] = str(error)
@@ -718,8 +786,9 @@ def main() -> int:
         for result in cases.values():
             if result["status"] == "pending":
                 result.update({"status": failure_status(error), "error": str(error)})
+                console.case_finished(result)
         status = 1
-        print(str(error), file=sys.stderr)
+        console.setup_error(report["setup_status"], str(error))
     finally:
         report["complete"] = all(result["status"] != "pending" for result in cases.values())
         report["finished_at"] = datetime.now(timezone.utc).isoformat()
@@ -729,10 +798,20 @@ def main() -> int:
         report["coverage"] = coverage_model.summarize(report)
         if report["coverage"]["verification"]["status"] != "current":
             status = 1
+        report["duration_seconds"] = clock() - started
         write_json(output / "report.json", report)
         (output / "coverage.md").write_text(format_summary(report["coverage"]))
-    print(f"Results: {output / 'report.json'}; full compatibility coverage is incomplete")
-    print(f"Coverage: {output / 'coverage.md'}")
+    console.summary(report, output, status)
+    if summary_path := os.environ.get("GITHUB_STEP_SUMMARY"):
+        try:
+            rendered = github_summary(report, status)
+            with Path(summary_path).open("a", encoding="utf-8") as summary:
+                summary.write("\n\n" + rendered)
+            # Only mark delivery after the Actions append has successfully closed.
+            (output / "job-summary.md").write_text(rendered, encoding="utf-8")
+        except OSError as error:
+            console.setup_error("setup-error", f"Cannot write GitHub job summary: {error}")
+            status = 1
     return status
 
 

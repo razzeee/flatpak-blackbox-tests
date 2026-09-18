@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "scope": "cli",
+  "requirements": [
+    {
+      "id": "cli.build-commit-from.any.contents",
+      "interface": "cli",
+      "profile": "any",
+      "category": "building-distribution",
+      "description": "build-commit-from creates a destination-branch commit with the selected source branch's contents without importing the source's parent history or signatures.",
+      "sources": [
+        {
+          "path": "doc/flatpak-build-commit-from.xml",
+          "anchor": "Description"
+        }
+      ],
+      "surfaces": [
+        "cli.command.build-commit-from"
+      ],
+      "required_capabilities": [
+        "cli",
+        "build-tools",
+        "local-repository",
+        "repository-signing"
+      ]
+    }
+  ],
+  "limitations": []
+}

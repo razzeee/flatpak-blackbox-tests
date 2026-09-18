@@ -36,6 +36,9 @@ jobs:
       - name: Ruff
         run: uv run --locked ruff check .
 
+      - name: Static JSON formatting
+        run: uv run --locked python format_json.py --check
+
       - name: ty
         run: uv run --locked ty check .
 

@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "objects.ref-roundtrip",
+      "scenario": "objects-ref-roundtrip",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "libflatpak"
+      ],
+      "description": "Parse app and runtime literal refs.",
+      "preconditions": "Literal full refs for x86_64 and aarch64.",
+      "expected": "Kind, name, arch, branch and allocating format match the literals; commit is NULL.",
+      "references": [
+        "common/flatpak-ref.c: flatpak_ref_parse and public getters"
+      ]
+    },
+    {
+      "id": "objects.ref-invalid",
+      "scenario": "objects-ref-invalid",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "libflatpak"
+      ],
+      "description": "Reject malformed full refs.",
+      "preconditions": "Empty, missing-component, invalid-kind, empty-name and extra-component inputs.",
+      "expected": "Each returns NULL and a GError.",
+      "references": [
+        "common/flatpak-ref.c: flatpak_ref_parse"
+      ]
+    },
+    {
+      "id": "objects.ref-cache",
+      "scenario": "objects-ref-cache",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "libflatpak"
+      ],
+      "description": "Check cached formatting and independently owned strings.",
+      "preconditions": "Live parsed app and runtime refs.",
+      "expected": "Cached pointer is stable and literal-correct; freeing one allocated string preserves the ref and cache; the other string survives ref destruction.",
+      "references": [
+        "common/flatpak-ref.c: flatpak_ref_format_ref, flatpak_ref_format_ref_cached"
+      ]
+    },
+    {
+      "id": "objects.ref-properties",
+      "scenario": "objects-ref-properties",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "any",
+      "required_capabilities": [
+        "libflatpak"
+      ],
+      "description": "Read explicit ref commit and collection ID from a public-property fixture.",
+      "preconditions": "Public construct-only properties supply literal values; no repository metadata is read.",
+      "expected": "Getters return the supplied 64-character commit and collection ID. This checks the Ref object contract only, not collection-ID propagation from a repository or bundle.",
+      "references": [
+        "common/flatpak-ref.c: public commit and collection-id properties; flatpak_ref_get_collection_id"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "objects.ref-roundtrip",
+      "driver": "library",
+      "profile": "any",
+      "requirements": [
+        "library.ref.parse-roundtrip",
+        "library.ref.parse-no-commit"
+      ],
+      "rationale": "Both literal ref kinds have all identity components, formatting and absent commit asserted."
+    },
+    {
+      "behavior_id": "objects.ref-invalid",
+      "driver": "library",
+      "profile": "any",
+      "requirements": [
+        "library.ref.parse-invalid"
+      ],
+      "rationale": "All malformed inputs require NULL and a non-NULL error, including missing component and invalid kind."
+    },
+    {
+      "behavior_id": "objects.ref-cache",
+      "driver": "library",
+      "profile": "any",
+      "requirements": [
+        "library.ref.cached-format",
+        "library.ownership.formatted-string"
+      ],
+      "rationale": "Literal equality, borrowed pointer stability, independent frees, live-ref inspection and post-destruction owned-string inspection are asserted."
+    },
+    {
+      "behavior_id": "objects.ref-properties",
+      "driver": "library",
+      "profile": "any",
+      "requirements": [
+        "library.ref.collection-id"
+      ],
+      "rationale": "The requirement's explicit-ID ref fixture is supplied through the public collection-id property and verified by the getter. Credit covers object-level exposure only; this does not verify repository or bundle metadata propagation."
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "transaction.rate",
+      "scenario": "tx-rate",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Initial zero transfer rate followed by sustained positive rate.",
+      "preconditions": [
+        "prepare_transactions.py extras.transactions"
+      ],
+      "expected": [
+        "First-second rate samples are zero; paced sustained download exposes nonzero bytes-per-second."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    },
+    {
+      "id": "transaction.progress",
+      "scenario": "tx-progress",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Paced transfer progress values and monotonic counters.",
+      "preconditions": [
+        "prepare_transactions.py extras.transactions"
+      ],
+      "expected": [
+        "Changed status and estimating flag readable; percentage bounded; positive transferred bytes monotonic and start time stable."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "transaction.rate",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.progress.initial-transfer-rate"
+      ],
+      "rationale": "Paced 1 MiB payload produces samples during first second that must have zero rate and subsequent nonzero rate samples, with successful exact B deployment."
+    },
+    {
+      "behavior_id": "transaction.progress",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.progress.changed-values"
+      ],
+      "rationale": "Paced 1 MiB required payload generates repeated changed signals; C checks readable status and boolean estimating, bounded percentage and stable monotonic start time during positive transfer, monotonic bytes; Python requires payload-sized byte count and successful B deployment."
+    }
+  ]
+}

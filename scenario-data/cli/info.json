@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "management.query-fields",
+      "scenario": "management-query-fields",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Inspect permissions, remote metadata and commit parent.",
+      "preconditions": "Reference-exported queries fixture metadata and A/B ancestry.",
+      "expected": "Network permission, exact reference metadata and independently known A parent.",
+      "references": [
+        "doc/flatpak-info.xml",
+        "doc/flatpak-remote-info.xml"
+      ]
+    },
+    {
+      "id": "management.installed-arch",
+      "scenario": "management-installed-arch",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Select installed architecture in list and info.",
+      "preconditions": "Both native and foreign copies installed.",
+      "expected": "Lists exclude competing architecture; info selects exact foreign commit.",
+      "references": [
+        "doc/flatpak-list.xml",
+        "doc/flatpak-info.xml"
+      ]
+    },
+    {
+      "id": "management.installed-queries",
+      "scenario": "management-installed-queries",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Query installed metadata, origin, runtime and typed ref lists.",
+      "preconditions": "Fixture app and runtime installed.",
+      "expected": "Exact fixture metadata and selected refs.",
+      "references": [
+        "doc/flatpak-info.xml",
+        "doc/flatpak-list.xml"
+      ]
+    },
+    {
+      "id": "management.file-access",
+      "scenario": "management-file-access",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Query path access before and after filesystem grants.",
+      "preconditions": "Installed app with no host filesystem grant.",
+      "expected": "Hidden, read-only, then read-write access.",
+      "references": [
+        "doc/flatpak-info.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "management.query-fields",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Reference-generated metadata and parent commit provide independent oracles.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.info.--show-permissions",
+          "rationale": "Exact output is the fixture network Context, not general info or full metadata."
+        },
+        {
+          "id": "cli.option.remote-info.--show-metadata",
+          "rationale": "Output equals independently reference-exported metadata file."
+        },
+        {
+          "id": "cli.option.remote-info.--show-parent",
+          "rationale": "Output equals exact A parent of reference-generated B commit."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.installed-arch",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.info.user.ref-commit"
+      ],
+      "rationale": "Exact selected installed foreign full ref and commit.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.info.--arch",
+          "rationale": "With both copies installed, architecture-free info selects foreign copy over native."
+        },
+        {
+          "id": "cli.option.list.--arch",
+          "rationale": "Native and foreign list queries each exclude the other installed copy."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.installed-queries",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.info.user.metadata",
+        "cli.info.user.ref-commit"
+      ],
+      "rationale": "Exact app/runtime metadata sections and fields and full ref/commit queries match fixture.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.info.--show-origin",
+          "rationale": "Installed origin equals configured fixture remote."
+        },
+        {
+          "id": "cli.option.info.--show-runtime",
+          "rationale": "Installed runtime equals fixture runtime/arch/branch."
+        },
+        {
+          "id": "cli.option.info.--show-sdk",
+          "rationale": "SDK query returns exact SDK declared by fixture metadata."
+        },
+        {
+          "id": "cli.option.list.--runtime",
+          "rationale": "Runtime-only list excludes installed app."
+        },
+        {
+          "id": "cli.option.list.--columns",
+          "rationale": "Ref-only queries return exact expected refs."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.file-access",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.info.user.file-access"
+      ],
+      "rationale": "Public access query changes from hidden to read-only to read-write after grants."
+    }
+  ]
+}

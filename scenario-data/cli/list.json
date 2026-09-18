@@ -1,0 +1,148 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "coverage.runtime-filter",
+      "scenario": "coverage-runtime-filter",
+      "handler": "coverage_next_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "local-repository"
+      ],
+      "description": "Filter installed apps by their declared runtime.",
+      "preconditions": "Two installed apps use distinct prepared runtimes.",
+      "expected": "Each runtime selects only its app; missing runtime selects none.",
+      "references": [
+        "doc/flatpak-list.xml"
+      ]
+    },
+    {
+      "id": "system-selectors.queries",
+      "scenario": "system-selectors-queries",
+      "handler": "system_selector_scenarios:run",
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Query installation-specific ref identity, actual location, metadata and typed lists.",
+      "preconditions": "A default/user app, B named app and explicit runtime copies.",
+      "expected": "Exact selected ref/commit/metadata and kind/architecture-filtered sets; public locations contain corresponding fixture content; emptied default list excludes user-only refs.",
+      "references": [
+        "doc/flatpak-info.xml",
+        "doc/flatpak-list.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "coverage.runtime-filter",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.list.user.runtime-filter"
+      ],
+      "rationale": "Two installed apps use different runtimes. Each --app-runtime query returns precisely its app and excludes its competitor; missing runtime returns none."
+    },
+    {
+      "behavior_id": "system-selectors.queries",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [
+        "cli.list.system.scope"
+      ],
+      "rationale": "All selected identity/metadata/type/architecture queries are exact; after emptying default, system list excludes the still-installed user app.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.info.--system",
+          "rationale": "Default info returns A and actual default deployment path, not named B."
+        },
+        {
+          "id": "cli.option.info.--installation",
+          "rationale": "Named info returns B and actual alt deployment path, not default/user A."
+        },
+        {
+          "id": "cli.option.info.--user",
+          "rationale": "User info returns A and actual root-user deployment path, not named B."
+        },
+        {
+          "id": "cli.option.info.--show-ref",
+          "rationale": "Full installed ref matches requested identity exactly."
+        },
+        {
+          "id": "cli.option.info.--show-commit",
+          "rationale": "Selected installed commit equals A or B fixture commit."
+        },
+        {
+          "id": "cli.option.info.--show-location",
+          "rationale": "The public returned directory lies within the selected public installation base and contains the controlled probe reporting the expected A/B version; a root or general installation path is rejected without deriving a backend ref/commit path."
+        },
+        {
+          "id": "cli.option.info.--show-origin",
+          "rationale": "Selected installed origin equals fixture."
+        },
+        {
+          "id": "cli.option.info.--show-runtime",
+          "rationale": "Selected app runtime equals fixture runtime/arch/branch."
+        },
+        {
+          "id": "cli.option.info.--show-sdk",
+          "rationale": "Selected app SDK equals fixture runtime/arch/branch."
+        },
+        {
+          "id": "cli.option.info.--show-metadata",
+          "rationale": "Parsed Application fields equal all four fixture metadata fields."
+        },
+        {
+          "id": "cli.option.list.--system",
+          "rationale": "After default uninstall-all, default list is empty while named/user copies remain installed."
+        },
+        {
+          "id": "cli.option.list.--installation",
+          "rationale": "Named enumeration contains its explicitly installed app and runtime."
+        },
+        {
+          "id": "cli.option.list.--user",
+          "rationale": "User enumeration contains its explicitly installed app and runtime."
+        },
+        {
+          "id": "cli.option.list.--app",
+          "rationale": "App-only result excludes installed runtime."
+        },
+        {
+          "id": "cli.option.list.--runtime",
+          "rationale": "Runtime-only result excludes installed app."
+        },
+        {
+          "id": "cli.option.list.--arch",
+          "rationale": "Matching architecture yields both refs; nonexistent architecture yields neither."
+        },
+        {
+          "id": "cli.option.list.--columns",
+          "rationale": "Ref-only output equals exact installed ref sets."
+        },
+        {
+          "id": "cli.option.uninstall.--all",
+          "rationale": "Default uninstall-all removes app and runtime while user/named copies remain."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Every target call enters two disposable bubblewrap user/mount namespace layers. The outer root maps only to the invoking host UID; inner root maps only to outer root. Inherited host mounts are locked read-only, checked by a denied bind-remount before every target call. Private PID/network namespaces and writable installation state are case-local; generated state is removed after each case while command evidence is retained.",
+    "Target environment keys BLACKBOX_SYSTEM_INSTALL_DIR and BLACKBOX_SYSTEM_CONFIG_DIR specify the expected compiled defaults; their reference-build defaults are /var/local/lib/flatpak and /usr/local/etc/flatpak. The namespace mounts private data at those paths, and CLI/C-client assertions still check the target's actual default location. These keys never become FLATPAK_SYSTEM_DIR or FLATPAK_CONFIG_DIR redirects. Set them under the target JSON environment object, not the host shell environment.",
+    "Readonly exposure includes only the suite directory, selected target executables, configured helpers and LD_LIBRARY_PATH directories. Uninstalled targets can explicitly add colon-separated absolute paths with BLACKBOX_TARGET_READONLY_PATHS in the target environment. No repository ancestor is inferred. Paths that cover private namespace roots or overlap protected installation/service content are rejected, including symlink aliases.",
+    "CLI deployment location checks use the public returned location, verify containment in the selected public installation base, locate the controlled bin/blackbox-probe payload there and execute it to distinguish A from B. They never construct a deployment path from a ref or commit, and never recursively search a general installation root for content.",
+    "Direct-root mutations may satisfy explicitly selected installation outcomes. These cases do not assert polkit authorization, non-root helper behavior, or multiple-user access. No requirement demanding those outcomes is mapped.",
+    "The named override case intentionally asserts the documented isolation contract; the reference target currently fails it, so that option receives no verified credit from that case."
+  ]
+}

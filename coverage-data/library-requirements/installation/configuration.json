@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "requirements": [
+    {
+      "id": "library.authorization.system.no-interaction",
+      "interface": "library",
+      "profile": "system",
+      "category": "authorization",
+      "description": "Setting installation no_interaction TRUE is reflected by its getter and prevents interactive authorization dialogs during a system operation that would otherwise request authorization. Lack of authorization still produces failure rather than success.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_set_no_interaction"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_no_interaction"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_set_no_interaction",
+        "library.function.flatpak_installation_get_no_interaction"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "system-installation",
+        "system-authorization"
+      ]
+    },
+    {
+      "id": "library.config.languages-roundtrip",
+      "interface": "library",
+      "profile": "any",
+      "category": "configuration",
+      "description": "Setting languages and extra-languages to documented semicolon-separated values persists those values through get_config on a reopened installation. Unsetting a key with NULL makes get_config return NULL with G_KEY_FILE_ERROR_KEY_NOT_FOUND.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_set_config_sync"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_config"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_set_config_sync",
+        "library.function.flatpak_installation_get_config"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation"
+      ]
+    },
+    {
+      "id": "library.config.languages-locales",
+      "interface": "library",
+      "profile": "any",
+      "category": "configuration",
+      "description": "Default language and locale queries reflect explicit language configuration; the locale query preserves configured territory information. Setting languages to the empty string produces an empty language array meaning all languages.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_default_languages"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_default_locales"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_set_config_sync"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_get_default_languages",
+        "library.function.flatpak_installation_get_default_locales"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation"
+      ]
+    },
+    {
+      "id": "library.config.app-overrides",
+      "interface": "library",
+      "profile": "any",
+      "category": "configuration",
+      "description": "Loading an application's overrides returns the fixture's override metadata contents for that app and selected installation.",
+      "sources": [
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_load_app_overrides"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_installation_load_app_overrides"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation"
+      ]
+    }
+  ],
+  "limitations": []
+}

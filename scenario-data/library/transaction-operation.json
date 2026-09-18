@@ -1,0 +1,125 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "transaction.operation-identity",
+      "scenario": "tx-operation-identity",
+      "handler": "transaction_contract_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Install, update, uninstall and bundle operation identity.",
+      "preconditions": [
+        "Prepared query A/B repositories and plain bundle"
+      ],
+      "expected": [
+        "Ready getters identify exact requested ref/type and applicable origin; bundle getter is NULL or supplied GFile; current operation equals executing callback operation; exact resulting commits and uninstall absence."
+      ],
+      "references": [
+        "common/flatpak-transaction.c:flatpak_transaction_operation_get_bundle_path",
+        "common/flatpak-transaction.c:flatpak_transaction_get_current_operation"
+      ]
+    },
+    {
+      "id": "contracts.operation-causes",
+      "scenario": "tx-operation-causes",
+      "handler": "six_contract_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Shared runtime and extension operation causes, including skipped apps.",
+      "preconditions": [
+        "Two apps share runtime and extension; independently updated runtime"
+      ],
+      "expected": [
+        "Runtime names both requesting apps, extension names main runtime, explicit apps have no cause, unchanged app causes report skipped on runtime update."
+      ],
+      "references": [
+        "common/flatpak-transaction.c:flatpak_transaction_operation_get_related_to_ops",
+        "common/flatpak-transaction.c:flatpak_transaction_operation_get_is_skipped"
+      ]
+    },
+    {
+      "id": "transaction.metadata",
+      "scenario": "tx-metadata",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Resolved B metadata and old A permissions.",
+      "preconditions": [
+        "prepare_transactions.py extras.transactions"
+      ],
+      "expected": [
+        "Exact B commit, full new and old keyfiles, and NULL unsubsetting at ready."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    },
+    {
+      "id": "transaction.operation-sizes",
+      "scenario": "tx-operation-sizes",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Per-ref size getters match immutable reference commit metadata and uninstall zeros.",
+      "preconditions": [
+        "fixture.sizes[version][fullref] prepared by reference ostree from xa.installed-size and xa.download-size"
+      ],
+      "expected": [
+        "Each app/runtime operation size equals its own reference-prepared literal, excluding dependency sizes; uninstall sizes are zero."
+      ],
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "transaction.operation-identity",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.operation-identity"
+      ],
+      "rationale": "Native install/update/uninstall/bundle-install requests yield exact requested ref and enum type, applicable origin and nullable bundle GFile. Each execution callback compares owned get_current_operation pointer to its operation argument. Independent commit expectations and uninstall absence verify execution."
+    },
+    {
+      "behavior_id": "contracts.operation-causes",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.operation-causes"
+      ],
+      "rationale": "Ready traverses borrowed causes while transaction lives; shared runtime identifies both apps, extension its runtime, explicit apps no causes. Runtime-only update exposes both unchanged skipped app causes and excludes their execution."
+    },
+    {
+      "behavior_id": "transaction.metadata",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.operation-resolved-metadata"
+      ],
+      "rationale": "Prepared A and B differ in network permission. At ready compare entire old/new metadata keyfiles and exact B commit; C asserts NULL subpaths; abort preserves A."
+    },
+    {
+      "behavior_id": "transaction.operation-sizes",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.transaction.operation-sizes"
+      ],
+      "rationale": "Feed per-ref immutable xa.installed-size and xa.download-size literals collected by reference ostree at preparation into C assertions. Each app/runtime operation must match its own literal, excluding dependencies; both uninstall sizes must be zero. No target size API supplies expected values."
+    }
+  ]
+}

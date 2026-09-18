@@ -9,6 +9,30 @@ from test_fixture_manifest import basic
 
 
 class ReportSchemaTests(unittest.TestCase):
+    def test_optional_seconds_are_finite_nonnegative_numbers(self) -> None:
+        case = {"behavior_id": "test", "driver": "cli", "profile": "user", "status": "failed"}
+        for value in (-1, True, False, float("nan"), float("inf"), "1", None,
+                      10**400, -(10**400)):
+            for field in ("duration_seconds", "setup_seconds", "execution_seconds",
+                          "cleanup_seconds"):
+                with self.subTest(value=value, field=field), \
+                        self.assertRaises(ValidationError) as caught:
+                    fields = ({field: value} if field == "duration_seconds" else {
+                        "timings": {"setup_seconds": 0, "execution_seconds": 0,
+                                    "cleanup_seconds": 0, field: value},
+                    })
+                    parse_report({"schema": 1, "results": [{**case, **fields}]})
+                prefix = "" if field == "duration_seconds" else "timings."
+                self.assertIn(f"report.results[0].{prefix}{field}", str(caught.exception))
+            with self.subTest(run=value), self.assertRaises(ValidationError) as caught:
+                parse_report({"schema": 1, "duration_seconds": value})
+            self.assertIn("report.duration_seconds", str(caught.exception))
+        report = parse_report({"schema": 1, "duration_seconds": 3, "results": [
+            {**case, "duration_seconds": 2.5, "timings": {
+                "setup_seconds": 0, "execution_seconds": 2, "cleanup_seconds": 0.5}},
+        ]})
+        self.assertEqual(report["results"][0]["duration_seconds"], 2.5)
+
     def test_incremental_reports_and_supplemental_json(self) -> None:
         raw = {"schema": 1, "complete": False, "library_provenance": {}, "results": [
             {"behavior_id": "test", "driver": "cli", "profile": "user", "status": "pending",

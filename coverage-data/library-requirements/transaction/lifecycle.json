@@ -1,0 +1,238 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "requirements": [
+    {
+      "id": "library.transaction.completed-operations-survive",
+      "interface": "library",
+      "profile": "any",
+      "category": "atomicity",
+      "description": "In a multi-operation transaction, an operation completed before a later injected failure remains visible and installed after the transaction stops; the already completed operation is not rolled back.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "FlatpakTransaction"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "fault-injection"
+      ]
+    },
+    {
+      "id": "library.uninstall.user.absent-ref",
+      "interface": "library",
+      "profile": "user",
+      "category": "errors",
+      "description": "A transaction uninstall request for a well-formed absent user ref fails with domain FLATPAK_ERROR and code FLATPAK_ERROR_NOT_INSTALLED and preserves the commits of an existing app and runtime.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_add_uninstall"
+        },
+        {
+          "path": "common/flatpak-error.h",
+          "anchor": "FlatpakError"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_add_uninstall",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.uninstall.user.app",
+      "interface": "library",
+      "profile": "user",
+      "category": "uninstall",
+      "description": "A transaction uninstall of an installed user app succeeds and leaves that app absent from the user installation.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_add_uninstall"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_run"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_add_uninstall",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.uninstall.system.app",
+      "interface": "library",
+      "profile": "system",
+      "category": "uninstall",
+      "description": "An authorized uninstall transaction removes the selected system-installed app, including for subsequent installed-ref queries by another user.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_add_uninstall"
+        },
+        {
+          "path": "common/flatpak-installation.c",
+          "anchor": "flatpak_installation_get_installed_ref"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_add_uninstall",
+        "library.function.flatpak_transaction_run",
+        "library.function.flatpak_installation_get_installed_ref"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "system-installation",
+        "system-authorization",
+        "multiple-users",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.transaction.download-only",
+      "interface": "library",
+      "profile": "any",
+      "category": "transaction-options",
+      "description": "With no_deploy TRUE, the option getter reports TRUE and updating A downloads B without deploying B. With no_deploy later FALSE on a fresh transaction, the getter reports FALSE.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_set_no_deploy"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_get_no_deploy"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_set_no_deploy",
+        "library.function.flatpak_transaction_get_no_deploy",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.transaction.no-pull",
+      "interface": "library",
+      "profile": "any",
+      "category": "transaction-options",
+      "description": "With B fully downloaded but not deployed, a no_pull transaction deploys B using only local data. The no_pull getter reflects TRUE and FALSE settings.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_set_no_pull"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_get_no_pull"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_set_no_pull",
+        "library.function.flatpak_transaction_get_no_pull",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "network-observation"
+      ]
+    },
+    {
+      "id": "library.transaction.no-deploy-uninstall",
+      "interface": "library",
+      "profile": "any",
+      "category": "transaction-options",
+      "description": "An uninstall request is ignored when no_deploy is enabled, and running the transaction leaves the installed ref deployed.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_add_uninstall"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_set_no_deploy",
+        "library.function.flatpak_transaction_add_uninstall",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository"
+      ]
+    },
+    {
+      "id": "library.transaction.system.sync-preinstalled",
+      "interface": "library",
+      "profile": "system",
+      "category": "preinstallation",
+      "description": "With controlled preinstall configuration and known previously preinstalled refs, synchronizing preinstalled applications adds the required installation and removal operations and running them produces the configured set.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_add_sync_preinstalled"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_add_sync_preinstalled",
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "system-installation",
+        "system-authorization",
+        "local-repository",
+        "vendor-preinstall"
+      ]
+    },
+    {
+      "id": "library.transaction.cancel-download",
+      "interface": "library",
+      "profile": "any",
+      "category": "cancellation",
+      "description": "Cancelling the GCancellable while a required update payload download is in flight causes run to finish with failure and a GError. The interrupted individual update does not replace the previously deployed app commit; previously completed operations need not be rolled back.",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "flatpak_transaction_run"
+        },
+        {
+          "path": "common/flatpak-transaction.c",
+          "anchor": "FlatpakTransaction"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_transaction_run"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "installation",
+        "local-repository",
+        "controlled-transfers"
+      ]
+    }
+  ],
+  "limitations": []
+}

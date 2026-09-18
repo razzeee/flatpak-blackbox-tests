@@ -1,0 +1,357 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "sandbox.system-bus",
+      "scenario": "sandbox-system-bus",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus",
+        "concurrent-processes"
+      ],
+      "description": "Filter controlled service through system-bus policies.",
+      "preconditions": "Private daemon address supplied as system bus, independent echo service and host client.",
+      "expected": "Default denial, run/stored system-talk reply, run/stored system-no-talk denial.",
+      "references": [
+        "doc/flatpak-run.xml",
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "sandbox.system-socket",
+      "scenario": "sandbox-system-socket",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus",
+        "concurrent-processes"
+      ],
+      "description": "Expose and revoke unfiltered controlled system bus.",
+      "preconditions": "Private daemon address supplied as system bus with echo service.",
+      "expected": "Socket grants permit otherwise denied service; run/stored socket revocation restores denial.",
+      "references": [
+        "doc/flatpak-run.xml",
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "sandbox.session-switches",
+      "scenario": "sandbox-session-switches",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus",
+        "concurrent-processes"
+      ],
+      "description": "Enable filtered session bus in restrictive mode and disable it explicitly.",
+      "preconditions": "Private echo service and host client.",
+      "expected": "Sandbox with session-bus and talk grant gets reply; no-session-bus removes connection.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "sandbox.bus",
+      "scenario": "sandbox-bus",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus",
+        "concurrent-processes"
+      ],
+      "description": "Allow a controlled service through filtered session bus.",
+      "preconditions": "Private echo service and independent host dbus-send tool exposed through host-os files only.",
+      "expected": "Default destination denied; run and stored talk grants get replies; stored denial blocks again.",
+      "references": [
+        "doc/flatpak-run.xml",
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "sandbox.session-bus",
+      "scenario": "sandbox-session-bus",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus",
+        "concurrent-processes"
+      ],
+      "description": "Expose and revoke unfiltered private session bus socket.",
+      "preconditions": "Private echo service and independent host client.",
+      "expected": "Default filtered bus denies service; session-bus grants allow replies; nosocket restores filtering.",
+      "references": [
+        "doc/flatpak-run.xml",
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "sandbox.wayland",
+      "scenario": "sandbox-wayland",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Expose and revoke a controlled Wayland socket path.",
+      "preconditions": "Bound dummy Unix socket selected through WAYLAND_DISPLAY.",
+      "expected": "Path absent by default, present with run/stored grant, absent with run/stored denial.",
+      "references": [
+        "doc/flatpak-run.xml",
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "sandbox.ssh",
+      "scenario": "sandbox-ssh",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Expose and revoke a controlled SSH authentication socket path.",
+      "preconditions": "Bound dummy Unix socket selected through SSH_AUTH_SOCK.",
+      "expected": "Path absent by default, present with run/stored grant, absent with run/stored denial.",
+      "references": [
+        "doc/flatpak-run.xml",
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "sandbox.conditional-socket",
+      "scenario": "sandbox-conditional-socket",
+      "handler": "sandbox_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Evaluate conditional Wayland socket exposure.",
+      "preconditions": "Bound dummy Wayland socket and conditional permission support.",
+      "expected": "Socket visible only with true condition.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "sandbox.system-bus",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Actual method replies and D-Bus denials on private bus supplied as system bus.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--system-talk-name",
+          "rationale": "Grant allows controlled system service to reply."
+        },
+        {
+          "id": "cli.option.run.--system-no-talk-name",
+          "rationale": "Denial prevents reply despite stored grant."
+        },
+        {
+          "id": "cli.option.override.--system-talk-name",
+          "rationale": "Stored grant allows controlled system service to reply."
+        },
+        {
+          "id": "cli.option.override.--system-no-talk-name",
+          "rationale": "Stored denial blocks previously granted service."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.system-socket",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Actual private system bus communication, no host system daemon used.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--socket",
+          "rationale": "system-bus grants unfiltered service reply."
+        },
+        {
+          "id": "cli.option.run.--nosocket",
+          "rationale": "system-bus revocation restores filtering."
+        },
+        {
+          "id": "cli.option.override.--socket",
+          "rationale": "Stored system-bus grant permits reply."
+        },
+        {
+          "id": "cli.option.override.--nosocket",
+          "rationale": "Stored system-bus denial restores filtering."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.session-switches",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Bus access restored in restrictive mode, removed explicitly.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--session-bus",
+          "rationale": "Sandbox mode with explicit filtered bus and talk grant gets echo reply."
+        },
+        {
+          "id": "cli.option.run.--no-session-bus",
+          "rationale": "Client fails to open session connection despite talk grant."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.bus",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.run.user.bus-policy"
+      ],
+      "rationale": "Private echo method reply succeeds through talk-name grant while controls are denied by bus proxy.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--no-talk-name",
+          "rationale": "Run denial prevents service reply despite stored talk grant."
+        },
+        {
+          "id": "cli.option.override.--talk-name",
+          "rationale": "Stored grant permits actual method reply from controlled private session service."
+        },
+        {
+          "id": "cli.option.override.--no-talk-name",
+          "rationale": "Stored denial prevents previously allowed service call with D-Bus denial."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.session-bus",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Private session bus communication, specifically session-bus and no other socket value.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--socket",
+          "rationale": "session-bus exposes unfiltered connection permitting otherwise denied service reply."
+        },
+        {
+          "id": "cli.option.run.--nosocket",
+          "rationale": "session-bus denial restores filtered rejection despite stored socket grant."
+        },
+        {
+          "id": "cli.option.override.--socket",
+          "rationale": "Stored session-bus grant enables service reply."
+        },
+        {
+          "id": "cli.option.override.--nosocket",
+          "rationale": "Stored session-bus denial restores filtered rejection."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.wayland",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Controlled Wayland socket mount visibility only; no Wayland protocol or other socket claim.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--socket",
+          "rationale": "wayland exposes the controlled Unix socket path."
+        },
+        {
+          "id": "cli.option.run.--nosocket",
+          "rationale": "wayland denial hides socket despite stored grant."
+        },
+        {
+          "id": "cli.option.override.--socket",
+          "rationale": "Stored wayland grant exposes controlled socket path."
+        },
+        {
+          "id": "cli.option.override.--nosocket",
+          "rationale": "Stored wayland denial hides socket path."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.ssh",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Controlled SSH authentication socket mount visibility only; no SSH protocol claim.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--socket",
+          "rationale": "ssh-auth exposes controlled host socket at sandbox endpoint."
+        },
+        {
+          "id": "cli.option.run.--nosocket",
+          "rationale": "ssh-auth denial hides socket despite stored grant."
+        },
+        {
+          "id": "cli.option.override.--socket",
+          "rationale": "Stored ssh-auth grant exposes controlled socket."
+        },
+        {
+          "id": "cli.option.override.--nosocket",
+          "rationale": "Stored ssh-auth denial hides controlled socket."
+        }
+      ]
+    },
+    {
+      "behavior_id": "sandbox.conditional-socket",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.run.user.conditional-socket"
+      ],
+      "rationale": "Same controlled Wayland socket visible for true condition, absent for false condition."
+    }
+  ]
+}
