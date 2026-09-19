@@ -12,7 +12,6 @@ import {
   type Snapshot,
   type Track,
 } from "../src/history.ts";
-import { hasCaseTiming } from "../src/performance.ts";
 import { findBaseline } from "../src/baselines.ts";
 
 export async function readJson(path: string): Promise<unknown> {
@@ -99,7 +98,7 @@ export async function record(options: RecordOptions): Promise<Snapshot> {
   let performance: Snapshot["performance"];
   if (report?.complete && summary.verification.status === "current") {
     const timings = timingMetadata.parse(rawReport);
-    const cases = (timings.results ?? []).filter(hasCaseTiming);
+    const cases = timings.results ?? [];
     if (timings.duration_seconds !== undefined || cases.length) {
       const statuses: Record<string, number> = {};
       for (const item of timings.results ?? []) {
@@ -109,6 +108,7 @@ export async function record(options: RecordOptions): Promise<Snapshot> {
         duration_seconds: timings.duration_seconds,
         case_statuses: statuses,
         cases,
+        cases_complete: true,
       };
     }
   }

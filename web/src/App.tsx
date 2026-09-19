@@ -13,6 +13,9 @@ import {
   type Snapshot,
 } from "./history.ts";
 import { targetKey, targetOptions } from "./targets.ts";
+import { RunSummary } from "./RunSummary.tsx";
+import { focusSection } from "./RunDiagnostics.tsx";
+import type { OutcomeFilter } from "./runComparison.ts";
 
 const behaviors: Series[] = ["cli", "library"];
 const surfaces: Series[] = [
@@ -26,10 +29,12 @@ function CoverageChart({
   entries,
   names,
   title,
+  onSelectDay,
 }: {
   entries: Snapshot[];
   names: Series[];
   title: string;
+  onSelectDay: (date: string) => void;
 }) {
   const [hidden, setHidden] = useState<Series[]>([]);
   const definition = useMemo(
@@ -50,6 +55,9 @@ function CoverageChart({
         <Chart
           definition={definition}
           height={300}
+          onSelect={(point) => {
+            if (point) onSelectDay(point.datum.date);
+          }}
           ariaLabel={`${title}, daily passing percentages`}
         />
       ) : (
@@ -150,12 +158,27 @@ function DailyCounts({ entries }: { entries: Snapshot[] }) {
 export function App({ history }: { history: Snapshot[] }) {
   const options = useMemo(() => targetOptions(history), [history]);
   const [selection, setSelection] = useState("");
+  const [runSelection, setRunSelection] = useState("");
+  const [outcomeFilter, setOutcomeFilter] = useState<OutcomeFilter>("all");
   const selected =
     options.find((item) => item.key === selection) ?? options[0]!;
   const entries = useMemo(
     () => daily(history).filter((entry) => targetKey(entry) === selected.key),
     [history, selected.key],
   );
+  const run =
+    entries.find((entry) => entry.timestamp === runSelection) ?? entries.at(-1);
+  function selectDay(date: string) {
+    const entry = entries.find((item) => utcDay(item.timestamp) === date);
+    if (entry) {
+      setRunSelection(entry.timestamp);
+      focusSection("case-results");
+    }
+  }
+  function filterOutcomes(status: OutcomeFilter) {
+    setOutcomeFilter(status);
+    focusSection("case-results");
+  }
   return (
     <main>
       <header>
@@ -167,7 +190,11 @@ export function App({ history }: { history: Snapshot[] }) {
           Target{" "}
           <select
             value={selected.key}
-            onChange={(event) => setSelection(event.target.value)}
+            onChange={(event) => {
+              setSelection(event.target.value);
+              setRunSelection("");
+              setOutcomeFilter("all");
+            }}
           >
             {options.map((item) => (
               <option key={item.key} value={item.key}>
@@ -183,24 +210,40 @@ export function App({ history }: { history: Snapshot[] }) {
         unverified evidence. Percentages describe the catalogue and public
         interface reach; catalogue totals can change.
       </p>
-      {entries.length ? (
+      {run ? (
         <>
           <p className="date-range">
             {utcDay(entries[0]!.timestamp)} to{" "}
             {utcDay(entries.at(-1)!.timestamp)} · {entries.length} recorded days
           </p>
+          <RunSummary
+            entries={entries}
+            run={run}
+            onRunChange={setRunSelection}
+            filter={outcomeFilter}
+            onFilter={filterOutcomes}
+          />
           <CoverageChart
             entries={entries}
             names={behaviors}
             title="Catalogued behavior"
+            onSelectDay={selectDay}
           />
           <CoverageChart
             entries={entries}
             names={surfaces}
             title="Public interface reach"
+            onSelectDay={selectDay}
           />
           <DailyCounts entries={entries} />
-          <PerformancePanel entries={entries} key={selected.key} />
+          <PerformancePanel
+            entries={entries}
+            key={selected.key}
+            run={run}
+            filter={outcomeFilter}
+            onFilter={setOutcomeFilter}
+            onSelectDay={selectDay}
+          />
         </>
       ) : (
         <p className="empty">

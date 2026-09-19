@@ -10,6 +10,8 @@ Default-branch CI publishes daily coverage to GitHub Pages, with separate pinned
 and upstream-main views. It keeps the latest complete run per UTC day; missing or
 unverified evidence leaves gaps. Run and per-case timing trends include outcomes
 and setup/execution/cleanup breakdowns. Snapshots persist on `coverage-history`.
+Select a run to filter its case outcomes or rank slowdowns against an earlier run.
+Case rows open timing histories; shared and unrecorded time is accounted for separately.
 
 The TypeScript/React site uses TanStack Charts. For local development with Node 22.12+:
 

@@ -3,9 +3,19 @@ import { Chart } from "@tanstack/charts/react";
 import { useMemo, useState } from "react";
 import { performanceChart } from "./chart.ts";
 import { utcDay, type Snapshot } from "./history.ts";
+import { seconds } from "./format.ts";
+import { RunDiagnostics, focusSection } from "./RunDiagnostics.tsx";
 import {
-  availableCases,
-  caseTiming,
+  caseOptions,
+  caseRecord,
+  caseSeconds,
+  compareRuns,
+  earlierRuns,
+  rankCases,
+  outcomeLabels,
+  type OutcomeFilter,
+} from "./runComparison.ts";
+import {
   runOutcomes,
   timingNames,
   timingSeries,
@@ -15,9 +25,11 @@ import {
 function DurationChart({
   entries,
   caseId,
+  onSelectDay,
 }: {
   entries: Snapshot[];
   caseId?: string;
+  onSelectDay?: (date: string) => void;
 }) {
   const definition = useMemo(
     () => performanceChart(entries, caseId),
@@ -27,6 +39,9 @@ function DurationChart({
     <Chart
       definition={definition}
       height={300}
+      onSelect={(point) => {
+        if (point) onSelectDay?.(point.datum.date);
+      }}
       ariaLabel={
         caseId === undefined
           ? "Test run duration in seconds"
@@ -36,14 +51,40 @@ function DurationChart({
   );
 }
 
-function seconds(value: number | undefined) {
-  return value === undefined ? "No timing" : `${value.toFixed(2)}s`;
-}
-
-export function PerformancePanel({ entries }: { entries: Snapshot[] }) {
-  const cases = useMemo(() => availableCases(entries), [entries]);
+export function PerformancePanel({
+  entries,
+  run = entries.at(-1)!,
+  filter = "all",
+  onFilter = () => {},
+  onSelectDay,
+}: {
+  entries: Snapshot[];
+  run?: Snapshot;
+  filter?: OutcomeFilter;
+  onFilter?: (status: OutcomeFilter) => void;
+  onSelectDay?: (date: string) => void;
+}) {
+  const cases = useMemo(() => caseOptions(entries), [entries]);
+  const earlier = useMemo(() => earlierRuns(entries, run), [entries, run]);
+  const [comparison, setComparison] = useState<{
+    run: string;
+    value: string;
+  }>();
+  const choice = comparison?.run === run.timestamp ? comparison.value : "auto";
+  const reference =
+    choice === "none"
+      ? undefined
+      : (earlier.find((item) => item.timestamp === choice) ?? earlier[0]);
+  const rows = useMemo(() => compareRuns(run, reference), [run, reference]);
+  const recommended = useMemo(
+    () => rankCases(rows, reference ? "change" : "duration")[0]?.key,
+    [rows, reference],
+  );
   const [selection, setSelection] = useState("");
-  const selected = cases.find((item) => item.key === selection) ?? cases[0];
+  const selected =
+    cases.find((item) => item.key === selection) ??
+    cases.find((item) => item.key === recommended) ??
+    cases[0];
   const hasRunTiming = entries.some(
     (entry) => verifiedPerformance(entry)?.duration_seconds !== undefined,
   );
@@ -52,7 +93,7 @@ export function PerformancePanel({ entries }: { entries: Snapshot[] }) {
       <h2>Performance</h2>
       <p>
         Daily timings from complete, verified reports, including failed cases.
-        CI load, case count and failures can affect timings. Older snapshots
+        Select a chart point or recorded run to investigate. Older snapshots
         without timings leave gaps.
       </p>
       <h3>Test run duration</h3>
@@ -61,11 +102,28 @@ export function PerformancePanel({ entries }: { entries: Snapshot[] }) {
         Excludes CI's Flatpak build and fixture preparation.
       </p>
       {hasRunTiming ? (
-        <DurationChart entries={entries} />
+        <DurationChart entries={entries} onSelectDay={onSelectDay} />
       ) : (
         <p className="empty">No run timings recorded yet.</p>
       )}
-      <h3>Per-case duration</h3>
+      <RunDiagnostics
+        run={run}
+        reference={reference}
+        earlier={earlier}
+        comparisonChoice={choice}
+        onComparison={(value) => setComparison({ run: run.timestamp, value })}
+        rows={rows}
+        filter={filter}
+        onFilter={onFilter}
+        selectedCase={selected?.key}
+        onInspect={(key) => {
+          setSelection(key);
+          focusSection("case-history");
+        }}
+      />
+      <h3 id="case-history" tabIndex={-1}>
+        Per-case duration
+      </h3>
       {selected ? (
         <>
           <label>
@@ -82,7 +140,20 @@ export function PerformancePanel({ entries }: { entries: Snapshot[] }) {
               ))}
             </select>
           </label>
-          <DurationChart entries={entries} caseId={selected.key} />
+          {entries.some((entry) => {
+            const item = caseRecord(entry, selected.key);
+            return timingNames.some((name) => caseSeconds(item, name) !== null);
+          }) ? (
+            <DurationChart
+              entries={entries}
+              caseId={selected.key}
+              onSelectDay={onSelectDay}
+            />
+          ) : (
+            <p>
+              This case has no recorded timings. Its outcomes are listed below.
+            </p>
+          )}
           <ul className="legend" aria-label="Timing series">
             {timingNames.map((name) => (
               <li key={name}>
@@ -124,7 +195,7 @@ export function PerformancePanel({ entries }: { entries: Snapshot[] }) {
               <tbody>
                 {[...entries].reverse().map((entry) => {
                   const item = selected
-                    ? caseTiming(entry, selected.key)
+                    ? caseRecord(entry, selected.key)
                     : undefined;
                   return (
                     <tr key={entry.timestamp}>
@@ -141,14 +212,12 @@ export function PerformancePanel({ entries }: { entries: Snapshot[] }) {
                       <td>{runOutcomes(entry)}</td>
                       {selected ? (
                         <>
-                          <td>{item?.status ?? "No timing"}</td>
+                          <td>
+                            {item ? outcomeLabels[item.status] : "Not recorded"}
+                          </td>
                           {timingNames.map((name) => (
                             <td key={name}>
-                              {seconds(
-                                name === "duration_seconds"
-                                  ? item?.duration_seconds
-                                  : item?.timings?.[name],
-                              )}
+                              {seconds(caseSeconds(item, name))}
                             </td>
                           ))}
                         </>

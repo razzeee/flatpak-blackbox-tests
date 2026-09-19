@@ -60,6 +60,108 @@ select {
   max-width: 100%;
   margin: 8px 0 20px;
 }
+.run-summary {
+  margin: 20px 0;
+}
+.outcome-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.outcome-counts button {
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid #cad5df;
+  border-radius: 4px;
+  text-align: left;
+}
+.outcome-counts button[aria-pressed="true"] {
+  border-color: #1756a9;
+  background: #eef4fa;
+}
+.outcome-counts button:disabled {
+  color: #657585;
+  cursor: default;
+}
+.outcome-counts strong {
+  display: block;
+  font-size: 1.25rem;
+}
+[data-status="failed"],
+[data-status="setup-error"],
+.increase {
+  color: #a32a21;
+}
+[data-status="passed"],
+.decrease {
+  color: #187447;
+}
+.run-diagnostics {
+  margin: 28px 0;
+}
+.run-diagnostics h4 {
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+  scroll-margin-top: 20px;
+}
+.data-note {
+  background: #fff3d6;
+  border-left: 3px solid #a84b00;
+  padding: 12px 16px;
+}
+.case-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  align-items: end;
+  margin-top: 24px;
+}
+.case-tools label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 100%;
+}
+.case-tools input {
+  font: inherit;
+  padding: 8px;
+  border: 1px solid #8193a7;
+  border-radius: 4px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.case-tools select {
+  margin-left: 0;
+}
+.case-button {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: #1756a9;
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+.case-comparison th[scope="row"] {
+  min-width: 180px;
+  max-width: 280px;
+}
+.case-comparison td,
+.time-accounting td {
+  font-variant-numeric: tabular-nums;
+}
+.case-comparison tr[data-selected="true"] {
+  background: #eef4fa;
+}
+.phase-delta {
+  white-space: nowrap;
+}
+.show-cases {
+  margin-top: 16px;
+  padding: 8px 16px;
+}
 button {
   cursor: pointer;
 }

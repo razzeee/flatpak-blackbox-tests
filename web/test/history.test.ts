@@ -18,7 +18,7 @@ import {
 } from "../src/history.ts";
 import { record } from "../scripts/record.ts";
 import { currentBaseline } from "../src/baselines.ts";
-import { entry, timedEntry } from "./fixtures.ts";
+import { completeEntry, entry, timedEntry } from "./fixtures.ts";
 
 test("latest complete UTC-day run wins, including out-of-order reruns", () => {
   const early = entry();
@@ -131,12 +131,22 @@ test("snapshot CLI handles absent reports and update preserves existing history"
   );
   assert.equal(gap.complete, false);
   assert.equal(gap.verification, "not-run");
-  for (const value of [
-    gap,
-    entry(),
-    entry(undefined, "upstream"),
-    timedEntry(),
-  ]) {
+  const retained = completeEntry(entry().timestamp, [
+    ...timedEntry().performance!.cases,
+    {
+      behavior_id: "skipped",
+      driver: "cli",
+      profile: "user",
+      status: "not-selected",
+    },
+    {
+      behavior_id: "unsupported",
+      driver: "library",
+      profile: "system",
+      status: "unsupported",
+    },
+  ]);
+  for (const value of [gap, entry(), entry(undefined, "upstream"), retained]) {
     await writeFile(snapshot, JSON.stringify(value));
     execFileSync(process.execPath, [
       "--import",
@@ -151,7 +161,7 @@ test("snapshot CLI handles absent reports and update preserves existing history"
   }
   const saved = await readFile(history, "utf8");
   assert.deepEqual(historySchema.parse(JSON.parse(saved)), [
-    timedEntry(),
+    retained,
     entry(undefined, "upstream"),
   ]);
   await writeFile(snapshot, "broken JSON");
@@ -236,7 +246,9 @@ print(json.dumps({
   assert.equal(value.verification, "current");
   assert.equal(value.timestamp, "2026-09-17T22:00:00.000Z");
   assert.deepEqual(credit(value, "cli"), { passed: 0, total: 136, percent: 0 });
-  assert.equal(value.performance, undefined);
+  assert.equal(value.performance?.duration_seconds, undefined);
+  assert.equal(value.performance?.cases.length, report.results.length);
+  assert.equal(value.performance?.cases_complete, true);
   assert.deepEqual(value.baseline, currentBaseline);
   assert.equal(value.target_version, undefined);
   report.target_version = `Flatpak ${currentBaseline.version}`;
@@ -258,8 +270,12 @@ print(json.dumps({
   const timed = await record(options);
   assert.equal(timed.target_version, report.target_version);
   assert.equal(timed.performance?.duration_seconds, 450);
-  assert.equal(timed.performance?.cases.length, report.results.length - 3);
-  assert.deepEqual(timed.performance?.cases[0], report.results[3]);
+  assert.equal(timed.performance?.cases.length, report.results.length);
+  assert.equal(timed.performance?.cases_complete, true);
+  assert.deepEqual(timed.performance?.cases[3], report.results[3]);
+  assert.equal(timed.performance?.cases[0]?.status, "not-selected");
+  assert.equal(timed.performance?.cases[1]?.status, "unsupported");
+  assert.equal(timed.performance?.cases[2]?.status, "setup-error");
   assert.deepEqual(timed.performance?.case_statuses, {
     "not-selected": 1,
     unsupported: 1,
