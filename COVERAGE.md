@@ -4,6 +4,69 @@ This suite reports separate measurements for catalogued behavior and public
 interface reach. It does not report a percentage of all possible Flatpak behavior.
 The latter has no defensible finite denominator yet.
 
+## Global driver and diagnostic options
+
+Three additional focused cases pass against reference Flatpak 1.19.1 on
+2026-09-19. The suite now has 330 cases, 126 mapped CLI obligations and 397 mapped
+CLI options. All ten catalogued global-option obligations have implementations.
+Denominators are unchanged; these focused runs do not establish new full-suite
+passing percentages.
+
+- `global-options-gl-drivers` checks exact driver tokens and priority order using
+  two reversed `FLATPAK_GL_DRIVERS` overrides. It does not test automatic hardware
+  detection.
+- `global-options-verbose` compares quiet, `--verbose` and `-vv` unused-runtime
+  analysis in forward and reverse order. Each level preserves stdout and the exact
+  app/runtime commits. Verbosity enables diagnostics, and repeated verbosity adds
+  distinct diagnostic lines without requiring particular wording or a fixed count.
+- `global-options-ostree-verbose` alternates read-only commit queries with and
+  without the flag. Every query reports independently prepared A with identical
+  stdout; only flagged calls emit diagnostics. Both diagnostic cases disable
+  inherited `G_MESSAGES_DEBUG` to keep the controls quiet.
+
+Four negative controls deliberately ignore the GL override, remove `--verbose`,
+reduce `-vv` to single verbosity, or remove `--ostree-verbose`. Each fails its
+corresponding behavioral assertion and earns no passing credit. The controls use
+a wrapper around the reference executable to inject each fault.
+
+The target and fixtures are the same as the runtime-export runs below. All 119
+unit tests pass with the prepared-fixture check, as do Ruff, ty, strict mypy,
+JSON formatting and source catalogue checks.
+
+## Runtime export and ambiguous update checks
+
+Focused runs against reference Flatpak 1.19.1 on 2026-09-19 exercise two previously
+unmapped CLI obligations. The suite now has 327 cases and 123 mapped CLI obligations;
+the behavior and interface denominators are unchanged. Implemented CLI option reach
+increases from 393 to 394. These focused results do not replace the historical full
+run below or establish new full-suite passing percentages.
+
+- `build-export-runtime` passes. The same finalized Application tree has different
+  markers in `files` and `usr`, plus a file present only in `files`. Without
+  `--runtime`, export creates an app ref containing the `files` payload. With it,
+  export creates a runtime ref containing the `usr` payload and excludes the
+  app-only file. Installation from the exported repository preserves the exact
+  exported commit and payload, checked through `info --show-location`. This earns
+  `cli.build-export.any.runtime` and `--runtime` coverage. The earlier case used
+  Runtime metadata, which selected runtime export even without the flag.
+- `management-update-ambiguous` fails the documented contract. Both `test` and
+  `next` branches of `org.flatpak.Query.Data` start at independent A commits and
+  advertise B updates. Fully qualified update controls reach B; explicit commit
+  updates restore both to A before the ambiguous request. Updating by ID then
+  returns success, prints both updates, and advances both installed branches to B.
+  The manual says multiple matches produce an error listing the alternatives.
+  The case retains that requirement and earns no passing credit.
+
+The existing `build-export-contents` case also passes. Ruff, ty, strict mypy,
+JSON formatting, source catalogue checks and all 119 unit tests pass, including
+the prepared-fixture round-trip test.
+
+The runs use the existing `extracted-build-target.json` and
+`six-contract-fixtures-04` under the original Flatpak checkout's
+`_build/blackbox-artifacts/`.
+Local reports contain provenance and command evidence; they are not published
+with this repository.
+
 ## Ubuntu CI portability validation
 
 After correcting fixture `ldconfig` selection, C-locale help rendering, and D-Bus

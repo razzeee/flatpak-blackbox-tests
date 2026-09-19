@@ -2,6 +2,63 @@
   "schema": 1,
   "behaviors": [
     {
+      "id": "global-options.gl-drivers",
+      "scenario": "global-options-gl-drivers",
+      "handler": "global_option_scenarios:run_controlled",
+      "profile": "any",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "cli"
+      ],
+      "description": "Report graphics drivers selected by a controlled environment override.",
+      "preconditions": "Two nonempty FLATPAK_GL_DRIVERS lists with reversed priority order.",
+      "expected": "Each standalone --gl-drivers call succeeds with exactly the selected ordered tokens on stdout and empty stderr.",
+      "references": [
+        "doc/flatpak.xml"
+      ]
+    },
+    {
+      "id": "global-options.verbose",
+      "scenario": "global-options-verbose",
+      "handler": "global_option_scenarios:run_controlled",
+      "profile": "any",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Increase diagnostic detail without changing unused-runtime analysis or deployments.",
+      "preconditions": "An independently prepared app and its required runtime are installed at A; inherited GLib debug logging is disabled.",
+      "expected": "Quiet analysis emits no diagnostics, --verbose enables them, and -vv adds distinct detail. Forward and reverse level comparisons preserve stdout and both installed refs and commits.",
+      "references": [
+        "doc/flatpak.xml"
+      ]
+    },
+    {
+      "id": "global-options.ostree-verbose",
+      "scenario": "global-options-ostree-verbose",
+      "handler": "global_option_scenarios:run_controlled",
+      "profile": "any",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "cli",
+        "local-repository"
+      ],
+      "description": "Enable OSTree diagnostics during a read-only repository commit query.",
+      "preconditions": "Independent A repository and commit oracle; inherited GLib debug logging is disabled.",
+      "expected": "Alternating queries with and without --ostree-verbose preserve successful commit output; only flagged calls emit stderr diagnostics.",
+      "references": [
+        "doc/flatpak.xml"
+      ]
+    },
+    {
       "id": "global-options.command-help",
       "scenario": "global-options-command-help",
       "handler": "global_option_scenarios:run",
@@ -115,6 +172,33 @@
     }
   ],
   "mappings": [
+    {
+      "behavior_id": "global-options.gl-drivers",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.global.any.gl-drivers"
+      ],
+      "rationale": "Reversing the documented FLATPAK_GL_DRIVERS override reverses the exact reported driver order; each informational call succeeds with empty stderr. No physical GPU or automatic detection claim."
+    },
+    {
+      "behavior_id": "global-options.verbose",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.global.any.verbose"
+      ],
+      "rationale": "The same unused-runtime analysis is run at quiet, verbose and extra-verbose levels in both orders. Distinct diagnostic lines increase while stdout and independently expected installed commits remain unchanged. No exact debug wording or fixed line count is required."
+    },
+    {
+      "behavior_id": "global-options.ostree-verbose",
+      "driver": "cli",
+      "profile": "any",
+      "requirements": [
+        "cli.global.any.ostree-verbose"
+      ],
+      "rationale": "A public commit query reports independently prepared A and identical stdout on repeated successful calls. With general verbosity absent and inherited GLib debug disabled, only --ostree-verbose enables diagnostics. No internal log wording is prescribed."
+    },
     {
       "behavior_id": "global-options.command-help",
       "driver": "cli",

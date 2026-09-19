@@ -89,11 +89,12 @@
       "profile": "any",
       "required_capabilities": [
         "build-tools",
-        "local-repository"
+        "local-repository",
+        "user-installation"
       ],
-      "description": "Export usr as runtime files.",
-      "preconditions": "Independent runtime tree with a usr marker.",
-      "expected": "Runtime ref checkout has marker under files.",
+      "description": "Select usr and a runtime ref with --runtime, then install the export.",
+      "preconditions": "Independent finalized Application tree with distinct usr and files markers and an app-only file.",
+      "expected": "Without --runtime, export selects the app ref and files payload. With it, export selects the runtime ref and usr payload; installed commit and payload match, with no app-only file.",
       "references": [
         "doc/flatpak-build-export.xml"
       ]
@@ -202,8 +203,10 @@
       "behavior_id": "build.export.runtime",
       "driver": "cli",
       "profile": "any",
-      "requirements": [],
-      "rationale": "Runtime ref has usr marker under files, but runtime is inferred from metadata even when --runtime is omitted. No requirement mapping that implicitly credits this ignored flag."
+      "requirements": [
+        "cli.build-export.any.runtime"
+      ],
+      "rationale": "The same Application metadata and distinct files/usr payloads produce an app without --runtime and a runtime with it. Public repository checkouts and the installed runtime location verify usr selection and exclusion of app-only content; the installed commit equals the exported commit."
     },
     {
       "behavior_id": "build.export.options",
