@@ -4,10 +4,14 @@
 from __future__ import annotations
 
 import re
+from pathlib import Path
 from subprocess import CompletedProcess
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
 from fixture_manifest import FixtureManifest
+
+if TYPE_CHECKING:
+    from run import Driver
 
 # Frozen documented commands, not discovered from the target's own help output.
 # Each value is a documented option or positional syntax from its manpage.
@@ -150,3 +154,87 @@ def run(driver: HelpDriver, repository: object, url: str,
 
     message = f"unknown global option scenario: {name}"
     raise ValueError(message)
+
+
+def _diagnostics(driver: HelpDriver, result: CompletedProcess[str], expected: str) -> set[str]:
+    driver.check(result.returncode == 0,
+                 f"diagnostic command failed: {result.args}: {result.stderr}")
+    driver.check(result.stdout == expected,
+                 f"verbosity changed command output: {result.stdout!r}, expected {expected!r}")
+    return {line.strip() for line in result.stderr.splitlines() if line.strip()}
+
+
+def _levels(driver: HelpDriver, quiet: set[str], verbose: set[str], detailed: set[str]) -> None:
+    driver.check(not quiet, f"quiet control unexpectedly emitted diagnostics: {quiet}")
+    driver.check(bool(verbose), "--verbose did not enable diagnostics")
+    driver.check(len(detailed) > len(verbose), "-vv did not provide additional distinct detail")
+
+
+def run_controlled(driver: Driver, repository: object, url: str,
+                   fixture: FixtureManifest, name: str) -> None:
+    """Observe controlled environment selection and diagnostic levels through the CLI."""
+    from run import Driver
+
+    environment = dict(driver.env)
+    # An inherited GLib debug setting must not enable diagnostics in the controls.
+    environment.pop("G_MESSAGES_DEBUG", None)
+    driver = Driver(driver.kind, driver.cli, driver.client, environment, driver.root,
+                    driver.evidence, driver.timeout)
+    driver.evidence.append({"observation": "global-option-environment",
+                            "data": {"G_MESSAGES_DEBUG": None}})
+    if name == "global-options-gl-drivers":
+        for drivers in (("mesa-git", "default"), ("default", "mesa-git")):
+            selected = ":".join(drivers)
+            environment["FLATPAK_GL_DRIVERS"] = selected
+            driver.evidence.append({"observation": "global-option-environment",
+                                    "data": {"FLATPAK_GL_DRIVERS": selected}})
+            output = _output(driver, "--gl-drivers")
+            driver.check(output.split() == list(drivers),
+                         f"active GL drivers must match override order {drivers}: {output!r}")
+        return
+
+    app = f"app/{fixture['app']}/{fixture['arch']}/{fixture['branch']}"
+    if name == "global-options-ostree-verbose":
+        repo = str(Path(fixture["directory"]) / "A")
+        arguments: tuple[str, ...] = ("repo", f"--commits={app}", repo)
+        control = driver.cli_call(*arguments)
+        driver.check(fixture["commits"]["A"] in control.stdout,
+                     "commit query must identify the independently prepared A commit")
+        driver.check(not _diagnostics(driver, control, control.stdout),
+                     "initial repository control emitted diagnostics")
+        for flags in ((), ("--ostree-verbose",), (), ("--ostree-verbose",), ()):
+            diagnostics = _diagnostics(driver, driver.cli_call(*flags, *arguments), control.stdout)
+            driver.check(bool(diagnostics) == bool(flags),
+                         f"repository diagnostics must follow --ostree-verbose: {diagnostics}")
+        return
+
+    if name == "global-options-verbose":
+        runtime = f"runtime/{fixture['runtime']}/{fixture['arch']}/{fixture['branch']}"
+        driver.cli_success("remote-add", "--user", "--no-gpg-verify", "verbosity-fixture", url)
+        driver.cli_success("install", "--user", "--noninteractive", "verbosity-fixture", app)
+        expected = {app: fixture["commits"]["A"], runtime: fixture["runtime_commit"]}
+
+        def unchanged() -> None:
+            for ref, commit in expected.items():
+                output = driver.cli_success("info", "--user", "--show-ref", "--show-commit", ref)
+                driver.check(output.split() == [ref, commit],
+                             f"verbosity check changed installed {ref}: {output!r}")
+
+        unchanged()
+        arguments = ("uninstall", "--user", "--unused", "--noninteractive")
+        # Warm up any one-time installation maintenance before comparing levels.
+        control = driver.cli_call(*arguments)
+        driver.check(bool(control.stdout.strip()), "unused-runtime query returned no result")
+        driver.check(not _diagnostics(driver, control, control.stdout),
+                     "initial unused-runtime control emitted diagnostics")
+        unchanged()
+        for order in (((), ("--verbose",), ("-vv",)), (("-vv",), ("--verbose",), ())):
+            observed = {}
+            for flags in order:
+                observed[flags] = _diagnostics(driver, driver.cli_call(*flags, *arguments),
+                                               control.stdout)
+                unchanged()
+            _levels(driver, observed[()], observed[("--verbose",)], observed[("-vv",)])
+        return
+
+    raise ValueError(f"unknown controlled global option scenario: {name}")

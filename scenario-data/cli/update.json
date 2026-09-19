@@ -2,6 +2,25 @@
   "schema": 1,
   "behaviors": [
     {
+      "id": "management.update-ambiguous",
+      "scenario": "management-update-ambiguous",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Reject an update whose omitted branch matches two installed runtime refs.",
+      "preconditions": "Two branches of the same runtime ID installed at independently prepared A commits, each advertising a distinct B update.",
+      "expected": "Fully qualified updates reach each exact B commit, then both branches are restored to A. Updating by ID fails with both alternatives in the diagnostic and preserves both A commits.",
+      "references": [
+        "doc/flatpak-update.xml"
+      ]
+    },
+    {
       "id": "management.update-arch",
       "scenario": "management-update-arch",
       "handler": "cli_management_scenarios:run",
@@ -137,6 +156,15 @@
     }
   ],
   "mappings": [
+    {
+      "behavior_id": "management.update-ambiguous",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.update.user.ambiguous-ref"
+      ],
+      "rationale": "Two installed branches share an exact ID and have verified available updates. The partial-ref update must fail and list both alternatives while retaining exact A commits; explicit full-ref controls reach B."
+    },
     {
       "behavior_id": "management.update-arch",
       "driver": "cli",

@@ -60,6 +60,44 @@ def _rich(driver: Driver, fixture: FixtureManifest, name: str) -> None:
     app = f"app/{queries['app']}/{arch}/test"
     runtime = f"runtime/{fixture['runtime']}/{arch}/{fixture['branch']}"
 
+    if name == "management-update-ambiguous":
+        identity = queries["extension"]
+        refs = tuple(f"runtime/{identity}/{arch}/{branch}" for branch in ("test", "next"))
+        for ref in refs:
+            driver.check(versions["A"]["refs"][ref]["commit"] !=
+                         versions["B"]["refs"][ref]["commit"],
+                         f"ambiguous update fixture must have distinct A/B commits for {ref}")
+            _install(driver, ref)
+            _commit(driver, ref, versions["A"]["refs"][ref]["commit"])
+        driver.cli_success("remote-modify", "--user",
+                           f"--url={(root / versions['B']['repo']).as_uri()}", "fixture")
+        for ref in refs:
+            _equal(driver, driver.cli_success("remote-info", "--user", "--show-commit",
+                                              "fixture", ref),
+                   versions["B"]["refs"][ref]["commit"], "available update")
+        # Exercise each full-ref update from A, then restore A before testing
+        # ambiguity. Otherwise an incorrect partial update could make the
+        # positive controls no-ops.
+        for ref in refs:
+            _update(driver, ref)
+            _commit(driver, ref, versions["B"]["refs"][ref]["commit"])
+            _update(driver, f"--commit={versions['A']['refs'][ref]['commit']}", ref)
+        for ref in refs:
+            _commit(driver, ref, versions["A"]["refs"][ref]["commit"])
+        result = driver.cli_call("update", "--user", "--noninteractive", identity)
+        # Observe both deployments even when the ambiguity assertion will fail.
+        commits = {ref: driver.cli_success("info", "--user", "--show-commit", ref)
+                   for ref in refs}
+        driver.check(result.returncode != 0,
+                     f"ambiguous update must fail: exit={result.returncode}, "
+                     f"stdout={result.stdout!r}, stderr={result.stderr!r}, commits={commits}")
+        for ref in refs:
+            driver.check(ref.removeprefix("runtime/") in result.stderr,
+                         f"ambiguity diagnostic must list {ref}")
+        _equal(driver, commits, {ref: versions["A"]["refs"][ref]["commit"] for ref in refs},
+               "ambiguous update preserves both installed commits")
+        return
+
     if name == "management-update-all":
         extension = f"runtime/{queries['extension']}/{arch}/next"
         # The next branch remains related after Query advances to B. The test
@@ -203,7 +241,7 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
                 "management-remote-info-arch", "management-installed-arch",
                 "management-uninstall-arch", "management-update-arch",
                 "management-update-kinds", "management-update-no-deps",
-                "management-update-all"):
+                "management-update-all", "management-update-ambiguous"):
         _rich(driver, fixture, name)
         return
     if name in ("management-remote-properties", "management-remote-enumerate"):

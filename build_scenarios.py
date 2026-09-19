@@ -282,13 +282,28 @@ def _finish(driver: Driver, fixture: FixtureManifest, name: str) -> None:
 
 def _export(driver: Driver, fixture: FixtureManifest, name: str) -> None:
     runtime = name == "build-export-runtime"
-    tree = _tree(driver, fixture, finished=True, runtime=runtime)
+    tree = _tree(driver, fixture, finished=True)
     repo = driver.root / "exported"
     (tree / "ignored-private-build-file").write_text("not distributable")
     options = ["--disable-sandbox", f"--arch={fixture['arch']}"]
     if runtime:
-        options += ["--runtime"]
+        # Application metadata makes --runtime, rather than metadata inference,
+        # responsible for selecting both the ref kind and the payload directory.
+        (tree / "usr").mkdir()
         (tree / "usr/marker").write_text("runtime marker")
+        (tree / "files/marker").write_text("app marker")
+        (tree / "files/app-only").write_text("not runtime content")
+        control = driver.root / "app-export-control"
+        driver.cli_success("build-export", *options, str(control), str(tree), fixture["branch"])
+        observed = driver.root / "observed-app-control"
+        _ostree(driver, control, "checkout", "--user-mode", _ref(fixture), str(observed))
+        driver.check((observed / "files/marker").read_text() == "app marker" and
+                     (observed / "files/app-only").is_file(),
+                     "export without --runtime must select files")
+        runtime_ref = _ref(fixture).replace("app/", "runtime/", 1)
+        driver.check(runtime_ref not in _ostree(driver, control, "refs").splitlines(),
+                     "export without --runtime created a runtime ref")
+        options += ["--runtime"]
     elif name == "build-export-options":
         (tree / "files/keep.txt").write_text("included")
         (tree / "files/drop.txt").write_text("excluded")
@@ -307,7 +322,7 @@ def _export(driver: Driver, fixture: FixtureManifest, name: str) -> None:
         options += [f"--gpg-homedir={home}", f"--gpg-sign={fixture['build']['key_id']}",
                     "--end-of-life-rebase=org.example.Successor", "--update-appstream"]
     driver.cli_success("build-export", *options, str(repo), str(tree), fixture["branch"])
-    ref = _ref(fixture, runtime)
+    ref = runtime_ref if runtime else _ref(fixture)
     checkout = driver.root / "observed-export"
     _ostree(driver, repo, "checkout", "--user-mode", ref, str(checkout))
     driver.check((checkout / "metadata").is_file(), "export must contain metadata")
@@ -316,6 +331,17 @@ def _export(driver: Driver, fixture: FixtureManifest, name: str) -> None:
     if runtime:
         driver.check((checkout / "files/marker").read_text() == "runtime marker",
                      "runtime export did not select usr contents")
+        driver.check(not (checkout / "files/app-only").exists(), "app content leaked into runtime")
+        driver.check(_ref(fixture) not in _ostree(driver, repo, "refs").splitlines(),
+                     "runtime export created an app ref")
+        driver.cli_success("remote-add", "--user", "--no-gpg-verify", "exported-runtime", str(repo))
+        driver.cli_success("install", "--user", "--noninteractive", "exported-runtime", ref)
+        driver.check(driver.cli_success("info", "--user", "--show-commit", ref) ==
+                     _ostree(driver, repo, "rev-parse", ref), "installed export commit differs")
+        location = Path(driver.cli_success("info", "--user", "--show-location", ref))
+        driver.check((location / "files/marker").read_text() == "runtime marker" and
+                     not (location / "files/app-only").exists(),
+                     "installed runtime does not contain only the selected payload")
     elif name == "build-export-alternate":
         driver.check((checkout / "files/marker").is_file() and
                      (checkout / "files/marker").read_text() == "alternate payload",
