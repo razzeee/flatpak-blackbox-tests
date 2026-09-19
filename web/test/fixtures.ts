@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
-import { seriesNames, type Snapshot, type Track } from "../src/history.ts";
+import {
+  seriesNames,
+  type CaseTiming,
+  type Snapshot,
+  type Track,
+} from "../src/history.ts";
 import { currentBaseline } from "../src/baselines.ts";
 
 export function entry(
@@ -72,6 +77,25 @@ export function timedEntry(
           },
         },
       ],
+    },
+  };
+}
+
+export function completeEntry(
+  timestamp: string,
+  cases: CaseTiming[],
+  duration = 100,
+): Snapshot {
+  const counts: Record<string, number> = {};
+  for (const item of cases)
+    counts[item.status] = (counts[item.status] ?? 0) + 1;
+  return {
+    ...entry(timestamp),
+    performance: {
+      duration_seconds: duration,
+      case_statuses: counts,
+      cases,
+      cases_complete: true,
     },
   };
 }

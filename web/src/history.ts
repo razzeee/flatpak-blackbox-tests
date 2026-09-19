@@ -30,6 +30,7 @@ export const caseStatusSchema = z.enum([
   "not-selected",
   "pending",
 ]);
+export type CaseStatus = z.infer<typeof caseStatusSchema>;
 export const caseTimingSchema = z.object({
   behavior_id: z.string(),
   driver: z.enum(["cli", "library"]),
@@ -49,13 +50,25 @@ export const performanceSchema = z
     duration_seconds: secondsSchema.optional(),
     case_statuses: z.record(z.string(), z.number().int().nonnegative()),
     cases: z.array(caseTimingSchema),
+    cases_complete: z.boolean().optional(),
   })
   .refine((value) => {
     const keys = value.cases.map((item) =>
       JSON.stringify([item.behavior_id, item.driver, item.profile]),
     );
     return new Set(keys).size === keys.length;
-  }, "Duplicate case timings");
+  }, "Duplicate case timings")
+  .refine((value) => {
+    if (!value.cases_complete) return true;
+    const counts: Record<string, number> = {};
+    for (const item of value.cases)
+      counts[item.status] = (counts[item.status] ?? 0) + 1;
+    return [
+      ...new Set([...Object.keys(counts), ...Object.keys(value.case_statuses)]),
+    ].every(
+      (status) => (counts[status] ?? 0) === (value.case_statuses[status] ?? 0),
+    );
+  }, "Complete case inventory must match outcome counts");
 export type CaseTiming = z.infer<typeof caseTimingSchema>;
 export const metricSchema = z
   .object({
