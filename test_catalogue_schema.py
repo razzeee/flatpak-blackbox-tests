@@ -26,7 +26,7 @@ class CatalogueSchemaTests(unittest.TestCase):
         suite = Path(__file__).parent
         model = CoverageModel(suite)
         self.assertEqual(model.catalogue, load_json(suite / "coverage-data/surfaces.json"))
-        self.assertEqual(len(model.cases), 383)
+        self.assertEqual(len(model.cases), 386)
         metrics = model.summarize()["metrics"]
         self.assertEqual({key: item["total"] for key, item in metrics["behaviors"].items()},
                          {"cli": 136, "library": 163})
