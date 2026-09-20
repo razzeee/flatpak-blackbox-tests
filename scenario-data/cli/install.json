@@ -21,6 +21,46 @@
       ]
     },
     {
+      "id": "management.flatpakref-reinstall",
+      "scenario": "management-flatpakref-reinstall",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Reinstall an installed app from a local flatpakref description.",
+      "preconditions": "Independent A/B repositories; a case-local description initially installs A.",
+      "expected": "Reinstall succeeds at A and advances to B, preserving runtime, origin and exact installed refs.",
+      "references": [
+        "doc/flatpak-install.xml",
+        "https://github.com/flatpak/flatpak/issues/5460"
+      ]
+    },
+    {
+      "id": "management.flatpakref-reinstall-http",
+      "scenario": "management-flatpakref-reinstall-http",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Reinstall an installed app from an HTTP flatpakref description.",
+      "preconditions": "Independent A/B repositories; a loopback-served description initially installs A.",
+      "expected": "Reinstall succeeds at A and advances to B, preserving runtime, origin and exact installed refs.",
+      "references": [
+        "doc/flatpak-install.xml",
+        "https://github.com/flatpak/flatpak/issues/5460"
+      ]
+    },
+    {
       "id": "management.install-arch",
       "scenario": "management-install-arch",
       "handler": "cli_management_scenarios:run",
@@ -230,6 +270,36 @@
         {
           "id": "cli.option.install.--no-related",
           "rationale": "The locale is absent only with the flag, while the required runtime remains installed in both runs."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.flatpakref-reinstall",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.install.user.app"
+      ],
+      "rationale": "Local description reinstall must accept the installed app and deploy independently prepared B after A.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.install.--reinstall",
+          "rationale": "A description-driven reinstall replaces installed A with independently prepared B."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.flatpakref-reinstall-http",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.install.user.app"
+      ],
+      "rationale": "HTTP description reinstall must accept the installed app and deploy independently prepared B after A.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.install.--reinstall",
+          "rationale": "An HTTP description-driven reinstall replaces installed A with independently prepared B."
         }
       ]
     },

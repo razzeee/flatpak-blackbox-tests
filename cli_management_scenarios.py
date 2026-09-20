@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import configparser
+from contextlib import nullcontext
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -229,6 +230,52 @@ def _remote_options(driver: Driver, url: str, name: str) -> None:
     driver.check(marker in options.split(","), f"modified {flag} absent from {options!r}")
 
 
+def _flatpakref_reinstall(driver: Driver, repository: RepositoryServer, url: str,
+                         fixture: FixtureManifest, *, http: bool) -> None:
+    from run import RepositoryServer
+
+    app = f"app/{fixture['app']}/{fixture['arch']}/{fixture['branch']}"
+    runtime = f"runtime/{fixture['runtime']}/{fixture['arch']}/{fixture['branch']}"
+    descriptions = driver.root / "descriptions"
+    (descriptions / "A").mkdir(parents=True)
+    path = descriptions / "A" / "app.flatpakref"
+    path.write_text(f"[Flatpak Ref]\nName={fixture['app']}\n"
+                    f"Branch={fixture['branch']}\nUrl={url}\nIsRuntime=false\n",
+                    encoding="utf-8")
+    server = RepositoryServer(descriptions)
+    failures = []
+    try:
+        with server.serving() if http else nullcontext("") as description_url:
+            source = f"{description_url}/app.flatpakref" if http else str(path)
+            driver.cli_success("install", "--user", "--noninteractive", source)
+            _commit(driver, app, fixture["commits"]["A"])
+            _commit(driver, runtime, fixture["runtime_commit"])
+            origin = driver.cli_success("info", "--user", "--show-origin", app)
+            for version in ("A", "B"):
+                repository.version = version
+                result = driver.cli_call("install", "--user", "--noninteractive",
+                                         "--reinstall", source)
+                # Exercise both unchanged and advanced tips even when the first
+                # reinstall fails, and retain public state queries in the report.
+                installed = driver.cli_success("info", "--user", "--show-commit", app)
+                if result.returncode != 0 or installed != fixture["commits"][version]:
+                    failures.append(f"{version}: exit={result.returncode}, commit={installed}, "
+                                    f"stderr={result.stderr.strip()!r}")
+                _commit(driver, runtime, fixture["runtime_commit"])
+                _equal(driver, _refs(driver),
+                       {app.removeprefix("app/"), runtime.removeprefix("runtime/")},
+                       "description reinstall preserves exact installed refs")
+                _equal(driver, driver.cli_success("info", "--user", "--show-origin", app),
+                       origin, "description reinstall preserves origin")
+            if http:
+                driver.check(any(request["path"] == "/app.flatpakref"
+                                 for request in server.requests),
+                             "HTTP description input must be fetched")
+            driver.check(not failures, "flatpakref reinstall failed: " + "; ".join(failures))
+    finally:
+        repository.requests.extend(server.requests)
+
+
 def run(driver: Driver, repository: RepositoryServer, url: str,
         fixture: FixtureManifest, name: str) -> None:
     """Run one independently isolated management contract group."""
@@ -277,6 +324,37 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
 
     driver.cli_success("remote-add", "--user", "--no-gpg-verify",
                        "--title=Original title", "--prio=17", "fixture", url)
+
+    if name in ("management-flatpakref-reinstall", "management-flatpakref-reinstall-http"):
+        _flatpakref_reinstall(driver, repository, url, fixture, http=name.endswith("-http"))
+        return
+
+    if name == "management-duplicate-remote-description":
+        before = driver.cli_success("remotes", "--user", "--columns=name,url,title,priority")
+        # An absent loopback resource gives a deterministic HTTP failure without
+        # depending on external DNS, connectivity, or repository payload failures.
+        missing = "/unavailable.flatpakrepo"
+        start = len(repository.requests)
+        control = driver.cli_call("remote-add", "--user", "--if-not-exists",
+                                  "fresh", f"{url}{missing}")
+        driver.check(control.returncode > 0 and any(
+            request["path"] == missing for request in repository.requests[start:]),
+            "fresh remote control must fetch and reject the unavailable description")
+        _equal(driver, driver.cli_success("remotes", "--user",
+                                          "--columns=name,url,title,priority"), before,
+               "failed description control leaves sentinel unchanged")
+        start = len(repository.requests)
+        result = driver.cli_call("remote-add", "--user", "--if-not-exists",
+                                 "fixture", f"{url}{missing}")
+        requests = [request for request in repository.requests[start:]
+                    if request["path"] == missing]
+        after = driver.cli_success("remotes", "--user", "--columns=name,url,title,priority")
+        _equal(driver, after, before, "duplicate description preserves remote properties")
+        driver.check(result.returncode == 0 and not requests,
+                     "existing remote must not need its unavailable description: "
+                     f"exit={result.returncode}, requests={len(requests)}, "
+                     f"stderr={result.stderr.strip()!r}")
+        return
 
     if name in ("management-install-kinds", "management-remote-info-kinds"):
         command = "install" if name == "management-install-kinds" else "remote-info"

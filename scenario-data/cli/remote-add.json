@@ -2,6 +2,26 @@
   "schema": 1,
   "behaviors": [
     {
+      "id": "management.duplicate-remote-description",
+      "scenario": "management-duplicate-remote-description",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Repeat remote-add with --if-not-exists and an unavailable HTTP description.",
+      "preconditions": "Existing sentinel remote; a missing loopback flatpakrepo resource fails for a fresh remote name.",
+      "expected": "The existing-name command succeeds without fetching the unavailable description or altering remote properties.",
+      "references": [
+        "doc/flatpak-remote-add.xml",
+        "https://github.com/flatpak/flatpak/issues/6144"
+      ]
+    },
+    {
       "id": "management.duplicate-remote",
       "scenario": "management-duplicate-remote",
       "handler": "cli_management_scenarios:run",
@@ -190,6 +210,7 @@
     }
   ],
   "notes": [
+    "The duplicate-remote-description issue regression is executable but has no coverage mapping: unavailable-description handling extends beyond the existing raw-URL duplicate obligation.",
     "Every target call enters two disposable bubblewrap user/mount namespace layers. The outer root maps only to the invoking host UID; inner root maps only to outer root. Inherited host mounts are locked read-only, checked by a denied bind-remount before every target call. Private PID/network namespaces and writable installation state are case-local; generated state is removed after each case while command evidence is retained.",
     "Target environment keys BLACKBOX_SYSTEM_INSTALL_DIR and BLACKBOX_SYSTEM_CONFIG_DIR specify the expected compiled defaults; their reference-build defaults are /var/local/lib/flatpak and /usr/local/etc/flatpak. The namespace mounts private data at those paths, and CLI/C-client assertions still check the target's actual default location. These keys never become FLATPAK_SYSTEM_DIR or FLATPAK_CONFIG_DIR redirects. Set them under the target JSON environment object, not the host shell environment.",
     "Readonly exposure includes only the suite directory, selected target executables, configured helpers and LD_LIBRARY_PATH directories. Uninstalled targets can explicitly add colon-separated absolute paths with BLACKBOX_TARGET_READONLY_PATHS in the target environment. No repository ancestor is inferred. Paths that cover private namespace roots or overlap protected installation/service content are rejected, including symlink aliases.",
