@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "repair.reinstall-all",
+      "scenario": "repair-reinstall-all",
+      "handler": "repair_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "filesystem-fault-injection",
+        "sandbox"
+      ],
+      "description": "Force redeployment even when repository objects are intact.",
+      "preconditions": "App A installed, then executable unlinked only from its publicly queried deployment location.",
+      "expected": "Ordinary repair leaves the app unable to run. Repair --reinstall-all restores independent executable bytes, exact commits and execution of A.",
+      "references": [
+        "doc/flatpak-repair.xml"
+      ]
+    },
+    {
+      "id": "repair.user-restore",
+      "scenario": "repair-user-restore",
+      "handler": "repair_scenarios:run",
+      "profile": "user",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "filesystem-fault-injection",
+        "sandbox"
+      ],
+      "description": "Restore a deployed app whose required repository payload is missing.",
+      "preconditions": "Independent app A and runtime installed; adapter removes the app executable object from isolated repository storage.",
+      "expected": "Repair restores the expected refs and commits, and the app can be redeployed without pulling and executed as A.",
+      "references": [
+        "doc/flatpak-repair.xml"
+      ]
+    },
+    {
+      "id": "repair.user-dry-run",
+      "scenario": "repair-user-dry-run",
+      "handler": "repair_scenarios:run",
+      "profile": "user",
+      "drivers": [
+        "cli"
+      ],
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "filesystem-fault-injection",
+        "sandbox"
+      ],
+      "description": "Report missing repository content without changing persistent installation state.",
+      "preconditions": "Healthy dry-run baseline followed by adapter-controlled removal of the deployed app executable object.",
+      "expected": "Dry-run identifies the affected app and differs from healthy output while preserving paths, contents, ownership and modes; real repair then permits offline redeployment and execution.",
+      "references": [
+        "doc/flatpak-repair.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "repair.reinstall-all",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Deployment-only damage leaves the repository healthy, so successful recovery requires forced redeployment.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.repair.--reinstall-all",
+          "rationale": "Ordinary repair does not restore execution after deployment-only unlink; forced repair restores exact independent executable bytes and execution."
+        }
+      ]
+    },
+    {
+      "behavior_id": "repair.user-restore",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.repair.user.restore"
+      ],
+      "rationale": "Missing executable payload is injected through the reference adapter; public offline reinstall and execution prove repair restored required repository content. Exact independent app/runtime commits bracket offline redeployment."
+    },
+    {
+      "behavior_id": "repair.user-dry-run",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.repair.user.dry-run"
+      ],
+      "rationale": "Damaged dry-run output identifies the app and differs from a healthy control; before/after persistent installation snapshots match. Real repair subsequently restores offline redeployment."
+    }
+  ],
+  "notes": [
+    "Backend-specific payload removal and persistent-state snapshots belong to the reference adapter. Other adapters may supply BLACKBOX_REPAIR_FIXTURE with the same Python invocation protocol or report the prerequisite unavailable.",
+    "Snapshots compare relative paths, file types, modes, ownership, symlink targets and file hashes. They exclude timestamps, which can change through reads, and make no inode-identity claim. Repair success is established through public CLI operations rather than backend inspection."
+  ]
+}

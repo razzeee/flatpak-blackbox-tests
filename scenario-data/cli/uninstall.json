@@ -2,6 +2,25 @@
   "schema": 1,
   "behaviors": [
     {
+      "id": "related-options.uninstall",
+      "scenario": "related-options-uninstall",
+      "handler": "related_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Keep an autodelete locale extension when suppressing related-ref removal.",
+      "preconditions": "Independent selection app, runtime and locale extension installed; locale metadata specifies autodelete.",
+      "expected": "Uninstall --no-related leaves runtime and locale. After reinstalling the app, ordinary uninstall removes the locale and leaves only the runtime.",
+      "references": [
+        "doc/flatpak-uninstall.xml"
+      ]
+    },
+    {
       "id": "management.uninstall-arch",
       "scenario": "management-uninstall-arch",
       "handler": "cli_management_scenarios:run",
@@ -161,6 +180,19 @@
     }
   ],
   "mappings": [
+    {
+      "behavior_id": "related-options.uninstall",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Exact remaining ref sets contrast suppressed and ordinary related-ref removal.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.uninstall.--no-related",
+          "rationale": "The autodelete locale survives only with the flag; ordinary uninstall removes it while preserving the runtime."
+        }
+      ]
+    },
     {
       "behavior_id": "management.uninstall-arch",
       "driver": "cli",

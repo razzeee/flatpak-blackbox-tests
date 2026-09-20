@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: LGPL-2.1-or-later
-# Run each phase from the suite root. Only "host" uses sudo.
+# Run each phase from the suite root. Provisioning uses sudo on disposable CI only.
 set -euo pipefail
 
 : "${BB_CI_ROOT:?Set BB_CI_ROOT to a new absolute work directory}"
-phase=${1:?Usage: bash ci/compatibility.sh init|host|build|probe|prepare|run|summary}
+phase=${1:?Usage: bash ci/compatibility.sh init|host|build|probe|prepare|system|run|cleanup|summary}
 if [[ "$phase" = summary ]]; then
     # This must also work when init, dependencies, or the runner failed early.
     # Actions assigns a different summary path to each step; use the delivery marker.
@@ -25,6 +25,7 @@ source_dir="$BB_CI_ROOT/source"
 build_dir="$BB_CI_ROOT/build"
 
 if [[ "$phase" = init ]]; then
+    umask 022
     # mkdir fails atomically on stale work rather than mixing runs or replacing it.
     mkdir "$BB_CI_ROOT"
     mkdir -p "$BB_CI_ROOT/logs" "$TMPDIR"
@@ -53,6 +54,7 @@ host() {
         libappstream-dev libarchive-dev libattr1-dev libcap-dev \
         libcurl4-openssl-dev libdconf-dev libfuse3-dev libgdk-pixbuf-2.0-dev \
         libglib2.0-dev libgpgme11-dev libjson-glib-dev libostree-dev \
+        libpolkit-agent-1-dev libpolkit-gobject-1-dev polkitd \
         libseccomp-dev libsystemd-dev libxau-dev libxml2-dev libzstd-dev \
         bubblewrap dbus dbus-daemon dbus-bin dbus-tests fuse3 gnupg ostree \
         desktop-file-utils shared-mime-info xdg-dbus-proxy xdg-desktop-portal \
@@ -76,7 +78,7 @@ build() {
         -Dsystem_dbus_proxy=/usr/bin/xdg-dbus-proxy \
         -Dtests=false -Dgir=disabled -Dgtkdoc=disabled -Dman=disabled \
         -Ddocbook_docs=disabled -Dselinux_module=disabled \
-        -Dsystem_helper=disabled -Dmalcontent=disabled \
+        -Dsystem_helper=enabled -Dmalcontent=disabled \
         -Dwayland_security_context=disabled
     meson compile -C "$build_dir" --jobs 2
     reference_environment
@@ -100,6 +102,7 @@ target = {
         "LD_LIBRARY_PATH": str(build / "common"),
         "BLACKBOX_SYSTEM_INSTALL_DIR": "/var/lib/flatpak",
         "BLACKBOX_SYSTEM_CONFIG_DIR": "/etc/flatpak",
+        "BLACKBOX_SYSTEM_TEST_ROOT": str(root),
     },
     "library": {
         "environment": {"PKG_CONFIG_PATH": str(build / "meson-uninstalled")},
@@ -158,8 +161,22 @@ run() {
         --color always
 }
 
+system() {
+    [[ "${GITHUB_ACTIONS:-}" = true && "${RUNNER_ENVIRONMENT:-}" = github-hosted ]]
+    sudo env GITHUB_ACTIONS=true RUNNER_ENVIRONMENT=github-hosted \
+        python3 ci/system_helper.py start "$BB_CI_ROOT"
+    sudo env GITHUB_ACTIONS=true RUNNER_ENVIRONMENT=github-hosted \
+        python3 ci/system_helper.py probe "$BB_CI_ROOT"
+}
+
+cleanup() {
+    [[ "${GITHUB_ACTIONS:-}" = true && "${RUNNER_ENVIRONMENT:-}" = github-hosted ]]
+    sudo env GITHUB_ACTIONS=true RUNNER_ENVIRONMENT=github-hosted \
+        python3 ci/system_helper.py stop "$BB_CI_ROOT"
+}
+
 case "$phase" in
-    host|build|probe|prepare|run)
+    host|build|probe|prepare|system|run|cleanup)
         # pipefail keeps setup errors and failed compatibility checks fatal.
         "$phase" 2>&1 | tee "$BB_CI_ROOT/logs/$phase.log"
         ;;

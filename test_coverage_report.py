@@ -414,13 +414,16 @@ class CoverageReportTests(unittest.TestCase):
         self.write("run.json", report)
         self.assertEqual(self.command("--report", str(self.suite / "run.json")).returncode, 1)
 
-    def test_extension_manifests_and_headers_are_part_of_the_definition(self) -> None:
+    def test_assertion_helpers_are_part_of_the_definition(self) -> None:
         directory = self.suite / "scenario-data"
         directory.mkdir()
         self.write("scenario-data/extra.json", {"schema": 1, "behaviors": [], "mappings": []})
         header = self.suite / "test-extension.h"
         header.write_text("/* an assertion helper */\n")
-        for path in (directory / "extra.json", header):
+        bridge = self.suite / "ci/system_helper.py"
+        bridge.parent.mkdir()
+        bridge.write_text("# assertions executed through a privileged bridge\n")
+        for path in (directory / "extra.json", header, bridge):
             report = self.execution_report(("passed", "passed", "passed"))
             self.write("run.json", report)
             path.write_text(path.read_text() + "\n")

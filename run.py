@@ -614,7 +614,8 @@ def main(*, clock: Callable[[], float] = monotonic) -> int:
                 result["behavior_id"], result["driver"], result["profile"]
             ]
             if result["status"] == "pending" and result["profile"] not in ("user", "any") and (
-                case_definition.get("execution_environment") != "root-userns"
+                case_definition.get("execution_environment") not in
+                ("root-userns", "provisioned-system")
             ):
                 result.update({"status": "unsupported",
                                "error": "System-profile execution requires a VM runner."})

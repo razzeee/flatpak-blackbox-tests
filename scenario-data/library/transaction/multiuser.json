@@ -1,0 +1,206 @@
+{
+  "schema": 1,
+  "client": {
+    "source": "client-multiuser.c",
+    "entry": "blackbox_multiuser_main"
+  },
+  "behaviors": [
+    {
+      "id": "multiuser.install",
+      "scenario": "multiuser-install",
+      "handler": "multiuser_scenarios:run",
+      "execution_environment": "provisioned-system",
+      "drivers": [
+        "library"
+      ],
+      "profile": "system",
+      "required_capabilities": [
+        "system-installation",
+        "system-authorization",
+        "multiple-users",
+        "local-repository"
+      ],
+      "description": "Authorized ordinary-user system install resolves the runtime dependency and is readable by a second user.",
+      "preconditions": "Selected target's system helper, real polkit, two distinct ordinary users, fresh named installation and independently prepared A repository; umask 0022.",
+      "expected": "A single app install request deploys exactly the expected app and runtime commits, queried by both users; default and per-user remote sets remain unchanged.",
+      "references": [
+        "common/flatpak-transaction.c",
+        "common/flatpak-installation.c"
+      ]
+    },
+    {
+      "id": "multiuser.update",
+      "scenario": "multiuser-update",
+      "handler": "multiuser_scenarios:run",
+      "execution_environment": "provisioned-system",
+      "drivers": [
+        "library"
+      ],
+      "profile": "system",
+      "required_capabilities": [
+        "system-installation",
+        "system-authorization",
+        "multiple-users",
+        "local-repository"
+      ],
+      "description": "Authorized ordinary-user update selects advertised B while retaining the runtime.",
+      "preconditions": "A and runtime installed through the system helper, then the remote is pointed to independently prepared B.",
+      "expected": "Update with commit NULL deploys B and retains the runtime commit, visible to both users.",
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    },
+    {
+      "id": "multiuser.uninstall",
+      "scenario": "multiuser-uninstall",
+      "handler": "multiuser_scenarios:run",
+      "execution_environment": "provisioned-system",
+      "drivers": [
+        "library"
+      ],
+      "profile": "system",
+      "required_capabilities": [
+        "system-installation",
+        "system-authorization",
+        "multiple-users",
+        "local-repository"
+      ],
+      "description": "Authorized ordinary-user uninstall removes the system app for both users.",
+      "preconditions": "Exact app A and runtime commits installed through the selected system helper.",
+      "expected": "Both users receive public NOT_INSTALLED for the removed app, while exact enumeration and queries retain only the runtime.",
+      "references": [
+        "common/flatpak-transaction.c",
+        "common/flatpak-installation.c"
+      ]
+    },
+    {
+      "id": "multiuser.remotes",
+      "scenario": "multiuser-remotes",
+      "handler": "multiuser_scenarios:run",
+      "execution_environment": "provisioned-system",
+      "drivers": [
+        "library"
+      ],
+      "profile": "system",
+      "required_capabilities": [
+        "system-installation",
+        "system-authorization",
+        "multiple-users",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Named system remote addition, URL modification and removal persist across users.",
+      "preconditions": "Two real user identities and fresh named installation; default and per-user remote snapshots recorded.",
+      "expected": "The reader observes A and then B URLs from fresh library objects, then no remote after removal. Both users' default/per-user snapshots remain unchanged.",
+      "references": [
+        "common/flatpak-installation.c"
+      ]
+    },
+    {
+      "id": "multiuser.auth-installation",
+      "scenario": "multiuser-auth-installation",
+      "handler": "multiuser_scenarios:run",
+      "execution_environment": "provisioned-system",
+      "drivers": [
+        "library"
+      ],
+      "profile": "system",
+      "required_capabilities": [
+        "system-installation",
+        "system-authorization",
+        "multiple-users",
+        "local-repository"
+      ],
+      "description": "Installation no-interaction suppresses real polkit requests while preserving authorization failure.",
+      "preconditions": "Reader requires authentication; independent process-scoped recording agent rejects every request; system languages seeded to de.",
+      "expected": "Interactive/silent/interactive config attempts all fail with public permission-denied. Interactive attempts reach the agent; silent does not. Getter reflects setter, languages stay de and installed commits remain unchanged.",
+      "references": [
+        "common/flatpak-installation.c"
+      ]
+    },
+    {
+      "id": "multiuser.auth-transaction",
+      "scenario": "multiuser-auth-transaction",
+      "handler": "multiuser_scenarios:run",
+      "execution_environment": "provisioned-system",
+      "drivers": [
+        "library"
+      ],
+      "profile": "system",
+      "required_capabilities": [
+        "system-installation",
+        "system-authorization",
+        "multiple-users",
+        "local-repository"
+      ],
+      "description": "Transactions inherit and override no-interaction with observable polkit request suppression.",
+      "preconditions": "Reader requires authentication to uninstall seeded A; independent recording agent rejects all requests.",
+      "expected": "New transaction getters inherit both installation settings and reflect overrides in both directions. Interactive modes reach the agent, silent modes do not; all uninstall attempts fail permission-denied and preserve exact app/runtime commits.",
+      "references": [
+        "common/flatpak-transaction.c"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "multiuser.install",
+      "driver": "library",
+      "profile": "system",
+      "requirements": [
+        "library.install.system.app-dependency"
+      ],
+      "rationale": "A real authorized non-root transaction installs app and implicit runtime; fresh public queries and exact enumerations by two distinct users match independent commits."
+    },
+    {
+      "behavior_id": "multiuser.update",
+      "driver": "library",
+      "profile": "system",
+      "requirements": [
+        "library.update.system.latest"
+      ],
+      "rationale": "After A is visible to both users, authorized update with commit NULL selects advertised B. Both users observe B and the unchanged runtime."
+    },
+    {
+      "behavior_id": "multiuser.uninstall",
+      "driver": "library",
+      "profile": "system",
+      "requirements": [
+        "library.uninstall.system.app"
+      ],
+      "rationale": "Real authorized uninstall is followed by public NOT_INSTALLED errors for both users and exact runtime-only enumeration."
+    },
+    {
+      "behavior_id": "multiuser.remotes",
+      "driver": "library",
+      "profile": "system",
+      "requirements": [
+        "library.remote.system.persistence"
+      ],
+      "rationale": "The reader reopens the named installation after addition and URL modification, then both users enumerate no remotes after removal. Default and per-user remote snapshots stay unchanged."
+    },
+    {
+      "behavior_id": "multiuser.auth-installation",
+      "driver": "library",
+      "profile": "system",
+      "requirements": [
+        "library.authorization.system.no-interaction"
+      ],
+      "rationale": "A process-scoped agent records actual polkit requests in both interactive controls and none for no-interaction. Every rejected configuration operation returns public permission-denied, getters match and state remains unchanged."
+    },
+    {
+      "behavior_id": "multiuser.auth-transaction",
+      "driver": "library",
+      "profile": "system",
+      "requirements": [
+        "library.auth.interaction-inheritance"
+      ],
+      "rationale": "Getter checks cover inheritance and explicit overrides in both directions, and a rejecting real polkit agent distinguishes interactive and silent transactions. All denied uninstalls preserve both users' exact installed refs/commits."
+    }
+  ],
+  "notes": [
+    "Authorization failures accept the public D-Bus AccessDenied or Flatpak permission-denied error. An aborted transaction must expose a permission-denied underlying operation error for the requested ref; an unrelated failure cannot satisfy the assertion.",
+    "Execution requires explicit BLACKBOX_SYSTEM_TEST_ROOT provisioning, with the helper and library from the selected target build. Root only orchestrates disposable state and switches users; every target library operation executes with the asserted ordinary UID.",
+    "The recording agent registers for the exact client process, never authenticates, and dies with its parent. No root-user-namespace or property-only assertion substitutes for real authorization behavior.",
+    "Nested command records, stdout, stderr and statuses remain in evidence. Actual client API-call traces are forwarded for library coverage verification."
+  ]
+}
