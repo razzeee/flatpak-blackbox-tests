@@ -117,6 +117,32 @@ def _tx(driver: Driver, mode: str, action: str, ref: str, *,
     return rows
 
 
+@contextmanager
+def _fresh_transaction_state(driver: Driver, name: str) -> Iterator[None]:
+    root = driver.root / "transaction-states" / name
+    directories = {
+        "HOME": root / "home",
+        "XDG_DATA_HOME": root / "home/data",
+        "XDG_CONFIG_HOME": root / "home/config",
+        "XDG_CACHE_HOME": root / "home/cache",
+        "XDG_STATE_HOME": root / "home/state",
+        "XDG_RUNTIME_DIR": root / "runtime",
+        "TMPDIR": root / "tmp",
+    }
+    previous = {key: driver.env.get(key) for key in directories}
+    for path in directories.values():
+        path.mkdir(parents=True, mode=0o700, exist_ok=True)
+    driver.env.update({key: str(path) for key, path in directories.items()})
+    try:
+        yield
+    finally:
+        for key, value in previous.items():
+            if value is None:
+                driver.env.pop(key, None)
+            else:
+                driver.env[key] = value
+
+
 def _rows(rows: list[list[str]], label: str) -> list[list[str]]:
     return [row[1:] for row in rows if row[0] == label]
 
@@ -374,19 +400,21 @@ def _supplemental(driver: Driver, fixture: FixtureManifest, name: str) -> None:
             state(first, "A")
         elif name == "tx-frequency":
             counts = []
-            for mode in ("frequency-fast", "frequency-slow", "frequency-fast"):
-                server.directory = directory / "B"
-                server.slow = True
-                rows = _tx(driver, mode, "update", first)
-                samples = {int(row[1]) for row in _rows(rows, "progress")}
-                driver.check(max(samples) >= 1024 * 1024,
-                             "each cadence control transfers independent payload")
-                counts.append(len(samples - {0, max(samples)}))
-                state(first, "B")
-                server.directory = directory / "A"
-                server.slow = False
-                _tx(driver, "normal", "update", first, operand=extra["commits"]["A"][first])
-                state(first, "A")
+            for index, mode in enumerate(("frequency-fast", "frequency-slow", "frequency-fast")):
+                with _fresh_transaction_state(driver, f"frequency-{index}"):
+                    server.directory = directory / "A"
+                    server.slow = False
+                    driver.success("remote-edit", "fixture", url, "Supplemental transactions", "1")
+                    driver.success("install", first)
+                    state(first, "A")
+                    server.directory = directory / "B"
+                    server.slow = True
+                    rows = _tx(driver, mode, "update", first)
+                    samples = {int(row[1]) for row in _rows(rows, "progress")}
+                    driver.check(max(samples) >= 1024 * 1024,
+                                 "each cadence control transfers independent payload")
+                    counts.append(len(samples - {0, max(samples)}))
+                    state(first, "B")
             driver.check(counts[1] >= 1 and min(counts[0], counts[2]) > 2 * counts[1],
                          f"50ms updates sample advancing bytes more often than 1000ms: {counts}")
             driver.evidence.append({"observation": "progress-update-cadence",
