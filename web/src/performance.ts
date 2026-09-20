@@ -2,10 +2,10 @@
 import { dailyEntries, type CaseTiming, type Snapshot } from "./history.ts";
 
 export const timingSeries = {
-  duration_seconds: { label: "Total", color: "#1756a9" },
-  setup_seconds: { label: "Setup", color: "#a84b00" },
-  execution_seconds: { label: "Execution", color: "#7541a0" },
-  cleanup_seconds: { label: "Cleanup", color: "#187447" },
+  duration_seconds: { label: "Total", color: "var(--blue)" },
+  setup_seconds: { label: "Setup", color: "var(--orange)" },
+  execution_seconds: { label: "Execution", color: "var(--purple)" },
+  cleanup_seconds: { label: "Cleanup", color: "var(--green)" },
 } as const;
 export type TimingSeries = keyof typeof timingSeries;
 export const timingNames = Object.keys(timingSeries) as TimingSeries[];

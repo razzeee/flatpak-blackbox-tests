@@ -1,14 +1,34 @@
 /* SPDX-License-Identifier: LGPL-2.1-or-later */
 :root {
-  color-scheme: light;
+  color-scheme: light dark;
+  --background: light-dark(#fff, #101820);
+  --foreground: light-dark(#202d3b, #e1e8ef);
+  --muted: light-dark(#435569, #afbfce);
+  --disabled: light-dark(#657585, #95a6b6);
+  --border: light-dark(#cad5df, #3b4b5c);
+  --control-border: light-dark(#8193a7, #71859a);
+  --surface: light-dark(#eef4fa, #203040);
+  --blue: light-dark(#1756a9, #82b7ff);
+  --purple: light-dark(#7541a0, #c5a0ef);
+  --orange: light-dark(#a84b00, #ffb76b);
+  --green: light-dark(#187447, #75d5a3);
+  --red: light-dark(#a32a21, #ff9188);
+  --ts-chart-tooltip-background: var(--surface);
+  --ts-chart-tooltip-color: var(--foreground);
   font-family: "Segoe UI", "Liberation Sans", sans-serif;
-  color: #202d3b;
-  background: #fff;
+  color: var(--foreground);
+  background: var(--background);
   line-height: 1.55;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }
 body {
   margin: 0;
-  border-top: 6px solid #1756a9;
+  border-top: 6px solid var(--blue);
 }
 main {
   max-width: 1080px;
@@ -48,11 +68,15 @@ button {
   color: inherit;
 }
 select {
-  background: white;
-  border: 1px solid #8193a7;
+  background: var(--background);
+  border: 1px solid var(--control-border);
   border-radius: 4px;
   padding: 8px;
   margin-left: 8px;
+}
+.theme-select {
+  margin-left: auto;
+  white-space: nowrap;
 }
 .case-select {
   display: block;
@@ -70,17 +94,17 @@ select {
 }
 .outcome-counts button {
   padding: 10px 14px;
-  background: #fff;
-  border: 1px solid #cad5df;
+  background: var(--background);
+  border: 1px solid var(--border);
   border-radius: 4px;
   text-align: left;
 }
 .outcome-counts button[aria-pressed="true"] {
-  border-color: #1756a9;
-  background: #eef4fa;
+  border-color: var(--blue);
+  background: var(--surface);
 }
 .outcome-counts button:disabled {
-  color: #657585;
+  color: var(--disabled);
   cursor: default;
 }
 .outcome-counts strong {
@@ -90,11 +114,11 @@ select {
 [data-status="failed"],
 [data-status="setup-error"],
 .increase {
-  color: #a32a21;
+  color: var(--red);
 }
 [data-status="passed"],
 .decrease {
-  color: #187447;
+  color: var(--green);
 }
 .run-diagnostics {
   margin: 28px 0;
@@ -105,8 +129,8 @@ select {
   scroll-margin-top: 20px;
 }
 .data-note {
-  background: #fff3d6;
-  border-left: 3px solid #a84b00;
+  background: light-dark(#fff3d6, #392d1d);
+  border-left: 3px solid var(--orange);
   padding: 12px 16px;
 }
 .case-tools {
@@ -123,9 +147,11 @@ select {
   max-width: 100%;
 }
 .case-tools input {
+  color: var(--foreground);
+  background: var(--background);
   font: inherit;
   padding: 8px;
-  border: 1px solid #8193a7;
+  border: 1px solid var(--control-border);
   border-radius: 4px;
   max-width: 100%;
   box-sizing: border-box;
@@ -137,7 +163,7 @@ select {
   border: 0;
   padding: 0;
   background: none;
-  color: #1756a9;
+  color: var(--blue);
   font: inherit;
   text-align: left;
   text-decoration: underline;
@@ -153,12 +179,15 @@ select {
   font-variant-numeric: tabular-nums;
 }
 .case-comparison tr[data-selected="true"] {
-  background: #eef4fa;
+  background: var(--surface);
 }
 .phase-delta {
   white-space: nowrap;
 }
 .show-cases {
+  background: var(--surface);
+  border: 1px solid var(--control-border);
+  border-radius: 4px;
   margin-top: 16px;
   padding: 8px 16px;
 }
@@ -166,18 +195,18 @@ button {
   cursor: pointer;
 }
 a {
-  color: #1756a9;
+  color: var(--blue);
   text-underline-offset: 3px;
 }
 a:hover {
   text-decoration-thickness: 2px;
 }
 :focus-visible {
-  outline: 3px solid #a84b00;
+  outline: 3px solid var(--orange);
   outline-offset: 4px;
 }
 .chart-section {
-  border-top: 1px solid #cad5df;
+  border-top: 1px solid var(--border);
   margin-top: 28px;
   padding-top: 12px;
 }
@@ -185,7 +214,7 @@ a:hover {
   font-size: 1.25rem;
 }
 .date-range {
-  color: #435569;
+  color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
 .empty {
@@ -205,11 +234,11 @@ a:hover {
   padding: 8px 4px;
 }
 .legend button:hover {
-  border-color: #8193a7;
+  border-color: var(--control-border);
 }
 .legend button[aria-pressed="false"] {
   text-decoration: line-through;
-  color: #657585;
+  color: var(--disabled);
 }
 .legend span {
   display: inline-block;
@@ -223,7 +252,7 @@ details {
 }
 summary {
   cursor: pointer;
-  color: #1756a9;
+  color: var(--blue);
   padding: 8px 0;
 }
 .table-scroll {
@@ -242,15 +271,15 @@ th,
 td {
   text-align: left;
   padding: 12px 10px;
-  border-bottom: 1px solid #dce4ec;
+  border-bottom: 1px solid var(--border);
 }
 thead {
-  background: #eef4fa;
+  background: var(--surface);
 }
 small {
   display: block;
   font-weight: normal;
-  color: #435569;
+  color: var(--muted);
 }
 @media (max-width: 600px) {
   main {

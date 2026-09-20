@@ -2,7 +2,7 @@
 import { createRoot } from "react-dom/client";
 import { App } from "./App.tsx";
 import { historySchema } from "./history.ts";
-import "./style.css";
+import { ThemeSelect } from "./ThemeSelect.tsx";
 
 const root = createRoot(document.getElementById("root")!);
 async function load() {
@@ -14,6 +14,7 @@ async function load() {
   } catch {
     root.render(
       <main>
+        <ThemeSelect />
         <h1>Flatpak daily coverage</h1>
         <p role="alert">
           Coverage history could not be loaded. Check the published history file
