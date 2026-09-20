@@ -8,12 +8,12 @@ export const tracks = {
   upstream: "Upstream main",
 } as const;
 export const series = {
-  cli: { label: "CLI behavior", color: "#1756a9" },
-  library: { label: "Library behavior", color: "#7541a0" },
-  "cli-command": { label: "CLI commands", color: "#1756a9" },
-  "cli-option": { label: "CLI options", color: "#a84b00" },
-  "library-function": { label: "Library functions", color: "#7541a0" },
-  "library-signal": { label: "Library signals", color: "#187447" },
+  cli: { label: "CLI behavior", color: "var(--blue)" },
+  library: { label: "Library behavior", color: "var(--purple)" },
+  "cli-command": { label: "CLI commands", color: "var(--blue)" },
+  "cli-option": { label: "CLI options", color: "var(--orange)" },
+  "library-function": { label: "Library functions", color: "var(--purple)" },
+  "library-signal": { label: "Library signals", color: "var(--green)" },
 } as const;
 export type Series = keyof typeof series;
 export type Track = keyof typeof tracks;

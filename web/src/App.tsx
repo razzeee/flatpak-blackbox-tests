@@ -14,6 +14,7 @@ import {
 } from "./history.ts";
 import { targetKey, targetOptions } from "./targets.ts";
 import { RunSummary } from "./RunSummary.tsx";
+import { ThemeSelect } from "./ThemeSelect.tsx";
 import { focusSection } from "./RunDiagnostics.tsx";
 import type { OutcomeFilter } from "./runComparison.ts";
 
@@ -204,6 +205,7 @@ export function App({ history }: { history: Snapshot[] }) {
           </select>
         </label>
         <a href="./history.json">Download history</a>
+        <ThemeSelect />
       </div>
       <p>
         Latest complete run per target and UTC day. Gaps mean missing or
