@@ -222,17 +222,20 @@ test("history updates migrate legacy labels and retain same-day baseline compari
   );
 });
 
-test("the page defaults to the active baseline without mixing historical data", () => {
+test("the page defaults to upstream without mixing target data", () => {
   const archived = forBaseline({ version: "1.18.0", commit: "d".repeat(40) });
   archived.metrics.cli!.passed = 2;
+  const upstream = entry(undefined, "upstream");
+  for (const metric of Object.values(upstream.metrics)) metric.passed = 3;
   const page = renderToStaticMarkup(
-    createElement(App, { history: [archived, entry()] }),
+    createElement(App, { history: [archived, entry(), upstream] }),
   );
+  assert.match(page, /option value="upstream" selected="">Upstream main/);
   assert.match(page, /Flatpak 1.18.0/);
   assert.ok(
     page.includes(`Flatpak ${currentBaseline.version} / current baseline`),
   );
-  assert.ok(page.includes(`Reported: Flatpak ${currentBaseline.version}`));
-  assert.match(page, /8\/10/);
+  assert.match(page, /3\/10/);
+  assert.doesNotMatch(page, /8\/10/);
   assert.doesNotMatch(page, /2\/10/);
 });

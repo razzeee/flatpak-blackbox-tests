@@ -158,7 +158,9 @@ function DailyCounts({ entries }: { entries: Snapshot[] }) {
 
 export function App({ history }: { history: Snapshot[] }) {
   const options = useMemo(() => targetOptions(history), [history]);
-  const [selection, setSelection] = useState("");
+  const [selection, setSelection] = useState(() =>
+    history.some((entry) => entry.track === "upstream") ? "upstream" : "",
+  );
   const [runSelection, setRunSelection] = useState("");
   const [outcomeFilter, setOutcomeFilter] = useState<OutcomeFilter>("all");
   const selected =
