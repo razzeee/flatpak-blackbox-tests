@@ -27,8 +27,9 @@ RULES = Path("/etc/polkit-1/rules.d/00-flatpak-blackbox.rules")
 BUS_NAME = "org.freedesktop.Flatpak.SystemHelper"
 
 
-def command(argv: list[str], *, success: bool = True) -> subprocess.CompletedProcess[str]:
-    result = subprocess.run(argv, text=True, capture_output=True, timeout=90, check=False)
+def command(argv: list[str], *, success: bool = True,
+            timeout: float = 90) -> subprocess.CompletedProcess[str]:
+    result = subprocess.run(argv, text=True, capture_output=True, timeout=timeout, check=False)
     print(json.dumps({"argv": argv, "exit_status": result.returncode,
                       "stdout": result.stdout, "stderr": result.stderr}), flush=True)
     if success and result.returncode:
@@ -85,9 +86,10 @@ def start(root: Path) -> None:
             stream.write(str(path) + "\n")
 
     for user in (WRITER, READER):
-        command(["useradd", "--create-home", "--shell", "/usr/sbin/nologin", user])
         with (state / "created-users").open("a") as stream:
             stream.write(user + "\n")
+        command(["useradd", "--create-home", "--shell", "/usr/sbin/nologin", user],
+                timeout=600)
     try:
         pwd.getpwnam("flatpak")
     except KeyError:
@@ -207,9 +209,9 @@ def stop(root: Path) -> None:
     for user in (state / "created-users").read_text().splitlines():
         if user not in (WRITER, READER):
             raise RuntimeError(f"unexpected provisioning cleanup user: {user}")
-        command(["userdel", "--remove", user])
+        command(["userdel", "--remove", user], success=False)
     if (state / "helper-user-created").exists():
-        command(["userdel", "flatpak"])
+        command(["userdel", "flatpak"], success=False)
     shutil.rmtree(state)
 
 
