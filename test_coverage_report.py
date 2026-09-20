@@ -317,16 +317,70 @@ class CoverageReportTests(unittest.TestCase):
             ],
         })
 
-    def test_option_annotations_cannot_bypass_function_mapping(self) -> None:
+    def test_explicit_library_assertions_require_observation_without_behavior_credit(self) -> None:
+        path = self.suite / "coverage-data/surfaces.json"
+        catalogue = json.loads(path.read_text())
+        catalogue["surfaces"].append({"id": "library.signal.Test.ready",
+                                      "kind": "library-signal", "name": "ready"})
+        self.write("coverage-data/surfaces.json", catalogue)
         path = self.suite / "coverage-data/mapping.json"
         mapping = json.loads(path.read_text())
-        mapping["cases"][2]["surface_assertions"] = [{
-            "id": "library.function.install", "rationale": "Not an option assertion.",
-        }]
+        mapping["cases"][2]["requirements"] = []
+        mapping["cases"][2]["surface_assertions"] = [
+            {"id": "library.function.install", "rationale": "Assert installed state."},
+            {"id": "library.signal.Test.ready", "rationale": "Assert readiness payload."},
+        ]
         self.write("coverage-data/mapping.json", mapping)
-        result = self.command()
-        self.assertEqual(result.returncode, 1)
-        self.assertIn("invalid explicit option assertion", result.stderr)
+        for observed, status, interface in ((False, "passed", "library"),
+                                             (True, "passed", "library"),
+                                             (True, "failed", "library"),
+                                             (True, "passed", "setup")):
+            with self.subTest(observed=observed, status=status, interface=interface):
+                report = self.execution_report(("not-selected", "not-selected", status))
+                command = report["results"][2]["evidence"][0]
+                command["api_calls"] = ["install", "install"] if observed else []
+                command["signals"] = ["Test.ready", "Test.ready"] if observed else []
+                command["interface"] = interface
+                if interface == "setup":
+                    report["results"][2]["evidence"].append({
+                        "argv": ["/synthetic/client"], "interface": "library", "api_calls": [],
+                        "signals": [], "exit_status": 0, "stdout": "", "stderr": "",
+                    })
+                self.write("run.json", report)
+                result = self.command("--report", str(self.suite / "run.json"))
+                self.assertEqual(result.returncode, 0, result.stderr)
+                output = json.loads(result.stdout)
+                metrics = output["metrics"]
+                self.assertEqual(metrics["behaviors"]["library"]["total"], 1)
+                self.assertEqual(metrics["behaviors"]["library"]["implemented"], 0)
+                self.assertEqual(metrics["behaviors"]["library"]["passed"], 0)
+                credit = int(observed and status == "passed" and interface == "library")
+                for kind in ("library-function", "library-signal"):
+                    self.assertEqual(metrics["surfaces"][kind]["implemented"], 1)
+                    self.assertEqual(metrics["surfaces"][kind]["passed"], credit)
+                self.assertEqual(len(output["interface_evidence"]), 2 * credit)
+
+    def test_explicit_assertions_reject_wrong_interface_kind_duplicates_and_missing_rationale(
+        self,
+    ) -> None:
+        path = self.suite / "coverage-data/mapping.json"
+        original = path.read_text()
+        for index, identifier, duplicate, rationale in (
+            (0, "library.function.install", False, "Cross-interface"),
+            (2, "cli.command.install", False, "Cross-interface"),
+            (0, "cli.command.install", False, "Commands require behavior assertions"),
+            (2, "library.function.missing", False, "Unknown"),
+            (2, "library.function.install", True, "Duplicate"),
+            (2, "library.function.install", False, ""),
+        ):
+            with self.subTest(identifier=identifier, rationale=rationale):
+                mapping = json.loads(original)
+                assertions = [{"id": identifier, "rationale": rationale}]
+                mapping["cases"][index]["surface_assertions"] = assertions * (2 if duplicate else 1)
+                self.write("coverage-data/mapping.json", mapping)
+                result = self.command()
+                self.assertEqual(result.returncode, 1)
+                self.assertIn("invalid explicit surface assertion", result.stderr)
 
     def test_unobserved_signal_cannot_receive_reach_credit(self) -> None:
         path = self.suite / "coverage-data/surfaces.json"

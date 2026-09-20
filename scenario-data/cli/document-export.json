@@ -1,0 +1,240 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "documents.read",
+      "scenario": "documents-read",
+      "handler": "document_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus",
+        "sandbox",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Read an exported file through the sandbox's document grant.",
+      "preconditions": "Real private document portal, FUSE, installed fixture app and host file outside sandbox access.",
+      "expected": "Direct host read fails; document-path read returns exact content; default grant denies writes and preserves origin.",
+      "references": [
+        "doc/flatpak-document-export.xml"
+      ]
+    },
+    {
+      "id": "documents.write",
+      "scenario": "documents-write",
+      "handler": "document_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus",
+        "sandbox",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Grant and revoke sandbox document write access.",
+      "preconditions": "Private real document portal and sandbox app with a readable export.",
+      "expected": "Write grant changes origin; revocation denies subsequent writes while reads and previous content survive.",
+      "references": [
+        "doc/flatpak-document-export.xml"
+      ]
+    },
+    {
+      "id": "documents.unique",
+      "scenario": "documents-unique",
+      "handler": "document_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ],
+      "description": "Create an independent document ID for an already exported file.",
+      "preconditions": "Private real document portal with one existing export.",
+      "expected": "Ordinary export reuses the ID; unique export has a distinct ID and independent grants; removing it preserves original export.",
+      "references": [
+        "doc/flatpak-document-export.xml"
+      ]
+    },
+    {
+      "id": "documents.permissions",
+      "scenario": "documents-permissions",
+      "handler": "document_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ],
+      "description": "Round-trip each document permission through allow and forbid options.",
+      "preconditions": "Private real document portal with a read-only export.",
+      "expected": "Public portal Info reports exact permissions after each grant/revoke and after granting two app IDs together.",
+      "references": [
+        "doc/flatpak-document-export.xml"
+      ]
+    },
+    {
+      "id": "documents.noexist",
+      "scenario": "documents-noexist",
+      "handler": "document_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ],
+      "description": "Export a path before its file exists.",
+      "preconditions": "Private real document portal and absent file in an existing directory.",
+      "expected": "Ordinary export fails; noexist returns a grant without creating origin; later content is readable through that grant.",
+      "references": [
+        "doc/flatpak-document-export.xml"
+      ]
+    },
+    {
+      "id": "documents.transient",
+      "scenario": "documents-transient",
+      "handler": "document_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ],
+      "description": "Compare transient and persistent exports across portal restart.",
+      "preconditions": "Private real document portal with one persistent export and one transient export.",
+      "expected": "Both exports exist before restart; only persistent ID, content and permissions remain afterward.",
+      "references": [
+        "doc/flatpak-document-export.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "documents.read",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.document-export.any.read-grant"
+      ],
+      "rationale": "Sandbox reads exact exported content despite denied original path and cannot write through the default read grant.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.document-export.--app",
+          "rationale": "The named sandbox app receives a readable grant while direct host access remains denied."
+        }
+      ]
+    },
+    {
+      "behavior_id": "documents.write",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.document-export.any.write-revocation"
+      ],
+      "rationale": "A successful sandbox write proves the grant works; after revocation probe-level denial and unchanged origin prove write protection while reads still succeed.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.document-export.--allow-write",
+          "rationale": "Sandbox writes through the grant and changes the original file."
+        },
+        {
+          "id": "cli.option.document-export.--forbid-write",
+          "rationale": "Previously permitted sandbox writes fail after revocation and leave origin content intact."
+        }
+      ]
+    },
+    {
+      "behavior_id": "documents.unique",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.document-export.any.unique"
+      ],
+      "rationale": "Ordinary repeated export preserves ID; unique export differs and can be independently unexported.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.document-export.--unique",
+          "rationale": "Distinct document IDs and independent per-app grants contrast with ordinary ID reuse."
+        }
+      ]
+    },
+    {
+      "behavior_id": "documents.permissions",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent public portal Info checks exact per-app permission sets after each allow/forbid operation.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.document-export.--forbid-read",
+          "rationale": "Public Info reports no remaining grant after read revocation."
+        },
+        {
+          "id": "cli.option.document-export.--allow-delete",
+          "rationale": "Public Info adds delete to the app's permissions."
+        },
+        {
+          "id": "cli.option.document-export.--forbid-delete",
+          "rationale": "Public Info removes a previously granted delete permission."
+        },
+        {
+          "id": "cli.option.document-export.--allow-grant-permission",
+          "rationale": "Public Info adds grant-permissions to the app's permissions."
+        },
+        {
+          "id": "cli.option.document-export.--forbid-grant-permission",
+          "rationale": "Public Info removes a previously granted grant-permissions permission."
+        }
+      ]
+    },
+    {
+      "behavior_id": "documents.noexist",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Nonexistent-path rejection contrasts with a noexist grant that resolves independently created content.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.document-export.--noexist",
+          "rationale": "Absent-file export succeeds only with noexist, does not create origin, and exposes subsequently written content."
+        }
+      ]
+    },
+    {
+      "behavior_id": "documents.transient",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Restart removes transient ID while retaining persistent ID, permissions and content.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.document-export.--transient",
+          "rationale": "A persistent control survives the same portal restart that removes the transient export."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Real permission-store and document-portal processes run on the private case bus with isolated XDG directories. FUSE mounts are unmounted and checked during cleanup."
+  ]
+}

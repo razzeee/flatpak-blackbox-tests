@@ -192,7 +192,17 @@
       "requirements": [
         "library.remote.user.description-persistence"
       ],
-      "rationale": "Committed comment, description and homepage are each checked against literals on a newly opened installation."
+      "rationale": "Committed comment, description and homepage are each checked against literals on a newly opened installation.",
+      "surface_assertions": [
+        {
+          "id": "library.function.flatpak_remote_set_icon",
+          "rationale": "An explicit icon URL persists through save and a newly opened installation."
+        },
+        {
+          "id": "library.function.flatpak_remote_get_icon",
+          "rationale": "The reopened remote returns the independently supplied icon URL."
+        }
+      ]
     },
     {
       "behavior_id": "objects.remote-policy",

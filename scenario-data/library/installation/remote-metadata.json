@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "objects.remote-metadata",
+      "scenario": "objects-remote-metadata",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Refresh and persist remote metadata from an independently published summary.",
+      "preconditions": "Configured remote points at a copied fixture repository; OSTree fixture tool publishes two distinct literal titles.",
+      "expected": "Before each refresh the title differs; update_remote_sync fetches the new title and a reopened installation retains it.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_update_remote_sync"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "objects.remote-metadata",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent summary mutations contrast stale configuration with refreshed and reopened title values.",
+      "surface_assertions": [
+        {
+          "id": "library.function.flatpak_installation_update_remote_sync",
+          "rationale": "Each explicit refresh persists a different externally published title, verified on a new installation object."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Only the copied fixture's public OSTree repository is edited; the target's installation layout is never inspected."
+  ]
+}

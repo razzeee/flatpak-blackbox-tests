@@ -206,7 +206,13 @@
       "driver": "library",
       "profile": "user",
       "requirements": [],
-      "rationale": "Direct bundle success and repeat error are additional public checks; existing deprecated lifecycle obligation names different entry points."
+      "rationale": "Direct bundle success and repeat error are additional public checks; existing deprecated lifecycle obligation names different entry points.",
+      "surface_assertions": [
+        {
+          "id": "library.function.flatpak_installation_install_bundle",
+          "rationale": "Returned and queried commits match the independent bundle; repeating the call returns ALREADY_INSTALLED without changing deployment."
+        }
+      ]
     },
     {
       "behavior_id": "lifex.local-ref",
@@ -229,7 +235,13 @@
       "requirements": [
         "library.legacy.deferred-triggers"
       ],
-      "rationale": "Install/update/uninstall NO_TRIGGERS observed against real exported desktop MIME cache; run_triggers must refresh each deferred change."
+      "rationale": "Install/update/uninstall NO_TRIGGERS observed against real exported desktop MIME cache; run_triggers must refresh each deferred change.",
+      "surface_assertions": [
+        {
+          "id": "library.function.flatpak_installation_uninstall_full",
+          "rationale": "Direct uninstall removes the app's installed ref and defers removal of its MIME association until explicit triggers run."
+        }
+      ]
     }
   ],
   "client": {

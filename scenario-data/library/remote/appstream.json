@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "objects.appstream-timestamp",
+      "scenario": "objects-appstream-timestamp",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe AppStream refresh through the public timestamp file.",
+      "preconditions": "Independent AppStream repository, configured remote, two refreshes separated in time.",
+      "expected": "Default and explicit native architectures return the same retained GFile; each refresh updates that file's mtime within its measured time interval, even after releasing the remote object.",
+      "references": [
+        "common/flatpak-remote.c: flatpak_remote_get_appstream_timestamp"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "objects.appstream-timestamp",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independently bounded refresh times establish that the returned public file tracks refresh attempts and outlives its remote object.",
+      "surface_assertions": [
+        {
+          "id": "library.function.flatpak_remote_get_appstream_timestamp",
+          "rationale": "Returned native/default timestamp files match and update on each refresh after the remote is released."
+        }
+      ]
+    }
+  ],
+  "notes": []
+}

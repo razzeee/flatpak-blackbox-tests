@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "objects.interaction-properties",
+      "scenario": "objects-interaction-properties",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ],
+      "description": "Round-trip installation and transaction no-interaction properties.",
+      "preconditions": "Fresh isolated user installation and separately constructed transactions.",
+      "expected": "Defaults are false; transactions inherit current installation setting; explicit transaction overrides work in both directions without modifying installation or fresh objects.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_set_no_interaction",
+        "common/flatpak-transaction.c: flatpak_transaction_set_no_interaction"
+      ]
+    },
+    {
+      "id": "objects.unused-operation-property",
+      "scenario": "objects-unused-operation-property",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ],
+      "description": "Round-trip inclusion of unused uninstall operations on a transaction.",
+      "preconditions": "Fresh isolated installation and two independent transaction objects.",
+      "expected": "Getter defaults to false and follows true/false/true changes; another transaction retains its default.",
+      "references": [
+        "common/flatpak-transaction.c: flatpak_transaction_set_include_unused_uninstall_ops"
+      ]
+    },
+    {
+      "id": "objects.operation-names",
+      "scenario": "objects-operation-names",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak"
+      ],
+      "description": "Convert each public transaction operation type to its name.",
+      "preconditions": "Four public lifecycle operation enum constants.",
+      "expected": "Each type returns its distinct install, update, install-bundle or uninstall name.",
+      "references": [
+        "common/flatpak-transaction.c: flatpak_transaction_operation_type_to_string"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "objects.interaction-properties",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Property and inheritance assertions do not establish suppression of authorization dialogs, so the full authorization obligations remain unmapped.",
+      "surface_assertions": [
+        {
+          "id": "library.function.flatpak_installation_get_no_interaction",
+          "rationale": "Getter follows both setter values and remains independent of transaction overrides."
+        },
+        {
+          "id": "library.function.flatpak_installation_set_no_interaction",
+          "rationale": "True/false/true changes are observed through getter and newly constructed transactions."
+        },
+        {
+          "id": "library.function.flatpak_transaction_get_no_interaction",
+          "rationale": "Getter reports inherited setting and both explicit override values."
+        },
+        {
+          "id": "library.function.flatpak_transaction_set_no_interaction",
+          "rationale": "Overrides change the transaction getter without changing installation setting."
+        }
+      ]
+    },
+    {
+      "behavior_id": "objects.unused-operation-property",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Both property values round-trip on one transaction while another retains the default.",
+      "surface_assertions": [
+        {
+          "id": "library.function.flatpak_transaction_get_include_unused_uninstall_ops",
+          "rationale": "Getter distinguishes default, enabled and disabled states."
+        },
+        {
+          "id": "library.function.flatpak_transaction_set_include_unused_uninstall_ops",
+          "rationale": "Repeated opposing setter values are observed through the getter and isolated from fresh transactions."
+        }
+      ]
+    },
+    {
+      "behavior_id": "objects.operation-names",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Four literal expected operation names reject constant or swapped enum conversions.",
+      "surface_assertions": [
+        {
+          "id": "library.function.flatpak_transaction_operation_type_to_string",
+          "rationale": "All four public operation types are compared with distinct expected names."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Standalone function reach does not imply that complete authorization or unused-runtime lifecycle behavior is covered."
+  ]
+}

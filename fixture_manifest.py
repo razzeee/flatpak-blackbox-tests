@@ -113,11 +113,16 @@ class FixtureContracts(TypedDict):
     commits: dict[str, dict[str, str]]
 
 
-class FixtureAuth(TypedDict):
+class _AuthRequired(TypedDict):
     directory: str
     ref: str
     commit: str
     payloads: list[str]
+
+
+class FixtureAuth(_AuthRequired, total=False):
+    authenticator_ref: str
+    authenticator_commit: str
 
 
 class FixtureExtras(TypedDict, total=False):
@@ -373,6 +378,9 @@ def parse_auth(value: object, path: str) -> FixtureAuth:
         "commit": _text(data, "commit", path),
         "payloads": strings(required(data, "payloads", path), f"{path}.payloads"),
     }
+    if "authenticator_ref" in data:
+        result["authenticator_ref"] = _text(data, "authenticator_ref", path)
+        result["authenticator_commit"] = _text(data, "authenticator_commit", path)
     _known(data, result, path)
     return result
 

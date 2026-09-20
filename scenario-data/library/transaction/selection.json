@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "objects.transaction-arch",
+      "scenario": "objects-transaction-arch",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Select the architecture of an architecture-unspecified flatpakref.",
+      "preconditions": "Independent repository advertises the same app and branch for native and foreign architectures.",
+      "expected": "Native/foreign/native default-architecture settings resolve exactly the selected full ref; aborting at ready leaves no deployments.",
+      "references": [
+        "common/flatpak-transaction.c: flatpak_transaction_set_default_arch"
+      ]
+    },
+    {
+      "id": "objects.transaction-reinstall",
+      "scenario": "objects-transaction-reinstall",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Allow an already-installed ref only when reinstall is enabled.",
+      "preconditions": "Independently known app commit and runtime already installed.",
+      "expected": "Transactions with reinstall disabled fail ALREADY_INSTALLED before and after the enabled transaction succeeds; deployed and downloaded commits remain exact.",
+      "references": [
+        "common/flatpak-transaction.c: flatpak_transaction_set_reinstall"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "objects.transaction-arch",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Opposing default architectures change resolution of an identical architecture-unspecified flatpakref.",
+      "surface_assertions": [
+        {
+          "id": "library.function.flatpak_transaction_set_default_arch",
+          "rationale": "Resolved operation identity follows native/foreign/native settings and cannot remain on host default."
+        }
+      ]
+    },
+    {
+      "behavior_id": "objects.transaction-reinstall",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "The same installed ref succeeds only with reinstall enabled between two disabled controls.",
+      "surface_assertions": [
+        {
+          "id": "library.function.flatpak_transaction_set_reinstall",
+          "rationale": "An enabled reinstall succeeds where both disabled controls produce ALREADY_INSTALLED; exact commits are preserved."
+        }
+      ]
+    }
+  ],
+  "notes": []
+}

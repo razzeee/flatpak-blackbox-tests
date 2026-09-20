@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "objects.transaction-pruning",
+      "scenario": "objects-transaction-pruning",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Control retention of unrelated orphan payload through transaction pruning settings.",
+      "preconditions": "Independent app A/B updates, a second app's removed local ref, and a server capable of withholding file content while serving metadata.",
+      "expected": "Disabled pruning retains the second app's payload for a content-free repull; enabled pruning removes it and a blocked-content repull fails. Each update deploys exact B before reset to A.",
+      "references": [
+        "common/flatpak-transaction.c: flatpak_transaction_set_disable_prune"
+      ]
+    },
+    {
+      "id": "objects.transaction-deltas",
+      "scenario": "objects-transaction-deltas",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Choose static deltas or loose payload during a transaction update.",
+      "preconditions": "Copied independent A/B repositories with an OSTree-generated A-to-B static delta and request-recording HTTP server.",
+      "expected": "Default/disabled/default delta settings alternate delta and loose-payload requests while all updates deploy exact B.",
+      "references": [
+        "common/flatpak-transaction.c: flatpak_transaction_set_disable_static_deltas"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "objects.transaction-pruning",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Identical blocked-content repulls distinguish retained from pruned unrelated orphan objects across opposing transaction settings.",
+      "surface_assertions": [
+        {
+          "id": "library.function.flatpak_transaction_set_disable_prune",
+          "rationale": "True/false/true settings alternate payload-free repull success with blocked-payload failure for an unrelated removed ref after updating A to B."
+        }
+      ]
+    },
+    {
+      "behavior_id": "objects.transaction-deltas",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Server observations distinguish actual static-delta use from ordinary file downloads with both transfer paths yielding independent B.",
+      "surface_assertions": [
+        {
+          "id": "library.function.flatpak_transaction_set_disable_static_deltas",
+          "rationale": "Opposing settings select delta URLs versus loose file payloads in recorded HTTP requests."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Network evidence observes public transfers; no private target repository files are inspected."
+  ]
+}

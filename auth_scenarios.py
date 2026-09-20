@@ -59,11 +59,29 @@ def protected_server(driver: Driver, directory: Path,
 def run(driver: Driver, repository: RepositoryServer, url: str,
          fixture: FixtureManifest, name: str) -> None:
     """Exercise isolated authentication decisions and observable deployment results."""
-    from run import terminate
+    from run import PrerequisiteError, terminate
 
     del repository, url
     extra = fixture["extras"]["auth"]
     directory = Path(fixture["directory"]) / extra["directory"] / "repo"
+    if name == "auth-install-required":
+        if "authenticator_ref" not in extra or "authenticator_commit" not in extra:
+            raise PrerequisiteError("prepared available authenticator candidate required")
+        candidate = extra["authenticator_ref"]
+        with protected_server(driver, directory, extra["payloads"]) as (auth_url, requests):
+            driver.success("remote", auth_url)
+            available = driver.cli_success("remote-info", "--user", "--show-commit",
+                                           "fixture", candidate)
+            driver.check(available == extra["authenticator_commit"],
+                         "independent authenticator candidate is advertised")
+            driver.cli_success("remote-modify", "--user", "--authenticator-install",
+                               f"--authenticator-name={candidate.split('/')[1]}", "fixture")
+            before = len(requests)
+            output = driver.success("auth-install-required", extra["ref"], candidate)
+            driver.check(output == "auth-install-declined", "client completed refusal assertions")
+            driver.check(not any(item["protected"] for item in requests[before:]),
+                         "declined authenticator installation prevents protected transfers")
+        return
     binary = driver.root / "fixture-auth-service"
     flags = subprocess.check_output(
         ["pkg-config", "--cflags", "--libs", "gio-2.0"], text=True)

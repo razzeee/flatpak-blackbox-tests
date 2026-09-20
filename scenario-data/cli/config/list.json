@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "options.config-list",
+      "scenario": "options-config-list",
+      "handler": "cli_surface_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ],
+      "description": "List two explicitly configured language settings.",
+      "preconditions": "Isolated user installation with independently chosen languages and extra-languages values.",
+      "expected": "Listed fields match both settings before and after replacing each value.",
+      "references": [
+        "doc/flatpak-config.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "options.config-list",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "The combined configuration listing follows two independent changes to two keys.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.config.--list",
+          "rationale": "Both listed key/value pairs match explicit configuration through two rounds of updates."
+        }
+      ]
+    }
+  ],
+  "notes": []
+}

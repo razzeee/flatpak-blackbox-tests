@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
-"""Remote configuration contracts, observed through separate client processes."""
+"""Test remote configuration through separate client processes."""
 
 from __future__ import annotations
 

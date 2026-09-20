@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "options.build-finish-env-fd",
+      "scenario": "options-build-finish-env-fd",
+      "handler": "cli_surface_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "build-tools",
+        "local-repository"
+      ],
+      "description": "Persist descriptor-supplied environment entries when finalizing a build.",
+      "preconditions": "Independent unfinalized build trees and two distinct NUL-separated descriptor payloads.",
+      "expected": "Each public metadata file contains exactly the supplied environment values, including empty strings and spaces/equal signs.",
+      "references": [
+        "doc/flatpak-build-finish.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "options.build-finish-env-fd",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independently supplied descriptor bytes become exact public metadata fields in two fresh trees.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-finish.--env-fd",
+          "rationale": "Finalized metadata distinguishes both input payloads and retains empty values."
+        }
+      ]
+    }
+  ],
+  "notes": []
+}

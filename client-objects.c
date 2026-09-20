@@ -572,6 +572,277 @@ installation_identity (const char *expected)
 }
 
 static void
+interaction_properties (void)
+{
+  g_autoptr(FlatpakInstallation) installation = open_user ();
+  g_assert_false (CALL_API (flatpak_installation_get_no_interaction, installation));
+  for (int setting = 0; setting < 3; setting++)
+    {
+      gboolean enabled = setting != 1;
+      CALL_API (flatpak_installation_set_no_interaction, installation, enabled);
+      g_assert_cmpint (CALL_API (flatpak_installation_get_no_interaction, installation), ==, enabled);
+      g_autoptr(GError) error = NULL;
+      g_autoptr(FlatpakTransaction) transaction = CALL_API (
+          flatpak_transaction_new_for_installation, installation, NULL, &error);
+      g_assert_no_error (error);
+      g_assert_nonnull (transaction);
+      g_assert_cmpint (CALL_API (flatpak_transaction_get_no_interaction, transaction), ==, enabled);
+      CALL_API (flatpak_transaction_set_no_interaction, transaction, !enabled);
+      g_assert_cmpint (CALL_API (flatpak_transaction_get_no_interaction, transaction), ==, !enabled);
+      g_assert_cmpint (CALL_API (flatpak_installation_get_no_interaction, installation), ==, enabled);
+      CALL_API (flatpak_transaction_set_no_interaction, transaction, enabled);
+      g_assert_cmpint (CALL_API (flatpak_transaction_get_no_interaction, transaction), ==, enabled);
+    }
+  g_autoptr(FlatpakInstallation) fresh = open_user ();
+  g_assert_false (CALL_API (flatpak_installation_get_no_interaction, fresh));
+}
+
+static void
+unused_operation_property (void)
+{
+  g_autoptr(FlatpakInstallation) installation = open_user ();
+  g_autoptr(GError) error = NULL;
+  g_autoptr(FlatpakTransaction) transaction = CALL_API (
+      flatpak_transaction_new_for_installation, installation, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_false (CALL_API (flatpak_transaction_get_include_unused_uninstall_ops, transaction));
+  for (int setting = 0; setting < 3; setting++)
+    {
+      gboolean enabled = setting != 1;
+      CALL_API (flatpak_transaction_set_include_unused_uninstall_ops, transaction, enabled);
+      g_assert_cmpint (CALL_API (flatpak_transaction_get_include_unused_uninstall_ops, transaction),
+                       ==, enabled);
+    }
+  g_autoptr(FlatpakTransaction) fresh = CALL_API (
+      flatpak_transaction_new_for_installation, installation, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_false (CALL_API (flatpak_transaction_get_include_unused_uninstall_ops, fresh));
+}
+
+static void
+operation_names (void)
+{
+  const struct {
+    FlatpakTransactionOperationType type;
+    const char *name;
+  } cases[] = {
+    { FLATPAK_TRANSACTION_OPERATION_INSTALL, "install" },
+    { FLATPAK_TRANSACTION_OPERATION_UPDATE, "update" },
+    { FLATPAK_TRANSACTION_OPERATION_INSTALL_BUNDLE, "install-bundle" },
+    { FLATPAK_TRANSACTION_OPERATION_UNINSTALL, "uninstall" },
+  };
+  for (size_t i = 0; i < G_N_ELEMENTS (cases); i++)
+    g_assert_cmpstr (CALL_API (flatpak_transaction_operation_type_to_string, cases[i].type),
+                     ==, cases[i].name);
+}
+
+static void
+latest_commit (const char *ref_string, const char *deployed, const char *latest)
+{
+  g_autoptr(FlatpakInstallation) installation = open_user ();
+  g_autoptr(GError) error = NULL;
+  g_autoptr(FlatpakRef) ref = CALL_API (flatpak_ref_parse, ref_string, &error);
+  g_assert_no_error (error);
+  g_autoptr(FlatpakInstalledRef) installed = CALL_API (flatpak_installation_get_installed_ref,
+      installation, CALL_API (flatpak_ref_get_kind, ref), CALL_API (flatpak_ref_get_name, ref),
+      CALL_API (flatpak_ref_get_arch, ref), CALL_API (flatpak_ref_get_branch, ref), NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (installed);
+  g_assert_cmpstr (CALL_API (flatpak_ref_get_commit, FLATPAK_REF (installed)), ==, deployed);
+  g_assert_cmpstr (CALL_API (flatpak_installed_ref_get_latest_commit, installed), ==, latest);
+}
+
+static void
+appstream_timestamp (const char *arch)
+{
+  g_autoptr(FlatpakInstallation) installation = open_user ();
+  g_autoptr(GError) error = NULL;
+  g_autoptr(FlatpakRemote) remote = lookup (installation, "fixture");
+  g_autoptr(GFile) explicit = CALL_API (flatpak_remote_get_appstream_timestamp, remote, arch);
+  g_autoptr(GFile) default_arch = CALL_API (flatpak_remote_get_appstream_timestamp, remote, NULL);
+  g_assert_nonnull (explicit);
+  g_assert_nonnull (default_arch);
+  g_assert_true (g_file_equal (explicit, default_arch));
+  g_clear_object (&remote);
+  for (int attempt = 0; attempt < 2; attempt++)
+    {
+      guint64 before = g_get_real_time () / G_USEC_PER_SEC;
+      g_assert_true (CALL_API (flatpak_installation_update_appstream_sync,
+          installation, "fixture", arch, NULL, NULL, &error));
+      g_assert_no_error (error);
+      g_autoptr(GFileInfo) info = g_file_query_info (explicit, G_FILE_ATTRIBUTE_TIME_MODIFIED,
+          G_FILE_QUERY_INFO_NONE, NULL, &error);
+      g_assert_no_error (error);
+      g_assert_nonnull (info);
+      guint64 modified = g_file_info_get_attribute_uint64 (info, G_FILE_ATTRIBUTE_TIME_MODIFIED);
+      g_assert_cmpuint (modified, >=, before);
+      g_assert_cmpuint (modified, <=, g_get_real_time () / G_USEC_PER_SEC);
+      if (attempt == 0)
+        g_usleep (2 * G_USEC_PER_SEC);
+    }
+}
+
+static void
+remote_metadata (const char *expected)
+{
+  g_autoptr(FlatpakInstallation) installation = open_user ();
+  g_autoptr(FlatpakRemote) remote = lookup (installation, "fixture");
+  g_autofree char *before = CALL_API (flatpak_remote_get_title, remote);
+  g_assert_cmpstr (before, !=, expected);
+  g_autoptr(GError) error = NULL;
+  g_assert_true (CALL_API (flatpak_installation_update_remote_sync,
+      installation, "fixture", NULL, &error));
+  g_assert_no_error (error);
+  g_autoptr(FlatpakRemote) refreshed = lookup (installation, "fixture");
+  g_autofree char *title = CALL_API (flatpak_remote_get_title, refreshed);
+  g_assert_cmpstr (title, ==, expected);
+  g_autoptr(FlatpakRemote) reopened = reopen_remote ("fixture");
+  g_autofree char *persisted = CALL_API (flatpak_remote_get_title, reopened);
+  g_assert_cmpstr (persisted, ==, expected);
+}
+
+typedef struct {
+  const char *ref;
+  gboolean seen;
+} ArchResolution;
+
+static gboolean
+arch_ready (FlatpakTransaction *transaction, ArchResolution *expected)
+{
+  TRACE_SIGNAL (FlatpakTransaction, "ready");
+  g_autolist(FlatpakTransactionOperation) operations =
+    CALL_API (flatpak_transaction_get_operations, transaction);
+  g_assert_cmpuint (g_list_length (operations), ==, 1);
+  FlatpakTransactionOperation *operation = operations->data;
+  g_assert_cmpstr (CALL_API (flatpak_transaction_operation_get_ref, operation), ==, expected->ref);
+  expected->seen = TRUE;
+  return FALSE;
+}
+
+static void
+transaction_arch (const char *name, const char *arch, const char *ref)
+{
+  g_autoptr(FlatpakInstallation) installation = open_user ();
+  g_autoptr(GError) error = NULL;
+  g_autoptr(FlatpakTransaction) transaction = CALL_API (
+      flatpak_transaction_new_for_installation, installation, NULL, &error);
+  g_assert_no_error (error);
+  CALL_API (flatpak_transaction_set_default_arch, transaction, arch);
+  CALL_API (flatpak_transaction_set_disable_dependencies, transaction, TRUE);
+  CALL_API (flatpak_transaction_set_disable_related, transaction, TRUE);
+  g_autoptr(FlatpakRemote) remote = lookup (installation, "fixture");
+  g_autofree char *url = CALL_API (flatpak_remote_get_url, remote);
+  g_autofree char *text = g_strdup_printf (
+      "[Flatpak Ref]\nVersion=1\nName=%s\nBranch=test\nUrl=%s\n"
+      "SuggestRemoteName=fixture\nIsRuntime=false\n", name, url);
+  g_autoptr(GBytes) bytes = g_bytes_new (text, strlen (text));
+  ArchResolution expected = { ref, FALSE };
+  g_signal_connect (transaction, "ready", G_CALLBACK (arch_ready), &expected);
+  gboolean added = CALL_API (flatpak_transaction_add_install_flatpakref, transaction, bytes, &error);
+  g_assert_no_error (error);
+  g_assert_true (added);
+  g_assert_false (CALL_API (flatpak_transaction_run, transaction, NULL, &error));
+  g_assert_error (error, FLATPAK_ERROR, FLATPAK_ERROR_ABORTED);
+  g_assert_true (expected.seen);
+  g_clear_error (&error);
+  g_autoptr(GPtrArray) installed = CALL_API (
+      flatpak_installation_list_installed_refs, installation, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_cmpuint (installed->len, ==, 0);
+}
+
+static void
+transaction_reinstall (const char *ref, const char *commit)
+{
+  g_autoptr(FlatpakInstallation) installation = open_user ();
+  for (int iteration = 0; iteration < 3; iteration++)
+    {
+      gboolean enabled = iteration == 1;
+      g_autoptr(GError) error = NULL;
+      g_autoptr(FlatpakTransaction) transaction = CALL_API (
+          flatpak_transaction_new_for_installation, installation, NULL, &error);
+      g_assert_no_error (error);
+      CALL_API (flatpak_transaction_set_reinstall, transaction, enabled);
+      gboolean success = CALL_API (flatpak_transaction_add_install,
+          transaction, "fixture", ref, NULL, &error);
+      if (success)
+        success = CALL_API (flatpak_transaction_run, transaction, NULL, &error);
+      if (enabled)
+        {
+          g_assert_true (success);
+          g_assert_no_error (error);
+        }
+      else
+        {
+          g_assert_false (success);
+          g_assert_error (error, FLATPAK_ERROR, FLATPAK_ERROR_ALREADY_INSTALLED);
+        }
+      latest_commit (ref, commit, commit);
+    }
+}
+
+static void
+transaction_update_option (const char *ref, const char *commit, const char *option,
+                           const char *setting)
+{
+  g_autoptr(FlatpakInstallation) installation = open_user ();
+  g_autoptr(GError) error = NULL;
+  g_autoptr(FlatpakTransaction) transaction = CALL_API (
+      flatpak_transaction_new_for_installation, installation, NULL, &error);
+  g_assert_no_error (error);
+  gboolean enabled = g_str_equal (setting, "true");
+  if (g_str_equal (option, "disable-prune"))
+    CALL_API (flatpak_transaction_set_disable_prune, transaction, enabled);
+  else
+    {
+      g_assert_cmpstr (option, ==, "disable-static-deltas");
+      CALL_API (flatpak_transaction_set_disable_static_deltas, transaction, enabled);
+    }
+  g_assert_true (CALL_API (flatpak_transaction_add_update, transaction, ref, NULL, NULL, &error));
+  g_assert_no_error (error);
+  g_assert_true (CALL_API (flatpak_transaction_run, transaction, NULL, &error));
+  g_assert_no_error (error);
+  latest_commit (ref, commit, commit);
+}
+
+static void
+minimum_free_space (void)
+{
+  g_autoptr(FlatpakInstallation) installation = open_user ();
+  g_autoptr(GError) error = NULL;
+  guint64 original = G_MAXUINT64;
+  g_assert_true (CALL_API (flatpak_installation_get_min_free_space_bytes,
+      installation, &original, &error));
+  g_assert_no_error (error);
+  g_assert_cmpuint (original, !=, G_MAXUINT64);
+  g_autoptr(GFile) path = CALL_API (flatpak_installation_get_path, installation);
+  g_autofree char *name = g_file_get_path (path);
+  g_autofree char *away_name = g_strconcat (name, ".unavailable", NULL);
+  g_autoptr(GFile) away = g_file_new_for_path (away_name);
+  g_assert_true (g_file_move (path, away, G_FILE_COPY_NONE, NULL, NULL, NULL, &error));
+  g_assert_no_error (error);
+  g_assert_true (g_file_replace_contents (path, "not a directory", 15, NULL, FALSE,
+      G_FILE_CREATE_NONE, NULL, NULL, &error));
+  g_assert_no_error (error);
+  g_autoptr(GError) unavailable = NULL;
+  guint64 unused = G_MAXUINT64;
+  gboolean success = CALL_API (flatpak_installation_get_min_free_space_bytes,
+      installation, &unused, &unavailable);
+  /* Restore the whole public installation location before checking the error. */
+  g_assert_true (g_file_delete (path, NULL, &error));
+  g_assert_no_error (error);
+  g_assert_true (g_file_move (away, path, G_FILE_COPY_NONE, NULL, NULL, NULL, &error));
+  g_assert_no_error (error);
+  g_assert_false (success);
+  g_assert_nonnull (unavailable);
+  guint64 restored = G_MAXUINT64;
+  g_assert_true (CALL_API (flatpak_installation_get_min_free_space_bytes,
+      installation, &restored, &error));
+  g_assert_no_error (error);
+  g_assert_cmpuint (restored, ==, original);
+}
+
+static void
 timestamp_case (void)
 {
   g_autoptr(FlatpakInstallation) installation = open_user ();
@@ -670,6 +941,44 @@ blackbox_objects_main (int argc, char **argv)
     eol_case ();
   else if (strcmp (command, "objects-appdata") == 0)
     appdata_case ();
+  else if (strcmp (command, "objects-interaction-properties") == 0)
+    interaction_properties ();
+  else if (strcmp (command, "objects-unused-operation-property") == 0)
+    unused_operation_property ();
+  else if (strcmp (command, "objects-operation-names") == 0)
+    operation_names ();
+  else if (strcmp (command, "objects-min-free-space") == 0)
+    minimum_free_space ();
+  else if (strcmp (command, "objects-latest-commit") == 0)
+    {
+      g_assert_cmpint (argc, ==, 5);
+      latest_commit (argv[2], argv[3], argv[4]);
+    }
+  else if (strcmp (command, "objects-appstream-timestamp") == 0)
+    {
+      g_assert_cmpint (argc, ==, 3);
+      appstream_timestamp (argv[2]);
+    }
+  else if (strcmp (command, "objects-remote-metadata") == 0)
+    {
+      g_assert_cmpint (argc, ==, 3);
+      remote_metadata (argv[2]);
+    }
+  else if (strcmp (command, "objects-transaction-arch") == 0)
+    {
+      g_assert_cmpint (argc, ==, 5);
+      transaction_arch (argv[2], argv[3], argv[4]);
+    }
+  else if (strcmp (command, "objects-transaction-reinstall") == 0)
+    {
+      g_assert_cmpint (argc, ==, 4);
+      transaction_reinstall (argv[2], argv[3]);
+    }
+  else if (strcmp (command, "objects-transaction-update-option") == 0)
+    {
+      g_assert_cmpint (argc, ==, 6);
+      transaction_update_option (argv[2], argv[3], argv[4], argv[5]);
+    }
   else if (strcmp (command, "objects-remote-ownership") == 0)
     remote_ownership ();
   else if (strcmp (command, "objects-remote-file") == 0)

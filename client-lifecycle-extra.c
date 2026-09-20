@@ -151,7 +151,8 @@ direct (FlatpakInstallation *installation, GKeyFile *data, const char *action)
         NULL, NULL, NULL, NULL, &error);
   else
     result = CALL_API (flatpak_installation_install_full, installation,
-        g_str_equal (action, "pull") ? FLATPAK_INSTALL_FLAGS_NO_DEPLOY :
+        (g_str_equal (action, "pull") || g_str_equal (action, "pull-missing"))
+        ? FLATPAK_INSTALL_FLAGS_NO_DEPLOY :
         (g_str_equal (action, "local") || g_str_equal (action, "local-missing"))
         ? FLATPAK_INSTALL_FLAGS_NO_PULL : FLATPAK_INSTALL_FLAGS_NO_TRIGGERS,
         "lifecycle", kind, parts[1], parts[2], parts[3], NULL, NULL, NULL, NULL, &error);
@@ -161,10 +162,12 @@ direct (FlatpakInstallation *installation, GKeyFile *data, const char *action)
       g_assert_error (error, FLATPAK_ERROR, FLATPAK_ERROR_ONLY_PULLED);
       installed (installation, ref, FALSE);
     }
-  else if (g_str_equal (action, "local-missing"))
+  else if (g_str_equal (action, "local-missing") || g_str_equal (action, "pull-missing"))
     {
       g_assert_null (result);
       g_assert_nonnull (error);
+      if (g_str_equal (action, "pull-missing"))
+        g_assert_false (g_error_matches (error, FLATPAK_ERROR, FLATPAK_ERROR_ONLY_PULLED));
       installed (installation, ref, FALSE);
     }
   else

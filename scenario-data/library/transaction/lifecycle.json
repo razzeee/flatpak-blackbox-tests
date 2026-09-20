@@ -160,7 +160,13 @@
       "driver": "library",
       "profile": "user",
       "requirements": [],
-      "rationale": "Additional public force_uninstall contract has no exact row in the fixed denominator; held running files distinguish TRUE from FALSE."
+      "rationale": "Additional public force_uninstall contract has no exact row in the fixed denominator; held running files distinguish TRUE from FALSE.",
+      "surface_assertions": [
+        {
+          "id": "library.function.flatpak_transaction_set_force_uninstall",
+          "rationale": "A held running deployment remains with force disabled and loses its files when force is enabled."
+        }
+      ]
     },
     {
       "behavior_id": "transaction.file-uri-origin",

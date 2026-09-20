@@ -117,6 +117,32 @@ def _tx(driver: Driver, mode: str, action: str, ref: str, *,
     return rows
 
 
+@contextmanager
+def _fresh_transaction_state(driver: Driver, name: str) -> Iterator[None]:
+    root = driver.root / "transaction-states" / name
+    directories = {
+        "HOME": root / "home",
+        "XDG_DATA_HOME": root / "home/data",
+        "XDG_CONFIG_HOME": root / "home/config",
+        "XDG_CACHE_HOME": root / "home/cache",
+        "XDG_STATE_HOME": root / "home/state",
+        "XDG_RUNTIME_DIR": root / "runtime",
+        "TMPDIR": root / "tmp",
+    }
+    previous = {key: driver.env.get(key) for key in directories}
+    for path in directories.values():
+        path.mkdir(parents=True, mode=0o700, exist_ok=True)
+    driver.env.update({key: str(path) for key, path in directories.items()})
+    try:
+        yield
+    finally:
+        for key, value in previous.items():
+            if value is None:
+                driver.env.pop(key, None)
+            else:
+                driver.env[key] = value
+
+
 def _rows(rows: list[list[str]], label: str) -> list[list[str]]:
     return [row[1:] for row in rows if row[0] == label]
 
@@ -223,7 +249,7 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
         return
 
     if name in ("tx-metadata", "tx-independent-errors", "tx-completed-survive",
-                "tx-progress", "tx-rate",
+                 "tx-progress", "tx-rate", "tx-frequency",
                 "tx-eol", "tx-eol-rebase", "tx-rebase-success", "tx-rebase-failure",
                 "tx-rebase-null"):
         _supplemental(driver, fixture, name)
@@ -372,6 +398,28 @@ def _supplemental(driver: Driver, fixture: FixtureManifest, name: str) -> None:
                 expected.read_string(extra["metadata"][f"{version}:{extra['apps'][0]}"])
                 driver.check(actual == expected, f"{label} must equal complete fixture {version}")
             state(first, "A")
+        elif name == "tx-frequency":
+            counts = []
+            for index, mode in enumerate(("frequency-fast", "frequency-slow", "frequency-fast")):
+                with _fresh_transaction_state(driver, f"frequency-{index}"):
+                    server.directory = directory / "A"
+                    server.slow = False
+                    driver.success("remote-edit", "fixture", url, "Supplemental transactions", "1")
+                    driver.success("install", first)
+                    state(first, "A")
+                    server.directory = directory / "B"
+                    server.slow = True
+                    rows = _tx(driver, mode, "update", first)
+                    samples = {int(row[1]) for row in _rows(rows, "progress")}
+                    driver.check(max(samples) >= 1024 * 1024,
+                                 "each cadence control transfers independent payload")
+                    counts.append(len(samples - {0, max(samples)}))
+                    state(first, "B")
+            driver.check(counts[1] >= 1 and min(counts[0], counts[2]) > 2 * counts[1],
+                         f"50ms updates sample advancing bytes more often than 1000ms: {counts}")
+            driver.evidence.append({"observation": "progress-update-cadence",
+                                    "data": json_value({"interval_ms": [50, 1000, 50],
+                                                        "advancing_samples": counts})})
         elif name in ("tx-progress", "tx-rate"):
             server.slow = True
             rows = _tx(driver, "progress" if name == "tx-progress" else "rate", "update", first)

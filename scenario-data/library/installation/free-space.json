@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "objects.min-free-space",
+      "scenario": "objects-min-free-space",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Report minimum-free-space query failure and recovery when installation storage is unavailable.",
+      "preconditions": "Fresh private user installation; its whole public location can be moved and restored.",
+      "expected": "Initial query succeeds and writes its result; replacing installation directory with a file causes false plus an error; restoring the directory recovers the original value.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_get_min_free_space_bytes"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "objects.min-free-space",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Public getter distinguishes available, unavailable and restored storage. This does not establish interpretation of custom repository configuration.",
+      "surface_assertions": [
+        {
+          "id": "library.function.flatpak_installation_get_min_free_space_bytes",
+          "rationale": "Success writes a value, unavailable public installation storage produces an error, and restoration recovers the initial result."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "The whole location returned by get_path is moved; no private repository paths or configuration files are accessed."
+  ]
+}

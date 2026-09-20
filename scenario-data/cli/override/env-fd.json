@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "options.override-env-fd",
+      "scenario": "options-override-env-fd",
+      "handler": "cli_surface_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "user-installation"
+      ],
+      "description": "Persist descriptor-supplied environment overrides for one app.",
+      "preconditions": "Two app IDs with an independent control override and two descriptor payloads.",
+      "expected": "Public override output shows exactly the new empty/nonempty values on the selected app while control app is unchanged.",
+      "references": [
+        "doc/flatpak-override.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "options.override-env-fd",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Each descriptor replaces the selected app's values while an unrelated app retains its control value.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.override.--env-fd",
+          "rationale": "Exact descriptor values persist through public override inspection with app isolation."
+        }
+      ]
+    }
+  ],
+  "notes": []
+}

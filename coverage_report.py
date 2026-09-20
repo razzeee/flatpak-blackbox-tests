@@ -209,7 +209,7 @@ class CoverageModel:
                     raise ValueError(f"invalid or duplicate case: {key}")
                 self.cases[key] = executable_behavior(behavior)
         self.mapping: dict[tuple[str, str, str], set[str]] = {}
-        self.option_assertions: dict[tuple[str, str, str], set[str]] = {}
+        self.surface_assertions: dict[tuple[str, str, str], set[str]] = {}
         mappings = load_mappings(self.suite)
         for mapping in mappings:
             key = (mapping["behavior_id"], mapping["driver"], mapping["profile"])
@@ -231,15 +231,17 @@ class CoverageModel:
                         f"mapping cannot cover interface/profile: {identifier} from {key}"
                     )
             self.mapping[key] = set(ids)
-            options = set()
+            assertions = set()
+            allowed_kinds = ({"cli-option"} if key[1] == "cli" else
+                             {"library-function", "library-signal"})
             for assertion in mapping.get("surface_assertions", []):
                 identifier = assertion["id"]
-                if key[1] != "cli" or identifier not in self.surfaces or (
-                    self.surfaces[identifier]["kind"] != "cli-option"
-                ) or not assertion.get("rationale") or identifier in options:
-                    raise ValueError(f"invalid explicit option assertion: {identifier} from {key}")
-                options.add(identifier)
-            self.option_assertions[key] = options
+                if identifier not in self.surfaces or (
+                    self.surfaces[identifier]["kind"] not in allowed_kinds
+                ) or not assertion.get("rationale") or identifier in assertions:
+                    raise ValueError(f"invalid explicit surface assertion: {identifier} from {key}")
+                assertions.add(identifier)
+            self.surface_assertions[key] = assertions
         self.definition = self.snapshot()
 
     def snapshot(self) -> Definition:
@@ -325,7 +327,7 @@ class CoverageModel:
                         result_statuses[result["status"]] += 1
                         if result["status"] != "passed":
                             continue
-                        credited = set(self.option_assertions.get(case_key(result), set()))
+                        asserted = set(self.surface_assertions.get(case_key(result), set()))
                         observed_functions = {
                             f"library.function.{name}" for command in result.get("evidence", [])
                             if command.get("interface") == "library"
@@ -342,13 +344,15 @@ class CoverageModel:
                                     "behavior_id": result["behavior_id"],
                                     "driver": result["driver"], "profile": result["profile"],
                             })
-                            for surface in self.requirements[identifier]["surfaces"]:
-                                kind = self.surfaces[surface]["kind"]
-                                if kind == "library-function" and surface not in observed_functions:
-                                    continue
-                                if kind == "library-signal" and surface not in observed_signals:
-                                    continue
-                                credited.add(surface)
+                            asserted.update(self.requirements[identifier]["surfaces"])
+                        credited = set()
+                        for surface in asserted:
+                            kind = self.surfaces[surface]["kind"]
+                            if kind == "library-function" and surface not in observed_functions:
+                                continue
+                            if kind == "library-signal" and surface not in observed_signals:
+                                continue
+                            credited.add(surface)
                         passed_surfaces.update(credited)
                         for surface in sorted(credited):
                             interface_evidence.setdefault(surface, []).append({
@@ -358,8 +362,8 @@ class CoverageModel:
         implemented = set().union(*self.mapping.values()) if self.mapping else set()
         reached = {surface for identifier in implemented
                    for surface in self.requirements[identifier]["surfaces"]}
-        if self.option_assertions:
-            reached.update(set().union(*self.option_assertions.values()))
+        if self.surface_assertions:
+            reached.update(set().union(*self.surface_assertions.values()))
         metrics: CoverageMetrics = {
             "behaviors": {interface: metric(
                 {key for key, item in self.requirements.items() if item["interface"] == interface},

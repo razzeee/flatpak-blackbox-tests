@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "query-options.remotes-details",
+      "scenario": "query-options-remotes-details",
+      "handler": "query_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Show configured remote details after a metadata change.",
+      "preconditions": "Two named remotes have independently selected titles and distinct URLs.",
+      "expected": "Details equal columns=all and differ from ordinary output; exact names, titles and URLs persist in two rows before and after changing one title.",
+      "references": [
+        "doc/flatpak-remotes.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "query-options.remotes-details",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent remote properties back the alias comparison, with a changed-title control against stale output.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remotes.--show-details",
+          "rationale": "Detailed rows expose independently supplied URLs and changing titles while matching the documented all-columns output."
+        }
+      ]
+    }
+  ],
+  "notes": []
+}

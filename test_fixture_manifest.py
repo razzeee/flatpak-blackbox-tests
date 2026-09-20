@@ -251,6 +251,21 @@ class FixtureManifestTests(unittest.TestCase):
             with self.assertRaisesRegex(ValidationError, "duplicate JSON key"):
                 load_fixture(path)
 
+    def test_authenticator_candidate_fields_are_optional_but_paired_and_typed(self) -> None:
+        auth = {"directory": "auth", "ref": "runtime/org.example.Protected/x86_64/test",
+                "commit": "protected-commit", "payloads": ["objects/payload.filez"]}
+        candidate = {"authenticator_ref": "app/org.example.Auth/x86_64/autoinstall",
+                     "authenticator_commit": "candidate-commit"}
+        for extra in ({}, candidate):
+            value = {**basic(), "extras": {"auth": {**auth, **extra}}}
+            self.assertEqual(parse_fixture(value)["extras"]["auth"], {**auth, **extra})
+        for invalid_extra in ({"authenticator_ref": candidate["authenticator_ref"]},
+                      {"authenticator_commit": candidate["authenticator_commit"]},
+                      {**candidate, "authenticator_ref": False},
+                      {**candidate, "authenticator_commit": []}):
+            with self.subTest(extra=invalid_extra), self.assertRaises(ValidationError):
+                parse_fixture({**basic(), "extras": {"auth": {**auth, **invalid_extra}}})
+
     def test_current_prepared_fixture(self) -> None:
         manifest = os.environ.get("BLACKBOX_TEST_FIXTURE")
         if manifest is None:
