@@ -2,6 +2,7 @@
 import { z } from "zod";
 import { baselineSchema } from "./baselines.ts";
 import { targetKey } from "./targets.ts";
+import { failureDetailsSchema } from "./failureDetails.ts";
 
 export const tracks = {
   pinned: "Pinned baseline",
@@ -36,6 +37,7 @@ export const caseTimingSchema = z.object({
   driver: z.enum(["cli", "library"]),
   profile: z.enum(["user", "system", "any"]),
   status: caseStatusSchema,
+  failure_details: failureDetailsSchema.optional(),
   duration_seconds: secondsSchema.optional(),
   timings: z
     .object({

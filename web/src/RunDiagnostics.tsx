@@ -238,8 +238,8 @@ export function RunDiagnostics({
         <>
           <p>
             {reference
-              ? "Added/removed contributions are labelled separately; missing timings are never zero. Select a case to inspect its history."
-              : "Select a case to inspect its timing history."}
+              ? "Added/removed contributions are labelled separately; missing timings are never zero. Select a case to inspect its failure details and history."
+              : "Select a case to inspect its failure details and timing history."}
           </p>
           <div className="table-scroll">
             <table className="case-comparison">

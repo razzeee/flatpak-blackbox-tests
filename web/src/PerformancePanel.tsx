@@ -5,6 +5,7 @@ import { performanceChart } from "./chart.ts";
 import { utcDay, type Snapshot } from "./history.ts";
 import { seconds } from "./format.ts";
 import { RunDiagnostics, focusSection } from "./RunDiagnostics.tsx";
+import { CaseFailureDetails } from "./CaseFailureDetails.tsx";
 import {
   caseOptions,
   caseRecord,
@@ -122,7 +123,7 @@ export function PerformancePanel({
         }}
       />
       <h3 id="case-history" tabIndex={-1}>
-        Per-case duration
+        Case details and history
       </h3>
       {selected ? (
         <>
@@ -140,6 +141,7 @@ export function PerformancePanel({
               ))}
             </select>
           </label>
+          <CaseFailureDetails item={caseRecord(run, selected.key)} run={run} />
           {entries.some((entry) => {
             const item = caseRecord(entry, selected.key);
             return timingNames.some((name) => caseSeconds(item, name) !== null);

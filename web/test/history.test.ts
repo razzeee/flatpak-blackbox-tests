@@ -146,6 +146,11 @@ test("snapshot CLI handles absent reports and update preserves existing history"
       status: "unsupported",
     },
   ]);
+  retained.performance!.cases[1]!.failure_details = {
+    error: "Previously recorded failure",
+    evidence: [],
+    truncated: false,
+  };
   for (const value of [gap, entry(), entry(undefined, "upstream"), retained]) {
     await writeFile(snapshot, JSON.stringify(value));
     execFileSync(process.execPath, [
@@ -231,7 +236,10 @@ print(json.dumps({
     complete: boolean;
     target_version?: string;
     duration_seconds?: number;
-    results: CaseTiming[];
+    results: (CaseTiming & {
+      error?: string;
+      evidence?: { stderr: string }[];
+    })[];
   };
   await writeFile(reportPath, JSON.stringify(report));
   const options = {
@@ -264,6 +272,9 @@ print(json.dumps({
   report.results[0]!.status = "not-selected";
   report.results[1]!.status = "unsupported";
   report.results[2]!.status = "setup-error";
+  report.results[2]!.error = "Fixture preparation failed";
+  report.results[3]!.error = "Expected installed ref";
+  report.results[3]!.evidence = [{ stderr: "Remote unavailable" }];
   delete report.results[2]!.duration_seconds;
   delete report.results[2]!.timings;
   await writeFile(reportPath, JSON.stringify(report));
@@ -272,7 +283,18 @@ print(json.dumps({
   assert.equal(timed.performance?.duration_seconds, 450);
   assert.equal(timed.performance?.cases.length, report.results.length);
   assert.equal(timed.performance?.cases_complete, true);
-  assert.deepEqual(timed.performance?.cases[3], report.results[3]);
+  assert.equal(
+    timed.performance?.cases[3]?.failure_details?.error,
+    "Expected installed ref",
+  );
+  assert.equal(
+    timed.performance?.cases[3]?.failure_details?.evidence[0]?.body,
+    "Remote unavailable",
+  );
+  assert.equal(
+    timed.performance?.cases[2]?.failure_details?.error,
+    "Fixture preparation failed",
+  );
   assert.equal(timed.performance?.cases[0]?.status, "not-selected");
   assert.equal(timed.performance?.cases[1]?.status, "unsupported");
   assert.equal(timed.performance?.cases[2]?.status, "setup-error");

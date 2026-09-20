@@ -84,6 +84,26 @@ select {
   max-width: 100%;
   margin: 8px 0 20px;
 }
+.failure-details {
+  border-left: 3px solid var(--red);
+  padding: 4px 16px 12px;
+  margin: 20px 0;
+  background: var(--surface);
+}
+.failure-details pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 24rem;
+  overflow: auto;
+  font-size: 0.85rem;
+}
+.failure-details summary {
+  cursor: pointer;
+  padding: 6px 0;
+}
+.failure-details details {
+  margin-top: 0;
+}
 .run-summary {
   margin: 20px 0;
 }
