@@ -8012,6 +8012,4036 @@
   },
   {
     "schema": 1,
+    "track": "pinned",
+    "timestamp": "2026-09-20T01:19:05.676Z",
+    "complete": true,
+    "verification": "current",
+    "suite_commit": "950ecb7f058f42517b91d394cbe8db1000b82e66",
+    "target_commit": "1a6ec6a1f720fb30d76c76e656ac624fcaa237e9",
+    "baseline": {
+      "version": "1.19.1",
+      "commit": "1a6ec6a1f720fb30d76c76e656ac624fcaa237e9"
+    },
+    "target_version": "Flatpak 1.19.1",
+    "run_url": "https://github.com/razzeee/flatpak-blackbox-tests/actions/runs/35480752022",
+    "fingerprint": "8d59b70a3f439ff7e7ec6cc632ab6ceb2cd79dc2cb0c5c1e55e22c33934403b1",
+    "metrics": {
+      "cli": {
+        "total": 136,
+        "implemented": 126,
+        "implemented_percent": 92.65,
+        "passed": 119,
+        "passed_percent": 87.5
+      },
+      "library": {
+        "total": 163,
+        "implemented": 154,
+        "implemented_percent": 94.48,
+        "passed": 147,
+        "passed_percent": 90.18
+      },
+      "cli-command": {
+        "total": 44,
+        "implemented": 40,
+        "implemented_percent": 90.91,
+        "passed": 38,
+        "passed_percent": 86.36
+      },
+      "cli-option": {
+        "total": 624,
+        "implemented": 397,
+        "implemented_percent": 63.62,
+        "passed": 394,
+        "passed_percent": 63.14
+      },
+      "library-function": {
+        "total": 223,
+        "implemented": 199,
+        "implemented_percent": 89.24,
+        "passed": 192,
+        "passed_percent": 86.1
+      },
+      "library-signal": {
+        "total": 14,
+        "implemented": 13,
+        "implemented_percent": 92.86,
+        "passed": 13,
+        "passed_percent": 92.86
+      }
+    },
+    "performance": {
+      "duration_seconds": 380.157658239,
+      "case_statuses": {
+        "passed": 313,
+        "failed": 17
+      },
+      "cases": [
+        {
+          "behavior_id": "lifecycle.user",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.7882938780000046,
+          "timings": {
+            "setup_seconds": 0.036854585000000384,
+            "execution_seconds": 0.4542660839999968,
+            "cleanup_seconds": 0.29717320900000743
+          }
+        },
+        {
+          "behavior_id": "update.failed-download-preserves-installation",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.7641126950000086,
+          "timings": {
+            "setup_seconds": 0.02825721700000372,
+            "execution_seconds": 0.31567216799999187,
+            "cleanup_seconds": 0.42018331000001297
+          }
+        },
+        {
+          "behavior_id": "update.already-current",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.7439066159999896,
+          "timings": {
+            "setup_seconds": 0.027016586000002007,
+            "execution_seconds": 0.29393882299999063,
+            "cleanup_seconds": 0.422951206999997
+          }
+        },
+        {
+          "behavior_id": "install.already-installed",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.7425135889999979,
+          "timings": {
+            "setup_seconds": 0.02697035300001005,
+            "execution_seconds": 0.29144933599999945,
+            "cleanup_seconds": 0.42409389999998837
+          }
+        },
+        {
+          "behavior_id": "install.missing-ref",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5593389330000065,
+          "timings": {
+            "setup_seconds": 0.02683747100000744,
+            "execution_seconds": 0.04408375999999237,
+            "cleanup_seconds": 0.48841770200000667
+          }
+        },
+        {
+          "behavior_id": "lifecycle.absent-ref",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6167739330000046,
+          "timings": {
+            "setup_seconds": 0.026266058000004477,
+            "execution_seconds": 0.3825215299999911,
+            "cleanup_seconds": 0.207986345000009
+          }
+        },
+        {
+          "behavior_id": "update.retry-after-failed-download",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.8524201860000034,
+          "timings": {
+            "setup_seconds": 0.026734646999997835,
+            "execution_seconds": 0.43408267099999875,
+            "cleanup_seconds": 0.39160286800000677
+          }
+        },
+        {
+          "behavior_id": "remotes.user.configuration",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5893232580000074,
+          "timings": {
+            "setup_seconds": 0.026576571000006766,
+            "execution_seconds": 0.1732476069999933,
+            "cleanup_seconds": 0.3894990800000073
+          }
+        },
+        {
+          "behavior_id": "build.options.oci",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5331565010000077,
+          "timings": {
+            "setup_seconds": 0.02676575700000683,
+            "execution_seconds": 0.03730361599998844,
+            "cleanup_seconds": 0.4690871280000124
+          }
+        },
+        {
+          "behavior_id": "build.options.delta-bundle",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.536687967000006,
+          "timings": {
+            "setup_seconds": 0.02670810900001186,
+            "execution_seconds": 0.07891246999999169,
+            "cleanup_seconds": 0.43106738800000244
+          }
+        },
+        {
+          "behavior_id": "build.options.arch-bundle",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5304465899999968,
+          "timings": {
+            "setup_seconds": 0.027180404999995744,
+            "execution_seconds": 0.05882044400000552,
+            "cleanup_seconds": 0.44444574099999556
+          }
+        },
+        {
+          "behavior_id": "build.bundle.app",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6532929959999905,
+          "timings": {
+            "setup_seconds": 0.027114892000000168,
+            "execution_seconds": 0.16373860899999215,
+            "cleanup_seconds": 0.46243949499999815
+          }
+        },
+        {
+          "behavior_id": "build.bundle.runtime",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.535227398999993,
+          "timings": {
+            "setup_seconds": 0.026236521999990714,
+            "execution_seconds": 1.142963217000002,
+            "cleanup_seconds": 0.3660276600000003
+          }
+        },
+        {
+          "behavior_id": "build.bundle.origin",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6515304759999907,
+          "timings": {
+            "setup_seconds": 0.026323672999993164,
+            "execution_seconds": 0.18406894800000373,
+            "cleanup_seconds": 0.4411378549999938
+          }
+        },
+        {
+          "behavior_id": "build.options.runtime-repo",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.0407955650000105,
+          "timings": {
+            "setup_seconds": 0.026998231000007422,
+            "execution_seconds": 0.615719335999998,
+            "cleanup_seconds": 0.3980779980000051
+          }
+        },
+        {
+          "behavior_id": "build.options.force",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5363284919999955,
+          "timings": {
+            "setup_seconds": 0.027413983000002418,
+            "execution_seconds": 0.0767632389999875,
+            "cleanup_seconds": 0.43215127000000564
+          }
+        },
+        {
+          "behavior_id": "build.options.untrusted",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5378520820000006,
+          "timings": {
+            "setup_seconds": 0.026257478000005108,
+            "execution_seconds": 0.08485441799999194,
+            "cleanup_seconds": 0.4267401860000035
+          }
+        },
+        {
+          "behavior_id": "build.options.promotion",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5313855870000026,
+          "timings": {
+            "setup_seconds": 0.026390358000000447,
+            "execution_seconds": 0.3480865539999911,
+            "cleanup_seconds": 0.15690867500001104
+          }
+        },
+        {
+          "behavior_id": "build.commit-from.contents",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5303880299999975,
+          "timings": {
+            "setup_seconds": 0.026492621000002714,
+            "execution_seconds": 0.07067176799999686,
+            "cleanup_seconds": 0.4332236409999979
+          }
+        },
+        {
+          "behavior_id": "build.options.export-subset",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5331318979999935,
+          "timings": {
+            "setup_seconds": 0.02615759100000048,
+            "execution_seconds": 0.04242409799999791,
+            "cleanup_seconds": 0.4645502089999951
+          }
+        },
+        {
+          "behavior_id": "build.options.arch-export",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5348560780000042,
+          "timings": {
+            "setup_seconds": 0.026601966000001198,
+            "execution_seconds": 0.25940373100000613,
+            "cleanup_seconds": 0.2488503809999969
+          }
+        },
+        {
+          "behavior_id": "build.export.signed",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5328906630000034,
+          "timings": {
+            "setup_seconds": 0.027689500000008138,
+            "execution_seconds": 0.28516144799999665,
+            "cleanup_seconds": 0.22003971499999864
+          }
+        },
+        {
+          "behavior_id": "build.export.contents",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5354693379999986,
+          "timings": {
+            "setup_seconds": 0.027621091999989744,
+            "execution_seconds": 0.04603728900001158,
+            "cleanup_seconds": 0.4618109569999973
+          }
+        },
+        {
+          "behavior_id": "build.export.runtime",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5338852739999993,
+          "timings": {
+            "setup_seconds": 0.02707458400000462,
+            "execution_seconds": 0.1772663419999958,
+            "cleanup_seconds": 0.3295443479999989
+          }
+        },
+        {
+          "behavior_id": "build.export.options",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.530299044000003,
+          "timings": {
+            "setup_seconds": 0.026236758999999665,
+            "execution_seconds": 0.07143230599999129,
+            "cleanup_seconds": 0.4326299790000121
+          }
+        },
+        {
+          "behavior_id": "build.export.alternate",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5338662949999957,
+          "timings": {
+            "setup_seconds": 0.026438509000001886,
+            "execution_seconds": 0.0412752009999906,
+            "cleanup_seconds": 0.46615258500000323
+          }
+        },
+        {
+          "behavior_id": "build.finish.inheritance",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5354242709999966,
+          "timings": {
+            "setup_seconds": 0.027344259000003035,
+            "execution_seconds": 0.08198223200000143,
+            "cleanup_seconds": 0.4260977799999921
+          }
+        },
+        {
+          "behavior_id": "build.finish.extra-data",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.530120992999997,
+          "timings": {
+            "setup_seconds": 0.026553422999995746,
+            "execution_seconds": 0.025774691999998822,
+            "cleanup_seconds": 0.4777928780000025
+          }
+        },
+        {
+          "behavior_id": "build.finish.extension-priority",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5288056450000056,
+          "timings": {
+            "setup_seconds": 0.026285178999998493,
+            "execution_seconds": 0.0240700730000043,
+            "cleanup_seconds": 0.4784503930000028
+          }
+        },
+        {
+          "behavior_id": "build.finish.metadata",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5328924789999974,
+          "timings": {
+            "setup_seconds": 0.026914321999996105,
+            "execution_seconds": 0.0255267139999944,
+            "cleanup_seconds": 0.48045144300000686
+          }
+        },
+        {
+          "behavior_id": "build.finish.exports",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5333600610000104,
+          "timings": {
+            "setup_seconds": 0.026918219000009458,
+            "execution_seconds": 0.026544336000000612,
+            "cleanup_seconds": 0.47989750600000036
+          }
+        },
+        {
+          "behavior_id": "build.finish.no-exports",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5291709059999903,
+          "timings": {
+            "setup_seconds": 0.026236607999990724,
+            "execution_seconds": 0.025704027000003293,
+            "cleanup_seconds": 0.47723027099999626
+          }
+        },
+        {
+          "behavior_id": "build.finish.context",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5328418309999989,
+          "timings": {
+            "setup_seconds": 0.026548785000002795,
+            "execution_seconds": 0.024619208000004278,
+            "cleanup_seconds": 0.48167383799999186
+          }
+        },
+        {
+          "behavior_id": "build.finish.policy",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5289989489999982,
+          "timings": {
+            "setup_seconds": 0.026567278999991117,
+            "execution_seconds": 0.024376482000008082,
+            "cleanup_seconds": 0.478055187999999
+          }
+        },
+        {
+          "behavior_id": "build.finish.usb",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5291952160000051,
+          "timings": {
+            "setup_seconds": 0.026704057000003445,
+            "execution_seconds": 0.02546845100000894,
+            "cleanup_seconds": 0.4770227079999927
+          }
+        },
+        {
+          "behavior_id": "build.finish.conditional",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5296897289999976,
+          "timings": {
+            "setup_seconds": 0.02703943699999911,
+            "execution_seconds": 0.02529755300000147,
+            "cleanup_seconds": 0.477352738999997
+          }
+        },
+        {
+          "behavior_id": "build.finish.invalid",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5329475069999887,
+          "timings": {
+            "setup_seconds": 0.027191422000001353,
+            "execution_seconds": 0.03684994500000016,
+            "cleanup_seconds": 0.4689061399999872
+          }
+        },
+        {
+          "behavior_id": "build.options.import-signed",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5352530059999907,
+          "timings": {
+            "setup_seconds": 0.026788033999991967,
+            "execution_seconds": 0.2115179970000014,
+            "cleanup_seconds": 0.29694697499999734
+          }
+        },
+        {
+          "behavior_id": "build.options.import-oci",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5310992640000052,
+          "timings": {
+            "setup_seconds": 0.027236526999999455,
+            "execution_seconds": 0.06977520899999945,
+            "cleanup_seconds": 0.4340875280000063
+          }
+        },
+        {
+          "behavior_id": "build.import.bundle",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5310438369999986,
+          "timings": {
+            "setup_seconds": 0.027462705000004917,
+            "execution_seconds": 0.05522269200000096,
+            "cleanup_seconds": 0.4483584399999927
+          }
+        },
+        {
+          "behavior_id": "build.options.arch-init",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5380237419999929,
+          "timings": {
+            "setup_seconds": 0.02616829499999085,
+            "execution_seconds": 0.11042126899999971,
+            "cleanup_seconds": 0.40143417800000236
+          }
+        },
+        {
+          "behavior_id": "build.init.metadata",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5761865870000094,
+          "timings": {
+            "setup_seconds": 0.026581982000010385,
+            "execution_seconds": 0.08613704699999403,
+            "cleanup_seconds": 0.46346755800000494
+          }
+        },
+        {
+          "behavior_id": "build.init.layout",
+          "driver": "cli",
+          "profile": "user",
+          "status": "failed",
+          "duration_seconds": 0.5714714639999983,
+          "timings": {
+            "setup_seconds": 0.0264295460000028,
+            "execution_seconds": 0.08475201299999924,
+            "cleanup_seconds": 0.4602899049999962
+          }
+        },
+        {
+          "behavior_id": "build.init.existing",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5750658600000094,
+          "timings": {
+            "setup_seconds": 0.026367699000005018,
+            "execution_seconds": 0.09526464699999337,
+            "cleanup_seconds": 0.453433514000011
+          }
+        },
+        {
+          "behavior_id": "build.init.options",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5750880809999899,
+          "timings": {
+            "setup_seconds": 0.026502742999994666,
+            "execution_seconds": 0.10138903099999652,
+            "cleanup_seconds": 0.4471963069999987
+          }
+        },
+        {
+          "behavior_id": "build.init.base",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.627730346000007,
+          "timings": {
+            "setup_seconds": 0.027047035999999025,
+            "execution_seconds": 0.14652432100000112,
+            "cleanup_seconds": 0.45415898900000684
+          }
+        },
+        {
+          "behavior_id": "build.options.arch-sign",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5366773249999994,
+          "timings": {
+            "setup_seconds": 0.027106457999991562,
+            "execution_seconds": 0.1420810130000092,
+            "cleanup_seconds": 0.3674898539999987
+          }
+        },
+        {
+          "behavior_id": "build.sign.app",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.532171928000011,
+          "timings": {
+            "setup_seconds": 0.026678523000001064,
+            "execution_seconds": 0.1556403480000057,
+            "cleanup_seconds": 0.34985305700000424
+          }
+        },
+        {
+          "behavior_id": "build.sign.runtime",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5357252259999967,
+          "timings": {
+            "setup_seconds": 0.026954712999994968,
+            "execution_seconds": 0.15726742500000057,
+            "cleanup_seconds": 0.3515030880000012
+          }
+        },
+        {
+          "behavior_id": "build.options.summary-sign",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5343035550000081,
+          "timings": {
+            "setup_seconds": 0.02633250400000975,
+            "execution_seconds": 0.19817947899998956,
+            "cleanup_seconds": 0.30979157200000884
+          }
+        },
+        {
+          "behavior_id": "build.options.collection",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.531424353999995,
+          "timings": {
+            "setup_seconds": 0.026227013999999826,
+            "execution_seconds": 0.03626507399999923,
+            "cleanup_seconds": 0.46893226599999593
+          }
+        },
+        {
+          "behavior_id": "build.options.deploy-collection",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5347090859999923,
+          "timings": {
+            "setup_seconds": 0.026505337999992662,
+            "execution_seconds": 0.05758707500000071,
+            "cleanup_seconds": 0.45061667299999897
+          }
+        },
+        {
+          "behavior_id": "build.options.deploy-sideload",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5331626130000018,
+          "timings": {
+            "setup_seconds": 0.027981632000006584,
+            "execution_seconds": 0.056641748999993524,
+            "cleanup_seconds": 0.4485392320000017
+          }
+        },
+        {
+          "behavior_id": "build.repo.deltas",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.536476854,
+          "timings": {
+            "setup_seconds": 0.026911850999994158,
+            "execution_seconds": 0.07905298299999686,
+            "cleanup_seconds": 0.430512020000009
+          }
+        },
+        {
+          "behavior_id": "build.repo.summary",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5368150489999977,
+          "timings": {
+            "setup_seconds": 0.027302617000003693,
+            "execution_seconds": 0.07939500999999893,
+            "cleanup_seconds": 0.43011742199999503
+          }
+        },
+        {
+          "behavior_id": "build.repo.prune",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5349659009999925,
+          "timings": {
+            "setup_seconds": 0.026148297000005982,
+            "execution_seconds": 0.18168851299999744,
+            "cleanup_seconds": 0.3271290909999891
+          }
+        },
+        {
+          "behavior_id": "build.options.unset-env",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5766993400000047,
+          "timings": {
+            "setup_seconds": 0.02620665700000302,
+            "execution_seconds": 0.15311744100000624,
+            "cleanup_seconds": 0.3973752419999954
+          }
+        },
+        {
+          "behavior_id": "build.options.filesystem",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5744229700000005,
+          "timings": {
+            "setup_seconds": 0.0270951880000041,
+            "execution_seconds": 0.1899563909999955,
+            "cleanup_seconds": 0.3573713910000009
+          }
+        },
+        {
+          "behavior_id": "build.execution.readonly-app",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5744826889999928,
+          "timings": {
+            "setup_seconds": 0.02639801799999475,
+            "execution_seconds": 0.16306758899999352,
+            "cleanup_seconds": 0.3850170820000045
+          }
+        },
+        {
+          "behavior_id": "build.execution.artifacts",
+          "driver": "cli",
+          "profile": "user",
+          "status": "failed",
+          "duration_seconds": 0.5737867609999938,
+          "timings": {
+            "setup_seconds": 0.02678347299999473,
+            "execution_seconds": 0.18281998700000202,
+            "cleanup_seconds": 0.3641833009999971
+          }
+        },
+        {
+          "behavior_id": "build.execution.readonly",
+          "driver": "cli",
+          "profile": "user",
+          "status": "failed",
+          "duration_seconds": 0.5784717789999974,
+          "timings": {
+            "setup_seconds": 0.02692956500000321,
+            "execution_seconds": 0.1908986939999977,
+            "cleanup_seconds": 0.36064351999999644
+          }
+        },
+        {
+          "behavior_id": "build.execution.options",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5785003989999922,
+          "timings": {
+            "setup_seconds": 0.027048679000003517,
+            "execution_seconds": 0.15631718400000238,
+            "cleanup_seconds": 0.39513453599998627
+          }
+        },
+        {
+          "behavior_id": "build.execution.runtime",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5788300459999789,
+          "timings": {
+            "setup_seconds": 0.027461324000000786,
+            "execution_seconds": 0.138865538999994,
+            "cleanup_seconds": 0.4125031829999841
+          }
+        },
+        {
+          "behavior_id": "build.options.metadata",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5784404599999959,
+          "timings": {
+            "setup_seconds": 0.027203529999979992,
+            "execution_seconds": 0.13674231500002065,
+            "cleanup_seconds": 0.4144946149999953
+          }
+        },
+        {
+          "behavior_id": "build.options.sdk-dir",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5801029889999825,
+          "timings": {
+            "setup_seconds": 0.027041435999990426,
+            "execution_seconds": 0.19408028899999863,
+            "cleanup_seconds": 0.3589812639999934
+          }
+        },
+        {
+          "behavior_id": "management.config",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.529393089999985,
+          "timings": {
+            "setup_seconds": 0.02665570099998149,
+            "execution_seconds": 0.05674838000001614,
+            "cleanup_seconds": 0.4459890089999874
+          }
+        },
+        {
+          "behavior_id": "coverage.config-unset",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5338546809999798,
+          "timings": {
+            "setup_seconds": 0.027017040000004044,
+            "execution_seconds": 0.397814239999974,
+            "cleanup_seconds": 0.10902340100000174
+          }
+        },
+        {
+          "behavior_id": "system-selectors.config",
+          "driver": "cli",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 3.035288629000007,
+          "timings": {
+            "setup_seconds": 0.02729317899999728,
+            "execution_seconds": 2.928070095999999,
+            "cleanup_seconds": 0.07992535400001088
+          }
+        },
+        {
+          "behavior_id": "build.usb.offline",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.0393036640000162,
+          "timings": {
+            "setup_seconds": 0.02650409400001763,
+            "execution_seconds": 0.557622011999996,
+            "cleanup_seconds": 0.4551775580000026
+          }
+        },
+        {
+          "behavior_id": "sandbox.enter",
+          "driver": "cli",
+          "profile": "user",
+          "status": "failed",
+          "duration_seconds": 0.6296075350000194,
+          "timings": {
+            "setup_seconds": 0.026463838000012174,
+            "execution_seconds": 0.20703378900000757,
+            "cleanup_seconds": 0.3961099079999997
+          }
+        },
+        {
+          "behavior_id": "global-options.gl-drivers",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5321967249999773,
+          "timings": {
+            "setup_seconds": 0.02635494399999061,
+            "execution_seconds": 0.02727340799998501,
+            "cleanup_seconds": 0.47856837300000166
+          }
+        },
+        {
+          "behavior_id": "global-options.verbose",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.6138155229999995,
+          "timings": {
+            "setup_seconds": 0.027191424000022835,
+            "execution_seconds": 0.39999570899999526,
+            "cleanup_seconds": 0.18662838999998144
+          }
+        },
+        {
+          "behavior_id": "global-options.ostree-verbose",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.533363976000004,
+          "timings": {
+            "setup_seconds": 0.02814338199999611,
+            "execution_seconds": 0.0801853650000055,
+            "cleanup_seconds": 0.42503522900000235
+          }
+        },
+        {
+          "behavior_id": "global-options.command-help",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 1.0329548290000048,
+          "timings": {
+            "setup_seconds": 0.02667242900000133,
+            "execution_seconds": 0.5539421320000031,
+            "cleanup_seconds": 0.4523402680000004
+          }
+        },
+        {
+          "behavior_id": "global-options.help",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5283957810000004,
+          "timings": {
+            "setup_seconds": 0.02620712699999217,
+            "execution_seconds": 0.015389418000012256,
+            "cleanup_seconds": 0.48679923599999597
+          }
+        },
+        {
+          "behavior_id": "global-options.default-arch",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5326607860000081,
+          "timings": {
+            "setup_seconds": 0.026400457999983473,
+            "execution_seconds": 0.013050232000011874,
+            "cleanup_seconds": 0.49321009600001275
+          }
+        },
+        {
+          "behavior_id": "global-options.supported-arches",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5315398779999896,
+          "timings": {
+            "setup_seconds": 0.026143827999987934,
+            "execution_seconds": 0.012847544000010203,
+            "cleanup_seconds": 0.49254850599999145
+          }
+        },
+        {
+          "behavior_id": "global-options.version",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.528641021999988,
+          "timings": {
+            "setup_seconds": 0.026458760999986453,
+            "execution_seconds": 0.012951930000014045,
+            "cleanup_seconds": 0.4892303309999875
+          }
+        },
+        {
+          "behavior_id": "maintenance.global",
+          "driver": "cli",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 1.0324529109999787,
+          "timings": {
+            "setup_seconds": 0.02627228199997944,
+            "execution_seconds": 0.5638260090000244,
+            "cleanup_seconds": 0.44235461999997483
+          }
+        },
+        {
+          "behavior_id": "maintenance.history",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.032956191000011,
+          "timings": {
+            "setup_seconds": 0.026512542999995503,
+            "execution_seconds": 0.8904220919999943,
+            "cleanup_seconds": 0.11602155600002106
+          }
+        },
+        {
+          "behavior_id": "management.query-fields",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5381851490000145,
+          "timings": {
+            "setup_seconds": 0.02816109000002598,
+            "execution_seconds": 0.14322793199997363,
+            "cleanup_seconds": 0.36679612700001485
+          }
+        },
+        {
+          "behavior_id": "management.installed-arch",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5350023299999975,
+          "timings": {
+            "setup_seconds": 0.026192111000000295,
+            "execution_seconds": 0.1686522299999922,
+            "cleanup_seconds": 0.34015798900000505
+          }
+        },
+        {
+          "behavior_id": "management.installed-queries",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6088475939999967,
+          "timings": {
+            "setup_seconds": 0.026466605999985404,
+            "execution_seconds": 0.21729700500000604,
+            "cleanup_seconds": 0.3650839830000052
+          }
+        },
+        {
+          "behavior_id": "management.file-access",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6126549820000093,
+          "timings": {
+            "setup_seconds": 0.026651753000010103,
+            "execution_seconds": 0.20162458900000502,
+            "cleanup_seconds": 0.3843786399999942
+          }
+        },
+        {
+          "behavior_id": "management.install-arch",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5322544400000027,
+          "timings": {
+            "setup_seconds": 0.02648118299998714,
+            "execution_seconds": 0.08755106800001045,
+            "cleanup_seconds": 0.4182221890000051
+          }
+        },
+        {
+          "behavior_id": "management.install-kinds",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5911265069999843,
+          "timings": {
+            "setup_seconds": 0.02645513499999197,
+            "execution_seconds": 0.07049633599999083,
+            "cleanup_seconds": 0.49417503600000146
+          }
+        },
+        {
+          "behavior_id": "management.flatpakref",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6155835959999933,
+          "timings": {
+            "setup_seconds": 0.02640107199999875,
+            "execution_seconds": 0.1355615660000069,
+            "cleanup_seconds": 0.4536209579999877
+          }
+        },
+        {
+          "behavior_id": "management.install-local",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6160923170000103,
+          "timings": {
+            "setup_seconds": 0.027008023999997022,
+            "execution_seconds": 0.19834229299999606,
+            "cleanup_seconds": 0.39074200000001724
+          }
+        },
+        {
+          "behavior_id": "management.install-no-deps",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5725484379999841,
+          "timings": {
+            "setup_seconds": 0.026746161000005486,
+            "execution_seconds": 0.09672963299999537,
+            "cleanup_seconds": 0.44907264399998326
+          }
+        },
+        {
+          "behavior_id": "management.or-update",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6828993749999768,
+          "timings": {
+            "setup_seconds": 0.026122920999995358,
+            "execution_seconds": 0.19611281599998165,
+            "cleanup_seconds": 0.46066363799999976
+          }
+        },
+        {
+          "behavior_id": "management.reinstall",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6913504040000191,
+          "timings": {
+            "setup_seconds": 0.026551325000014003,
+            "execution_seconds": 0.20138868000000798,
+            "cleanup_seconds": 0.46341039899999714
+          }
+        },
+        {
+          "behavior_id": "coverage.bundle",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6830608559999973,
+          "timings": {
+            "setup_seconds": 0.026739670000011984,
+            "execution_seconds": 0.2372890219999988,
+            "cleanup_seconds": 0.41903216399998655
+          }
+        },
+        {
+          "behavior_id": "system-selectors.lifecycle",
+          "driver": "cli",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 13.044740145999981,
+          "timings": {
+            "setup_seconds": 0.026753184000000374,
+            "execution_seconds": 12.580680027,
+            "cleanup_seconds": 0.43730693499998097
+          }
+        },
+        {
+          "behavior_id": "system-selectors.install-options",
+          "driver": "cli",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 7.037927599999989,
+          "timings": {
+            "setup_seconds": 0.026435639999988325,
+            "execution_seconds": 6.862843806000001,
+            "cleanup_seconds": 0.14864815399999998
+          }
+        },
+        {
+          "behavior_id": "coverage.runtime-filter",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5350015289999988,
+          "timings": {
+            "setup_seconds": 0.02629396300000053,
+            "execution_seconds": 0.2169317700000022,
+            "cleanup_seconds": 0.29177579599999603
+          }
+        },
+        {
+          "behavior_id": "system-selectors.queries",
+          "driver": "cli",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 8.041862158000015,
+          "timings": {
+            "setup_seconds": 0.026686845000000403,
+            "execution_seconds": 7.739291961000021,
+            "cleanup_seconds": 0.2758833519999939
+          }
+        },
+        {
+          "behavior_id": "sandbox.make-current",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.8109288039999853,
+          "timings": {
+            "setup_seconds": 0.027044353999997384,
+            "execution_seconds": 0.5823446519999891,
+            "cleanup_seconds": 0.20153979799999888
+          }
+        },
+        {
+          "behavior_id": "management.mask",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.784062481999996,
+          "timings": {
+            "setup_seconds": 0.027826693999998042,
+            "execution_seconds": 0.2926120609999998,
+            "cleanup_seconds": 0.4636237269999981
+          }
+        },
+        {
+          "behavior_id": "system-selectors.patterns",
+          "driver": "cli",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 6.034399940000014,
+          "timings": {
+            "setup_seconds": 0.026517511999998078,
+            "execution_seconds": 5.529159217,
+            "cleanup_seconds": 0.47872321100001614
+          }
+        },
+        {
+          "behavior_id": "sandbox.override-env",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.7238759380000204,
+          "timings": {
+            "setup_seconds": 0.027012123000019983,
+            "execution_seconds": 0.5616436229999806,
+            "cleanup_seconds": 0.13522019200001978
+          }
+        },
+        {
+          "behavior_id": "sandbox.global-override",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.7236831570000106,
+          "timings": {
+            "setup_seconds": 0.02881768500000703,
+            "execution_seconds": 0.4910795650000068,
+            "cleanup_seconds": 0.20378590699999677
+          }
+        },
+        {
+          "behavior_id": "sandbox.override-extra",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6142161509999937,
+          "timings": {
+            "setup_seconds": 0.027591783999980635,
+            "execution_seconds": 0.16453458899999873,
+            "cleanup_seconds": 0.42208977800001435
+          }
+        },
+        {
+          "behavior_id": "sandbox.override-conditional",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6099408940000046,
+          "timings": {
+            "setup_seconds": 0.027316908000017293,
+            "execution_seconds": 0.13219809399998894,
+            "cleanup_seconds": 0.4504258919999984
+          }
+        },
+        {
+          "behavior_id": "sandbox.override-policy",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6121618290000015,
+          "timings": {
+            "setup_seconds": 0.027547111000018276,
+            "execution_seconds": 0.1556419859999778,
+            "cleanup_seconds": 0.4289727320000054
+          }
+        },
+        {
+          "behavior_id": "sandbox.override-context",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6139121180000018,
+          "timings": {
+            "setup_seconds": 0.027052591000000348,
+            "execution_seconds": 0.13193046099999606,
+            "cleanup_seconds": 0.4549290660000054
+          }
+        },
+        {
+          "behavior_id": "system-selectors.overrides",
+          "driver": "cli",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 1.5300423920000128,
+          "timings": {
+            "setup_seconds": 0.026669190000006893,
+            "execution_seconds": 1.3579297189999977,
+            "cleanup_seconds": 0.1454434830000082
+          }
+        },
+        {
+          "behavior_id": "system-selectors.override-named",
+          "driver": "cli",
+          "profile": "system",
+          "status": "failed",
+          "duration_seconds": 0.5322608150000008,
+          "timings": {
+            "setup_seconds": 0.026590141999975003,
+            "execution_seconds": 0.445414100000022,
+            "cleanup_seconds": 0.060256573000003755
+          }
+        },
+        {
+          "behavior_id": "permissions.remove-app",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5318792270000188,
+          "timings": {
+            "setup_seconds": 0.027129424999998264,
+            "execution_seconds": 0.06506071200001884,
+            "cleanup_seconds": 0.43968909000000167
+          }
+        },
+        {
+          "behavior_id": "permissions.remove-object",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5340142019999803,
+          "timings": {
+            "setup_seconds": 0.027968332999989798,
+            "execution_seconds": 0.06016254600001503,
+            "cleanup_seconds": 0.44588332299997546
+          }
+        },
+        {
+          "behavior_id": "permissions.reset-app",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5317609889999915,
+          "timings": {
+            "setup_seconds": 0.026194398999990653,
+            "execution_seconds": 0.09626991400000406,
+            "cleanup_seconds": 0.40929667599999675
+          }
+        },
+        {
+          "behavior_id": "permissions.reset-all",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5309563129999901,
+          "timings": {
+            "setup_seconds": 0.026625487999979214,
+            "execution_seconds": 0.14341607000000067,
+            "cleanup_seconds": 0.36091475500001025
+          }
+        },
+        {
+          "behavior_id": "permissions.persist",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5318790999999976,
+          "timings": {
+            "setup_seconds": 0.02709707700000763,
+            "execution_seconds": 0.08615002600001276,
+            "cleanup_seconds": 0.4186319969999772
+          }
+        },
+        {
+          "behavior_id": "permissions.data",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5347480119999943,
+          "timings": {
+            "setup_seconds": 0.026481398000015588,
+            "execution_seconds": 0.08925097299999152,
+            "cleanup_seconds": 0.4190156409999872
+          }
+        },
+        {
+          "behavior_id": "permissions.show",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5340640359999895,
+          "timings": {
+            "setup_seconds": 0.02726449899998329,
+            "execution_seconds": 0.08223876700000687,
+            "cleanup_seconds": 0.42456076999999937
+          }
+        },
+        {
+          "behavior_id": "permissions.selection",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5354978560000063,
+          "timings": {
+            "setup_seconds": 0.027280950999994502,
+            "execution_seconds": 0.08347272000000316,
+            "cleanup_seconds": 0.42474418500000866
+          }
+        },
+        {
+          "behavior_id": "management.pin",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6180205649999948,
+          "timings": {
+            "setup_seconds": 0.027316787999978942,
+            "execution_seconds": 0.3127361500000063,
+            "cleanup_seconds": 0.27796762700000954
+          }
+        },
+        {
+          "behavior_id": "maintenance.preinstall-download",
+          "driver": "cli",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 2.03454567899999,
+          "timings": {
+            "setup_seconds": 0.02695606000000339,
+            "execution_seconds": 1.6756079279999767,
+            "cleanup_seconds": 0.33198169100000996
+          }
+        },
+        {
+          "behavior_id": "maintenance.preinstall-sync",
+          "driver": "cli",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 2.5316258119999873,
+          "timings": {
+            "setup_seconds": 0.02736529000000587,
+            "execution_seconds": 2.2980721149999965,
+            "cleanup_seconds": 0.20618840699998486
+          }
+        },
+        {
+          "behavior_id": "maintenance.preinstall-optout",
+          "driver": "cli",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 3.5370953439999937,
+          "timings": {
+            "setup_seconds": 0.02732249899997896,
+            "execution_seconds": 3.401057331000004,
+            "cleanup_seconds": 0.10871551400001067
+          }
+        },
+        {
+          "behavior_id": "sandbox.process",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 4.117760868999994,
+          "timings": {
+            "setup_seconds": 0.028182995999998184,
+            "execution_seconds": 3.643049899999994,
+            "cleanup_seconds": 0.446527973000002
+          }
+        },
+        {
+          "behavior_id": "management.duplicate-remote",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5461345840000149,
+          "timings": {
+            "setup_seconds": 0.026754720000013776,
+            "execution_seconds": 0.04519238399998926,
+            "cleanup_seconds": 0.4741874800000119
+          }
+        },
+        {
+          "behavior_id": "management.flatpakrepo",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.566895675000012,
+          "timings": {
+            "setup_seconds": 0.027129454000004216,
+            "execution_seconds": 0.04798735800000031,
+            "cleanup_seconds": 0.4917788630000075
+          }
+        },
+        {
+          "behavior_id": "management.filter-replacement",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.7283501690000094,
+          "timings": {
+            "setup_seconds": 0.027209265999999843,
+            "execution_seconds": 0.19939109700001723,
+            "cleanup_seconds": 0.5017498059999923
+          }
+        },
+        {
+          "behavior_id": "system-selectors.remotes",
+          "driver": "cli",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 5.535158752000001,
+          "timings": {
+            "setup_seconds": 0.026897360000020853,
+            "execution_seconds": 5.441567238999994,
+            "cleanup_seconds": 0.06669415299998604
+          }
+        },
+        {
+          "behavior_id": "management.force-delete",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6143092380000041,
+          "timings": {
+            "setup_seconds": 0.028014329000001226,
+            "execution_seconds": 0.1994033219999949,
+            "cleanup_seconds": 0.38689158700000803
+          }
+        },
+        {
+          "behavior_id": "system-selectors.remote-force",
+          "driver": "cli",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 6.038618866999997,
+          "timings": {
+            "setup_seconds": 0.026975778000007722,
+            "execution_seconds": 5.719397461,
+            "cleanup_seconds": 0.2922456279999892
+          }
+        },
+        {
+          "behavior_id": "management.remote-info-arch",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5296432129999857,
+          "timings": {
+            "setup_seconds": 0.026826129999989234,
+            "execution_seconds": 0.0313701819999892,
+            "cleanup_seconds": 0.4714469010000073
+          }
+        },
+        {
+          "behavior_id": "management.remote-info-kinds",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5922156180000115,
+          "timings": {
+            "setup_seconds": 0.026946166000016092,
+            "execution_seconds": 0.07298810300000014,
+            "cleanup_seconds": 0.4922813489999953
+          }
+        },
+        {
+          "behavior_id": "management.remote-info",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.7025624990000097,
+          "timings": {
+            "setup_seconds": 0.027319378000015604,
+            "execution_seconds": 0.1853382189999877,
+            "cleanup_seconds": 0.48990490200000636
+          }
+        },
+        {
+          "behavior_id": "management.remote-log",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6862570049999874,
+          "timings": {
+            "setup_seconds": 0.027824847999994518,
+            "execution_seconds": 0.15542079799999442,
+            "cleanup_seconds": 0.5030113589999985
+          }
+        },
+        {
+          "behavior_id": "system-selectors.remote-queries",
+          "driver": "cli",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 2.5351854300000127,
+          "timings": {
+            "setup_seconds": 0.027478045999998812,
+            "execution_seconds": 2.416989283000021,
+            "cleanup_seconds": 0.09071810099999311
+          }
+        },
+        {
+          "behavior_id": "management.remote-available",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6418713460000163,
+          "timings": {
+            "setup_seconds": 0.02787022000001116,
+            "execution_seconds": 0.1078245260000017,
+            "cleanup_seconds": 0.5061766000000034
+          }
+        },
+        {
+          "behavior_id": "management.remote-updates",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.7727430710000078,
+          "timings": {
+            "setup_seconds": 0.028521213000004764,
+            "execution_seconds": 0.2347359099999835,
+            "cleanup_seconds": 0.5094859480000196
+          }
+        },
+        {
+          "behavior_id": "management.remote-properties",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5468888290000109,
+          "timings": {
+            "setup_seconds": 0.027203847000009773,
+            "execution_seconds": 0.10382023400001117,
+            "cleanup_seconds": 0.41586474799998996
+          }
+        },
+        {
+          "behavior_id": "management.remote-enumerate",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5474203980000141,
+          "timings": {
+            "setup_seconds": 0.027624660000014956,
+            "execution_seconds": 0.08507026099999848,
+            "cleanup_seconds": 0.43472547700000064
+          }
+        },
+        {
+          "behavior_id": "management.remote-dependencies",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.8958241069999815,
+          "timings": {
+            "setup_seconds": 0.02706651999997689,
+            "execution_seconds": 0.4725113810000039,
+            "cleanup_seconds": 0.3962462060000007
+          }
+        },
+        {
+          "behavior_id": "management.remote-gpg",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6734074629999895,
+          "timings": {
+            "setup_seconds": 0.026852246999993667,
+            "execution_seconds": 0.1830092529999945,
+            "cleanup_seconds": 0.4635459630000014
+          }
+        },
+        {
+          "behavior_id": "management.filter",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.702045016999989,
+          "timings": {
+            "setup_seconds": 0.026477882999984104,
+            "execution_seconds": 0.1725925830000108,
+            "cleanup_seconds": 0.5029745509999941
+          }
+        },
+        {
+          "behavior_id": "management.disabled",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.8134968009999852,
+          "timings": {
+            "setup_seconds": 0.026849350999981425,
+            "execution_seconds": 0.29775436500000296,
+            "cleanup_seconds": 0.48889308500000084
+          }
+        },
+        {
+          "behavior_id": "system-selectors.disabled",
+          "driver": "cli",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 6.039219771000006,
+          "timings": {
+            "setup_seconds": 0.027440514000005578,
+            "execution_seconds": 5.945439534999991,
+            "cleanup_seconds": 0.06633972200000926
+          }
+        },
+        {
+          "behavior_id": "maintenance.repair-root",
+          "driver": "cli",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 2.034795121000002,
+          "timings": {
+            "setup_seconds": 0.0275890800000127,
+            "execution_seconds": 1.7585590079999918,
+            "cleanup_seconds": 0.24864703299999746
+          }
+        },
+        {
+          "behavior_id": "build.repo.inspect",
+          "driver": "cli",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5329992839999989,
+          "timings": {
+            "setup_seconds": 0.027556930999992346,
+            "execution_seconds": 0.06255316900001162,
+            "cleanup_seconds": 0.4428891839999949
+          }
+        },
+        {
+          "behavior_id": "sandbox.system-bus",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6156884509999827,
+          "timings": {
+            "setup_seconds": 0.02687905700000215,
+            "execution_seconds": 0.43852034199997547,
+            "cleanup_seconds": 0.15028905200000509
+          }
+        },
+        {
+          "behavior_id": "sandbox.system-socket",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6166855580000004,
+          "timings": {
+            "setup_seconds": 0.027764971999999943,
+            "execution_seconds": 0.44090856200000417,
+            "cleanup_seconds": 0.14801202399999625
+          }
+        },
+        {
+          "behavior_id": "sandbox.session-switches",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6123794620000069,
+          "timings": {
+            "setup_seconds": 0.027135168999990356,
+            "execution_seconds": 0.27966254800000456,
+            "cleanup_seconds": 0.305581745000012
+          }
+        },
+        {
+          "behavior_id": "sandbox.bus",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6128358519999892,
+          "timings": {
+            "setup_seconds": 0.027319495000000416,
+            "execution_seconds": 0.4421653050000032,
+            "cleanup_seconds": 0.14335105199998566
+          }
+        },
+        {
+          "behavior_id": "sandbox.session-bus",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6178282039999772,
+          "timings": {
+            "setup_seconds": 0.027378695999999536,
+            "execution_seconds": 0.4092443870000011,
+            "cleanup_seconds": 0.18120512099997654
+          }
+        },
+        {
+          "behavior_id": "sandbox.wayland",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.1184119259999932,
+          "timings": {
+            "setup_seconds": 0.02708012499999768,
+            "execution_seconds": 0.6142785819999972,
+            "cleanup_seconds": 0.4770532189999983
+          }
+        },
+        {
+          "behavior_id": "sandbox.ssh",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6141866610000193,
+          "timings": {
+            "setup_seconds": 0.02709303899999327,
+            "execution_seconds": 0.4126341420000017,
+            "cleanup_seconds": 0.17445948000002431
+          }
+        },
+        {
+          "behavior_id": "sandbox.conditional-socket",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6121484479999992,
+          "timings": {
+            "setup_seconds": 0.027031523999994533,
+            "execution_seconds": 0.4074028759999919,
+            "cleanup_seconds": 0.17771404800001278
+          }
+        },
+        {
+          "behavior_id": "sandbox.env-fd",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6158201410000004,
+          "timings": {
+            "setup_seconds": 0.027550160000004098,
+            "execution_seconds": 0.16316726599998788,
+            "cleanup_seconds": 0.4251027150000084
+          }
+        },
+        {
+          "behavior_id": "sandbox.command",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6197668050000118,
+          "timings": {
+            "setup_seconds": 0.026880038000001605,
+            "execution_seconds": 0.39824734199999057,
+            "cleanup_seconds": 0.19463942500001963
+          }
+        },
+        {
+          "behavior_id": "sandbox.environment",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.7291975290000039,
+          "timings": {
+            "setup_seconds": 0.028406869999997753,
+            "execution_seconds": 0.39729002799998625,
+            "cleanup_seconds": 0.3035006310000199
+          }
+        },
+        {
+          "behavior_id": "sandbox.clear-env",
+          "driver": "cli",
+          "profile": "user",
+          "status": "failed",
+          "duration_seconds": 0.6134321110000087,
+          "timings": {
+            "setup_seconds": 0.027204090000026326,
+            "execution_seconds": 0.22069767699997556,
+            "cleanup_seconds": 0.36553034400000683
+          }
+        },
+        {
+          "behavior_id": "sandbox.cwd",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6210898049999969,
+          "timings": {
+            "setup_seconds": 0.027754103999996005,
+            "execution_seconds": 0.1720831270000076,
+            "cleanup_seconds": 0.4212525739999933
+          }
+        },
+        {
+          "behavior_id": "sandbox.var",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6170401930000082,
+          "timings": {
+            "setup_seconds": 0.02705710300000419,
+            "execution_seconds": 0.22027632499998617,
+            "cleanup_seconds": 0.36970676500001787
+          }
+        },
+        {
+          "behavior_id": "sandbox.file-forwarding",
+          "driver": "cli",
+          "profile": "user",
+          "status": "failed",
+          "duration_seconds": 0.6153115829999933,
+          "timings": {
+            "setup_seconds": 0.027579023000015468,
+            "execution_seconds": 0.2963671259999785,
+            "cleanup_seconds": 0.29136543399999937
+          }
+        },
+        {
+          "behavior_id": "sandbox.mount-paths",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.12559395400001,
+          "timings": {
+            "setup_seconds": 0.02722828599999616,
+            "execution_seconds": 0.7131379839999852,
+            "cleanup_seconds": 0.3852276840000286
+          }
+        },
+        {
+          "behavior_id": "sandbox.filesystem",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6167525330000103,
+          "timings": {
+            "setup_seconds": 0.027109041000016987,
+            "execution_seconds": 0.4029582619999701,
+            "cleanup_seconds": 0.18668523000002324
+          }
+        },
+        {
+          "behavior_id": "sandbox.filesystem-create",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.617633818999991,
+          "timings": {
+            "setup_seconds": 0.027447057000017594,
+            "execution_seconds": 0.17081104400000413,
+            "cleanup_seconds": 0.4193757179999693
+          }
+        },
+        {
+          "behavior_id": "sandbox.filesystem-reset",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.3433060110000383,
+          "timings": {
+            "setup_seconds": 0.02732127000001583,
+            "execution_seconds": 1.1348085089999813,
+            "cleanup_seconds": 0.18117623200004118
+          }
+        },
+        {
+          "behavior_id": "sandbox.persist",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6182022579999966,
+          "timings": {
+            "setup_seconds": 0.027362557999992987,
+            "execution_seconds": 0.4040514960000223,
+            "cleanup_seconds": 0.1867882039999813
+          }
+        },
+        {
+          "behavior_id": "sandbox.run-extra",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6165519460000155,
+          "timings": {
+            "setup_seconds": 0.02707565200000772,
+            "execution_seconds": 0.2013239689999864,
+            "cleanup_seconds": 0.3881523250000214
+          }
+        },
+        {
+          "behavior_id": "sandbox.run-conditional",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6130747839999913,
+          "timings": {
+            "setup_seconds": 0.027086853000014344,
+            "execution_seconds": 0.38816789100002325,
+            "cleanup_seconds": 0.19782003999995368
+          }
+        },
+        {
+          "behavior_id": "sandbox.run-policy",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6165448639999909,
+          "timings": {
+            "setup_seconds": 0.026711687999977585,
+            "execution_seconds": 0.17180159100001902,
+            "cleanup_seconds": 0.41803158499999427
+          }
+        },
+        {
+          "behavior_id": "sandbox.run-context",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6191264230000115,
+          "timings": {
+            "setup_seconds": 0.027074679999998352,
+            "execution_seconds": 0.23843547500001705,
+            "cleanup_seconds": 0.3536162679999961
+          }
+        },
+        {
+          "behavior_id": "sandbox.instance-fd",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6164649609999628,
+          "timings": {
+            "setup_seconds": 0.027252924999970674,
+            "execution_seconds": 0.1950612389999833,
+            "cleanup_seconds": 0.3941507970000089
+          }
+        },
+        {
+          "behavior_id": "sandbox.metadata-network",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.7271554769999966,
+          "timings": {
+            "setup_seconds": 0.027197650999994494,
+            "execution_seconds": 0.33858176100000037,
+            "cleanup_seconds": 0.36137606500000174
+          }
+        },
+        {
+          "behavior_id": "sandbox.devel",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.7322232020000001,
+          "timings": {
+            "setup_seconds": 0.027444243999980245,
+            "execution_seconds": 0.3040255889999912,
+            "cleanup_seconds": 0.40075336900002867
+          }
+        },
+        {
+          "behavior_id": "sandbox.restrict",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6129841250000254,
+          "timings": {
+            "setup_seconds": 0.02757423899998912,
+            "execution_seconds": 0.2275912000000062,
+            "cleanup_seconds": 0.3578186860000301
+          }
+        },
+        {
+          "behavior_id": "sandbox.network",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6170251380000309,
+          "timings": {
+            "setup_seconds": 0.027149782000037703,
+            "execution_seconds": 0.4278701899999646,
+            "cleanup_seconds": 0.16200516600002857
+          }
+        },
+        {
+          "behavior_id": "sandbox.conditional-network",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6169412879999641,
+          "timings": {
+            "setup_seconds": 0.027299011999957656,
+            "execution_seconds": 0.22450046500000553,
+            "cleanup_seconds": 0.36514181100000087
+          }
+        },
+        {
+          "behavior_id": "sandbox.selectors",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.618021457999987,
+          "timings": {
+            "setup_seconds": 0.02700259499999902,
+            "execution_seconds": 0.3351082820000215,
+            "cleanup_seconds": 0.25591058099996644
+          }
+        },
+        {
+          "behavior_id": "sandbox.shm",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6149832680000031,
+          "timings": {
+            "setup_seconds": 0.02774216500000648,
+            "execution_seconds": 0.4099266919999991,
+            "cleanup_seconds": 0.17731441099999756
+          }
+        },
+        {
+          "behavior_id": "system-selectors.run",
+          "driver": "cli",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 5.537596156000006,
+          "timings": {
+            "setup_seconds": 0.027254413000036948,
+            "execution_seconds": 5.152439775000005,
+            "cleanup_seconds": 0.35790196799996465
+          }
+        },
+        {
+          "behavior_id": "coverage.search",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.0357369449999965,
+          "timings": {
+            "setup_seconds": 0.026987090999966767,
+            "execution_seconds": 0.5438787740000066,
+            "cleanup_seconds": 0.4648710800000231
+          }
+        },
+        {
+          "behavior_id": "management.uninstall-arch",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5316483080000012,
+          "timings": {
+            "setup_seconds": 0.026934803000017382,
+            "execution_seconds": 0.1971955610000009,
+            "cleanup_seconds": 0.3075179439999829
+          }
+        },
+        {
+          "behavior_id": "management.keep-ref",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6136844179999912,
+          "timings": {
+            "setup_seconds": 0.0268302560000393,
+            "execution_seconds": 0.29310496399995145,
+            "cleanup_seconds": 0.29374919800000043
+          }
+        },
+        {
+          "behavior_id": "management.uninstall-apps",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6144744449999848,
+          "timings": {
+            "setup_seconds": 0.02738381599999684,
+            "execution_seconds": 0.24875402200001417,
+            "cleanup_seconds": 0.3383366069999738
+          }
+        },
+        {
+          "behavior_id": "management.uninstall-runtimes",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6163546989999986,
+          "timings": {
+            "setup_seconds": 0.027989522000041234,
+            "execution_seconds": 0.25073496499999237,
+            "cleanup_seconds": 0.337630211999965
+          }
+        },
+        {
+          "behavior_id": "management.unused",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6131457150000301,
+          "timings": {
+            "setup_seconds": 0.02778389800005243,
+            "execution_seconds": 0.2471884969999678,
+            "cleanup_seconds": 0.3381733200000099
+          }
+        },
+        {
+          "behavior_id": "management.uninstall-all",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6169030710000243,
+          "timings": {
+            "setup_seconds": 0.027297855000028903,
+            "execution_seconds": 0.1939124899999456,
+            "cleanup_seconds": 0.3956927260000498
+          }
+        },
+        {
+          "behavior_id": "permissions.delete-data",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.7636250839999548,
+          "timings": {
+            "setup_seconds": 0.027027847999988808,
+            "execution_seconds": 0.34757293600000594,
+            "cleanup_seconds": 0.38902429999996
+          }
+        },
+        {
+          "behavior_id": "system-selectors.ambiguous",
+          "driver": "cli",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 5.03368625600001,
+          "timings": {
+            "setup_seconds": 0.026946414999997614,
+            "execution_seconds": 4.862570445000017,
+            "cleanup_seconds": 0.14416939599999523
+          }
+        },
+        {
+          "behavior_id": "management.update-ambiguous",
+          "driver": "cli",
+          "profile": "user",
+          "status": "failed",
+          "duration_seconds": 0.5326884699999823,
+          "timings": {
+            "setup_seconds": 0.027916236999999455,
+            "execution_seconds": 0.35149448800001437,
+            "cleanup_seconds": 0.1532777449999685
+          }
+        },
+        {
+          "behavior_id": "management.update-arch",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5330537440000285,
+          "timings": {
+            "setup_seconds": 0.02746560299999601,
+            "execution_seconds": 0.22138789500002076,
+            "cleanup_seconds": 0.2842002460000117
+          }
+        },
+        {
+          "behavior_id": "management.update-kinds",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5390969059999975,
+          "timings": {
+            "setup_seconds": 0.027812655000047926,
+            "execution_seconds": 0.3513295390000053,
+            "cleanup_seconds": 0.15995471199994427
+          }
+        },
+        {
+          "behavior_id": "management.update-no-deps",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5347561789999986,
+          "timings": {
+            "setup_seconds": 0.029051352999999835,
+            "execution_seconds": 0.2331617700000379,
+            "cleanup_seconds": 0.27254305599996087
+          }
+        },
+        {
+          "behavior_id": "management.update-all",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5410050400000159,
+          "timings": {
+            "setup_seconds": 0.02783985600001415,
+            "execution_seconds": 0.3626381619999961,
+            "cleanup_seconds": 0.15052702200000567
+          }
+        },
+        {
+          "behavior_id": "management.update-local",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.7324848389999943,
+          "timings": {
+            "setup_seconds": 0.029786605999959193,
+            "execution_seconds": 0.2960676540000122,
+            "cleanup_seconds": 0.40663057900002286
+          }
+        },
+        {
+          "behavior_id": "management.commit",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.8297762810000222,
+          "timings": {
+            "setup_seconds": 0.028200103000017407,
+            "execution_seconds": 0.2933821120000175,
+            "cleanup_seconds": 0.5081940659999873
+          }
+        },
+        {
+          "behavior_id": "coverage.appstream-update",
+          "driver": "cli",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.0363412290000156,
+          "timings": {
+            "setup_seconds": 0.028057808000028217,
+            "execution_seconds": 0.6460392159999628,
+            "cleanup_seconds": 0.3622442050000245
+          }
+        },
+        {
+          "behavior_id": "lifecycle.user",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.7536626699999829,
+          "timings": {
+            "setup_seconds": 0.028016746999981024,
+            "execution_seconds": 0.39681259700000737,
+            "cleanup_seconds": 0.3288333259999945
+          }
+        },
+        {
+          "behavior_id": "update.failed-download-preserves-installation",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.7443239300000073,
+          "timings": {
+            "setup_seconds": 0.02718398199999683,
+            "execution_seconds": 0.2898179179999829,
+            "cleanup_seconds": 0.42732203000002755
+          }
+        },
+        {
+          "behavior_id": "update.already-current",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.745266370999957,
+          "timings": {
+            "setup_seconds": 0.027508421999982602,
+            "execution_seconds": 0.3024701420000042,
+            "cleanup_seconds": 0.41528780699997014
+          }
+        },
+        {
+          "behavior_id": "install.already-installed",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6106228300000112,
+          "timings": {
+            "setup_seconds": 0.02658187000002954,
+            "execution_seconds": 0.2836857989999544,
+            "cleanup_seconds": 0.30035516100002724
+          }
+        },
+        {
+          "behavior_id": "install.missing-ref",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.561256372999992,
+          "timings": {
+            "setup_seconds": 0.027227702999994108,
+            "execution_seconds": 0.043293350999988434,
+            "cleanup_seconds": 0.49073531900000944
+          }
+        },
+        {
+          "behavior_id": "lifecycle.absent-ref",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6082795749999832,
+          "timings": {
+            "setup_seconds": 0.02693685799999912,
+            "execution_seconds": 0.37014961500000254,
+            "cleanup_seconds": 0.21119310199998154
+          }
+        },
+        {
+          "behavior_id": "update.retry-after-failed-download",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.8524588129999984,
+          "timings": {
+            "setup_seconds": 0.02694069500000751,
+            "execution_seconds": 0.4341464650000262,
+            "cleanup_seconds": 0.3913716529999647
+          }
+        },
+        {
+          "behavior_id": "remotes.user.configuration",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.7073308810000185,
+          "timings": {
+            "setup_seconds": 0.026802435999968566,
+            "execution_seconds": 0.3994398359999991,
+            "cleanup_seconds": 0.28108860900005084
+          }
+        },
+        {
+          "behavior_id": "remotes.library.priority-order",
+          "driver": "library",
+          "profile": "user",
+          "status": "failed",
+          "duration_seconds": 0.5339898670000025,
+          "timings": {
+            "setup_seconds": 0.02749397500002715,
+            "execution_seconds": 0.0672708849999708,
+            "cleanup_seconds": 0.43922500700000455
+          }
+        },
+        {
+          "behavior_id": "transaction.library.ready-decision",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6412435290000076,
+          "timings": {
+            "setup_seconds": 0.027453709999974762,
+            "execution_seconds": 0.2181677830000126,
+            "cleanup_seconds": 0.3956220360000202
+          }
+        },
+        {
+          "behavior_id": "queryx.bundle",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5336939370000096,
+          "timings": {
+            "setup_seconds": 0.027312804000018787,
+            "execution_seconds": 0.031068864000019403,
+            "cleanup_seconds": 0.47531226899997137
+          }
+        },
+        {
+          "behavior_id": "lifex.bundle-errors",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5332116499999984,
+          "timings": {
+            "setup_seconds": 0.027132047000009152,
+            "execution_seconds": 0.09502491500001042,
+            "cleanup_seconds": 0.4110546879999788
+          }
+        },
+        {
+          "behavior_id": "objects.error-domains",
+          "driver": "library",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5335913729999788,
+          "timings": {
+            "setup_seconds": 0.02734971699999278,
+            "execution_seconds": 0.012736985000003642,
+            "cleanup_seconds": 0.4935046709999824
+          }
+        },
+        {
+          "behavior_id": "objects.arches",
+          "driver": "library",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5300188909999974,
+          "timings": {
+            "setup_seconds": 0.027607209999985116,
+            "execution_seconds": 0.012025596999990285,
+            "cleanup_seconds": 0.49038608400002204
+          }
+        },
+        {
+          "behavior_id": "objects.config-roundtrip",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5338394510000057,
+          "timings": {
+            "setup_seconds": 0.02708618999997725,
+            "execution_seconds": 0.017918536000024687,
+            "cleanup_seconds": 0.4888347250000038
+          }
+        },
+        {
+          "behavior_id": "objects.config-locales",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5300915849999797,
+          "timings": {
+            "setup_seconds": 0.02737724899998284,
+            "execution_seconds": 0.018458140000007006,
+            "cleanup_seconds": 0.4842561959999898
+          }
+        },
+        {
+          "behavior_id": "objects.overrides",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5350807459999487,
+          "timings": {
+            "setup_seconds": 0.027610716999959095,
+            "execution_seconds": 0.04190085300001556,
+            "cleanup_seconds": 0.46556917599997405
+          }
+        },
+        {
+          "behavior_id": "queryx.launch",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.541400689999989,
+          "timings": {
+            "setup_seconds": 0.027659712000001946,
+            "execution_seconds": 1.178735266999979,
+            "cleanup_seconds": 0.335005711000008
+          }
+        },
+        {
+          "behavior_id": "queryx.launch-full",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.5363214110000172,
+          "timings": {
+            "setup_seconds": 0.02691608200001383,
+            "execution_seconds": 1.1719965589999788,
+            "cleanup_seconds": 0.33740877000002456
+          }
+        },
+        {
+          "behavior_id": "queryx.ref-file",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5294355020000125,
+          "timings": {
+            "setup_seconds": 0.026788210999995954,
+            "execution_seconds": 0.015428904000032162,
+            "cleanup_seconds": 0.48721838699998443
+          }
+        },
+        {
+          "behavior_id": "queryx.legacy-lifecycle",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.533161328999995,
+          "timings": {
+            "setup_seconds": 0.027034133000029215,
+            "execution_seconds": 0.20206817299998647,
+            "cleanup_seconds": 0.30405902299997933
+          }
+        },
+        {
+          "behavior_id": "queryx.legacy-noop",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5389775099999952,
+          "timings": {
+            "setup_seconds": 0.02716941300002418,
+            "execution_seconds": 0.11230278300001828,
+            "cleanup_seconds": 0.3995053139999527
+          }
+        },
+        {
+          "behavior_id": "queryx.legacy-pull",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5380959109999708,
+          "timings": {
+            "setup_seconds": 0.027403222999964783,
+            "execution_seconds": 0.13617732099999103,
+            "cleanup_seconds": 0.374515367000015
+          }
+        },
+        {
+          "behavior_id": "lifex.direct-bundle",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5382990040000095,
+          "timings": {
+            "setup_seconds": 0.027451013000018065,
+            "execution_seconds": 0.10179839400001356,
+            "cleanup_seconds": 0.4090495969999779
+          }
+        },
+        {
+          "behavior_id": "lifex.local-ref",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5380460299999754,
+          "timings": {
+            "setup_seconds": 0.02696621199999072,
+            "execution_seconds": 0.28344988899999635,
+            "cleanup_seconds": 0.22762992899998835
+          }
+        },
+        {
+          "behavior_id": "lifex.prune",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.538086030000045,
+          "timings": {
+            "setup_seconds": 0.027271385999995346,
+            "execution_seconds": 0.3125445990000344,
+            "cleanup_seconds": 0.19827004500001522
+          }
+        },
+        {
+          "behavior_id": "lifex.deferred-triggers",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.536205166000002,
+          "timings": {
+            "setup_seconds": 0.02677404100001013,
+            "execution_seconds": 0.24830211599999075,
+            "cleanup_seconds": 0.26112900900000113
+          }
+        },
+        {
+          "behavior_id": "objects.timestamp",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 2.531829321000032,
+          "timings": {
+            "setup_seconds": 0.026784824000003482,
+            "execution_seconds": 2.0168910520000054,
+            "cleanup_seconds": 0.4881534450000231
+          }
+        },
+        {
+          "behavior_id": "lifex.monitor",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5371371869999848,
+          "timings": {
+            "setup_seconds": 0.028315246999966348,
+            "execution_seconds": 0.42129078600004277,
+            "cleanup_seconds": 0.08753115399997569
+          }
+        },
+        {
+          "behavior_id": "objects.installation-identity",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5298959290000198,
+          "timings": {
+            "setup_seconds": 0.027199469999970916,
+            "execution_seconds": 0.013281860000006418,
+            "cleanup_seconds": 0.48941459900004247
+          }
+        },
+        {
+          "behavior_id": "objects.custom-path",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6113980140000308,
+          "timings": {
+            "setup_seconds": 0.027371193000021776,
+            "execution_seconds": 0.11998775500001102,
+            "cleanup_seconds": 0.464039065999998
+          }
+        },
+        {
+          "behavior_id": "objects.remote-cache",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5302566469999874,
+          "timings": {
+            "setup_seconds": 0.027584073999946668,
+            "execution_seconds": 0.019477838000000247,
+            "cleanup_seconds": 0.4831947350000405
+          }
+        },
+        {
+          "behavior_id": "queryx.unused",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5366307170000368,
+          "timings": {
+            "setup_seconds": 0.02747821399998429,
+            "execution_seconds": 0.10500076499999977,
+            "cleanup_seconds": 0.4041517380000528
+          }
+        },
+        {
+          "behavior_id": "queryx.updates",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5386254709999889,
+          "timings": {
+            "setup_seconds": 0.027187787999991997,
+            "execution_seconds": 0.2538465910000127,
+            "cleanup_seconds": 0.2575910919999842
+          }
+        },
+        {
+          "behavior_id": "queryx.installed-list",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5401548429999821,
+          "timings": {
+            "setup_seconds": 0.027079125000000204,
+            "execution_seconds": 0.15915723299997353,
+            "cleanup_seconds": 0.35391848500000833
+          }
+        },
+        {
+          "behavior_id": "queryx.installed-defaults",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5398889310000072,
+          "timings": {
+            "setup_seconds": 0.028627264000022024,
+            "execution_seconds": 0.16102066799999193,
+            "cleanup_seconds": 0.3502409989999933
+          }
+        },
+        {
+          "behavior_id": "queryx.installed-ownership",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5391265719999865,
+          "timings": {
+            "setup_seconds": 0.028464948999953776,
+            "execution_seconds": 0.09718771300003937,
+            "cleanup_seconds": 0.41347390999999334
+          }
+        },
+        {
+          "behavior_id": "contracts.missing-dependencies",
+          "driver": "library",
+          "profile": "user",
+          "status": "failed",
+          "duration_seconds": 1.0545260160000112,
+          "timings": {
+            "setup_seconds": 0.027002740999989783,
+            "execution_seconds": 0.8583131390000176,
+            "cleanup_seconds": 0.16921013600000379
+          }
+        },
+        {
+          "behavior_id": "lifex.unused-pinned",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5375148980000404,
+          "timings": {
+            "setup_seconds": 0.02730383700003358,
+            "execution_seconds": 0.31631120099996224,
+            "cleanup_seconds": 0.19389986000004455
+          }
+        },
+        {
+          "behavior_id": "objects.remote-duplicate",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5325262310000198,
+          "timings": {
+            "setup_seconds": 0.026697728000044663,
+            "execution_seconds": 0.015670680999960496,
+            "cleanup_seconds": 0.4901578220000147
+          }
+        },
+        {
+          "behavior_id": "objects.remote-if-needed",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5299086439999883,
+          "timings": {
+            "setup_seconds": 0.027165787999990698,
+            "execution_seconds": 0.01469579000001886,
+            "cleanup_seconds": 0.4880470659999787
+          }
+        },
+        {
+          "behavior_id": "objects.remote-clear-filter",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5293908809999834,
+          "timings": {
+            "setup_seconds": 0.02659220999998979,
+            "execution_seconds": 0.0178779610000106,
+            "cleanup_seconds": 0.48492070999998305
+          }
+        },
+        {
+          "behavior_id": "objects.remote-types",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5332129310000369,
+          "timings": {
+            "setup_seconds": 0.0267189980000353,
+            "execution_seconds": 0.015636497999992116,
+            "cleanup_seconds": 0.49085743500000945
+          }
+        },
+        {
+          "behavior_id": "queryx.remote-cached",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.0298080819999882,
+          "timings": {
+            "setup_seconds": 0.02643641999998181,
+            "execution_seconds": 0.540210548999994,
+            "cleanup_seconds": 0.4631611130000124
+          }
+        },
+        {
+          "behavior_id": "queryx.related-members",
+          "driver": "library",
+          "profile": "user",
+          "status": "failed",
+          "duration_seconds": 0.5349588600000175,
+          "timings": {
+            "setup_seconds": 0.02728752800004486,
+            "execution_seconds": 0.26077359099997466,
+            "cleanup_seconds": 0.24689774099999795
+          }
+        },
+        {
+          "behavior_id": "queryx.related-version",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5396178209999789,
+          "timings": {
+            "setup_seconds": 0.027057005000017398,
+            "execution_seconds": 0.19761576099995182,
+            "cleanup_seconds": 0.3149450550000097
+          }
+        },
+        {
+          "behavior_id": "queryx.remote-members",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5311712449999959,
+          "timings": {
+            "setup_seconds": 0.026701115000037134,
+            "execution_seconds": 0.030394963999981428,
+            "cleanup_seconds": 0.47407516599997734
+          }
+        },
+        {
+          "behavior_id": "queryx.remote-all-arches",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5332126800000196,
+          "timings": {
+            "setup_seconds": 0.02716455600000245,
+            "execution_seconds": 0.03052682600002754,
+            "cleanup_seconds": 0.47552129799998966
+          }
+        },
+        {
+          "behavior_id": "queryx.remote-current",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.536979228000007,
+          "timings": {
+            "setup_seconds": 0.02648223300002428,
+            "execution_seconds": 0.11132679299998927,
+            "cleanup_seconds": 0.3991702019999934
+          }
+        },
+        {
+          "behavior_id": "coverage.progress-context",
+          "driver": "library",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 3.0377070320000144,
+          "timings": {
+            "setup_seconds": 0.026693452000017714,
+            "execution_seconds": 2.827503778999983,
+            "cleanup_seconds": 0.1835098010000138
+          }
+        },
+        {
+          "behavior_id": "queryx.appstream",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5347431339999957,
+          "timings": {
+            "setup_seconds": 0.026671679999992648,
+            "execution_seconds": 0.043923445000018546,
+            "cleanup_seconds": 0.46414800899998454
+          }
+        },
+        {
+          "behavior_id": "lifex.sideload-query-native",
+          "driver": "library",
+          "profile": "user",
+          "status": "failed",
+          "duration_seconds": 1.0338667269999746,
+          "timings": {
+            "setup_seconds": 0.026609733999976015,
+            "execution_seconds": 0.5787179460000402,
+            "cleanup_seconds": 0.4285390469999584
+          }
+        },
+        {
+          "behavior_id": "lifex.sideload-query",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.0340334530000064,
+          "timings": {
+            "setup_seconds": 0.027061466000020573,
+            "execution_seconds": 0.5804823849999821,
+            "cleanup_seconds": 0.42648960200000374
+          }
+        },
+        {
+          "behavior_id": "system-selectors.library-identity",
+          "driver": "library",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 0.5282690999999886,
+          "timings": {
+            "setup_seconds": 0.026215516999968713,
+            "execution_seconds": 0.2194332290000034,
+            "cleanup_seconds": 0.2826203540000165
+          }
+        },
+        {
+          "behavior_id": "system-selectors.library-metadata",
+          "driver": "library",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 0.5332362269999749,
+          "timings": {
+            "setup_seconds": 0.026971526999943762,
+            "execution_seconds": 0.22422269300000153,
+            "cleanup_seconds": 0.28204200700002957
+          }
+        },
+        {
+          "behavior_id": "system-selectors.library-enumeration",
+          "driver": "library",
+          "profile": "system",
+          "status": "failed",
+          "duration_seconds": 0.5336084360000086,
+          "timings": {
+            "setup_seconds": 0.026917275000016616,
+            "execution_seconds": 0.3103787769999826,
+            "cleanup_seconds": 0.1963123840000094
+          }
+        },
+        {
+          "behavior_id": "system-selectors.library-profile-isolation",
+          "driver": "library",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 0.5321575010000288,
+          "timings": {
+            "setup_seconds": 0.026566516999992018,
+            "execution_seconds": 0.40086820700003045,
+            "cleanup_seconds": 0.10472277700000632
+          }
+        },
+        {
+          "behavior_id": "system-selectors.library-custom-path",
+          "driver": "library",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 0.5344077519999928,
+          "timings": {
+            "setup_seconds": 0.02800077000000556,
+            "execution_seconds": 0.4050293399999987,
+            "cleanup_seconds": 0.10137764199998855
+          }
+        },
+        {
+          "behavior_id": "system-selectors.library-query-objects",
+          "driver": "library",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 0.5287907960000098,
+          "timings": {
+            "setup_seconds": 0.02660004099999469,
+            "execution_seconds": 0.4331218570000033,
+            "cleanup_seconds": 0.06906889800001181
+          }
+        },
+        {
+          "behavior_id": "objects.eol",
+          "driver": "library",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5332418560000178,
+          "timings": {
+            "setup_seconds": 0.027372012000000723,
+            "execution_seconds": 0.012659801999973297,
+            "cleanup_seconds": 0.4932100420000438
+          }
+        },
+        {
+          "behavior_id": "objects.appdata",
+          "driver": "library",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5305937779999681,
+          "timings": {
+            "setup_seconds": 0.026628163999987464,
+            "execution_seconds": 0.011840864000021156,
+            "cleanup_seconds": 0.4921247499999595
+          }
+        },
+        {
+          "behavior_id": "queryx.installed-metadata",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5339239369999973,
+          "timings": {
+            "setup_seconds": 0.027121521000026405,
+            "execution_seconds": 0.09644949500000166,
+            "cleanup_seconds": 0.41035292099996923
+          }
+        },
+        {
+          "behavior_id": "queryx.installed-appdata",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5419767150000325,
+          "timings": {
+            "setup_seconds": 0.031582995999997365,
+            "execution_seconds": 0.09663309000001163,
+            "cleanup_seconds": 0.4137606290000235
+          }
+        },
+        {
+          "behavior_id": "queryx.installed-subpaths",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5343052349999766,
+          "timings": {
+            "setup_seconds": 0.026654072999974687,
+            "execution_seconds": 0.15275222299999314,
+            "cleanup_seconds": 0.3548989390000088
+          }
+        },
+        {
+          "behavior_id": "lifex.appdata",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5387288949999629,
+          "timings": {
+            "setup_seconds": 0.0267740779999599,
+            "execution_seconds": 0.1552751570000055,
+            "cleanup_seconds": 0.3566796599999975
+          }
+        },
+        {
+          "behavior_id": "lifex.eol",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5360006939999948,
+          "timings": {
+            "setup_seconds": 0.02666013399999656,
+            "execution_seconds": 0.2014238890000115,
+            "cleanup_seconds": 0.30791667099998676
+          }
+        },
+        {
+          "behavior_id": "queryx.instance-processes",
+          "driver": "library",
+          "profile": "user",
+          "status": "failed",
+          "duration_seconds": 60.605262694999965,
+          "timings": {
+            "setup_seconds": 0.02696054899996625,
+            "execution_seconds": 60.170539905,
+            "cleanup_seconds": 0.40776224100000036
+          }
+        },
+        {
+          "behavior_id": "lifex.runtime-instance",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5360198439999522,
+          "timings": {
+            "setup_seconds": 0.02672115899997607,
+            "execution_seconds": 0.13341174700002512,
+            "cleanup_seconds": 0.375886937999951
+          }
+        },
+        {
+          "behavior_id": "objects.ref-roundtrip",
+          "driver": "library",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5286742449999906,
+          "timings": {
+            "setup_seconds": 0.026442444999986492,
+            "execution_seconds": 0.011606417999985297,
+            "cleanup_seconds": 0.4906253820000188
+          }
+        },
+        {
+          "behavior_id": "objects.ref-invalid",
+          "driver": "library",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5331078929999649,
+          "timings": {
+            "setup_seconds": 0.02695519899998544,
+            "execution_seconds": 0.011900350000018989,
+            "cleanup_seconds": 0.49425234399996043
+          }
+        },
+        {
+          "behavior_id": "objects.ref-cache",
+          "driver": "library",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5329147950000106,
+          "timings": {
+            "setup_seconds": 0.02698800199999596,
+            "execution_seconds": 0.012041877000001477,
+            "cleanup_seconds": 0.49388491600001316
+          }
+        },
+        {
+          "behavior_id": "objects.ref-properties",
+          "driver": "library",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.52941101600004,
+          "timings": {
+            "setup_seconds": 0.027141911000001073,
+            "execution_seconds": 0.011578427000017655,
+            "cleanup_seconds": 0.4906906780000213
+          }
+        },
+        {
+          "behavior_id": "objects.related-policy",
+          "driver": "library",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.531986073999974,
+          "timings": {
+            "setup_seconds": 0.026425424999956704,
+            "execution_seconds": 0.011750309000035486,
+            "cleanup_seconds": 0.4938103399999818
+          }
+        },
+        {
+          "behavior_id": "objects.related-subpaths",
+          "driver": "library",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5294209799999976,
+          "timings": {
+            "setup_seconds": 0.02722823400000607,
+            "execution_seconds": 0.011891996000031213,
+            "cleanup_seconds": 0.4903007499999603
+          }
+        },
+        {
+          "behavior_id": "queryx.related-policy",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5338548679999917,
+          "timings": {
+            "setup_seconds": 0.02702277700001332,
+            "execution_seconds": 0.03223829799998157,
+            "cleanup_seconds": 0.4745937929999968
+          }
+        },
+        {
+          "behavior_id": "objects.remote-ownership",
+          "driver": "library",
+          "profile": "any",
+          "status": "passed",
+          "duration_seconds": 0.5327873479999994,
+          "timings": {
+            "setup_seconds": 0.02703850699998611,
+            "execution_seconds": 0.012081111000043165,
+            "cleanup_seconds": 0.4936677299999701
+          }
+        },
+        {
+          "behavior_id": "objects.remote-file",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5333326690000035,
+          "timings": {
+            "setup_seconds": 0.027182487000004585,
+            "execution_seconds": 0.013228288999982851,
+            "cleanup_seconds": 0.4929218930000161
+          }
+        },
+        {
+          "behavior_id": "objects.remote-local",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5325872550000099,
+          "timings": {
+            "setup_seconds": 0.026504715000044143,
+            "execution_seconds": 0.015010546999974395,
+            "cleanup_seconds": 0.4910719929999914
+          }
+        },
+        {
+          "behavior_id": "objects.remote-description",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5301545489999739,
+          "timings": {
+            "setup_seconds": 0.027301470999987032,
+            "execution_seconds": 0.01686062200002425,
+            "cleanup_seconds": 0.48599245599996266
+          }
+        },
+        {
+          "behavior_id": "objects.remote-policy",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5338250049999829,
+          "timings": {
+            "setup_seconds": 0.02693941999996241,
+            "execution_seconds": 0.02703130399999054,
+            "cleanup_seconds": 0.4798542810000299
+          }
+        },
+        {
+          "behavior_id": "objects.remote-branch",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5308408269999632,
+          "timings": {
+            "setup_seconds": 0.026450310999962312,
+            "execution_seconds": 0.014514273000031608,
+            "cleanup_seconds": 0.48987624299996924
+          }
+        },
+        {
+          "behavior_id": "objects.remote-filter",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5340935290000175,
+          "timings": {
+            "setup_seconds": 0.0265760180000143,
+            "execution_seconds": 0.015554177000012714,
+            "cleanup_seconds": 0.4919633339999905
+          }
+        },
+        {
+          "behavior_id": "contracts.branch-collection",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5341849069999967,
+          "timings": {
+            "setup_seconds": 0.02718105500002821,
+            "execution_seconds": 0.34681342799996173,
+            "cleanup_seconds": 0.16019042400000671
+          }
+        },
+        {
+          "behavior_id": "objects.remote-verification",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5329856190000442,
+          "timings": {
+            "setup_seconds": 0.026652656999999635,
+            "execution_seconds": 0.019380534000049465,
+            "cleanup_seconds": 0.48695242799999505
+          }
+        },
+        {
+          "behavior_id": "contracts.trusted-key",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5373626739999509,
+          "timings": {
+            "setup_seconds": 0.02695158699998501,
+            "execution_seconds": 0.38324852299996337,
+            "cleanup_seconds": 0.12716256400000248
+          }
+        },
+        {
+          "behavior_id": "queryx.remote-metadata",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5351463659999922,
+          "timings": {
+            "setup_seconds": 0.027762873000028776,
+            "execution_seconds": 0.03216568099998085,
+            "cleanup_seconds": 0.4752178119999826
+          }
+        },
+        {
+          "behavior_id": "auth.basic",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.0350368310000135,
+          "timings": {
+            "setup_seconds": 0.026487595999981295,
+            "execution_seconds": 0.7000661470000296,
+            "cleanup_seconds": 0.3084830880000027
+          }
+        },
+        {
+          "behavior_id": "auth.basic-wrong",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.0301535329999751,
+          "timings": {
+            "setup_seconds": 0.026669557999980498,
+            "execution_seconds": 0.6899024240000244,
+            "cleanup_seconds": 0.3135815509999702
+          }
+        },
+        {
+          "behavior_id": "auth.basic-abort",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.0330347710000183,
+          "timings": {
+            "setup_seconds": 0.02641313600003059,
+            "execution_seconds": 0.73916294899999,
+            "cleanup_seconds": 0.26745868599999767
+          }
+        },
+        {
+          "behavior_id": "auth.web",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.0344805489999658,
+          "timings": {
+            "setup_seconds": 0.026461555999958364,
+            "execution_seconds": 0.7432491260000234,
+            "cleanup_seconds": 0.26476986699998406
+          }
+        },
+        {
+          "behavior_id": "auth.web-abort",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.0334487709999962,
+          "timings": {
+            "setup_seconds": 0.02650151199998163,
+            "execution_seconds": 0.7424127369999951,
+            "cleanup_seconds": 0.2645345220000195
+          }
+        },
+        {
+          "behavior_id": "auth.pre-auth",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.0346724000000336,
+          "timings": {
+            "setup_seconds": 0.02669277500001499,
+            "execution_seconds": 0.7442501119999747,
+            "cleanup_seconds": 0.2637295130000439
+          }
+        },
+        {
+          "behavior_id": "auth.parent-window",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.03460442100004,
+          "timings": {
+            "setup_seconds": 0.02604605200002652,
+            "execution_seconds": 0.7850018409999961,
+            "cleanup_seconds": 0.22355652800001735
+          }
+        },
+        {
+          "behavior_id": "transaction.disable-related",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5363395919999903,
+          "timings": {
+            "setup_seconds": 0.026526167999975314,
+            "execution_seconds": 0.26911319800001365,
+            "cleanup_seconds": 0.2407002260000013
+          }
+        },
+        {
+          "behavior_id": "transaction.extra-dependency-source",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.8311336210000491,
+          "timings": {
+            "setup_seconds": 0.026684746000000814,
+            "execution_seconds": 0.3852822880000417,
+            "cleanup_seconds": 0.41916658700000653
+          }
+        },
+        {
+          "behavior_id": "contracts.auto-sdk-debug",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.0691887369999904,
+          "timings": {
+            "setup_seconds": 0.026458258999980444,
+            "execution_seconds": 0.7602450050000016,
+            "cleanup_seconds": 0.28248547300000837
+          }
+        },
+        {
+          "behavior_id": "transaction.disable-dependencies",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6366176619999919,
+          "timings": {
+            "setup_seconds": 0.02667503800000759,
+            "execution_seconds": 0.15574614799999154,
+            "cleanup_seconds": 0.4541964759999928
+          }
+        },
+        {
+          "behavior_id": "transaction.auto-pin",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6656913719999693,
+          "timings": {
+            "setup_seconds": 0.02632629299995415,
+            "execution_seconds": 0.1780718150000098,
+            "cleanup_seconds": 0.46129326400000537
+          }
+        },
+        {
+          "behavior_id": "lifex.sideload-image",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.0361849679999864,
+          "timings": {
+            "setup_seconds": 0.026499808999972174,
+            "execution_seconds": 0.5776808940000251,
+            "cleanup_seconds": 0.4320042649999891
+          }
+        },
+        {
+          "behavior_id": "lifex.signed-bundle",
+          "driver": "library",
+          "profile": "user",
+          "status": "failed",
+          "duration_seconds": 0.5383213029999752,
+          "timings": {
+            "setup_seconds": 0.02664571299999352,
+            "execution_seconds": 0.45308213799995656,
+            "cleanup_seconds": 0.05859345200002508
+          }
+        },
+        {
+          "behavior_id": "lifex.image",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5341706849999923,
+          "timings": {
+            "setup_seconds": 0.027972546000000875,
+            "execution_seconds": 0.13175824600000396,
+            "cleanup_seconds": 0.3744398929999875
+          }
+        },
+        {
+          "behavior_id": "lifex.sideload-install",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.037167624999995,
+          "timings": {
+            "setup_seconds": 0.027166889999989507,
+            "execution_seconds": 0.6568535210000164,
+            "cleanup_seconds": 0.35314721399998916
+          }
+        },
+        {
+          "behavior_id": "lifex.force-uninstall",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5373505439999917,
+          "timings": {
+            "setup_seconds": 0.026610384999969483,
+            "execution_seconds": 0.3650792029999934,
+            "cleanup_seconds": 0.14566095600002882
+          }
+        },
+        {
+          "behavior_id": "transaction.file-uri-origin",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5324794919999931,
+          "timings": {
+            "setup_seconds": 0.026583473999949092,
+            "execution_seconds": 0.07440689900005282,
+            "cleanup_seconds": 0.4314891189999912
+          }
+        },
+        {
+          "behavior_id": "transaction.download-only",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6587274810000281,
+          "timings": {
+            "setup_seconds": 0.026775344000043333,
+            "execution_seconds": 0.19315831599999456,
+            "cleanup_seconds": 0.4387938209999902
+          }
+        },
+        {
+          "behavior_id": "transaction.no-pull",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6611586270000203,
+          "timings": {
+            "setup_seconds": 0.026773912000010114,
+            "execution_seconds": 0.24043385200002376,
+            "cleanup_seconds": 0.3939508629999864
+          }
+        },
+        {
+          "behavior_id": "transaction.explicit-commit",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.7344965870000237,
+          "timings": {
+            "setup_seconds": 0.026403866000009657,
+            "execution_seconds": 0.2531297689999974,
+            "cleanup_seconds": 0.4549629520000167
+          }
+        },
+        {
+          "behavior_id": "transaction.no-deploy-uninstall",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6113649609999925,
+          "timings": {
+            "setup_seconds": 0.026597069999979794,
+            "execution_seconds": 0.14088405400002557,
+            "cleanup_seconds": 0.4438838369999871
+          }
+        },
+        {
+          "behavior_id": "transaction.cancel-download",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 3.112085169000011,
+          "timings": {
+            "setup_seconds": 0.026666751000050226,
+            "execution_seconds": 2.662160237999956,
+            "cleanup_seconds": 0.4232581800000048
+          }
+        },
+        {
+          "behavior_id": "transaction.completed-survive",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.0390935730000024,
+          "timings": {
+            "setup_seconds": 0.027077360000021145,
+            "execution_seconds": 0.6905564560000244,
+            "cleanup_seconds": 0.3214597569999569
+          }
+        },
+        {
+          "behavior_id": "transaction.options",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5346959049999782,
+          "timings": {
+            "setup_seconds": 0.02769453399997701,
+            "execution_seconds": 0.04129602599999771,
+            "cleanup_seconds": 0.4657053450000035
+          }
+        },
+        {
+          "behavior_id": "transaction.lookup",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6718921890000047,
+          "timings": {
+            "setup_seconds": 0.027033087000006617,
+            "execution_seconds": 0.1615350419999686,
+            "cleanup_seconds": 0.4833240600000295
+          }
+        },
+        {
+          "behavior_id": "transaction.operation-list",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6786866450000275,
+          "timings": {
+            "setup_seconds": 0.027117646000021978,
+            "execution_seconds": 0.1719645769999829,
+            "cleanup_seconds": 0.4796044220000226
+          }
+        },
+        {
+          "behavior_id": "transaction.ownership",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6099076809999815,
+          "timings": {
+            "setup_seconds": 0.02714039799997181,
+            "execution_seconds": 0.13033549099998254,
+            "cleanup_seconds": 0.45243179200002714
+          }
+        },
+        {
+          "behavior_id": "maintenance.library-preinstall",
+          "driver": "library",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 2.0303652780000334,
+          "timings": {
+            "setup_seconds": 0.026491698000029373,
+            "execution_seconds": 1.8984981939999557,
+            "cleanup_seconds": 0.10537538600004837
+          }
+        },
+        {
+          "behavior_id": "contracts.rebase-migration",
+          "driver": "library",
+          "profile": "user",
+          "status": "failed",
+          "duration_seconds": 2.067080103999956,
+          "timings": {
+            "setup_seconds": 0.027110662999973556,
+            "execution_seconds": 1.8372915500000317,
+            "cleanup_seconds": 0.2026778909999507
+          }
+        },
+        {
+          "behavior_id": "transaction.rebase-null",
+          "driver": "library",
+          "profile": "user",
+          "status": "failed",
+          "duration_seconds": 1.0336382200000003,
+          "timings": {
+            "setup_seconds": 0.026951064000002134,
+            "execution_seconds": 0.585988465000014,
+            "cleanup_seconds": 0.42069869099998414
+          }
+        },
+        {
+          "behavior_id": "transaction.rebase-success",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.0336748180000086,
+          "timings": {
+            "setup_seconds": 0.02650338199998714,
+            "execution_seconds": 0.7800897870000085,
+            "cleanup_seconds": 0.22708164900001293
+          }
+        },
+        {
+          "behavior_id": "transaction.rebase-failure",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.0369027780000124,
+          "timings": {
+            "setup_seconds": 0.026448869000034847,
+            "execution_seconds": 0.6595145719999778,
+            "cleanup_seconds": 0.3509393369999998
+          }
+        },
+        {
+          "behavior_id": "transaction.choose-remote",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6786100450000276,
+          "timings": {
+            "setup_seconds": 0.0270794030000161,
+            "execution_seconds": 0.20200614999998834,
+            "cleanup_seconds": 0.4495244920000232
+          }
+        },
+        {
+          "behavior_id": "transaction.flatpakref",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.5786700679999512,
+          "timings": {
+            "setup_seconds": 0.02661541199995554,
+            "execution_seconds": 1.0908113060000346,
+            "cleanup_seconds": 0.4612433499999611
+          }
+        },
+        {
+          "behavior_id": "transaction.ready",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6382033250000063,
+          "timings": {
+            "setup_seconds": 0.026957075000041186,
+            "execution_seconds": 0.15572122800000443,
+            "cleanup_seconds": 0.4555250219999607
+          }
+        },
+        {
+          "behavior_id": "transaction.pre-auth",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.632891418999975,
+          "timings": {
+            "setup_seconds": 0.02674904399998468,
+            "execution_seconds": 0.15491054599999643,
+            "cleanup_seconds": 0.4512318289999939
+          }
+        },
+        {
+          "behavior_id": "transaction.eol",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.0384805400000232,
+          "timings": {
+            "setup_seconds": 0.0265682360000028,
+            "execution_seconds": 0.7251768780000134,
+            "cleanup_seconds": 0.286735426000007
+          }
+        },
+        {
+          "behavior_id": "transaction.eol-rebase",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.0375231900000017,
+          "timings": {
+            "setup_seconds": 0.02667287399998486,
+            "execution_seconds": 0.8071131230000219,
+            "cleanup_seconds": 0.20373719299999493
+          }
+        },
+        {
+          "behavior_id": "transaction.independent-errors",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.039619813999991,
+          "timings": {
+            "setup_seconds": 0.026671211999996558,
+            "execution_seconds": 0.7231389430000377,
+            "cleanup_seconds": 0.2898096589999568
+          }
+        },
+        {
+          "behavior_id": "transaction.error-sequence",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.7036664560000077,
+          "timings": {
+            "setup_seconds": 0.02632247600001847,
+            "execution_seconds": 0.2252740870000025,
+            "cleanup_seconds": 0.4520698929999867
+          }
+        },
+        {
+          "behavior_id": "transaction.install-subpaths",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5341563729999734,
+          "timings": {
+            "setup_seconds": 0.02652081899998393,
+            "execution_seconds": 0.1820660960000282,
+            "cleanup_seconds": 0.3255694579999613
+          }
+        },
+        {
+          "behavior_id": "transaction.update-subpaths-all",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5365898200000174,
+          "timings": {
+            "setup_seconds": 0.027076802999999927,
+            "execution_seconds": 0.19586825200002522,
+            "cleanup_seconds": 0.3136447649999923
+          }
+        },
+        {
+          "behavior_id": "transaction.update-subpaths-default",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5327808160000131,
+          "timings": {
+            "setup_seconds": 0.026639213999999356,
+            "execution_seconds": 0.14556302799996956,
+            "cleanup_seconds": 0.3605785740000442
+          }
+        },
+        {
+          "behavior_id": "system-selectors.library-update",
+          "driver": "library",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 0.5318564130000141,
+          "timings": {
+            "setup_seconds": 0.026135918000022684,
+            "execution_seconds": 0.43720107799998686,
+            "cleanup_seconds": 0.06851941700000452
+          }
+        },
+        {
+          "behavior_id": "system-selectors.library-dependency-sources",
+          "driver": "library",
+          "profile": "system",
+          "status": "passed",
+          "duration_seconds": 0.5345811919999619,
+          "timings": {
+            "setup_seconds": 0.026498119999985192,
+            "execution_seconds": 0.3952222859999779,
+            "cleanup_seconds": 0.11286078599999882
+          }
+        },
+        {
+          "behavior_id": "transaction.operation-identity",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5348697260000108,
+          "timings": {
+            "setup_seconds": 0.027279105999980402,
+            "execution_seconds": 0.36940391799998906,
+            "cleanup_seconds": 0.13818670200004135
+          }
+        },
+        {
+          "behavior_id": "contracts.operation-causes",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.5404875879999622,
+          "timings": {
+            "setup_seconds": 0.026735905999998977,
+            "execution_seconds": 0.17343200299995942,
+            "cleanup_seconds": 0.3403196790000038
+          }
+        },
+        {
+          "behavior_id": "transaction.metadata",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 1.0375620409999442,
+          "timings": {
+            "setup_seconds": 0.02744343699998808,
+            "execution_seconds": 0.6585779839999759,
+            "cleanup_seconds": 0.3515406199999802
+          }
+        },
+        {
+          "behavior_id": "transaction.operation-sizes",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 0.6048413710000204,
+          "timings": {
+            "setup_seconds": 0.026391632000013487,
+            "execution_seconds": 0.15873950399998193,
+            "cleanup_seconds": 0.419710235000025
+          }
+        },
+        {
+          "behavior_id": "transaction.rate",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 4.0400266999999985,
+          "timings": {
+            "setup_seconds": 0.026783227999999326,
+            "execution_seconds": 3.6627520399999867,
+            "cleanup_seconds": 0.35049143200001254
+          }
+        },
+        {
+          "behavior_id": "transaction.progress",
+          "driver": "library",
+          "profile": "user",
+          "status": "passed",
+          "duration_seconds": 4.040561448000005,
+          "timings": {
+            "setup_seconds": 0.026797052999995685,
+            "execution_seconds": 3.66754556799998,
+            "cleanup_seconds": 0.3462188270000297
+          }
+        }
+      ],
+      "cases_complete": true
+    }
+  },
+  {
+    "schema": 1,
     "track": "upstream",
     "timestamp": "2026-09-18T23:01:09.255Z",
     "complete": true,
