@@ -1,0 +1,140 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "query-options.remote-ls-cached",
+      "scenario": "query-options-remote-ls-cached",
+      "handler": "query_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Enumerate cached remote commits while the server advertises another version.",
+      "preconditions": "Independent multi-app A/B repository versions served over request-recording HTTP.",
+      "expected": "Cached rows preserve exact membership and previous commit identities without network requests; ordinary queries refresh commits in both directions.",
+      "references": [
+        "doc/flatpak-remote-ls.xml"
+      ]
+    },
+    {
+      "id": "query-options.remote-ls-all",
+      "scenario": "query-options-remote-ls-all",
+      "handler": "query_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Include an otherwise hidden locale extension in remote enumeration.",
+      "preconditions": "Independent repository contains normal apps/runtimes and a locale extension.",
+      "expected": "Default/all/default queries differ only by the known hidden locale ref and preserve exact ordinary ref membership.",
+      "references": [
+        "doc/flatpak-remote-ls.xml"
+      ]
+    },
+    {
+      "id": "query-options.app-runtime",
+      "scenario": "query-options-app-runtime",
+      "handler": "query_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Filter remote applications by their declared runtime.",
+      "preconditions": "Independent applications consume two different runtime identities.",
+      "expected": "Unfiltered query contains all apps; each runtime filter returns exactly its consumers and an absent-runtime filter returns no rows.",
+      "references": [
+        "doc/flatpak-remote-ls.xml"
+      ]
+    },
+    {
+      "id": "query-options.remote-ls-details",
+      "scenario": "query-options-remote-ls-details",
+      "handler": "query_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Show remote ref details through the documented all-columns alias.",
+      "preconditions": "Independent multi-app, multi-branch repository with known commits.",
+      "expected": "Details equal columns=all, differ from ordinary output, and contain exactly the expected identities, architectures, branches and independently prepared commits.",
+      "references": [
+        "doc/flatpak-remote-ls.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "query-options.remote-ls-cached",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Recorded transfers and independent A/B commit maps contrast cached and refreshed listings.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-ls.--cached",
+          "rationale": "Cached enumeration retains the warmed commits and makes no network requests across two server changes."
+        }
+      ]
+    },
+    {
+      "behavior_id": "query-options.remote-ls-all",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Exact ref sets compare hidden locale membership with and without all.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-ls.--all",
+          "rationale": "The independently advertised locale extension appears only with all while ordinary refs remain present."
+        }
+      ]
+    },
+    {
+      "behavior_id": "query-options.app-runtime",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Opposing runtime consumers and an absent-runtime control reject ignored or inverted filtering.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-ls.--app-runtime",
+          "rationale": "Each runtime selects its exact independent consumer set and excludes the other runtime's applications."
+        }
+      ]
+    },
+    {
+      "behavior_id": "query-options.remote-ls-details",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Alias equivalence is checked alongside independent ref/commit expectations and an ordinary-output contrast.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-ls.--show-details",
+          "rationale": "Detailed output equals all columns and exposes the expected arch, branch and commit for every selected app."
+        }
+      ]
+    }
+  ],
+  "notes": []
+}

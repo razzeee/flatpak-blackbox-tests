@@ -34,8 +34,32 @@ def prepare(reference_cli: str, output: Path,
     commit = subprocess.check_output(
         ["ostree", f"--repo={repo}", "rev-parse", ref], text=True).strip()
     payloads = sorted(p.relative_to(repo).as_posix() for p in repo.rglob("*.filez"))
+    # An available app is sufficient for the refusal half of install-authenticator.
+    # It deliberately has no authentication service: the tested handler declines
+    # installation, so this fixture cannot establish successful auto-installation.
+    authenticator = "org.flatpak.BlackboxAuthenticator"
+    authenticator_ref = f"app/{authenticator}/{fixture['arch']}/autoinstall"
+    source = output.parent / "A"
+    app_ref = f"app/{fixture['app']}/{fixture['arch']}/{fixture['branch']}"
+    runtime_ref = f"runtime/{fixture['runtime']}/{fixture['arch']}/{fixture['branch']}"
+    subprocess.run(["ostree", f"--repo={repo}", "pull-local", str(source), runtime_ref],
+                   check=True, stdout=subprocess.DEVNULL)
+    with tempfile.TemporaryDirectory(prefix="auth-candidate-") as temporary:
+        tree = Path(temporary) / "app"
+        subprocess.run(["ostree", f"--repo={source}", "checkout", "--user-mode",
+                        "--force-copy", "--disable-cache", app_ref, str(tree)], check=True)
+        (tree / "metadata").write_text(
+            f"[Application]\nname={authenticator}\n"
+            f"runtime={fixture['runtime']}/{fixture['arch']}/{fixture['branch']}\n"
+            "command=blackbox-probe\n")
+        subprocess.run([reference_cli, "build-export", "--disable-sandbox", "--token-type=0",
+                        str(repo), str(tree), "autoinstall"], check=True,
+                       stdout=subprocess.DEVNULL)
+    authenticator_commit = subprocess.check_output(
+        ["ostree", f"--repo={repo}", "rev-parse", authenticator_ref], text=True).strip()
     return {"directory": output.name, "ref": ref, "commit": commit,
-            "payloads": payloads}
+            "payloads": payloads, "authenticator_ref": authenticator_ref,
+            "authenticator_commit": authenticator_commit}
 
 
 def main() -> None:

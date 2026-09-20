@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "query-options.list-all",
+      "scenario": "query-options-list-all",
+      "handler": "query_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Include installed locale extensions in list output.",
+      "preconditions": "App, runtime and an explicitly installed independently known locale extension.",
+      "expected": "Default/all/default queries preserve exact app/runtime membership and show the hidden extension only with all.",
+      "references": [
+        "doc/flatpak-list.xml"
+      ]
+    },
+    {
+      "id": "query-options.list-details",
+      "scenario": "query-options-list-details",
+      "handler": "query_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Show installed ref details through the all-columns alias.",
+      "preconditions": "Two independently prepared branches of the same app are installed.",
+      "expected": "Details equal columns=all, differ from ordinary output, and identify both installed branches and their independent commits exactly.",
+      "references": [
+        "doc/flatpak-list.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "query-options.list-all",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "An installed locale is excluded in both ordinary controls and included in the all query.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.list.--all",
+          "rationale": "Exact list membership adds the known installed locale only with all."
+        }
+      ]
+    },
+    {
+      "behavior_id": "query-options.list-details",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "All-columns equivalence and an ordinary-output contrast are backed by independent identity/commit assertions.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.list.--show-details",
+          "rationale": "Both installed branches appear with their known architectures and commits in the documented all-columns form."
+        }
+      ]
+    }
+  ],
+  "notes": []
+}

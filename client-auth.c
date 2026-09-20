@@ -147,9 +147,53 @@ web_done (FlatpakTransaction *tx, GVariant *options, guint id, Auth *a)
   g_assert_cmpuint (++a->done, ==, 1);
 }
 
+static void
+install_required (FlatpakTransaction *tx, const char *remote, const char *ref, Auth *a)
+{
+  TRACE_SIGNAL (FlatpakTransaction, "install-authenticator");
+  check_thread (a);
+  g_assert_true (tx == a->transaction);
+  g_assert_cmpstr (remote, ==, "fixture");
+  g_assert_cmpstr (ref, ==, a->ref);
+  g_assert_cmpuint (++a->start, ==, 1);
+  /* Decline by returning without installing the suggested app. */
+}
+
+static void
+required_authenticator (const char *protected_ref, const char *candidate)
+{
+  g_autoptr(GError) error = NULL;
+  g_autoptr(FlatpakInstallation) installation =
+    CALL_API (flatpak_installation_new_user, NULL, &error);
+  g_assert_no_error (error);
+  g_autoptr(FlatpakTransaction) tx = CALL_API (
+      flatpak_transaction_new_for_installation, installation, NULL, &error);
+  g_assert_no_error (error);
+  Auth a = { .ref = candidate, .transaction = tx, .thread = g_thread_self () };
+  g_signal_connect (tx, "install-authenticator", G_CALLBACK (install_required), &a);
+  g_assert_true (CALL_API (flatpak_transaction_add_install,
+      tx, "fixture", protected_ref, NULL, &error));
+  g_assert_no_error (error);
+  g_assert_false (CALL_API (flatpak_transaction_run, tx, NULL, &error));
+  g_assert_nonnull (error);
+  g_assert_cmpuint (a.start, ==, 1);
+  g_clear_error (&error);
+  g_autoptr(GPtrArray) installed = CALL_API (
+      flatpak_installation_list_installed_refs, installation, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_cmpuint (installed->len, ==, 0);
+  g_print ("auth-install-declined\n");
+}
+
 int
 blackbox_auth_main (int argc, char **argv)
 {
+  if (argc >= 2 && strcmp (argv[1], "auth-install-required") == 0)
+    {
+      g_assert_cmpint (argc, ==, 4);
+      required_authenticator (argv[2], argv[3]);
+      return 0;
+    }
   g_autoptr(GError) error = NULL;
   g_autoptr(FlatpakInstallation) installation = NULL;
   g_autoptr(FlatpakTransaction) tx = NULL;

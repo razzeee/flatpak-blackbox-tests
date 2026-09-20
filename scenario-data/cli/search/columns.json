@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "query-options.search-columns",
+      "scenario": "query-options-search-columns",
+      "handler": "query_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Select and reorder search result fields using combined and repeated column options.",
+      "preconditions": "Independent AppStream cache has two matching branches with known version and remote.",
+      "expected": "Exact row tuples follow each requested field order and both forms of repeated column selection; searching deploys no refs.",
+      "references": [
+        "doc/flatpak-search.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "query-options.search-columns",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Different ordered field subsets are checked against literal fixture values with exact row counts.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.search.--columns",
+          "rationale": "Selected and reordered application, branch, version and remote fields match independent AppStream values for both matching branches."
+        }
+      ]
+    }
+  ],
+  "notes": []
+}

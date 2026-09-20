@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "options.build-env-fd",
+      "scenario": "options-build-env-fd",
+      "handler": "cli_surface_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "build-tools",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Pass NUL-separated environment entries to a build command through a file descriptor.",
+      "preconditions": "Independent build tree, installed runtime, descriptors containing empty values and spaces/equal signs.",
+      "expected": "Build probe reports exact descriptor values for both inputs and empty values remain defined; original metadata remains unchanged.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "options.build-env-fd",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Two distinct descriptor payloads are observed inside the build command with no metadata mutation.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build.--env-fd",
+          "rationale": "Exact empty and nonempty descriptor values reach the build probe across two inputs."
+        }
+      ]
+    }
+  ],
+  "notes": []
+}

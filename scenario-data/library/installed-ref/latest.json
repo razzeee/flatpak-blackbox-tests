@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "objects.latest-commit",
+      "scenario": "objects-latest-commit",
+      "handler": "library_objects_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Distinguish deployed commit from latest downloaded commit.",
+      "preconditions": "Independent app commits A and B with runtime available.",
+      "expected": "Getter reports A after installation, B after download-only update while deployed commit stays A, and B after local deployment.",
+      "references": [
+        "common/flatpak-installed-ref.c: flatpak_installed_ref_get_latest_commit"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "objects.latest-commit",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Known A/B commits separate download state from deployment state across three independently queried phases.",
+      "surface_assertions": [
+        {
+          "id": "library.function.flatpak_installed_ref_get_latest_commit",
+          "rationale": "Downloaded B is returned while the deployed commit is still A, then remains B after deployment."
+        }
+      ]
+    }
+  ],
+  "notes": []
+}

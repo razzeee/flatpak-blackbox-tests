@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
-"""Public help and informational options, with independent output oracles."""
+"""Test public help and informational options against independent output expectations."""
 
 from __future__ import annotations
 

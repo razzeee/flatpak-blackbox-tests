@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
-"""Public observations for SDKs, causes, migration, updates and remote trust."""
+"""Test SDK, operation-cause, migration, update, and remote-trust behavior."""
 
 from __future__ import annotations
 

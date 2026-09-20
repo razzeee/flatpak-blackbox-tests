@@ -223,7 +223,7 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
         return
 
     if name in ("tx-metadata", "tx-independent-errors", "tx-completed-survive",
-                "tx-progress", "tx-rate",
+                 "tx-progress", "tx-rate", "tx-frequency",
                 "tx-eol", "tx-eol-rebase", "tx-rebase-success", "tx-rebase-failure",
                 "tx-rebase-null"):
         _supplemental(driver, fixture, name)
@@ -372,6 +372,26 @@ def _supplemental(driver: Driver, fixture: FixtureManifest, name: str) -> None:
                 expected.read_string(extra["metadata"][f"{version}:{extra['apps'][0]}"])
                 driver.check(actual == expected, f"{label} must equal complete fixture {version}")
             state(first, "A")
+        elif name == "tx-frequency":
+            counts = []
+            for mode in ("frequency-fast", "frequency-slow", "frequency-fast"):
+                server.directory = directory / "B"
+                server.slow = True
+                rows = _tx(driver, mode, "update", first)
+                samples = {int(row[1]) for row in _rows(rows, "progress")}
+                driver.check(max(samples) >= 1024 * 1024,
+                             "each cadence control transfers independent payload")
+                counts.append(len(samples - {0, max(samples)}))
+                state(first, "B")
+                server.directory = directory / "A"
+                server.slow = False
+                _tx(driver, "normal", "update", first, operand=extra["commits"]["A"][first])
+                state(first, "A")
+            driver.check(counts[1] >= 1 and min(counts[0], counts[2]) > 2 * counts[1],
+                         f"50ms updates sample advancing bytes more often than 1000ms: {counts}")
+            driver.evidence.append({"observation": "progress-update-cadence",
+                                    "data": json_value({"interval_ms": [50, 1000, 50],
+                                                        "advancing_samples": counts})})
         elif name in ("tx-progress", "tx-rate"):
             server.slow = True
             rows = _tx(driver, "progress" if name == "tx-progress" else "rate", "update", first)

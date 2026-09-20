@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "documents.info",
+      "scenario": "documents-info",
+      "handler": "document_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ],
+      "description": "Report exact document identity and current app permissions.",
+      "preconditions": "Private real document portal with a known export and app grant.",
+      "expected": "Queries by original and FUSE path report the exact ID, path, origin and permissions before and after write revocation.",
+      "references": [
+        "doc/flatpak-document-info.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "documents.info",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.document-info.any.identity-permissions"
+      ],
+      "rationale": "Exact parsed identity fields and per-app permissions match independent inputs for both accepted path forms across a grant change."
+    }
+  ],
+  "notes": []
+}

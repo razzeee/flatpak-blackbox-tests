@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "documents.enumerate",
+      "scenario": "documents-enumerate",
+      "handler": "document_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ],
+      "description": "List all exported document IDs and full original paths.",
+      "preconditions": "Private real portal with distinct exports, including a filename containing spaces.",
+      "expected": "Exact rows include both IDs and untruncated original paths with no duplicates or extras.",
+      "references": [
+        "doc/flatpak-documents.xml"
+      ]
+    },
+    {
+      "id": "documents.filter",
+      "scenario": "documents-filter",
+      "handler": "document_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ],
+      "description": "Filter document exports by app ID.",
+      "preconditions": "Private real portal with distinct exports granted to two different apps.",
+      "expected": "Unfiltered listing has both documents; each app gets only its own row; unknown app gets no rows.",
+      "references": [
+        "doc/flatpak-documents.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "documents.enumerate",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.documents.any.enumerate"
+      ],
+      "rationale": "Exact tab-separated rows compare IDs returned by export with independent complete origin paths."
+    },
+    {
+      "behavior_id": "documents.filter",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.documents.any.app-filter"
+      ],
+      "rationale": "Two opposing app-filter controls and an unknown-app empty result reject an implementation that ignores APPID."
+    }
+  ],
+  "notes": []
+}

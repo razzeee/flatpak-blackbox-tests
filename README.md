@@ -7,11 +7,11 @@ See [COVERAGE.md](COVERAGE.md) for coverage measurements and known failures.
 ## Daily coverage charts
 
 Default-branch CI publishes daily coverage to GitHub Pages, with separate pinned
-and upstream-main views. It keeps the latest complete run per UTC day; missing or
-unverified evidence leaves gaps. Run and per-case timing trends include outcomes
-and setup/execution/cleanup breakdowns. Snapshots persist on `coverage-history`.
-Select a run to filter its case outcomes or rank slowdowns against an earlier run.
-Case rows open timing histories; shared and unrecorded time is accounted for separately.
+and upstream-main views. It keeps the latest complete run for each UTC day. Missing
+or unverified runs create gaps. Run and case timings include outcomes and separate
+setup, execution, and cleanup times. Snapshots persist on `coverage-history`.
+Select a run to filter its case outcomes or compare slow cases with an earlier run.
+Case rows open timing histories. Shared and unrecorded time is listed separately.
 
 The TypeScript/React site uses TanStack Charts. For local development with Node 22.12+:
 
@@ -134,12 +134,18 @@ round-trip unit test.
 
 [`scenario-data/`](scenario-data/) groups cases with all their mappings by primary
 CLI command (`cli/`) or public libflatpak type (`library/`), with subgroups for
-larger owners. Requirement indexes under [`coverage-data/`](coverage-data/) mirror
-those owners; category metadata keeps its semantic meaning. Cross-command/type
-cases have one home. Shared baseline registrations remain in `inventory.json` and
+larger groups. Requirement indexes under [`coverage-data/`](coverage-data/) mirror
+those groups. Category metadata keeps its meaning. Cross-command/type cases have
+one home. Shared baseline registrations remain in `inventory.json` and
 `coverage-data/mapping.json`; follow their requirement IDs to the owning command
 or type. Add public assertions and map existing requirements without changing
 coverage denominators. Nested JSON participates in discovery and report hashes.
+
+Use `surface_assertions` for focused CLI-option, library-function, or library-signal
+checks that do not establish a complete catalogued behavior obligation. Each entry
+needs the interface ID and an assertion rationale. Library function and signal
+credit also requires the matching call trace or signal emission in a passing case.
+These annotations never add behavior or CLI-command credit.
 
 To check the generated interface catalogue against a separate Flatpak checkout:
 

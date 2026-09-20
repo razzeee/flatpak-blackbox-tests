@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "query-options.remote-info-cached",
+      "scenario": "query-options-remote-info-cached",
+      "handler": "query_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Read a warmed remote-info cache without refreshing the remote.",
+      "preconditions": "Independent A/B commits and an HTTP server that changes repository version between commands.",
+      "expected": "Cached queries return the warmed commit without HTTP requests; ordinary queries fetch the changed commit and refresh the next cached query in both directions.",
+      "references": [
+        "doc/flatpak-remote-info.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "query-options.remote-info-cached",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Exact A/B commit comparisons distinguish stale cache from current remote state, with zero-request observations for cached calls.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-info.--cached",
+          "rationale": "Warmed cached commit queries perform no network requests and retain the old commit until an ordinary query refreshes it."
+        }
+      ]
+    }
+  ],
+  "notes": []
+}

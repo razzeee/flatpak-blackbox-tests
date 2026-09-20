@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "auth.install-required",
+      "scenario": "auth-install-required",
+      "handler": "auth_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository",
+        "session-bus",
+        "authentication"
+      ],
+      "description": "Report and decline installation of a missing authenticator.",
+      "preconditions": "Independently prepared protected runtime and available candidate app on the autoinstall branch; neither is installed.",
+      "expected": "install-authenticator supplies exact remote and candidate ref on the transaction thread; returning without installation causes transaction failure, no protected download and no deployments.",
+      "references": [
+        "common/flatpak-transaction.c: FlatpakTransaction::install-authenticator"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "auth.install-required",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "The signal payload and refusal outcome are asserted. Successful installation and resumed authentication are not established, so the full behavior obligation remains unmapped.",
+      "surface_assertions": [
+        {
+          "id": "library.signal.FlatpakTransaction.install-authenticator",
+          "rationale": "Exact remote/ref and callback thread are checked; leaving the candidate uninstalled fails the transaction before protected downloads or deployments."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "The candidate is an installable placeholder app, not an authentication service. Only refusal is tested."
+  ]
+}

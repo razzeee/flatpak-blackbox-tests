@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "lifex.cleanup-retention",
+      "scenario": "lifex-cleanup-retention",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Remove an undeployed local ref while retaining its downloaded payload.",
+      "preconditions": "Independent deployed and second apps; HTTP server can deny content while continuing to serve metadata.",
+      "expected": "Removing deployed ref fails. Removing pulled-only ref prevents no-pull deployment, but a repull succeeds with content blocked and requests no payload; deployed commits remain intact.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_remove_local_ref_sync"
+      ]
+    },
+    {
+      "id": "lifex.cleanup-pruning",
+      "scenario": "lifex-cleanup-pruning",
+      "handler": "lifecycle_extra_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe orphaned payload deletion through controlled public repulls.",
+      "preconditions": "Deployed app and second app with independently required payload; public cleanup precedes pruning.",
+      "expected": "Cleanup removes the undeployed ref but retains repullable content. After another cleanup and prune, the same blocked-content repull fails and requests payload; restoring server access permits recovery with exact commits.",
+      "references": [
+        "common/flatpak-installation.c: flatpak_installation_cleanup_local_refs_sync, flatpak_installation_prune_local_repo"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "lifex.cleanup-retention",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.cleanup.local-ref-protection"
+      ],
+      "rationale": "Deployed removal fails; pulled-only removal succeeds and invalidates no-pull deployment. A blocked-content repull then succeeds without payload requests, contrasting with its pre-download failure and establishing retained objects."
+    },
+    {
+      "behavior_id": "lifex.cleanup-pruning",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.cleanup.orphaned-objects"
+      ],
+      "rationale": "Identical blocked-content repulls succeed after ref cleanup but fail with recorded blocked payload requests after pruning. Restored source permits exact-commit deployment; existing app and runtime retain their commits."
+    }
+  ],
+  "notes": [
+    "Object retention and deletion are observed through public installation operations and fixture-server requests, without inspecting the target's private repository layout."
+  ]
+}

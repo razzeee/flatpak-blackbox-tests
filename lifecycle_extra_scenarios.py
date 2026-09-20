@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from fixture_manifest import FixtureLifecycleExtra, FixtureManifest
+from json_validation import json_value
 
 if TYPE_CHECKING:
     from run import Driver, RepositoryServer
@@ -280,6 +281,108 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
                 values["commit"] = tx["commits"][version][values["ref"]]
                 call("direct", "update")
             call("metadata", "eol")
+        return
+    if name == "lifex-transaction-pruning":
+        queries = fixture.get("queries")
+        if not isinstance(queries, dict):
+            raise PrerequisiteError("independent multi-app query inputs required")
+        source = root / queries["versions"]["A"]["repo"]
+        refs = queries["versions"]["A"]["refs"]
+        deployed = f"app/{queries['app']}/{arch}/test"
+        pulled = f"app/{queries['second']}/{arch}/test"
+        server = RepositoryServer(source.parent)
+        with server.serving() as server_url:
+            driver.cli_success("remote-add", "--user", "--no-gpg-verify",
+                               "lifecycle", server_url)
+            install(deployed)
+            values.update(ref=pulled, commit=refs[pulled]["commit"])
+            for disabled in (True, False, True):
+                server.version = "A"
+                server.fail_payloads = False
+                call("direct", "pull")
+                call("cleanup", "remove")
+                call("direct", "local-missing")
+                server.version = "B"
+                driver.success("objects-transaction-update-option", deployed,
+                               queries["versions"]["B"]["refs"][deployed]["commit"],
+                               "disable-prune", str(disabled).lower())
+                server.version = "A"
+                server.fail_payloads = True
+                before = len(server.requests)
+                call("direct", "pull" if disabled else "pull-missing")
+                requests = server.requests[before:]
+                if disabled:
+                    driver.check(not any(item["path"].endswith(".filez") for item in requests),
+                                 "disabled pruning retains unrelated orphan payload")
+                else:
+                    driver.check(any(item["blocked"] for item in requests),
+                                 "enabled pruning removes unrelated orphan payload")
+                driver.evidence.append({"observation": "transaction-orphan-pruning",
+                                        "data": json_value({"disable_prune": disabled,
+                                                            "requests": requests})})
+                server.fail_payloads = False
+                driver.cli_success("update", "--user", "--noninteractive",
+                                   f"--commit={refs[deployed]['commit']}", deployed)
+        return
+    if name in {"lifex-cleanup-retention", "lifex-cleanup-pruning"}:
+        queries = fixture.get("queries")
+        if not isinstance(queries, dict):
+            raise PrerequisiteError("prepared independent multi-app query inputs required")
+        source = root / queries["versions"]["A"]["repo"]
+        refs = queries["versions"]["A"]["refs"]
+        deployed = f"app/{queries['app']}/{arch}/test"
+        pulled = f"app/{queries['second']}/{arch}/test"
+        server = RepositoryServer(source.parent)
+        server.version = source.name
+        with server.serving() as server_url:
+            driver.cli_success("remote-add", "--user", "--no-gpg-verify",
+                               "lifecycle", server_url)
+            install(deployed)
+            values.update(ref=deployed, commit=refs[deployed]["commit"])
+            call("cleanup", "protected")
+            values.update(ref=pulled, commit=refs[pulled]["commit"])
+            # Establish that the second app needs payload not shared with the
+            # deployed app. Metadata requests remain available throughout.
+            before = len(server.requests)
+            server.fail_payloads = True
+            call("direct", "pull-missing")
+            driver.check(any(item["blocked"] for item in server.requests[before:]),
+                         "unpulled app requires independently unavailable payload")
+            server.fail_payloads = False
+            call("direct", "pull")
+            call("direct", "local")
+            call("direct", "uninstall")
+            call("direct", "pull")
+            action = "remove" if name == "lifex-cleanup-retention" else "clean"
+            call("cleanup", action)
+            call("direct", "local-missing")
+            server.fail_payloads = True
+            before = len(server.requests)
+            call("direct", "pull")
+            requests = server.requests[before:]
+            driver.check(not any(item["path"].endswith(".filez") for item in requests),
+                         "ref removal retains content for a payload-free repull")
+            driver.evidence.append({"observation": "cleanup-retained-payload",
+                                    "data": json_value({"requests": requests, "ref": pulled})})
+            # The successful repull recreated the local ref. Remove it again
+            # before pruning so its objects really are unreferenced.
+            call("cleanup", action)
+            if name == "lifex-cleanup-pruning":
+                call("cleanup", "prune")
+                before = len(server.requests)
+                call("direct", "pull-missing")
+                requests = server.requests[before:]
+                driver.check(any(item["blocked"] for item in requests),
+                             "pruned payload must be downloaded again")
+                driver.evidence.append({"observation": "cleanup-pruned-payload",
+                                        "data": json_value({"requests": requests, "ref": pulled})})
+                server.fail_payloads = False
+            call("direct", "pull")
+            call("direct", "local")
+            driver.check(driver.cli_success("info", "--user", "--show-commit", deployed)
+                         == refs[deployed]["commit"], "cleanup preserves deployed app")
+            driver.check(driver.cli_success("info", "--user", "--show-commit", runtime)
+                         == fixture["runtime_commit"], "cleanup preserves deployed runtime")
         return
     if name in {"lifex-local-ref", "lifex-prune"}:
         queries = fixture.get("queries")

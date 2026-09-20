@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "query-options.info-size",
+      "scenario": "query-options-info-size",
+      "handler": "query_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Report installed size for independently prepared apps.",
+      "preconditions": "Two installed app refs with sizes recorded during independent fixture preparation.",
+      "expected": "Each scalar size output equals the corresponding reference-prepared installed byte count.",
+      "references": [
+        "doc/flatpak-info.xml"
+      ]
+    },
+    {
+      "id": "query-options.info-extensions",
+      "scenario": "query-options-info-extensions",
+      "handler": "query_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Report only the installed extension branch matching application metadata.",
+      "preconditions": "App with a declared extension and two independently prepared installed extension branches.",
+      "expected": "Extension output adds matching ref and commit to ordinary info, excludes the unrelated branch, and stops reporting the removed extension's commit after uninstall.",
+      "references": [
+        "doc/flatpak-info.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "query-options.info-size",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Exact byte counts come from independent fixture metadata, not another target query.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.info.--show-size",
+          "rationale": "Scalar installed sizes match independently recorded values for both app refs."
+        }
+      ]
+    },
+    {
+      "behavior_id": "query-options.info-extensions",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Known matching and unrelated branches distinguish extension filtering, and removal checks current installed state.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.info.--show-extensions",
+          "rationale": "Output identifies the matching installed extension and independent commit, excludes another branch and reflects uninstall."
+        }
+      ]
+    }
+  ],
+  "notes": []
+}

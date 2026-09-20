@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "documents.revoke",
+      "scenario": "documents-revoke",
+      "handler": "document_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus",
+        "sandbox",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Unexport a document and revoke sandbox file access.",
+      "preconditions": "Private real portal with two exports and a sandbox proven able to read one grant.",
+      "expected": "Unexport removes the ID and FUSE file, denies subsequent sandbox reads and preserves the original file and unrelated document.",
+      "references": [
+        "doc/flatpak-document-unexport.xml"
+      ]
+    },
+    {
+      "id": "documents.by-id",
+      "scenario": "documents-by-id",
+      "handler": "document_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "cli",
+        "desktop-portals",
+        "session-bus"
+      ],
+      "description": "Unexport a document by ID after deleting its origin.",
+      "preconditions": "Private real portal with two exports; target original file is deleted before unexport.",
+      "expected": "ID-based unexport removes only the selected document from listing while unrelated origin and grants survive.",
+      "references": [
+        "doc/flatpak-document-unexport.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "documents.revoke",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.document-unexport.any.revoke"
+      ],
+      "rationale": "A successful sandbox read becomes probe-level denial after unexport; listing excludes its ID and unrelated export remains intact."
+    },
+    {
+      "behavior_id": "documents.by-id",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.document-unexport.any.by-id"
+      ],
+      "rationale": "The original path is deleted before ID-based unexport and exact listing proves only that document was removed.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.document-unexport.--doc-id",
+          "rationale": "ID-based removal succeeds with no original file and preserves an unrelated document."
+        }
+      ]
+    }
+  ],
+  "notes": []
+}

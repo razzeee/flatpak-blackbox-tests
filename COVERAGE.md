@@ -2,7 +2,187 @@
 
 This suite reports separate measurements for catalogued behavior and public
 interface reach. It does not report a percentage of all possible Flatpak behavior.
-The latter has no defensible finite denominator yet.
+There is no finite denominator for all Flatpak behavior yet.
+
+## Query and filter option batch
+
+Eleven additional CLI cases pass against CI-pinned Flatpak 1.19.1, using the
+existing independently prepared query repositories. The suite now has 371 cases.
+Implemented CLI-option reach increases from 413/624 to **424/624, or 67.95%**.
+CLI-command, library-function and library-signal reach remain fully implemented.
+Behavior coverage remains 134/136 CLI obligations and 156/163 library obligations;
+these focused option assertions add no behavior credit or denominator entries.
+
+| Command | Newly asserted options |
+| --- | --- |
+| `remote-info` | `--cached` |
+| `remote-ls` | `--cached`, `--all`, `--app-runtime`, `--show-details` |
+| `list` | `--all`, `--show-details` |
+| `remotes` | `--show-details` |
+| `search` | `--columns` |
+| `info` | `--show-size`, `--show-extensions` |
+
+The cache cases switch the server from A to B and back. Cached queries retain
+the warmed commits without making HTTP requests; ordinary queries fetch the
+changed commits and refresh the next cached view. Filter cases compare exact
+ref sets, including hidden locale extensions and apps using different runtimes.
+Detailed output must equal the documented `--columns=all` form, differ from
+ordinary output, and contain independently known identities and commits or
+remote properties. Search checks selected and reordered columns, including
+repeated `--columns` options. Info checks exact prepared byte counts and extension
+membership before and after uninstalling the matching branch.
+
+All thirteen negative controls fail their behavioral assertions and earn zero
+passing credit. Eleven remove the option under test. Two additional cache
+controls preserve correct cached output but make an extra HTTP request, proving
+that the no-network assertions detect unwanted transfers independently of stale
+commit checks.
+
+All 122 unit tests pass with the prepared-fixture round-trip check, as do Ruff,
+ty, strict mypy, JSON formatting and the source catalogue check. No existing
+failure cases were investigated. These focused runs do not establish new
+full-suite passing percentages.
+
+All 24 positive/negative reports match definition fingerprint
+`78ef46453b2aa6dfeda4c34981b7211b08681749f90470175566178d914f9ac9`.
+Local indexes are kept outside this repository; their report paths are inside
+`flatpak-blackbox-coverage-portals`, using `/tmp/target.json` and
+`/tmp/fixtures-v2`. The artifacts are not published with this repository.
+There are 200 CLI options and nine behavior obligations still without mappings.
+
+## Command, function and signal reach at 100% implemented
+
+Thirty additional cases bring the suite to 360 cases. The interface and behavior
+denominators are unchanged. Current implemented coverage is:
+
+| Measurement | Implemented | Percentage |
+| --- | ---: | ---: |
+| Catalogued CLI behavior | 134 / 136 | 98.53% |
+| Catalogued library behavior | 156 / 163 | 95.71% |
+| CLI command reach | 44 / 44 | 100.00% |
+| Documented CLI option reach | 413 / 624 | 66.19% |
+| Public library function reach | 223 / 223 | 100.00% |
+| Public library signal reach | 14 / 14 | 100.00% |
+
+These are implemented percentages, not full-suite passing percentages. Focused
+runs on 2026-09-19 against the CI-pinned Flatpak 1.19.1 pass 28 of the 30 new
+cases. Four existing cases with newly recorded standalone function assertions
+also pass, as does the existing basic-authentication case with the expanded
+auth fixture. Existing baseline failures were not investigated in this work.
+
+The additions cover:
+
+- Document export, read and write grants, revocation, unique IDs, permission
+  changes, transient lifetime, enumeration, app filtering and document-info.
+  Sandbox probes distinguish document grants from direct host-path access.
+- Local-ref removal and pruning through controlled public repulls. With content
+  blocked, repulling succeeds after ref removal and fails after pruning.
+  Transaction pruning settings similarly control unrelated orphan payload.
+- Downloaded versus deployed commits, remote metadata refresh, public AppStream
+  timestamps, storage-query failure/recovery, transaction property round-trips,
+  architecture selection, reinstall, static-delta selection and progress cadence.
+- The `install-authenticator` signal's exact remote/ref, callback thread and
+  refusal outcome. The prepared candidate is an installable placeholder; this
+  case does not establish successful authenticator installation or resumed auth.
+- Environment descriptors for build, build-finish and override, plus config-list
+  output after independently changing two settings.
+
+Standalone library assertions now use the same `surface_assertions` structure as
+CLI-option assertions. They earn no behavior credit and still require matching
+call-stage or signal-emission evidence from a passing library case. Five functions
+receive reach credit from existing direct-bundle, deferred-trigger,
+force-uninstall and remote-description assertions. The new cases establish the
+remaining 19 previously unmapped functions.
+
+Two new cases expose failures and retain their assertions:
+
+- `documents.enumerate`: redirected output contains document IDs but omits the
+  full origin paths required by the catalogue and manual.
+- `documents.noexist`: exporting an absent file with `--noexist` fails with a
+  GVariant response-type mismatch against the container's document portal.
+
+All eleven negative controls fail their corresponding assertions and earn zero
+passing credit. They ignore unique export, write revocation, app filtering,
+unexport, transient lifetime, environment descriptors, authenticator installation
+configuration, pruning, static-delta disabling, default architecture, or progress
+interval changes. Controls use a CLI wrapper or a library interposer around the
+reference target. The cadence control, for example, yields 64 advancing samples
+in all three runs when the requested interval is ignored, so it fails the required
+fast/slow/fast contrast.
+
+All 121 unit tests pass with the new prepared-fixture round-trip check, along with
+Ruff, ty, strict mypy, JSON formatting, and the source catalogue check. The focused
+reports share suite definition fingerprint
+`3873ecd1bf6dfc8dfe5eeb4d5af9c12bdf0ac825fc745ed03da6f8ac5236c642`.
+
+Local evidence indexes are kept outside this repository. Their report paths are inside the
+`flatpak-blackbox-coverage-portals` rootless Ubuntu 24.04 container, using
+`/tmp/target.json` and `/tmp/fixtures-v2`. FUSE is available there; the container's
+capability bounding set permits fusermount while the test process runs without
+ambient capabilities. These artifacts are not published with the repository.
+
+Overall implemented coverage is not yet 100%. The remaining nine behavior
+obligations are two user repair contracts, two authorization contracts, four
+cross-user system lifecycle/remote contracts, and successful authenticator
+installation. Property round-trips and signal refusal do not satisfy their
+stronger requirements. There are also 211 CLI options without assertion mappings.
+
+## Full baseline for the 100% coverage target
+
+A complete run on 2026-09-19 at suite revision `d058861` produced 311 passes,
+18 failures and one unmet prerequisite across all 330 cases. The target was
+Flatpak 1.19.1, built from CI-pinned commit
+`1a6ec6a1f720fb30d76c76e656ac624fcaa237e9` in a rootless Ubuntu 24.04 Podman
+container with independently prepared fixtures. A child-reaping supervisor
+prevented orphaned sandbox processes from accumulating. The run took 362.49
+seconds with a 90-second command timeout.
+
+| Measurement | Implemented | Passing credit | Passing percentage |
+| --- | ---: | ---: | ---: |
+| Catalogued CLI behavior | 126 / 136 | 119 / 136 | 87.50% |
+| Catalogued library behavior | 154 / 163 | 147 / 163 | 90.18% |
+| CLI command reach | 40 / 44 | 38 / 44 | 86.36% |
+| Documented CLI option reach | 397 / 624 | 389 / 624 | 62.34% |
+| Public library function reach | 199 / 223 | 192 / 223 | 86.10% |
+| Public library signal reach | 13 / 14 | 13 / 14 | 92.86% |
+
+At creation, the coverage verifier accepted this report as current and complete.
+The additions above make it historical evidence for its original definitions. This is a
+baseline measurement, not coverage gained through new tests. Local evidence is
+saved outside this repository; that artifact is not published with the repository. The container copy is
+`/tmp/baseline-reaped/report.json` in `flatpak-blackbox-coverage-run`.
+
+| Input | SHA-256 |
+| --- | --- |
+| Suite definition fingerprint | `8d59b70a3f439ff7e7ec6cc632ab6ceb2cd79dc2cb0c5c1e55e22c33934403b1` |
+| Target configuration | `b8ec8619fa91dc3ccfe661e5fc861618aaa9ea9e22731a5be6264df545a7d758` |
+| Target CLI | `09e81047c016104c7c5148488de5d319a59564a429b82e222422ae24e93e9c20` |
+| Fixture manifest | `11aed4cb06f250d87c6942e6ea0274c26df6f8a1235414ef22590e93e7727f04` |
+
+The unmapped behavior obligations are eight document-portal contracts, two user
+repair contracts, two local-repository cleanup contracts, two authorization
+contracts, four cross-user system lifecycle/remote contracts, and authenticator
+installation. Interface reach additionally lacks 227 CLI options, 24 library
+functions and the `install-authenticator` signal. These counts overlap the
+behavior gaps and must not be added together.
+
+Some existing cases exercise unmapped functions but do not prove the full
+requirement. In particular, `lifex.local-ref` does not establish object retention,
+and `lifex.prune` does not establish orphaned-object deletion. Their successful
+execution does not justify marking those obligations covered.
+
+The failures include build layout and execution contracts, sandbox environment
+and enter behavior, named-installation overrides, ambiguous updates, remote
+ordering, dependency and related-ref queries, native sideload queries, system
+enumeration, instance processes, signed bundles and rebase behavior. Failure
+causes still need individual diagnosis; this run alone does not attribute all
+18 failures to Flatpak. The document-forwarding prerequisite fails because
+`fusermount3` reports `Operation not permitted` in this container.
+
+Reaching 100% passing coverage requires resolving those failures as well as adding
+the missing assertions. The current CI build disables the system helper, so real
+polkit authorization and second-user system tests also require a new provisioned
+test environment. Denominators and passing-credit rules remain unchanged.
 
 ## Global driver and diagnostic options
 
@@ -279,15 +459,15 @@ The initial reference is source commit
 
 | Measurement | Denominator | What one unit means |
 | --- | ---: | --- |
-| CLI behavior | 136 | One curated, described CLI outcome, with its installation profile and source references |
-| Library behavior | 163 | One curated, described public libflatpak outcome, with its profile and source references |
+| CLI behavior | 136 | One selected, described CLI outcome, with its installation profile and source references |
+| Library behavior | 163 | One selected, described public libflatpak outcome, with its profile and source references |
 | CLI command reach | 44 | One active canonical command registered by the reference CLI |
 | CLI option reach | 624 | One distinct documented long option for a particular command, or for the global invocation |
 | Library function reach | 223 | One explicit public callable declaration, including deprecated APIs, excluding type-registration plumbing |
 | Library signal reach | 14 | One documented and registered signal belonging to a public libflatpak type |
 
-The 299 behavior obligations are an initial curated catalogue. Their granularity
-varies, and they are not weighted by complexity, risk, or usage. The files record
+The 299 behavior obligations form the initial catalogue. Rows vary in scope and
+are not weighted by complexity, risk, or usage. The files record
 known omissions and documentation ambiguities. A behavior percentage means
 coverage of those rows only; it must not be advertised as overall compatibility.
 
@@ -352,10 +532,12 @@ not a denominator for all behavior relevant to user installations, because many
 `any` obligations also apply.
 
 Interface reach counts interfaces associated with covered obligations and
-explicit CLI-option assertions. The latter require a specific observable effect
-and a rationale, and cannot add command, function, or behavior-obligation credit.
-They allow option testing to expand without redefining the 299-row behavior
-denominator. Help tests cover only their help option, not the command's main work.
+explicit CLI-option, library-function, or library-signal assertions. Explicit
+assertions require a specific observable effect and a rationale. They cannot add
+command or behavior-obligation credit, and their interface must match the case's
+driver. This allows focused interface testing without redefining the 299-row
+behavior denominator. Help tests cover only their help option, not the command's
+main work.
 Verified library-function reach additionally requires that
 the test client reached that function's call site. A successful error test cannot
 credit `flatpak_transaction_run()` if `add_install()` returned an error before
@@ -433,8 +615,8 @@ That contradicts the documented tie rule.
 The case remains strict and fails on that reference build. Its obligation stays
 implemented but receives no passing credit. It is separate from the remote
 property scenario so the discrepancy does not prevent independent persistence
-checks from executing. No undocumented ordering quirk has been silently accepted
-as the compatibility contract.
+checks from executing. The compatibility contract does not accept an undocumented
+ordering rule.
 
 ## AppStream callback execution checks
 
@@ -476,8 +658,8 @@ failed its behavioral assertion; this run cannot reach it because the private
 document portal fails to start. That unmet prerequisite does not resolve or
 replace the prior failure finding. The two additional failures are described
 under "Six additional library contracts" above.
-These observations need individual triage; failed assertions are not automatically
-proof of implementation defects. None earns passing credit.
+Review these observations separately. A failed assertion does not by itself prove
+an implementation defect. None earns passing credit.
 
 Non-root system-helper authorization, polkit, multiple users, authenticator
 installation, document-portal workflows, repair recovery, and remaining

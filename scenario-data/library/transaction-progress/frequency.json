@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "transaction.frequency",
+      "scenario": "tx-frequency",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Change progress notification cadence during a paced download.",
+      "preconditions": "Independent A/B app updates with over one MiB of new payload served at controlled speed.",
+      "expected": "50ms/1000ms/50ms intervals each transfer the full payload; both fast runs produce more than twice the distinct in-transfer byte samples of the slow run; exact commits survive all resets.",
+      "references": [
+        "common/flatpak-transaction.c: flatpak_transaction_progress_set_update_frequency"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "transaction.frequency",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "A slow cadence is bracketed by two fast controls on repeated paced transfers, excluding zero and final duplicate samples.",
+      "surface_assertions": [
+        {
+          "id": "library.function.flatpak_transaction_progress_set_update_frequency",
+          "rationale": "Contrasting requested intervals change the number of distinct advancing-byte notifications during equivalent payload transfers."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "This compares observable notification cadence without requiring exact scheduling or callback counts."
+  ]
+}

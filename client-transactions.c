@@ -195,7 +195,8 @@ new_operation (FlatpakTransaction *transaction, FlatpakTransactionOperation *ope
   trace->started++;
   trace->bytes = 0;
   trace->start = 0;
-  CALL_API (flatpak_transaction_progress_set_update_frequency, progress, 50);
+  guint interval = strcmp (trace->mode, "frequency-slow") == 0 ? 1000 : 50;
+  CALL_API (flatpak_transaction_progress_set_update_frequency, progress, interval);
   g_signal_connect (progress, "changed", G_CALLBACK (changed), trace);
   g_print ("new\t%s\n", CALL_API (flatpak_transaction_operation_get_ref, operation));
 }
