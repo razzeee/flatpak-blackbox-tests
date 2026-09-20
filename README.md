@@ -22,6 +22,13 @@ npm --prefix web run dev
 
 Copy published `history.json` to `web/public/history.json` to preview real data.
 
+Select the Failed or Setup error count, then select a case to see its failure
+message and expandable command output, exit statuses, API calls and observations.
+Diagnostics retain the last 12 evidence records, prioritizing the most recent
+commands, with a 4,000-character field limit and a 24,000-character budget per
+case. Truncated output is labelled; the CI link leads to the full report artifacts
+while they remain available. Older snapshots without diagnostics say so.
+
 The active baseline is configured in `ci/baselines.json`. Add a version/commit pair
 and update `current` when upgrading; retain older definitions for historical labels.
 Manual runs accept a baseline version or commit. Compare old and new baselines

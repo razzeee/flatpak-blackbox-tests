@@ -5,7 +5,6 @@ import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import {
   metricSchema,
-  caseTimingSchema,
   secondsSchema,
   snapshotSchema,
   timestampSchema,
@@ -13,6 +12,7 @@ import {
   type Track,
 } from "../src/history.ts";
 import { findBaseline } from "../src/baselines.ts";
+import { diagnosticCase } from "./diagnostics.ts";
 
 export async function readJson(path: string): Promise<unknown> {
   return JSON.parse(await readFile(path, "utf8"));
@@ -44,7 +44,7 @@ const reportMetadata = z.object({
 });
 const timingMetadata = z.object({
   duration_seconds: secondsSchema.optional(),
-  results: z.array(caseTimingSchema).optional(),
+  results: z.array(z.unknown()).optional(),
 });
 
 export interface RecordOptions {
@@ -98,10 +98,10 @@ export async function record(options: RecordOptions): Promise<Snapshot> {
   let performance: Snapshot["performance"];
   if (report?.complete && summary.verification.status === "current") {
     const timings = timingMetadata.parse(rawReport);
-    const cases = timings.results ?? [];
+    const cases = (timings.results ?? []).map(diagnosticCase);
     if (timings.duration_seconds !== undefined || cases.length) {
       const statuses: Record<string, number> = {};
-      for (const item of timings.results ?? []) {
+      for (const item of cases) {
         statuses[item.status] = (statuses[item.status] ?? 0) + 1;
       }
       performance = {
