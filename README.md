@@ -77,6 +77,14 @@ Custom adapters receive a fresh state directory and print a JSON object of
 environment variables. Keep setup inside that directory; send diagnostics to
 stderr. Exit 77 reports an unmet prerequisite.
 
+Repair scenarios also use the adapter's `BLACKBOX_REPAIR_FIXTURE` Python helper.
+The runner invokes it with `STATE_DIRECTORY OPERATION APP_COMMIT`. The reference
+adapter implements `remove-payload` by removing the fixture executable's OSTree
+object, and `snapshot` by returning a deterministic digest of installation paths,
+file types, ownership, modes, symlink targets and file contents. These operations
+are setup evidence. Public offline redeployment and app execution establish repair
+success. An adapter without the helper reports an unmet prerequisite for these cases.
+
 ## Run tests
 
 ```sh
@@ -166,6 +174,37 @@ Every push and pull request runs lint, type and formatting checks, unit tests on
 Python 3.10 and 3.14, and the full compatibility suite against a pinned reference
 Flatpak build. Compatibility failures remain failures; reports and diagnostic
 logs are uploaded even when a run fails.
+
+CI builds the system helper from the same selected commit. After fixture
+preparation, `ci/system_helper.py` provisions two ordinary users, a named system
+installation and scoped polkit rules on the disposable GitHub-hosted VM. Its probe
+checks the helper's bus-owner PID, authorized installation, exact commits visible
+to both users, and rejection of the second user's remote modification. The helper
+stays available during the suite; an always-run cleanup step stops it, removes the
+test users and installation, and restores any previous polkit action policy.
+Commands and helper output are included in the uploaded logs.
+
+The provisioning probe earns no behavior coverage itself. Six `multiuser-*`
+library scenarios use this environment through the normal runner and report:
+system install, update, uninstall, remote persistence, installation no-interaction
+and transaction no-interaction inheritance/override. Each case resets the named
+installation, uses distinct ordinary users, verifies the library loaded by each
+user, and preserves nested command records and actual API-call traces.
+
+These cases opt into `execution_environment: provisioned-system` and require
+`BLACKBOX_SYSTEM_TEST_ROOT` in the target environment. CI sets it automatically.
+The helper and loaded library must belong to the selected target build; the runner
+needs noninteractive sudo to switch users. Local Podman reproduction additionally
+requires `BLACKBOX_SYSTEM_TEST_CONTAINER=1`; the privileged bridge checks the
+container marker. Missing provisioning is an unmet prerequisite.
+
+The runner compiles `fixture-polkit-agent.c` from the current suite using
+`polkit-agent-1` development files. This separate process registers for the exact
+client PID, records real authorization requests and rejects all of them. Interactive
+controls must reach it; no-interaction attempts must not. Every attempt must still
+fail authorization and preserve installed state. The fixture exits with its parent.
+The suite definition includes the privileged Python bridge under `ci/`, so changes
+to those assertions invalidate earlier coverage evidence.
 
 Both [workflows](.github/workflows/) can also be started from GitHub's Actions tab.
 

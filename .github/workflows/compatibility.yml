@@ -26,6 +26,10 @@ jobs:
     name: ${{ github.event_name == 'schedule' && 'Full suite against upstream main' || 'Full suite against pinned baseline' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    env:
+      # Both ordinary test users must be able to traverse the build and fixture paths.
+      BB_CI_ROOT: /tmp/bb-compat
+      TMPDIR: /tmp/bb-t
     defaults:
       run:
         shell: bash
@@ -61,11 +65,7 @@ jobs:
           printf 'Testing flatpak/flatpak main at %s\n' "$commit"
 
       - name: Initialize isolated CI directories
-        run: |
-          export TMPDIR="$RUNNER_TEMP/bb-t"
-          export BB_CI_ROOT="$RUNNER_TEMP/bb-compat"
-          printf 'TMPDIR=%s\nBB_CI_ROOT=%s\n' "$TMPDIR" "$BB_CI_ROOT" >> "$GITHUB_ENV"
-          bash ci/compatibility.sh init
+        run: bash ci/compatibility.sh init
 
       - name: Install host dependencies and enable runner namespaces
         run: bash ci/compatibility.sh host
@@ -89,14 +89,24 @@ jobs:
       - name: Prepare complete independent fixture inputs
         run: bash ci/compatibility.sh prepare
 
+      - name: Provision and probe the system helper with two ordinary users
+        run: bash ci/compatibility.sh system
+
       - name: Run all CLI and library scenarios as the runner user
         # run.py appends coverage and timings to the automatic GITHUB_STEP_SUMMARY.
         run: bash ci/compatibility.sh run
 
+      - name: Clean up system-helper test provisioning
+        if: always()
+        run: |
+          if [[ -d "${BB_CI_ROOT:-}/system-helper-state" ]]; then
+            bash ci/compatibility.sh cleanup
+          fi
+
       - name: Summarize an interrupted compatibility run
         if: always()
         env:
-          BB_CI_ROOT: ${{ runner.temp }}/bb-compat
+          BB_CI_ROOT: /tmp/bb-compat
         run: bash ci/compatibility.sh summary
 
       - name: Record daily coverage snapshot
@@ -107,7 +117,7 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           npm --prefix web run history -- record \
-            --report "$RUNNER_TEMP/bb-compat/results/report.json" \
+            --report "$BB_CI_ROOT/results/report.json" \
             --track "$COVERAGE_TRACK" --timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             --suite-commit "$SUITE_COMMIT" --target-commit "$FLATPAK_REFERENCE_COMMIT" \
             --run-url "$RUN_URL" --output "$RUNNER_TEMP/coverage-snapshot.json"
@@ -129,13 +139,13 @@ jobs:
           if-no-files-found: warn
           # Deliberately select evidence files, not fixtures, keys or build trees.
           path: |
-            ${{ runner.temp }}/bb-compat/results/report.json
-            ${{ runner.temp }}/bb-compat/results/coverage.md
-            ${{ runner.temp }}/bb-compat/results/job-summary.md
-            ${{ runner.temp }}/bb-compat/results/*.log
-            ${{ runner.temp }}/bb-compat/logs/
-            ${{ runner.temp }}/bb-compat/target.json
-            ${{ runner.temp }}/bb-compat/build/meson-logs/meson-log.txt
+            ${{ env.BB_CI_ROOT }}/results/report.json
+            ${{ env.BB_CI_ROOT }}/results/coverage.md
+            ${{ env.BB_CI_ROOT }}/results/job-summary.md
+            ${{ env.BB_CI_ROOT }}/results/*.log
+            ${{ env.BB_CI_ROOT }}/logs/
+            ${{ env.BB_CI_ROOT }}/target.json
+            ${{ env.BB_CI_ROOT }}/build/meson-logs/meson-log.txt
 
   coverage-pages:
     name: Publish daily coverage

@@ -4,12 +4,28 @@
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 
 class CompatibilityProbeTests(unittest.TestCase):
+    def test_system_helper_provisioning_rejects_an_unprovisioned_host(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ci-system-guard-") as temporary:
+            root = Path(temporary)
+            (root / "logs").mkdir()
+            suite = Path(__file__).resolve().parent
+            env = {key: value for key, value in os.environ.items()
+                   if key not in ("GITHUB_ACTIONS", "RUNNER_ENVIRONMENT")}
+            for phase in ("start", "probe", "stop", "case"):
+                result = subprocess.run(
+                    [sys.executable, str(suite / "ci/system_helper.py"), phase, str(root)],
+                    env=env, text=True, capture_output=True, timeout=10, check=False)
+                self.assertEqual(result.returncode, 2)
+                self.assertIn("requires root in a disposable", result.stderr)
+                self.assertEqual(list(root.iterdir()), [root / "logs"])
+
     def test_logged_runner_failure_remains_fatal_and_gets_fallback(self) -> None:
         if os.getuid() == 0:
             self.skipTest("CI helper requires an ordinary user")

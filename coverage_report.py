@@ -248,6 +248,9 @@ class CoverageModel:
         paths = [self.suite / "inventory.json"]
         paths += sorted((self.suite / "coverage-data").rglob("*.json"))
         paths += sorted((self.suite / "scenario-data").rglob("*.json"))
+        # Provisioned-system assertions execute in the privileged CI bridge too.
+        paths += sorted(path for pattern in ("*.py", "*.sh")
+                        for path in (self.suite / "ci").glob(pattern))
         paths += sorted(
             path for pattern in ("*.py", "*.c", "*.h") for path in self.suite.glob(pattern)
             if path.suffix != ".py" or not path.name.startswith("test_")

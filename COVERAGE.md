@@ -4,6 +4,146 @@ This suite reports separate measurements for catalogued behavior and public
 interface reach. It does not report a percentage of all possible Flatpak behavior.
 There is no finite denominator for all Flatpak behavior yet.
 
+## Cross-user library and authorization contracts
+
+Six new cases bring the suite to **383 cases** and implemented library behavior
+to **162/163, or 99.39%**. CLI behavior remains 136/136 and CLI-option reach remains
+429/624. Successful authenticator installation is the sole remaining unmapped
+catalogued behavior obligation. Denominators are unchanged, and these focused
+runs do not establish full-suite passing percentages.
+
+The four lifecycle/remote cases use the selected system helper, real polkit and
+two distinct ordinary users. Install requests only the app and verifies its
+implicit runtime dependency. Update selects advertised B with commit NULL and
+retains the runtime. Uninstall yields public NOT_INSTALLED errors for the app
+while retaining only the runtime. The reader observes remote addition and URL
+changes through fresh library objects, then both users observe removal. Default
+and per-user remote snapshots remain unchanged. Each user must load the selected
+target library, and each case uses fresh named-installation state with umask 0022.
+
+The authorization cases compile an independent process-scoped polkit agent that
+records requests and rejects all authentication. Installation settings produce
+interactive/silent/interactive request counts of **1, 0, 1**. Transaction inheritance
+and explicit overrides in both directions produce **1, 0, 1, 0, 1**. Getters must
+match settings. Every attempted mutation must fail authorization and leave the
+seeded configuration and installed refs/commits unchanged.
+
+Configuration errors may be public D-Bus AccessDenied or Flatpak permission-denied.
+A transaction's top-level ABORTED error is accepted only when its operation-error
+callback identifies a permission-denied failure for the requested ref. An unrelated
+failure cannot satisfy these checks.
+
+All six cases pass against the helper-enabled CI-pinned Flatpak 1.19.1 build.
+Nine library-interposer controls fail their intended assertions and earn zero
+passing credit. They redirect system selection to a user installation, suppress
+runtime dependency resolution, update, uninstall, remote modification or removal,
+or ignore installation/transaction interaction settings and inheritance. The
+interaction controls preserve the expected getter values, so real agent request
+counts detect the incorrect behavior.
+
+CI now places the build and fixture directory under `/tmp` for access by both test
+users. Privileged bridge sources under `ci/` participate in the suite definition
+fingerprint. The unit tests verify that changing a bridge invalidates prior
+coverage, and that its privileged entry points reject unprovisioned hosts.
+
+Ruff, ty, strict mypy, JSON formatting, the source catalogue check and the unit
+suite pass. The optional prepared-fixture test also passes in the container.
+A run without active provisioning reports an unmet prerequisite with zero passing
+credit. The updated provisioning probe, its allow-reader negative control and
+cleanup also pass their expected checks. GitHub Actions has not yet run these
+changes remotely.
+
+All fifteen focused positive/negative reports share definition fingerprint
+`9861214269b134b2e249d05a798d490b925ec1096f17646812a839344f9714b0`.
+Evidence is local to `flatpak-blackbox-coverage-portals` under
+`/tmp/multiuser-final-*/report.json` and `/tmp/multiuser-negative-final-*/report.json`,
+with provisioning logs in `/tmp/helper-ci/logs`. These artifacts are not published
+with the repository.
+
+## Related-ref options and forced repair redeployment
+
+Four additional focused cases bring the suite to 377 cases and implemented
+CLI-option reach to **429/624, or 68.75%**. Catalogued CLI behavior remains
+136/136 and library behavior 156/163. These option assertions add no behavior
+credit or denominator entries.
+
+- `install --no-related` omits the available locale extension while installing
+  the required runtime. Ordinary installation includes the locale.
+- `update --no-related` leaves an absent locale extension uninstalled. Ordinary
+  update installs it while preserving the app and runtime commits.
+- `uninstall --no-related` retains the app's autodelete locale extension.
+  Ordinary uninstall removes it. Both retain the runtime.
+- `repair --reinstall-all` restores an executable unlinked from the public app
+  deployment while its repository object remains intact. Ordinary repair leaves
+  that damage in place. Forced repair restores the independent fixture bytes and
+  runs version A via an absolute `/app/bin/blackbox-probe` command, preventing
+  fallback to the runtime's identically named executable.
+
+All four cases pass against CI-pinned Flatpak 1.19.1. Removing each option in a
+negative-control wrapper fails its state assertion and earns zero passing credit.
+The eight reports are local to `flatpak-blackbox-coverage-portals` under
+`/tmp/state-options-final-{install,update,uninstall,repair}-{False,True}/report.json`,
+where `True` denotes a negative control. Together with the five repair reports
+below, they share definition fingerprint
+`e21c9cccb7f1b04bac0157573241359997da2751bd312a8ec09c30c7ab0bf295`.
+
+## System-helper environment
+
+The CI reference build now enables the system helper. A provisioning probe uses
+real polkit decisions and two ordinary user identities on the existing disposable
+VM. It checks the selected helper's bus-owner PID, installation by the allowed
+user, exact app/runtime commits visible to both users, and denied remote mutation
+by the reader. Cleanup removes the test users, named installation and policies and
+restores any previous action policy.
+
+The probe and cleanup pass locally in a disposable Ubuntu 24.04 Podman container
+with a helper-enabled build of the pinned commit. A negative control granting the
+reader permission fails the denial assertion. The GitHub Actions integration has
+not yet been run remotely. Existing CLI and library lifecycle cases also pass with
+the helper-enabled build while the provisioned helper is running. Probe, cleanup
+and negative-control logs are retained locally in `/tmp/helper-ci/logs`; the
+lifecycle report is `/tmp/helper-lifecycle/report.json` in the same container.
+This infrastructure earns no behavior coverage; the
+six authorization and cross-user library obligations still need implementations,
+including an authentication-agent fixture for no-interaction contrasts.
+
+## User repair contracts
+
+Two new cases cover the remaining catalogued CLI behavior obligations. The suite
+now has 373 cases, with implemented CLI behavior at **136/136** and CLI-option
+reach at **425/624, or 68.11%**. Library behavior remains 156/163. Denominators
+are unchanged; these focused results do not establish full-suite passing coverage.
+
+Both cases pass against CI-pinned Flatpak 1.19.1 with independent fixtures. The
+reference adapter removes the executable payload object used by the installed app
+and runtime. Real repair must restore exact commits and permit offline
+reinstallation of both refs, followed by execution of app version A. A surviving
+deployment alone cannot satisfy the recovery assertion.
+
+The dry-run case compares healthy and damaged diagnostics, requires a new line
+identifying the affected app, and compares installation snapshots before and after
+the dry run. Snapshots cover paths, file types, ownership, modes, symlink targets
+and file contents, excluding timestamps. Subsequent real repair must pass the same
+offline redeployment checks.
+
+Three negative controls fail their intended assertions: a no-op repair cannot
+redeploy offline, ignoring `--dry-run` changes the installation snapshot, and
+discarding inconsistency diagnostics fails the affected-app assertion.
+
+An exploratory missing-commit variant failed: Flatpak detected the absent commit
+but reinstallation returned `No such metadata object`, even though the fixture
+source retained that commit. The committed cases cover missing payload recovery,
+not missing commit metadata recovery. That broader failure still needs diagnosis.
+
+Ruff, ty, strict mypy, JSON formatting and the source catalogue check pass.
+The unit suite passes with one optional prepared-fixture test skipped locally;
+the fixture-manifest tests also pass in the container with that check enabled.
+
+All five final reports match the definition fingerprint recorded above.
+Focused evidence is local to the `flatpak-blackbox-coverage-portals` container at
+`/tmp/repair-complete-{restore,dry,noop,ignore-dry-run,silent}/report.json`.
+These artifacts are not published with the repository.
+
 ## Query and filter option batch
 
 Eleven additional CLI cases pass against CI-pinned Flatpak 1.19.1, using the

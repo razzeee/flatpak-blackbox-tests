@@ -2,6 +2,25 @@
   "schema": 1,
   "behaviors": [
     {
+      "id": "related-options.update",
+      "scenario": "related-options-update",
+      "handler": "related_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Suppress installation of an available related locale during app update.",
+      "preconditions": "Independent selection app and runtime installed without its locale extension; explicit de language.",
+      "expected": "Update --no-related retains only app and runtime. Ordinary update installs the expected locale without changing app/runtime commits.",
+      "references": [
+        "doc/flatpak-update.xml"
+      ]
+    },
+    {
       "id": "management.update-ambiguous",
       "scenario": "management-update-ambiguous",
       "handler": "cli_management_scenarios:run",
@@ -156,6 +175,19 @@
     }
   ],
   "mappings": [
+    {
+      "behavior_id": "related-options.update",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "An absent related ref makes update's related-ref processing observable independently of app version changes.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.update.--no-related",
+          "rationale": "Suppressed update leaves the available locale absent; ordinary update installs its independent commit with app/runtime unchanged."
+        }
+      ]
+    },
     {
       "behavior_id": "management.update-ambiguous",
       "driver": "cli",

@@ -2,6 +2,25 @@
   "schema": 1,
   "behaviors": [
     {
+      "id": "related-options.install",
+      "scenario": "related-options-install",
+      "handler": "related_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Suppress related locale installation while retaining required runtime dependencies.",
+      "preconditions": "Independent selection app, runtime and autodelete locale extension; explicit de language.",
+      "expected": "Install --no-related deploys only app and runtime. Ordinary installation also deploys the exact locale commit.",
+      "references": [
+        "doc/flatpak-install.xml"
+      ]
+    },
+    {
       "id": "management.install-arch",
       "scenario": "management-install-arch",
       "handler": "cli_management_scenarios:run",
@@ -201,6 +220,19 @@
     }
   ],
   "mappings": [
+    {
+      "behavior_id": "related-options.install",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Exact ref sets and independent commits contrast suppressed and ordinary related-ref installation.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.install.--no-related",
+          "rationale": "The locale is absent only with the flag, while the required runtime remains installed in both runs."
+        }
+      ]
+    },
     {
       "behavior_id": "management.install-arch",
       "driver": "cli",
