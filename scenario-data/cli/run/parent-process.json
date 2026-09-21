@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "parent-process.options",
+      "scenario": "parent-process-options",
+      "handler": "parent_process_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Distinguish isolated, exposed and shared child sandbox PID namespaces.",
+      "preconditions": "A live independent parent app, with its actual process identified by public instance enumeration.",
+      "expected": "Only sharing reuses the parent namespace; exposure nests the child under it; public enter observes the exact child environment only for the exposed/shared modes. An absent parent is rejected.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "parent-process.options",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Kernel PID namespace identities and a read from inside the parent establish real process visibility rather than option serialization.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--parent-pid",
+          "rationale": "The selected live parent controls child namespace placement; an absent parent fails."
+        },
+        {
+          "id": "cli.option.run.--parent-expose-pids",
+          "rationale": "The child enters a nested namespace and its exact environment becomes readable inside the parent."
+        },
+        {
+          "id": "cli.option.run.--parent-share-pids",
+          "rationale": "The child shares the parent's actual kernel PID namespace and is visible from within it."
+        }
+      ]
+    }
+  ]
+}

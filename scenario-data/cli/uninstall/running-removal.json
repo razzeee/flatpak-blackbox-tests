@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "running-removal.uninstall",
+      "scenario": "running-removal-uninstall",
+      "handler": "running_removal_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Force removal of files used by an uninstalled but still-running app.",
+      "preconditions": "Independent installed A app/runtime and a live holding sandbox.",
+      "expected": "Ordinary uninstall retains files in the running sandbox; force-remove deletes them. Both remove the app ref while preserving the exact runtime.",
+      "references": [
+        "doc/flatpak-uninstall.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "running-removal.uninstall",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Actual sandbox file visibility distinguishes retained in-use data from forced removal, without assuming deployment-directory layout.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.uninstall.--force-remove",
+          "rationale": "Forced uninstall deletes payload entries that ordinary uninstall preserves for a running instance."
+        }
+      ]
+    }
+  ]
+}

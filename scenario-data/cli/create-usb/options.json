@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "usb-options.kinds",
+      "scenario": "usb-options-kinds",
+      "handler": "usb_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Select app and runtime USB exports and reject installed refs of the opposite kind.",
+      "preconditions": "Independent signed collection app and runtime installed together.",
+      "expected": "Each kind selector rejects the opposite installed kind. App selection exports the exact app and dependency runtime; runtime selection exports only the exact runtime, preserving collection identity.",
+      "references": [
+        "doc/flatpak-create-usb.xml"
+      ]
+    },
+    {
+      "id": "usb-options.partial",
+      "scenario": "usb-options-partial",
+      "handler": "usb_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Suppress the documented warning about incomplete USB source content.",
+      "preconditions": "Independent signed runtime installed with only the bin subpath.",
+      "expected": "Allow-partial removes the partial-content warning while preserving exit status and unrelated diagnostics. Successful exports retain selected bytes; an independent partial-export failure is recorded separately and a full-install export control must succeed.",
+      "references": [
+        "doc/flatpak-create-usb.xml"
+      ]
+    },
+    {
+      "id": "usb-options.diagnostics",
+      "scenario": "usb-options-diagnostics",
+      "handler": "usb_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe USB export diagnostics around recreated quiet controls.",
+      "preconditions": "Independent signed app/runtime and fresh export destination for every invocation.",
+      "expected": "Both verbosity modes add diagnostics while preserving stdout and exact exported collection/ref/commit sets.",
+      "references": [
+        "doc/flatpak-create-usb.xml"
+      ]
+    },
+    {
+      "id": "usb-options.selectors",
+      "scenario": "usb-options-selectors",
+      "handler": "usb_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Export the explicitly selected installation among default, named and user stores.",
+      "preconditions": "Disposable competing installations with independent signed A/B app commits under the same ref.",
+      "expected": "Every export has the selected installation's exact independent app/runtime commits and collection identity.",
+      "references": [
+        "doc/flatpak-create-usb.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "usb-options.kinds",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Exact public collection refs distinguish filtered app and runtime selections.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.create-usb.--app",
+          "rationale": "App filtering selects the app and its dependency rather than a matching runtime alone."
+        },
+        {
+          "id": "cli.option.create-usb.--runtime",
+          "rationale": "Runtime filtering exports the matching runtime without the app."
+        }
+      ]
+    },
+    {
+      "behavior_id": "usb-options.partial",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "The manual specifies warning suppression. Matching outcomes and unrelated diagnostics isolate that effect, with independent commit and payload controls.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.create-usb.--allow-partial",
+          "rationale": "The flag suppresses the actual partial-content warning without changing unrelated diagnostics or export status."
+        }
+      ]
+    },
+    {
+      "behavior_id": "usb-options.diagnostics",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Quiet/flagged/quiet exports retain exact independent refs while adding diagnostic output.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.create-usb.--verbose",
+          "rationale": "Verbose export adds diagnostic lines without changing ordinary results."
+        },
+        {
+          "id": "cli.option.create-usb.--ostree-verbose",
+          "rationale": "OSTree verbosity adds diagnostic lines without changing ordinary results."
+        }
+      ]
+    },
+    {
+      "behavior_id": "usb-options.selectors",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [],
+      "rationale": "Competing installed copies and independent A/B commit oracles identify the selected source store.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.create-usb.--user",
+          "rationale": "The user store supplies the exported refs despite competing system copies."
+        },
+        {
+          "id": "cli.option.create-usb.--system",
+          "rationale": "The default system store supplies the exported refs despite competing user/named copies."
+        },
+        {
+          "id": "cli.option.create-usb.--installation",
+          "rationale": "The named store supplies its independently different B app commit."
+        }
+      ]
+    }
+  ]
+}

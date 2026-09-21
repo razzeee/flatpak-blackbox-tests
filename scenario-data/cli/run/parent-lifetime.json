@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "parent-lifetime.run",
+      "scenario": "parent-lifetime-run",
+      "handler": "parent_lifetime_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Tie a running sandbox's lifetime to its real launching process.",
+      "preconditions": "Independent holding payload, a separate launcher process and a helper-local subreaper for cleanup.",
+      "expected": "The unflagged launcher and payload survive the parent's normal exit; die-with-parent causes both to stop. The observation precedes cleanup and all descendants are reaped.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "parent-lifetime.run",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "A real parent exit, positive survival control and independently identified payload establish sandbox lifetime rather than flag presence.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--die-with-parent",
+          "rationale": "The flag terminates both launcher and payload after the real parent exits, unlike the survival control."
+        }
+      ]
+    }
+  ]
+}

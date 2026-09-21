@@ -1,0 +1,272 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "build-diagnostics.init",
+      "scenario": "build-diagnostics-build-init",
+      "handler": "build_diagnostic_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe build initialization diagnostics with known runtime inputs.",
+      "preconditions": "Independent installed runtime and fresh build output for every invocation.",
+      "expected": "Flagged invocations add diagnostic lines between stable quiet controls while retaining expected build metadata.",
+      "references": [
+        "doc/flatpak-build-init.xml"
+      ]
+    },
+    {
+      "id": "build-diagnostics.finish",
+      "scenario": "build-diagnostics-build-finish",
+      "handler": "build_diagnostic_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "local-repository"
+      ],
+      "description": "Observe build finalization diagnostics on recreated independent inputs.",
+      "preconditions": "An unfinalized copy of the independently prepared build tree for every invocation.",
+      "expected": "Flagged invocations add diagnostic lines between stable quiet controls while producing the export directory and expected app metadata.",
+      "references": [
+        "doc/flatpak-build-finish.xml"
+      ]
+    },
+    {
+      "id": "build-diagnostics.export",
+      "scenario": "build-diagnostics-build-export",
+      "handler": "build_diagnostic_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "local-repository"
+      ],
+      "description": "Observe build export diagnostics with fixed timestamps and independent metadata.",
+      "preconditions": "The same independently finalized app tree and fresh repository for each invocation.",
+      "expected": "Flagged invocations add diagnostics while all exports preserve independent metadata and pass repository integrity checks.",
+      "references": [
+        "doc/flatpak-build-export.xml"
+      ]
+    },
+    {
+      "id": "build-diagnostics.bundle",
+      "scenario": "build-diagnostics-build-bundle",
+      "handler": "build_diagnostic_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "local-repository"
+      ],
+      "description": "Observe bundle diagnostics while independently importing each output.",
+      "preconditions": "Independent A repository and fresh output paths.",
+      "expected": "Flagged invocations add diagnostics; independent OSTree offline application of every bundle yields the known app commit.",
+      "references": [
+        "doc/flatpak-build-bundle.xml"
+      ]
+    },
+    {
+      "id": "build-diagnostics.import",
+      "scenario": "build-diagnostics-build-import-bundle",
+      "handler": "build_diagnostic_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "local-repository"
+      ],
+      "description": "Observe bundle import diagnostics with independent commit oracles.",
+      "preconditions": "Independent A bundle and fresh empty repositories.",
+      "expected": "Flagged invocations add diagnostics; every imported repository resolves the exact independent app commit and passes integrity checks.",
+      "references": [
+        "doc/flatpak-build-import-bundle.xml"
+      ]
+    },
+    {
+      "id": "build-diagnostics.commit",
+      "scenario": "build-diagnostics-build-commit-from",
+      "handler": "build_diagnostic_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "local-repository"
+      ],
+      "description": "Observe commit promotion diagnostics on immutable independent source content.",
+      "preconditions": "Independent A source, fixed timestamps and fresh destination repositories.",
+      "expected": "Flagged invocations add diagnostics while all destinations retain independent metadata and pass integrity checks.",
+      "references": [
+        "doc/flatpak-build-commit-from.xml"
+      ]
+    },
+    {
+      "id": "build-diagnostics.sign",
+      "scenario": "build-diagnostics-build-sign",
+      "handler": "build_diagnostic_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "local-repository"
+      ],
+      "description": "Observe signing diagnostics while verifying each signature independently.",
+      "preconditions": "Independent app commit, disposable signing key and fresh unsigned repository copies.",
+      "expected": "Flagged invocations add diagnostics while preserving the exact app commit and producing signatures verified by the independent public key.",
+      "references": [
+        "doc/flatpak-build-sign.xml"
+      ]
+    },
+    {
+      "id": "build-diagnostics.update-repo",
+      "scenario": "build-diagnostics-build-update-repo",
+      "handler": "build_diagnostic_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "local-repository"
+      ],
+      "description": "Observe repository update diagnostics with independently prepared app commits.",
+      "preconditions": "Fresh copies of the independent A repository.",
+      "expected": "Flagged invocations add diagnostics between stable quiet controls while preserving app commits and repository integrity.",
+      "references": [
+        "doc/flatpak-build-update-repo.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "build-diagnostics.init",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Recreated outputs retain independently expected build metadata while verbosity adds diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-init.--ostree-verbose",
+          "rationale": "OSTree initialization diagnostics differ from quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build-diagnostics.finish",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Recreated outputs preserve build identity and finalization while verbosity adds diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-finish.--verbose",
+          "rationale": "Verbose finalization adds diagnostics absent from quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build-diagnostics.export",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Public repository inspection validates every exported output independently of diagnostic text.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-export.--verbose",
+          "rationale": "Verbose exports add diagnostics absent from quiet controls."
+        },
+        {
+          "id": "cli.option.build-export.--ostree-verbose",
+          "rationale": "OSTree export diagnostics differ from quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build-diagnostics.bundle",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent offline bundle application verifies outputs while quiet/flagged/quiet runs isolate diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-bundle.--ostree-verbose",
+          "rationale": "OSTree bundle diagnostics differ from quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build-diagnostics.import",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent commit identity and repository integrity remain valid with diagnostic output.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-import-bundle.--verbose",
+          "rationale": "Verbose import adds diagnostics."
+        },
+        {
+          "id": "cli.option.build-import-bundle.--ostree-verbose",
+          "rationale": "OSTree import diagnostics differ from quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build-diagnostics.commit",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent metadata and repository integrity validate promoted outputs separately from diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-commit-from.--verbose",
+          "rationale": "Verbose promotion adds diagnostics."
+        },
+        {
+          "id": "cli.option.build-commit-from.--ostree-verbose",
+          "rationale": "OSTree promotion diagnostics differ from quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build-diagnostics.sign",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent signature verification and exact commits distinguish successful signing from diagnostic-only output.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-sign.--ostree-verbose",
+          "rationale": "OSTree signing diagnostics differ from quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build-diagnostics.update-repo",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent app commits and repository integrity remain valid while diagnostic output increases.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-update-repo.--verbose",
+          "rationale": "Verbose repository updates add diagnostics."
+        },
+        {
+          "id": "cli.option.build-update-repo.--ostree-verbose",
+          "rationale": "OSTree repository-update diagnostics differ from quiet controls."
+        }
+      ]
+    }
+  ]
+}

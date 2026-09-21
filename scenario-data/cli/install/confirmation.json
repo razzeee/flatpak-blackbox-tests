@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "confirmation-options.install",
+      "scenario": "confirmation-options-install",
+      "handler": "confirmation_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Approve an installation with closed stdin through either automatic confirmation mode.",
+      "preconditions": "Absent independent app/runtime and a remote advertising known commits.",
+      "expected": "An ordinary invocation refuses without consent and preserves the empty installation; each automatic mode deploys exactly the app and runtime without an unanswered prompt.",
+      "references": [
+        "doc/flatpak-install.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "confirmation-options.install",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Closed stdin distinguishes automatic consent from an ordinary unapproved transaction; exact independent commits verify completion.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.install.--assumeyes",
+          "rationale": "The pending installation completes without reading confirmation."
+        },
+        {
+          "id": "cli.option.install.--noninteractive",
+          "rationale": "The pending installation completes without prompting or reading input."
+        }
+      ]
+    }
+  ]
+}

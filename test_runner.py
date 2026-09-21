@@ -21,6 +21,22 @@ from fixture_manifest import FixtureManifest
 RUNNER = Path(__file__).with_name("run.py")
 
 
+class CommandInputTests(unittest.TestCase):
+    def test_target_commands_cannot_inherit_confirmation_from_runner_stdin(self) -> None:
+        script = (
+            "import os,sys; from pathlib import Path; import run; "
+            "result=run.execute([sys.executable,'-c',"
+            "'import sys; print(repr(sys.stdin.read()))'],"
+            "dict(os.environ),Path.cwd(),[],5); "
+            "print(result.stdout,end=''); raise SystemExit(result.returncode)"
+        )
+        result = subprocess.run([sys.executable, "-c", script], cwd=RUNNER.parent,
+                                input="yes\n", text=True, capture_output=True, timeout=10,
+                                check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, "''\n")
+
+
 @unittest.skipUnless(shutil.which("dbus-daemon"), "runner isolation requires dbus-daemon")
 class RunnerAttributionTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -499,7 +515,7 @@ elif command not in ('remote-add', 'list'):
     def test_malformed_inventory_has_a_cli_diagnostic(self) -> None:
         suite = self.root / "suite"
         shutil.copytree(RUNNER.parent, suite, ignore=shutil.ignore_patterns(
-            ".venv", "__pycache__", ".mypy_cache", ".ruff_cache",
+            ".git", ".venv", "node_modules", "__pycache__", ".mypy_cache", ".ruff_cache",
         ))
         (suite / "inventory.json").write_text('{"schema": true, "behaviors": []}')
         result = subprocess.run([
