@@ -14,8 +14,8 @@
         "local-repository"
       ],
       "description": "Initialize app, runtime and extension builds and reject an unknown type.",
-      "preconditions": "Independent installed SDK and extension fixtures.",
-      "expected": "Types select the correct metadata group, runtime SDK copy and extension parent; unknown types create no metadata.",
+      "preconditions": "Distinct installed SDK and platform refs with independently different payload markers.",
+      "expected": "Types select the correct metadata group, copy SDK rather than platform bytes for runtime builds, and retain the distinct SDK/runtime refs and platform extension parent; unknown types create no metadata.",
       "references": [
         "doc/flatpak-build-init.xml"
       ]
@@ -71,8 +71,8 @@
         "local-repository"
       ],
       "description": "Copy an installed extension into a writable SDK only when requested.",
-      "preconditions": "Independent SDK and extension with distinct payload markers.",
-      "expected": "Explicit extension selection adds its exact marker at the declared directory and retains the SDK marker; the control omits it.",
+      "preconditions": "Distinct SDK and platform refs, both debug extensions installed, and an independent SDK-owned debug marker.",
+      "expected": "Explicit SDK-debug selection copies sdk_debug:A into usr/lib/debug and retains sdk:A at the SDK root; the control omits the extension and platform bytes cannot satisfy either assertion.",
       "references": [
         "doc/flatpak-build-init.xml"
       ]

@@ -53,6 +53,27 @@ def _launch(root: Path, argv: list[str]) -> None:
         os._exit(0)
 
 
+def _cleanup_children(statuses: dict[int, int], timeout: float = 5) -> None:
+    """Stop and reap owned children, including late arrivals adopted by this subreaper."""
+    deadline = time.monotonic() + timeout
+    while True:
+        for pid in reversed(_descendants(os.getpid())[1:]):
+            if _alive(pid):
+                with suppress(ProcessLookupError):
+                    os.kill(pid, signal.SIGKILL)
+        while True:
+            try:
+                pid, status = os.waitpid(-1, os.WNOHANG)
+            except ChildProcessError:
+                return
+            if pid == 0:
+                break
+            statuses[pid] = os.waitstatus_to_exitcode(status)
+        if time.monotonic() >= deadline:
+            raise RuntimeError("sandbox descendant cleanup timed out")
+        time.sleep(0.02)
+
+
 def _supervise(root: Path, die: bool, argv: list[str]) -> int:
     libc = ctypes.CDLL(None, use_errno=True)
     if libc.prctl(36, 1, 0, 0, 0) != 0:  # PR_SET_CHILD_SUBREAPER, in this helper only
@@ -63,7 +84,6 @@ def _supervise(root: Path, die: bool, argv: list[str]) -> int:
         stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     assert launcher.stdout is not None
     target = int(launcher.stdout.readline())
-    tracked = [target]
     observation = {}
     try:
         deadline = time.monotonic() + 10
@@ -100,24 +120,22 @@ def _supervise(root: Path, die: bool, argv: list[str]) -> int:
         if launcher.poll() is None:
             launcher.kill()
             launcher.communicate(timeout=5)
-        for pid in reversed(tracked):
-            if _alive(pid):
-                with suppress(ProcessLookupError):
-                    os.kill(pid, signal.SIGKILL)
-        _, status = os.waitpid(target, 0)
-        print(json.dumps({"argv": argv, "interface": "cli",
-                          "exit_status": os.waitstatus_to_exitcode(status),
-                          "stdout": (root / "stdout").read_text(),
-                          "stderr": (root / "stderr").read_text()}), flush=True)
-        print(json.dumps({"observation": "sandbox parent lifetime", "data": observation}),
-              flush=True)
-        # All owned descendants have been stopped; reap orphaned sandbox init and
-        # proxy processes rather than leaving zombies in a long-running host.
-        while True:
-            try:
-                os.waitpid(-1, 0)
-            except ChildProcessError:
-                break
+        statuses: dict[int, int] = {}
+        try:
+            _cleanup_children(statuses)
+            if target not in statuses:
+                raise RuntimeError("target exit status unavailable after cleanup")
+        finally:
+            record: EvidenceRecord = {"argv": argv, "interface": "cli",
+                                      "stdout": (root / "stdout").read_text(),
+                                      "stderr": (root / "stderr").read_text()}
+            if target in statuses:
+                record["exit_status"] = statuses[target]
+            else:
+                record["error"] = "target exit status unavailable after cleanup"
+            print(json.dumps(record), flush=True)
+            print(json.dumps({"observation": "sandbox parent lifetime", "data": observation}),
+                  flush=True)
 
 
 def run(driver: Driver, repository: RepositoryServer, url: str,

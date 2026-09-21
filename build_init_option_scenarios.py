@@ -24,7 +24,7 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
     refs = contracts["refs"]
     source = Path(fixture["directory"]) / contracts["repos"]["A"]
     if name in {"init-options-sdk-extension", "init-options-base-extension"}:
-        alias = "shared" if name == "init-options-base-extension" else "extension"
+        alias = "shared" if name == "init-options-base-extension" else "sdk_debug"
         commit = contracts["commits"]["A"][refs[alias]]
         payload = driver.external_call([
             "ostree", f"--repo={source}", "cat", commit, "/files/contract-marker",
@@ -32,16 +32,24 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
         if payload.returncode != 0 or payload.stdout != f"{alias}:A\n":
             raise PrerequisiteError("reprepare contract fixtures with exported extension payloads")
     driver.cli_success("remote-add", "--user", "--no-gpg-verify", "fixture", source.as_uri())
-    for alias in ("platform", "extension", "one", "shared"):
+    for alias in ("platform", "sdk", "extension", "platform_debug", "sdk_debug", "one", "shared"):
         driver.cli_success("install", "--user", "--noninteractive", "fixture", refs[alias])
         driver.query(refs[alias], contracts["commits"]["A"][refs[alias]])
-    sdk = refs["platform"].removeprefix("runtime/")
+    sdk = refs["sdk"].removeprefix("runtime/")
+    runtime = refs["platform"].removeprefix("runtime/")
+    driver.check(sdk != runtime, "initialization requires independent SDK and runtime refs")
     identity = "org.flatpak.Initialized"
     options: tuple[str, ...]
 
     def initialize(label: str, *options: str) -> Path:
         tree = driver.root / f"initialized-{label}"
-        driver.cli_success("build-init", *options, str(tree), identity, sdk, sdk, "test")
+        driver.cli_success("build-init", *options, str(tree), identity, sdk, runtime, "test")
+        metadata = _metadata(tree)
+        group = "Application" if metadata.has_section("Application") else "Runtime"
+        driver.check(metadata.get(group, "sdk", fallback=None) == sdk,
+                     "initialization must select the independent SDK ref")
+        driver.check(metadata.get(group, "runtime", fallback=None) == runtime,
+                     "initialization must retain the independent runtime ref")
         return tree
 
     def marker(tree: Path, path: str, expected: str) -> None:
@@ -54,22 +62,22 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
             tree = initialize(kind, f"--type={kind}")
             metadata = _metadata(tree)
             group = "Application" if kind == "app" else "Runtime"
-            driver.check(metadata.get(group, "name") == identity,
+            driver.check(metadata.get(group, "name", fallback=None) == identity,
                          f"{kind} build metadata must use {group}")
             driver.check(metadata.has_section("Application") == (kind == "app"),
                          "non-app types must not retain app metadata")
             driver.check(metadata.has_section("ExtensionOf") == (kind == "extension"),
                          "only extension builds declare their parent")
             if kind == "runtime":
-                marker(tree, "usr/contract-marker", "platform:A")
+                marker(tree, "usr/contract-marker", "sdk:A")
             else:
                 driver.check(not (tree / "usr/contract-marker").exists(),
                              "ordinary app/extension initialization does not copy the SDK")
             if kind == "extension":
-                driver.check(metadata.get("ExtensionOf", "ref") == refs["platform"],
+                driver.check(metadata.get("ExtensionOf", "ref", fallback=None) == refs["platform"],
                              "extension parent is the selected runtime ref")
         rejected = driver.cli_call("build-init", "--type=invalid", str(driver.root / "invalid"),
-                                   identity, sdk, sdk)
+                                   identity, sdk, runtime)
         driver.check(rejected.returncode != 0 and not (driver.root / "invalid/metadata").exists(),
                      "unknown build type must not produce an initialized tree")
     elif name == "init-options-extension-tag":
@@ -79,7 +87,7 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
             metadata = _metadata(tree)
             driver.check(metadata.get("ExtensionOf", "tag", fallback=None) == tag,
                          "extension initialization must preserve the selected mount-point tag")
-            driver.check(metadata.get("ExtensionOf", "ref") == refs["platform"],
+            driver.check(metadata.get("ExtensionOf", "ref", fallback=None) == refs["platform"],
                          "tag changes must preserve the parent ref")
     elif name == "init-options-var":
         control = initialize("empty-var")
@@ -90,9 +98,9 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
                      "var input must not replace application payloads")
     elif name in {"init-options-sdk-extension", "init-options-base-extension"}:
         base = name == "init-options-base-extension"
-        alias = "shared" if base else "extension"
+        alias = "shared" if base else "sdk_debug"
         path = ("files/share/contract/contract-marker" if base else
-                "usr/share/contract-platform/contract-marker")
+                "usr/lib/debug/contract-marker")
         options = ((f"--base={refs['one'].split('/')[1]}", "--base-version=test")
                    if base else ("--writable-sdk",))
         control = initialize("without-extension", *options)
@@ -101,6 +109,6 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
         tree = initialize("with-extension", *options, f"{flag}={refs[alias].split('/')[1]}")
         marker(tree, path, f"{alias}:A")
         marker(tree, "files/contract-marker" if base else "usr/contract-marker",
-               "one:A" if base else "platform:A")
+               "one:A" if base else "sdk:A")
     else:
         raise ValueError(f"unknown initialization scenario: {name}")
