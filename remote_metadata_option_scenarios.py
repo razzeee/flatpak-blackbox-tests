@@ -127,8 +127,10 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
             driver.cli_success("remote-modify", "--user", "--update-metadata", "fixture")
             driver.check(driver.cli_success("remotes", "--user", "--columns=url") == source_url,
                          "an explicitly configured URL must initially prevent redirection")
-            driver.cli_success("remote-modify", "--user", "--follow-redirect", "--update-metadata",
-                               "fixture")
+            # Persist the policy before refreshing; combined options do not
+            # promise to apply configuration changes before the metadata fetch.
+            driver.cli_success("remote-modify", "--user", "--follow-redirect", "fixture")
+            driver.cli_success("remote-modify", "--user", "--update-metadata", "fixture")
             expected_url, version = destination, "B"
         else:
             driver.cli_success("remote-add", "--user", "--no-gpg-verify", "fixture", source_url)

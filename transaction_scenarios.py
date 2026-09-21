@@ -404,7 +404,8 @@ def _supplemental(driver: Driver, fixture: FixtureManifest, name: str) -> None:
                 with _fresh_transaction_state(driver, f"frequency-{index}"):
                     server.directory = directory / "A"
                     server.slow = False
-                    driver.success("remote-edit", "fixture", url, "Supplemental transactions", "1")
+                    driver.success("remote-create", "fixture", url,
+                                   "Supplemental transactions", "1")
                     driver.success("install", first)
                     state(first, "A")
                     server.directory = directory / "B"

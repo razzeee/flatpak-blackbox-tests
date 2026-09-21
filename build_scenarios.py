@@ -642,14 +642,14 @@ def _build(driver: Driver, fixture: FixtureManifest, url: str, name: str) -> Non
     elif name in ("build-readonly", "build-readonly-app"):
         destinations = [("app", "files")]
         if name == "build-readonly":
-            destinations.append(("var", "var"))
+            destinations.append(("var/lib", "var/lib"))
         for mount, relative in destinations:
             path = tree / relative / "artifact"
+            path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text("original")
-            if mount == "app":
-                observed = driver.cli_success("build", "--readonly", str(tree), probe,
-                                               "read", "/app/artifact")
-                driver.check(observed == "original", "readonly control cannot read app artifact")
+            observed = driver.cli_success("build", "--readonly", str(tree), probe,
+                                          "read", f"/{mount}/artifact")
+            driver.check(observed == "original", f"readonly control cannot read {mount} artifact")
             result = driver.cli_call("build", "--readonly", str(tree), probe,
                                      "write", f"/{mount}/artifact", "changed")
             driver.check(result.returncode != 0, f"readonly {mount} unexpectedly writable")
