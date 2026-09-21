@@ -60,6 +60,10 @@ and supplemental inputs with a checksummed `fixture.json` manifest. Fixtures are
 architecture-specific and can be reused across target runs. `--basic` prepares
 only the inputs needed by the basic cases.
 
+Contract preparation verifies marker bytes in the exported OSTree commits.
+SDK/base-extension copying cases require these payload-bearing fixtures and
+report an unmet prerequisite for older fixtures with empty extensions.
+
 ## Configure a target
 
 Copy [target.example.json](target.example.json) and edit it for your installation:
