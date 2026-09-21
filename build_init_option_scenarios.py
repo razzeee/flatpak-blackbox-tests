@@ -23,6 +23,14 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
         raise PrerequisiteError("independent SDK, base and extension contract inputs required")
     refs = contracts["refs"]
     source = Path(fixture["directory"]) / contracts["repos"]["A"]
+    if name in {"init-options-sdk-extension", "init-options-base-extension"}:
+        alias = "shared" if name == "init-options-base-extension" else "extension"
+        commit = contracts["commits"]["A"][refs[alias]]
+        payload = driver.external_call([
+            "ostree", f"--repo={source}", "cat", commit, "/files/contract-marker",
+        ], "setup")
+        if payload.returncode != 0 or payload.stdout != f"{alias}:A\n":
+            raise PrerequisiteError("reprepare contract fixtures with exported extension payloads")
     driver.cli_success("remote-add", "--user", "--no-gpg-verify", "fixture", source.as_uri())
     for alias in ("platform", "extension", "one", "shared"):
         driver.cli_success("install", "--user", "--noninteractive", "fixture", refs[alias])
