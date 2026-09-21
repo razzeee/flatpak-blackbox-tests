@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "bus-options.run-session",
+      "scenario": "bus-options-run-session",
+      "handler": "bus_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus"
+      ],
+      "description": "Acquire a granted session-bus name and observe controlled traffic logging from an app sandbox.",
+      "preconditions": "Independent installed app/runtime, private bus and echo service.",
+      "expected": "The own-name grant obtains the otherwise denied name; logged successful echo calls identify the method and destination while quiet controls do not.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "bus-options.run-system",
+      "scenario": "bus-options-run-system",
+      "handler": "bus_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus"
+      ],
+      "description": "Acquire a granted system-bus name and observe traffic logging against a private redirected bus.",
+      "preconditions": "Independent installed app/runtime, private system-bus substitute and echo service.",
+      "expected": "The system-own-name grant obtains the otherwise denied name; logged successful echo calls identify the method and destination while quiet controls do not.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "bus-options.run-session",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Live RequestName results establish ownership rather than serialized policy; quiet/logged/quiet echo calls isolate logging.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--own-name",
+          "rationale": "The grant obtains PRIMARY_OWNER for a name otherwise rejected by the proxy."
+        },
+        {
+          "id": "cli.option.run.--log-session-bus",
+          "rationale": "The controlled method and destination appear only when traffic logging is enabled."
+        }
+      ]
+    },
+    {
+      "behavior_id": "bus-options.run-system",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Ownership and logged calls traverse the system-bus proxy to a private bus, without host system-service access.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--system-own-name",
+          "rationale": "The grant obtains PRIMARY_OWNER for a name otherwise rejected by the proxy."
+        },
+        {
+          "id": "cli.option.run.--log-system-bus",
+          "rationale": "The controlled method and destination appear only when system-bus logging is enabled."
+        }
+      ]
+    }
+  ]
+}

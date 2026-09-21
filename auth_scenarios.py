@@ -64,9 +64,11 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
     del repository, url
     extra = fixture["extras"]["auth"]
     directory = Path(fixture["directory"]) / extra["directory"] / "repo"
-    if name == "auth-install-required":
+    if name in {"auth-install-required", "auth-install-success"}:
         if "authenticator_ref" not in extra or "authenticator_commit" not in extra:
             raise PrerequisiteError("prepared available authenticator candidate required")
+        if name == "auth-install-success" and "authenticator_binary" not in extra:
+            raise PrerequisiteError("prepared runnable authenticator and runtime required")
         candidate = extra["authenticator_ref"]
         with protected_server(driver, directory, extra["payloads"]) as (auth_url, requests):
             driver.success("remote", auth_url)
@@ -80,7 +82,37 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
             output = driver.success("auth-install-required", extra["ref"], candidate)
             driver.check(output == "auth-install-declined", "client completed refusal assertions")
             driver.check(not any(item["protected"] for item in requests[before:]),
-                         "declined authenticator installation prevents protected transfers")
+                          "declined authenticator installation prevents protected transfers")
+            if name == "auth-install-success":
+                from install_option_scenarios import _state
+
+                _state(driver, {})
+                before = len(requests)
+                parent = "x11:1234"
+                result = driver.call("auth-install-success", "basic", extra["ref"], extra["commit"],
+                                     parent, candidate, extra["authenticator_commit"], auth_url,
+                                     driver.cli, extra["authenticator_runtime_ref"])
+                driver.check(result.returncode == 0,
+                             f"accepted authenticator installation failed: {result.stderr}")
+                driver.check(result.stdout.endswith("auth-result\t1\n"),
+                             "client must complete accepted installation and authentication")
+                driver.check(f"request {extra['ref']} {extra['commit']} {parent} {auth_url}" in
+                             result.stdout and "response 0\n" in result.stdout,
+                             "newly installed authenticator must validate the real request")
+                transfers = [request for request in requests[before:] if request["protected"]]
+                driver.check(bool(transfers) and
+                             all(request["authorized"] for request in transfers),
+                             "resumed transaction must use the authenticator token for payloads")
+                _state(driver, {extra["ref"]: extra["commit"],
+                                candidate: extra["authenticator_commit"],
+                                extra["authenticator_runtime_ref"]:
+                                    extra["authenticator_runtime_commit"]})
+                deployment = Path(driver.cli_success("info", "--user", "--show-location",
+                                                      candidate))
+                payload = deployment / "files/bin/blackbox-authenticator"
+                prepared = Path(fixture["directory"]) / extra["authenticator_binary"]
+                driver.check(payload.read_bytes() == prepared.read_bytes(),
+                             "installed service bytes must equal the independent prepared binary")
         return
     binary = driver.root / "fixture-auth-service"
     flags = subprocess.check_output(

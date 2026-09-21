@@ -1,0 +1,147 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "install-options.sdk-debug-current",
+      "scenario": "install-options-sdk-debug-current",
+      "handler": "install_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Add SDK/debug dependencies to an already-current app in all four flag combinations.",
+      "preconditions": "Independent A repository with an installed app and ordinary dependencies; SDK/debug refs initially absent.",
+      "expected": "The app remains at A while each flag combination installs exactly its selected dependencies; absence of an app update does not suppress the requested additions.",
+      "references": [
+        "doc/flatpak-install.xml"
+      ]
+    },
+    {
+      "id": "install-options.sdk-debug-existing",
+      "scenario": "install-options-sdk-debug-existing",
+      "handler": "install_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Include SDK/debug dependencies while implicitly updating an already-installed app.",
+      "preconditions": "Independent A and updated APP commits; each variant starts with the old app and its ordinary dependencies installed.",
+      "expected": "Each include-flag combination adds exactly its selected refs and updates the app without explicit or-update; an ordinary repeated install retains A.",
+      "references": [
+        "doc/flatpak-install.xml"
+      ]
+    },
+    {
+      "id": "install-options.sdk-debug",
+      "scenario": "install-options-sdk-debug",
+      "handler": "install_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Select SDK and debug dependencies in all four include-flag combinations.",
+      "preconditions": "Independent app, distinct runtime and SDK, related extensions, and app/runtime/SDK debug refs; no installed refs before each variant.",
+      "expected": "Each combination deploys exactly the intended refs at independent commits, including SDK debug only when both flags are enabled.",
+      "references": [
+        "doc/flatpak-install.xml"
+      ]
+    },
+    {
+      "id": "install-options.subpath",
+      "scenario": "install-options-subpath",
+      "handler": "install_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Install individual and repeated payload subpaths with an ordinary full-install control.",
+      "preconditions": "Independent query runtime with bin/probe and subset-control/payload; empty installation before each variant.",
+      "expected": "Selected payloads exist and excluded payloads are absent at the public deployment location; repeated options and full installation contain both payloads.",
+      "references": [
+        "doc/flatpak-install.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "install-options.sdk-debug-current",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "The same app commit is retained while previously absent SDK/debug dependencies appear only in their respective include variants.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.install.--include-sdk",
+          "rationale": "An already-current app still gains the distinct SDK when requested."
+        },
+        {
+          "id": "cli.option.install.--include-debug",
+          "rationale": "An already-current app still gains app/runtime debug refs and optionally SDK debug when requested."
+        }
+      ]
+    },
+    {
+      "behavior_id": "install-options.sdk-debug-existing",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent updated app commits distinguish implicit or-update from adding dependencies to an unchanged app.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.install.--include-sdk",
+          "rationale": "SDK inclusion upgrades an installed app without explicit or-update and adds exactly the SDK-dependent ref set."
+        },
+        {
+          "id": "cli.option.install.--include-debug",
+          "rationale": "Debug inclusion upgrades an installed app without explicit or-update and adds exactly its debug-dependent ref set."
+        }
+      ]
+    },
+    {
+      "behavior_id": "install-options.sdk-debug",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent ref and commit sets distinguish all four SDK/debug selection combinations.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.install.--include-sdk",
+          "rationale": "Only SDK-enabled variants deploy the distinct SDK, including its debug ref when debug is also enabled."
+        },
+        {
+          "id": "cli.option.install.--include-debug",
+          "rationale": "Only debug-enabled variants deploy app/runtime debug refs, with SDK debug additionally selected when SDK inclusion is enabled."
+        }
+      ]
+    },
+    {
+      "behavior_id": "install-options.subpath",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Public deployment paths expose the selected and omitted fixture payloads at the exact independent commit.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.install.--subpath",
+          "rationale": "Two individual subsets differ from each other and from both repeated-subpath and ordinary full installations."
+        }
+      ]
+    }
+  ]
+}

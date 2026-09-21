@@ -109,6 +109,35 @@ def malformed_nodes(value: JSONValue, path: str = "fixture") -> list[tuple[JSONV
 
 
 class FixtureManifestTests(unittest.TestCase):
+    def test_sideload_update_requires_source_local_repo_and_commit(self) -> None:
+        lifecycle = rich()["lifecycle_extra"]
+        assert isinstance(lifecycle, dict)
+        complete = {**lifecycle, "sideload_update_repo": "update/source",
+                    "sideload_update": "update/offline", "sideload_update_commit": "signed-b"}
+        self.assertEqual(parse_fixture({**basic(), "lifecycle_extra": complete})["lifecycle_extra"],
+                         complete)
+        for key in ("sideload_update_repo", "sideload_update", "sideload_update_commit"):
+            partial = {name: value for name, value in complete.items() if name != key}
+            with self.subTest(key=key), self.assertRaises(ValidationError):
+                parse_fixture({**basic(), "lifecycle_extra": partial})
+
+    def test_runnable_authenticator_requires_complete_ref_and_payload_oracles(self) -> None:
+        auth = {
+            "directory": "auth", "ref": "runtime/protected/x86_64/test",
+            "commit": "protected-a", "payloads": ["objects/protected.filez"],
+            "authenticator_ref": "app/org.example.Auth/x86_64/autoinstall",
+            "authenticator_commit": "auth-a", "authenticator_binary": "auth/service",
+            "authenticator_runtime_ref": "runtime/org.example.AuthPlatform/x86_64/autoinstall",
+            "authenticator_runtime_commit": "platform-a",
+        }
+        value = {**basic(), "extras": {"auth": auth}}
+        self.assertEqual(parse_fixture(value)["extras"]["auth"], auth)
+        for key in ("authenticator_ref", "authenticator_commit", "authenticator_binary",
+                    "authenticator_runtime_ref", "authenticator_runtime_commit"):
+            incomplete = {name: item for name, item in auth.items() if name != key}
+            with self.subTest(key=key), self.assertRaises(ValidationError):
+                parse_fixture({**basic(), "extras": {"auth": incomplete}})
+
     def test_contract_fixture_requires_every_ref_and_version_oracle(self) -> None:
         aliases = ("one", "two", "platform", "sdk", "extension", "shared", "one_debug",
                    "two_debug", "platform_debug", "sdk_debug")

@@ -1,0 +1,229 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "build-permissions.appdir",
+      "scenario": "build-permissions-appdir",
+      "handler": "build_permission_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Use per-app storage and persist a private-home path across build invocations.",
+      "preconditions": "Independent build app/runtime, isolated host home, and seeded per-app data.",
+      "expected": "with-appdir redirects XDG data to the documented app directory with real reads/writes; persist retains bytes across invocations without writing into the ordinary host home.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    },
+    {
+      "id": "build-permissions.network",
+      "scenario": "build-permissions-network",
+      "handler": "build_permission_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Enforce build network grants and revocations through a host TCP listener.",
+      "preconditions": "Independent build app/runtime and a controlled loopback listener.",
+      "expected": "Sharing reaches the listener, a later unshare denies connection, and a later share restores access.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    },
+    {
+      "id": "build-permissions.shm",
+      "scenario": "build-permissions-shm",
+      "handler": "build_permission_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Enforce build shared-memory device grants and revocations.",
+      "preconditions": "Independent build app/runtime and a unique host shared-memory marker.",
+      "expected": "The host marker is unreadable without shm access, readable after a grant, and unreadable after revocation.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    },
+    {
+      "id": "build-permissions.socket",
+      "scenario": "build-permissions-socket",
+      "handler": "build_permission_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Enforce build SSH socket exposure and revocation.",
+      "preconditions": "Independent build app/runtime and a case-local Unix socket supplied as SSH_AUTH_SOCK.",
+      "expected": "The exposed socket path exists with the grant, disappears after revocation, and reappears after a later grant.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    },
+    {
+      "id": "build-permissions.policy",
+      "scenario": "build-permissions-policy",
+      "handler": "build_permission_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Merge build generic policy additions and removals into public sandbox metadata.",
+      "preconditions": "Independent build app with a preexisting generic policy value.",
+      "expected": "Both added values replace the removed value in effective /.flatpak-info policy.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    },
+    {
+      "id": "build-permissions.diagnostics",
+      "scenario": "build-permissions-diagnostics",
+      "handler": "build_permission_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Observe both build verbosity modes around quiet payload executions.",
+      "preconditions": "Independent A build payload and installed runtime.",
+      "expected": "Diagnostic invocations add stderr lines while quiet controls remain stable and all invocations print A.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "build-permissions.appdir",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent host markers and cross-launch reads distinguish per-app storage and private-home persistence from ordinary build storage.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build.--with-appdir",
+          "rationale": "The sandbox selects the real per-app XDG data directory and reads/writes its controlled files."
+        },
+        {
+          "id": "cli.option.build.--persist",
+          "rationale": "A private-home marker survives another build only when persistence is granted, without appearing at its host-home path."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build-permissions.network",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Real connections to a host-only listener distinguish granted and private network namespaces.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build.--share",
+          "rationale": "Network sharing permits a connection to the controlled host listener."
+        },
+        {
+          "id": "cli.option.build.--unshare",
+          "rationale": "Revoking sharing blocks that same host connection after a grant."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build-permissions.shm",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Host marker reads distinguish shared and private /dev/shm.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build.--device",
+          "rationale": "The shm device grant exposes exact independent marker bytes."
+        },
+        {
+          "id": "cli.option.build.--nodevice",
+          "rationale": "Revocation hides the host marker even after an earlier grant."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build-permissions.socket",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "A real controlled socket path is exposed or hidden inside the build sandbox.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build.--socket",
+          "rationale": "The socket grant exposes the SSH endpoint named by its sandbox environment."
+        },
+        {
+          "id": "cli.option.build.--nosocket",
+          "rationale": "A later revocation removes access to that endpoint."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build-permissions.policy",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Generic policies are public metadata; exact effective values distinguish additions and removal.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build.--add-policy",
+          "rationale": "Both added policy values appear in effective sandbox metadata."
+        },
+        {
+          "id": "cli.option.build.--remove-policy",
+          "rationale": "The previously present policy value disappears from effective metadata."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build-permissions.diagnostics",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Quiet/flagged/quiet runs preserve payload output and demonstrate additional diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build.--verbose",
+          "rationale": "Verbose build adds stderr lines without changing probe output."
+        },
+        {
+          "id": "cli.option.build.--ostree-verbose",
+          "rationale": "OSTree verbosity adds stderr lines without changing probe output."
+        }
+      ]
+    }
+  ]
+}

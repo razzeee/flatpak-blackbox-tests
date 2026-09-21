@@ -8,6 +8,7 @@ import hashlib
 import json
 import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 
 from fixture_manifest import (
@@ -62,6 +63,7 @@ def prepare(flatpak: str, output: Path, fixture: FixtureManifest) -> FixtureLife
     command("ostree", f"--repo={output / build['usb_repo']}", "create-usb",
             "--destination-repo=usb", str(root), build["collection_id"], ref)
     result["sideload"] = str((root / "usb").relative_to(output))
+    result.update(prepare_sideload_update(flatpak, output, fixture))
 
     # Keep SDK usage distinguishable from the app's runtime and extension usage.
     queries = fixture["queries"]
@@ -124,6 +126,40 @@ def prepare(flatpak: str, output: Path, fixture: FixtureManifest) -> FixtureLife
             "commit": command("ostree", f"--repo={repo}", "rev-parse", trigger_ref)}
         shutil.rmtree(tree)
     return parse_lifecycle_extra(result, "fixture.lifecycle_extra")
+
+
+def prepare_sideload_update(flatpak: str, output: Path,
+                            fixture: FixtureManifest) -> dict[str, str]:
+    """Export signed B content and its app-only offline source independently."""
+    build = fixture["build"]
+    root = output / "sideload-update"
+    root.mkdir()
+    repo = root / "source"
+    shutil.copytree(output / build["usb_repo"], repo, symlinks=True)
+    ref = f"app/{fixture['app']}/{fixture['arch']}/{fixture['branch']}"
+
+    def command(*args: str) -> str:
+        return subprocess.check_output(args, text=True).strip()
+
+    with tempfile.TemporaryDirectory(prefix="sideload-signing-") as temporary:
+        home = Path(temporary) / "gpg"
+        shutil.copytree(output / build["gpg_home"], home)
+        try:
+            command(flatpak, "build-commit-from", f"--src-repo={output / 'B'}",
+                    f"--src-ref={ref}", f"--gpg-homedir={home}",
+                    f"--gpg-sign={build['key_id']}", str(repo), ref)
+            command(flatpak, "build-update-repo", "--deploy-collection-id",
+                    f"--gpg-homedir={home}", f"--gpg-sign={build['key_id']}", str(repo))
+        finally:
+            command("gpgconf", "--homedir", str(home), "--kill", "gpg-agent")
+    commit = command("ostree", f"--repo={repo}", "rev-parse", ref)
+    if commit == build["usb_commits"]["app"]:
+        raise RuntimeError("sideload update must produce a distinct app commit")
+    command("ostree", f"--repo={repo}", "create-usb", "--destination-repo=offline",
+            str(root), build["collection_id"], ref)
+    return {"sideload_update_repo": str(repo.relative_to(output)),
+            "sideload_update": str((root / "offline").relative_to(output)),
+            "sideload_update_commit": commit}
 
 
 def main() -> None:

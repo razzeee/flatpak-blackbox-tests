@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "run-permissions.devel",
+      "scenario": "run-permissions-devel",
+      "handler": "build_permission_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Enforce ordinary and conditional devel permissions through a real ptrace syscall.",
+      "preconditions": "Independent installed app/runtime and separately compiled libc probe exposed read-only.",
+      "expected": "The probe starts in every sandbox; explicit grants and true conditions permit ptrace, while revocation and false conditions deny it.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "run-permissions.devel",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Live syscall outcomes verify devel permission enforcement independently of metadata reporting.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--allow",
+          "rationale": "Allowing devel permits the real ptrace syscall."
+        },
+        {
+          "id": "cli.option.run.--disallow",
+          "rationale": "Disallowing devel rejects the syscall after a grant."
+        },
+        {
+          "id": "cli.option.run.--allow-if",
+          "rationale": "True and false devel conditions produce opposite ptrace outcomes."
+        }
+      ]
+    }
+  ]
+}

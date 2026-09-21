@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import random
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -34,32 +35,50 @@ def prepare(reference_cli: str, output: Path,
     commit = subprocess.check_output(
         ["ostree", f"--repo={repo}", "rev-parse", ref], text=True).strip()
     payloads = sorted(p.relative_to(repo).as_posix() for p in repo.rglob("*.filez"))
-    # An available app is sufficient for the refusal half of install-authenticator.
-    # It deliberately has no authentication service: the tested handler declines
-    # installation, so this fixture cannot establish successful auto-installation.
+    # The candidate contains the independent wire-protocol authenticator, with
+    # its own runtime so gio dependencies do not alter the baseline fixture.
+    from prepare import copy_dependencies
+
     authenticator = "org.flatpak.BlackboxAuthenticator"
     authenticator_ref = f"app/{authenticator}/{fixture['arch']}/autoinstall"
-    source = output.parent / "A"
-    app_ref = f"app/{fixture['app']}/{fixture['arch']}/{fixture['branch']}"
-    runtime_ref = f"runtime/{fixture['runtime']}/{fixture['arch']}/{fixture['branch']}"
-    subprocess.run(["ostree", f"--repo={repo}", "pull-local", str(source), runtime_ref],
-                   check=True, stdout=subprocess.DEVNULL)
+    platform = "org.flatpak.BlackboxAuthPlatform"
+    runtime_ref = f"runtime/{platform}/{fixture['arch']}/autoinstall"
+    binary = output / "authenticator-service"
+    flags = subprocess.check_output(["pkg-config", "--cflags", "--libs", "gio-2.0"], text=True)
+    subprocess.run(["cc", "-O2", "-Wall", "-Wextra", "-Werror",
+                    str(Path(__file__).with_name("fixture-auth-service.c")),
+                    "-o", str(binary), *shlex.split(flags)], check=True)
     with tempfile.TemporaryDirectory(prefix="auth-candidate-") as temporary:
         tree = Path(temporary) / "app"
-        subprocess.run(["ostree", f"--repo={source}", "checkout", "--user-mode",
-                        "--force-copy", "--disable-cache", app_ref, str(tree)], check=True)
+        (tree / "files/bin").mkdir(parents=True)
+        shutil.copy2(binary, tree / "files/bin/blackbox-authenticator")
+        runtime = Path(temporary) / "runtime"
+        shutil.copytree(output.parent / fixture["assets"]["runtime_tree"], runtime, symlinks=True)
+        copy_dependencies(binary, runtime)
+        (runtime / "metadata").write_text(f"[Runtime]\nname={platform}\n")
+        subprocess.run([reference_cli, "build-export", "--disable-sandbox", "--runtime",
+                        "--token-type=0", str(repo), str(runtime), "autoinstall"], check=True,
+                       stdout=subprocess.DEVNULL)
         (tree / "metadata").write_text(
             f"[Application]\nname={authenticator}\n"
-            f"runtime={fixture['runtime']}/{fixture['arch']}/{fixture['branch']}\n"
-            "command=blackbox-probe\n")
+            f"runtime={platform}/{fixture['arch']}/autoinstall\n"
+            "command=blackbox-authenticator\n[Context]\nshared=network;\nsockets=session-bus;\n"
+            f"[Session Bus Policy]\n{authenticator}=own\n")
+        subprocess.run([reference_cli, "build-finish", str(tree)], check=True,
+                       stdout=subprocess.DEVNULL)
         subprocess.run([reference_cli, "build-export", "--disable-sandbox", "--token-type=0",
                         str(repo), str(tree), "autoinstall"], check=True,
                        stdout=subprocess.DEVNULL)
     authenticator_commit = subprocess.check_output(
         ["ostree", f"--repo={repo}", "rev-parse", authenticator_ref], text=True).strip()
+    runtime_commit = subprocess.check_output(
+        ["ostree", f"--repo={repo}", "rev-parse", runtime_ref], text=True).strip()
     return {"directory": output.name, "ref": ref, "commit": commit,
-            "payloads": payloads, "authenticator_ref": authenticator_ref,
-            "authenticator_commit": authenticator_commit}
+             "payloads": payloads, "authenticator_ref": authenticator_ref,
+             "authenticator_commit": authenticator_commit,
+             "authenticator_runtime_ref": runtime_ref,
+             "authenticator_runtime_commit": runtime_commit,
+             "authenticator_binary": str(binary.relative_to(output.parent))}
 
 
 def main() -> None:
@@ -73,6 +92,8 @@ def main() -> None:
     args.output.mkdir(parents=True, exist_ok=False)
     for version in ("A", "B"):
         shutil.copytree(args.baseline / version, args.output / version)
+    for asset in fixture["assets"].values():
+        shutil.copytree(args.baseline / asset, args.output / asset, symlinks=True)
     fixture["extras"] = {"auth": prepare(args.flatpak, args.output / "auth", fixture)}
     checksums = {}
     for path in sorted(args.output.rglob("*")):

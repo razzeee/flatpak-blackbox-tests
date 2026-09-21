@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "distribution-options.image",
+      "scenario": "distribution-options-image",
+      "handler": "distribution_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "container-images"
+      ],
+      "description": "Install and replace an app from independently exported OCI images.",
+      "preconditions": "Installed dependency runtime and independent A/B OCI images with exported payload bytes.",
+      "expected": "Explicit image selection deploys exact app payloads and preserves runtime/origin across replacement; forcing image parsing on an unsupported transport produces an image-specific rejection rather than ordinary ref parsing.",
+      "references": [
+        "doc/flatpak-install.xml"
+      ]
+    },
+    {
+      "id": "distribution-options.sideload-install",
+      "scenario": "distribution-options-sideload-install",
+      "handler": "distribution_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "network-fault-injection"
+      ],
+      "description": "Install from a sideload repository while remote payloads are unavailable.",
+      "preconditions": "Signed collection remote, installed runtime, absent app and independently prepared app-only sideload repository.",
+      "expected": "Ordinary install attempts a blocked payload transfer and leaves the app absent; the sideload option installs its exact commit without remote payload requests.",
+      "references": [
+        "doc/flatpak-install.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "distribution-options.image",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent payload bytes, exact ref membership and origin persistence validate actual image deployment.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.install.--image",
+          "rationale": "Explicit image parsing rejects an unsupported transport differently from ordinary ref parsing; valid image inputs deploy independently prepared A/B payloads."
+        }
+      ]
+    },
+    {
+      "behavior_id": "distribution-options.sideload-install",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "A real blocked-download control distinguishes local sideload data from cached or remotely downloaded payloads.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.install.--sideload-repo",
+          "rationale": "Installation succeeds at the exact signed commit without remote payload transfers only when the local source is supplied."
+        }
+      ]
+    }
+  ]
+}

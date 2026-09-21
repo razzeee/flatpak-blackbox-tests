@@ -1,0 +1,642 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "diagnostic-options.info",
+      "scenario": "diagnostic-options-info",
+      "handler": "diagnostic_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe OSTree diagnostics from an installed commit query.",
+      "preconditions": "Independent A app/runtime installed in isolated state.",
+      "expected": "OSTree verbosity adds stderr diagnostics while stdout, commits and remotes remain unchanged between quiet controls.",
+      "references": [
+        "doc/flatpak-info.xml"
+      ]
+    },
+    {
+      "id": "diagnostic-options.list",
+      "scenario": "diagnostic-options-list",
+      "handler": "diagnostic_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe both verbosity modes during installed-ref enumeration.",
+      "preconditions": "Independent A app/runtime installed in isolated state.",
+      "expected": "Each verbosity mode adds diagnostics without changing stdout or public installation state; quiet controls match.",
+      "references": [
+        "doc/flatpak-list.xml"
+      ]
+    },
+    {
+      "id": "diagnostic-options.remotes",
+      "scenario": "diagnostic-options-remotes",
+      "handler": "diagnostic_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe both verbosity modes during remote enumeration.",
+      "preconditions": "Independent A installation and a fixed remote URL/title.",
+      "expected": "Each verbosity mode adds diagnostics without changing stdout or public installation state; quiet controls match.",
+      "references": [
+        "doc/flatpak-remotes.xml"
+      ]
+    },
+    {
+      "id": "diagnostic-options.remote-info",
+      "scenario": "diagnostic-options-remote-info",
+      "handler": "diagnostic_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe both verbosity modes during remote commit queries.",
+      "preconditions": "Independent A app/runtime installed in isolated state.",
+      "expected": "Each verbosity mode adds diagnostics without changing stdout or public installation state; quiet controls match.",
+      "references": [
+        "doc/flatpak-remote-info.xml"
+      ]
+    },
+    {
+      "id": "diagnostic-options.remote-ls",
+      "scenario": "diagnostic-options-remote-ls",
+      "handler": "diagnostic_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe both verbosity modes during remote-ref enumeration.",
+      "preconditions": "Independent A app/runtime installed in isolated state.",
+      "expected": "Each verbosity mode adds diagnostics without changing stdout or public installation state; quiet controls match.",
+      "references": [
+        "doc/flatpak-remote-ls.xml"
+      ]
+    },
+    {
+      "id": "diagnostic-options.config",
+      "scenario": "diagnostic-options-config",
+      "handler": "diagnostic_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe both verbosity modes during configuration queries.",
+      "preconditions": "Independent A installation and explicit fr language configuration.",
+      "expected": "Each verbosity mode adds diagnostics without changing stdout or public installation state; quiet controls match.",
+      "references": [
+        "doc/flatpak-config.xml"
+      ]
+    },
+    {
+      "id": "diagnostic-options.override",
+      "scenario": "diagnostic-options-override",
+      "handler": "diagnostic_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe both verbosity modes while showing user overrides.",
+      "preconditions": "Independent A installation with no overrides.",
+      "expected": "Each verbosity mode adds diagnostics without changing stdout or public installation state; quiet controls match.",
+      "references": [
+        "doc/flatpak-override.xml"
+      ]
+    },
+    {
+      "id": "diagnostic-options.mask",
+      "scenario": "diagnostic-options-mask",
+      "handler": "diagnostic_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe verbose diagnostics during mask enumeration.",
+      "preconditions": "Independent A installation with no masks.",
+      "expected": "Verbosity adds diagnostics without changing stdout or public installation state; quiet controls match.",
+      "references": [
+        "doc/flatpak-mask.xml"
+      ]
+    },
+    {
+      "id": "diagnostic-options.pin",
+      "scenario": "diagnostic-options-pin",
+      "handler": "diagnostic_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe verbose diagnostics during pin enumeration.",
+      "preconditions": "Independent A app and unpinned dependency runtime.",
+      "expected": "Verbosity adds diagnostics without changing stdout or public installation state; quiet controls match.",
+      "references": [
+        "doc/flatpak-pin.xml"
+      ]
+    },
+    {
+      "id": "diagnostic-options.update",
+      "scenario": "diagnostic-options-update",
+      "handler": "diagnostic_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe both verbosity modes on an already-current update.",
+      "preconditions": "Exact independently prepared current app/runtime commits.",
+      "expected": "Each verbosity mode adds diagnostics without changing stdout or public installation state; quiet controls match.",
+      "references": [
+        "doc/flatpak-update.xml"
+      ]
+    },
+    {
+      "id": "diagnostic-options.install",
+      "scenario": "diagnostic-options-install",
+      "handler": "diagnostic_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe both verbosity modes on a repeated or-update install.",
+      "preconditions": "Exact independently prepared current app/runtime commits.",
+      "expected": "Each verbosity mode adds diagnostics without changing stdout or public installation state; quiet controls match.",
+      "references": [
+        "doc/flatpak-install.xml"
+      ]
+    },
+    {
+      "id": "diagnostic-options.uninstall",
+      "scenario": "diagnostic-options-uninstall",
+      "handler": "diagnostic_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe both verbosity modes on app removal.",
+      "preconditions": "App A is restored before each quiet or diagnostic invocation.",
+      "expected": "Each invocation removes only the app and retains the runtime; verbosity adds diagnostics while ordinary output remains equal.",
+      "references": [
+        "doc/flatpak-uninstall.xml"
+      ]
+    },
+    {
+      "id": "diagnostic-options.remote-add",
+      "scenario": "diagnostic-options-remote-add",
+      "handler": "diagnostic_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe both verbosity modes during duplicate remote-add.",
+      "preconditions": "Independent A installation and an existing sentinel remote.",
+      "expected": "Each verbosity mode adds diagnostics without changing stdout or public installation state; quiet controls match.",
+      "references": [
+        "doc/flatpak-remote-add.xml"
+      ]
+    },
+    {
+      "id": "diagnostic-options.remote-modify",
+      "scenario": "diagnostic-options-remote-modify",
+      "handler": "diagnostic_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe both verbosity modes while setting a remote title.",
+      "preconditions": "Independent A installation and an existing fixed-title remote.",
+      "expected": "Each verbosity mode adds diagnostics without changing stdout or public installation state; quiet controls match.",
+      "references": [
+        "doc/flatpak-remote-modify.xml"
+      ]
+    },
+    {
+      "id": "diagnostic-options.remote-delete",
+      "scenario": "diagnostic-options-remote-delete",
+      "handler": "diagnostic_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe both verbosity modes during deletion of an unused remote.",
+      "preconditions": "An extra unused remote is restored before every invocation; the fixture remote remains installed.",
+      "expected": "Only the extra remote disappears; verbosity adds diagnostics while stdout, fixture remote and installed commits remain unchanged.",
+      "references": [
+        "doc/flatpak-remote-delete.xml"
+      ]
+    },
+    {
+      "id": "diagnostic-options.make-current",
+      "scenario": "diagnostic-options-make-current",
+      "handler": "diagnostic_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe both verbosity modes while selecting the installed app branch.",
+      "preconditions": "Independent A app/runtime installed in isolated state.",
+      "expected": "Each verbosity mode adds diagnostics without changing stdout or public installation state; quiet controls match.",
+      "references": [
+        "doc/flatpak-make-current.xml"
+      ]
+    },
+    {
+      "id": "diagnostic-options.repair",
+      "scenario": "diagnostic-options-repair",
+      "handler": "diagnostic_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe both verbosity modes during a healthy repair dry run.",
+      "preconditions": "Healthy independently prepared A app/runtime installation.",
+      "expected": "Each verbosity mode adds diagnostics without changing stdout or public installation state; quiet controls match.",
+      "references": [
+        "doc/flatpak-repair.xml"
+      ]
+    },
+    {
+      "id": "diagnostic-options.repo",
+      "scenario": "diagnostic-options-repo",
+      "handler": "diagnostic_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe OSTree diagnostics while inspecting an independent repository.",
+      "preconditions": "Independent A repository and isolated installed app/runtime controls.",
+      "expected": "OSTree verbosity adds diagnostics while repository info stdout and installed state remain unchanged between quiet controls.",
+      "references": [
+        "doc/flatpak-repo.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "diagnostic-options.info",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Quiet/diagnostic/quiet contrasts preserve public results and add diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.info.--ostree-verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "diagnostic-options.list",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Quiet/diagnostic/quiet contrasts preserve public results and add diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.list.--verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        },
+        {
+          "id": "cli.option.list.--ostree-verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "diagnostic-options.remotes",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Quiet/diagnostic/quiet contrasts preserve public results and add diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remotes.--verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        },
+        {
+          "id": "cli.option.remotes.--ostree-verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "diagnostic-options.remote-info",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Quiet/diagnostic/quiet contrasts preserve public results and add diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-info.--verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        },
+        {
+          "id": "cli.option.remote-info.--ostree-verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "diagnostic-options.remote-ls",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Quiet/diagnostic/quiet contrasts preserve public results and add diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-ls.--verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        },
+        {
+          "id": "cli.option.remote-ls.--ostree-verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "diagnostic-options.config",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Quiet/diagnostic/quiet contrasts preserve public results and add diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.config.--verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        },
+        {
+          "id": "cli.option.config.--ostree-verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "diagnostic-options.override",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Quiet/diagnostic/quiet contrasts preserve public results and add diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.override.--verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        },
+        {
+          "id": "cli.option.override.--ostree-verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "diagnostic-options.mask",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Quiet/diagnostic/quiet contrasts preserve public results and add diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.mask.--verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "diagnostic-options.pin",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Quiet/diagnostic/quiet contrasts preserve public results and add diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.pin.--verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "diagnostic-options.update",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Quiet/diagnostic/quiet contrasts preserve public results and add diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.update.--verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        },
+        {
+          "id": "cli.option.update.--ostree-verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "diagnostic-options.install",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Quiet/diagnostic/quiet contrasts preserve public results and add diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.install.--verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        },
+        {
+          "id": "cli.option.install.--ostree-verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "diagnostic-options.uninstall",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Quiet/diagnostic/quiet contrasts preserve public results and add diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.uninstall.--verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        },
+        {
+          "id": "cli.option.uninstall.--ostree-verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "diagnostic-options.remote-add",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Quiet/diagnostic/quiet contrasts preserve public results and add diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        },
+        {
+          "id": "cli.option.remote-add.--ostree-verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "diagnostic-options.remote-modify",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Quiet/diagnostic/quiet contrasts preserve public results and add diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-modify.--verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        },
+        {
+          "id": "cli.option.remote-modify.--ostree-verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "diagnostic-options.remote-delete",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Quiet/diagnostic/quiet contrasts preserve public results and add diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-delete.--verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        },
+        {
+          "id": "cli.option.remote-delete.--ostree-verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "diagnostic-options.make-current",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Quiet/diagnostic/quiet contrasts preserve public results and add diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.make-current.--verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        },
+        {
+          "id": "cli.option.make-current.--ostree-verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "diagnostic-options.repair",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Quiet/diagnostic/quiet contrasts preserve public results and add diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.repair.--verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        },
+        {
+          "id": "cli.option.repair.--ostree-verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "diagnostic-options.repo",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Quiet/diagnostic/quiet contrasts preserve public results and add diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.repo.--ostree-verbose",
+          "rationale": "The flag adds nonempty stderr lines absent from both quiet controls."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "No exact diagnostic text or prefix is prescribed. Each option must produce nonempty additional stderr lines while ordinary stdout and public installation state are preserved. Commands without observable diagnostics for these probes receive no assertion credit."
+  ]
+}

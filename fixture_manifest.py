@@ -123,6 +123,9 @@ class _AuthRequired(TypedDict):
 class FixtureAuth(_AuthRequired, total=False):
     authenticator_ref: str
     authenticator_commit: str
+    authenticator_runtime_ref: str
+    authenticator_runtime_commit: str
+    authenticator_binary: str
 
 
 class FixtureExtras(TypedDict, total=False):
@@ -156,6 +159,9 @@ class _LifecycleRequired(TypedDict):
 
 class FixtureLifecycleExtra(_LifecycleRequired, total=False):
     foreign_bundle: str
+    sideload_update_repo: str
+    sideload_update: str
+    sideload_update_commit: str
 
 
 class _FixtureRequired(TypedDict):
@@ -381,6 +387,11 @@ def parse_auth(value: object, path: str) -> FixtureAuth:
     if "authenticator_ref" in data:
         result["authenticator_ref"] = _text(data, "authenticator_ref", path)
         result["authenticator_commit"] = _text(data, "authenticator_commit", path)
+    if "authenticator_binary" in data:
+        required(data, "authenticator_ref", path)
+        result["authenticator_binary"] = _text(data, "authenticator_binary", path)
+        result["authenticator_runtime_ref"] = _text(data, "authenticator_runtime_ref", path)
+        result["authenticator_runtime_commit"] = _text(data, "authenticator_runtime_commit", path)
     _known(data, result, path)
     return result
 
@@ -425,6 +436,10 @@ def parse_lifecycle_extra(value: object, path: str) -> FixtureLifecycleExtra:
     }
     if "foreign_bundle" in data:
         result["foreign_bundle"] = _text(data, "foreign_bundle", path)
+    if "sideload_update_repo" in data:
+        result["sideload_update_repo"] = _text(data, "sideload_update_repo", path)
+        result["sideload_update"] = _text(data, "sideload_update", path)
+        result["sideload_update_commit"] = _text(data, "sideload_update_commit", path)
     _known(data, result, path)
     return result
 
