@@ -83,11 +83,18 @@ def prepare_contracts(reference_cli: str, output: Path,
                               else alias.removesuffix("_debug"))
                     metadata += f"[ExtensionOf]\nref={refs[parent]}\n"
                 (build / "metadata").write_text(metadata)
-                payload = build / ("files" if is_app else "usr") / "contract-marker"
+                # ExtensionOf payloads are exported from files/, even though
+                # their refs have runtime kind. Only ordinary runtimes use usr/.
+                payload_directory = "usr" if alias in ("platform", "sdk") else "files"
+                payload = build / payload_directory / "contract-marker"
                 payload.write_text(f"{alias}:{version}\n")
                 flags = [] if is_app else ["--runtime"]
                 command(reference_cli, "build-export", "--disable-sandbox", f"--arch={arch}",
                         *flags, str(repo), str(build), "test")
+                exported = subprocess.check_output([
+                    "ostree", f"--repo={repo}", "cat", refs[alias], "/files/contract-marker"])
+                if exported != f"{alias}:{version}\n".encode():
+                    raise RuntimeError(f"exported contract payload differs for {alias}:{version}")
             command(reference_cli, "build-update-repo", str(repo))
             repos[version] = str(repo.relative_to(output))
             commits[version] = {ref: command("ostree", f"--repo={repo}", "rev-parse", ref)

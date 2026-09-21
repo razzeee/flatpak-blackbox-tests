@@ -60,6 +60,10 @@ and supplemental inputs with a checksummed `fixture.json` manifest. Fixtures are
 architecture-specific and can be reused across target runs. `--basic` prepares
 only the inputs needed by the basic cases.
 
+Contract preparation verifies marker bytes in the exported OSTree commits.
+SDK/base-extension copying cases require these payload-bearing fixtures and
+report an unmet prerequisite for older fixtures with empty extensions.
+
 ## Configure a target
 
 Copy [target.example.json](target.example.json) and edit it for your installation:
@@ -78,6 +82,12 @@ locations, not directory redirects.
 Custom adapters receive a fresh state directory and print a JSON object of
 environment variables. Keep setup inside that directory; send diagnostics to
 stderr. Exit 77 reports an unmet prerequisite.
+
+Vendor-definition option cases use `BLACKBOX_PREINSTALL_DIR` to locate the public
+`.preinstall` configuration directory. Adapters must point it inside the case's
+fresh state. The reference adapter maps it to its isolated `preinstall.d`.
+Ordinary runner commands receive EOF on stdin, so confirmation tests cannot
+accidentally consume input supplied to the runner.
 
 Repair scenarios also use the adapter's `BLACKBOX_REPAIR_FIXTURE` Python helper.
 The runner invokes it with `STATE_DIRECTORY OPERATION APP_COMMIT`. The reference
@@ -163,6 +173,21 @@ checks that do not establish a complete catalogued behavior obligation. Each ent
 needs the interface ID and an assertion rationale. Library function and signal
 credit also requires the matching call trace or signal emission in a passing case.
 These annotations never add behavior or CLI-command credit.
+
+Use `equivalent_options` instead when a case verifies ordinary results under a
+default-equivalent or context-inapplicable option without demonstrating its
+specific effect. These checks never increase the behavioral CLI-option metric.
+Reports include separate `cli_option_accounting` with equivalence checks and
+the deduplicated union of both kinds. Passing equivalence credit requires a
+current, complete, verified passing case and a recorded CLI invocation containing
+the option. Wrapped invocations record their exact `cli_argv` suffix; option-like
+payload arguments cannot establish credit. Inventory accounting is not full
+behavior coverage. In particular,
+native-bundle or native-OSTree equivalence does not establish OCI signing behavior.
+
+Filesystem-synchronization option cases require `strace` and permission to trace
+the selected target. They compare actual `fsync`/`fdatasync` calls while separately
+checking public output content and repository integrity.
 
 To check the generated interface catalogue against a separate Flatpak checkout:
 

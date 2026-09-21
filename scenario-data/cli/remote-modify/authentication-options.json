@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "remote-auth.options-modify",
+      "scenario": "remote-auth-options-modify",
+      "handler": "remote_auth_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "session-bus",
+        "authentication"
+      ],
+      "description": "Replace a wrong authenticator name and option value on an existing remote.",
+      "preconditions": "Independent protected runtime, initially wrong settings, and real private wire-protocol service.",
+      "expected": "The modified name reaches the real service, the final repeated option value arrives unchanged, and its token authorizes the exact protected deployment.",
+      "references": [
+        "doc/flatpak-remote-modify.xml"
+      ]
+    },
+    {
+      "id": "remote-auth.autoinstall-modify",
+      "scenario": "remote-auth-autoinstall-modify",
+      "handler": "remote_auth_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "session-bus",
+        "authentication"
+      ],
+      "description": "Enable and disable actual authenticator installation by modifying remote settings.",
+      "preconditions": "Independent protected runtime, available candidate and runtime, and no activation service.",
+      "expected": "Ordered grant/revocation changes whether exact candidate refs deploy; failed outer authentication never downloads protected payloads.",
+      "references": [
+        "doc/flatpak-remote-modify.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "remote-auth.options-modify",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "A real token exchange distinguishes effective modified settings from their earlier wrong values.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-modify.--authenticator-name",
+          "rationale": "Replacing the wrong name reaches the independently implemented service and completes authentication."
+        },
+        {
+          "id": "cli.option.remote-modify.--authenticator-option",
+          "rationale": "The service receives the final updated key value rather than the earlier wrong value."
+        }
+      ]
+    },
+    {
+      "behavior_id": "remote-auth.autoinstall-modify",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Real installed-ref sets distinguish the persisted grant from its revocation.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-modify.--authenticator-install",
+          "rationale": "The final grant installs the exact candidate and dependency runtime."
+        },
+        {
+          "id": "cli.option.remote-modify.--no-authenticator-install",
+          "rationale": "The final revocation leaves the candidate absent despite an earlier grant."
+        }
+      ]
+    }
+  ]
+}

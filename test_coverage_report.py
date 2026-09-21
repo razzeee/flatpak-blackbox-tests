@@ -360,6 +360,114 @@ class CoverageReportTests(unittest.TestCase):
                     self.assertEqual(metrics["surfaces"][kind]["passed"], credit)
                 self.assertEqual(len(output["interface_evidence"]), 2 * credit)
 
+    def test_equivalent_options_are_separate_verified_and_deduplicated(self) -> None:
+        catalogue = json.loads((self.suite / "coverage-data/surfaces.json").read_text())
+        identifier = "cli.option.install.--noninteractive"
+        catalogue["surfaces"].append({"id": identifier, "kind": "cli-option",
+                                       "name": "--noninteractive"})
+        self.write("coverage-data/surfaces.json", catalogue)
+        mapping = json.loads((self.suite / "coverage-data/mapping.json").read_text())
+        for case in mapping["cases"][:2]:
+            case["requirements"] = []
+        assertion = {"id": identifier, "rationale": "Test ordinary output equivalence."}
+        mapping["cases"][0]["equivalent_options"] = [assertion]
+        self.write("coverage-data/mapping.json", mapping)
+        equivalence_only = json.loads(self.command().stdout)
+        self.assertEqual(equivalence_only["metrics"]["surfaces"]["cli-option"]["implemented"], 0)
+        self.assertEqual(equivalence_only["cli_option_accounting"]["accounted"]["implemented"], 1)
+        mapping["cases"][1]["surface_assertions"] = [
+            {"id": identifier, "rationale": "A separate case demonstrates automatic consent."}]
+        self.write("coverage-data/mapping.json", mapping)
+        initial = json.loads(self.command().stdout)
+        self.assertEqual(initial["metrics"]["surfaces"]["cli-option"]["implemented"], 1)
+        self.assertEqual(initial["cli_option_accounting"]["accounted"]["implemented"], 1)
+        self.assertIsNone(initial["cli_option_accounting"]["accounted"]["passed"])
+        for status, observed, interface, effect_status in (
+            ("passed", True, "cli", "not-selected"),
+            ("failed", True, "cli", "not-selected"),
+            ("passed", False, "cli", "not-selected"),
+            ("passed", True, "setup", "not-selected"),
+            ("passed", True, "cli", "passed"),
+        ):
+            with self.subTest(status=status, observed=observed, interface=interface,
+                              effect_status=effect_status):
+                report = self.execution_report((status, effect_status, "not-selected"))
+                record = report["results"][0]["evidence"][0]
+                record["argv"] = ["/synthetic/cli", "install"] + (
+                    ["--noninteractive"] if observed else [])
+                record["interface"] = interface
+                if interface == "setup":
+                    report["results"][0]["evidence"].append({
+                        "argv": ["/synthetic/cli", "list"], "interface": "cli",
+                        "exit_status": 0, "stdout": "", "stderr": "",
+                    })
+                self.write("run.json", report)
+                result = self.command("--report", str(self.suite / "run.json"))
+                self.assertEqual(result.returncode, 0, result.stderr)
+                output = json.loads(result.stdout)
+                equivalent = int(status == "passed" and observed and interface == "cli")
+                effect = int(effect_status == "passed")
+                self.assertEqual(output["metrics"]["surfaces"]["cli-option"]["passed"], effect)
+                self.assertEqual(output["metrics"]["behaviors"]["cli"]["passed"], 0)
+                accounting = output["cli_option_accounting"]
+                self.assertEqual(accounting["equivalence_checks"]["passed"], equivalent)
+                self.assertEqual(accounting["accounted"]["passed"], int(bool(effect or equivalent)))
+                self.assertEqual(len(accounting["equivalence_evidence"]), equivalent)
+        report.pop("coverage_definition")
+        self.write("run.json", report)
+        unverified = self.command("--report", str(self.suite / "run.json"))
+        self.assertEqual(unverified.returncode, 1)
+        accounting = json.loads(unverified.stdout)["cli_option_accounting"]
+        self.assertIsNone(accounting["equivalence_checks"]["passed"])
+        self.assertIsNone(accounting["accounted"]["passed"])
+        self.assertEqual(accounting["equivalence_evidence"], {})
+
+    def test_equivalent_options_cannot_claim_effect_or_cross_interface(self) -> None:
+        catalogue = json.loads((self.suite / "coverage-data/surfaces.json").read_text())
+        identifier = "cli.option.install.--verbose"
+        catalogue["surfaces"].append({"id": identifier, "kind": "cli-option", "name": "--verbose"})
+        self.write("coverage-data/surfaces.json", catalogue)
+        original = (self.suite / "coverage-data/mapping.json").read_text()
+        for index, surface, rationale, copies, effect in (
+            (0, "cli.command.install", "Wrong kind", 1, False),
+            (2, identifier, "Wrong interface", 1, False),
+            (0, "cli.option.install.--absent", "Unknown", 1, False),
+            (0, identifier, " ", 1, False),
+            (0, identifier, "Duplicate", 2, False),
+            (0, identifier, "Cannot claim both", 1, True),
+        ):
+            with self.subTest(index=index, surface=surface, rationale=rationale):
+                mapping = json.loads(original)
+                assertion = {"id": surface, "rationale": rationale}
+                mapping["cases"][index]["equivalent_options"] = [assertion] * copies
+                if effect:
+                    mapping["cases"][index]["surface_assertions"] = [assertion]
+                self.write("coverage-data/mapping.json", mapping)
+                result = self.command()
+                self.assertEqual(result.returncode, 1)
+                self.assertIn("invalid equivalent option", result.stderr)
+
+    def test_equivalence_trace_distinguishes_cli_options_from_payload_arguments(self) -> None:
+        from coverage_report import invoked_option
+
+        cli, command, option = "/selected/flatpak", "info", "--verbose"
+        direct = [cli, command, option, "org.example.App"]
+        for argv, inner, expected in (
+            (direct, None, True),
+            ([cli, "run", "info", option], None, False),
+            ([cli, command, "--", option], None, False),
+            ([cli, command, "org.example.App", option], None, False),
+            ([cli, "run", *direct], direct, False),
+            (["/wrapper", *direct], None, False),
+            (["/wrapper", *direct], direct, True),
+            (["/wrapper", cli, "run", option], direct, False),
+        ):
+            with self.subTest(argv=argv, inner=inner):
+                record: EvidenceRecord = {"argv": argv, "interface": "cli"}
+                if inner is not None:
+                    record["cli_argv"] = inner
+                self.assertEqual(invoked_option(record, cli, command, option), expected)
+
     def test_explicit_assertions_reject_wrong_interface_kind_duplicates_and_missing_rationale(
         self,
     ) -> None:

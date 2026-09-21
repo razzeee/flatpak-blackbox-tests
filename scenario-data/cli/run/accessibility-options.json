@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "accessibility.options",
+      "scenario": "accessibility-options",
+      "handler": "accessibility_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "session-bus",
+        "sandbox-execution"
+      ],
+      "description": "Control accessibility socket exposure and actual bus-name ownership through a private provider.",
+      "preconditions": "Independent installed probe and separately compiled org.a11y.Bus provider returning a case-private bus.",
+      "expected": "Explicit enable after disable exposes a real accessibility socket; later disable removes it. Ownership fails without a grant and acquires PRIMARY_OWNER with the exact a11y-own-name grant.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "accessibility.options",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Real socket visibility and RequestName outcomes establish accessibility isolation, without any host accessibility bus.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--a11y-bus",
+          "rationale": "An explicit grant after disabling restores the actual sandbox accessibility socket."
+        },
+        {
+          "id": "cli.option.run.--no-a11y-bus",
+          "rationale": "Revocation after enabling removes the real socket from the sandbox."
+        },
+        {
+          "id": "cli.option.run.--a11y-own-name",
+          "rationale": "The otherwise-denied name is actually acquired on the controlled accessibility bus."
+        }
+      ]
+    }
+  ]
+}

@@ -279,6 +279,8 @@ class Namespace:
         result = self.driver.external_call(
             [*self.prefix, *(["--session"] if session else []), *argv],
             "library" if library else "cli")
+        if not library:
+            self.driver.evidence[-1].setdefault("cli_argv", argv)
         # Namespace root cannot set some security xattrs. This is an environment
         # prerequisite failure, never evidence that an install contract passed.
         diagnostic = result.stderr.lower()

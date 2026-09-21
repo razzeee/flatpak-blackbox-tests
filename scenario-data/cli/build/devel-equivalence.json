@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "build-permissions.devel-equivalence",
+      "scenario": "build-permissions-devel-equivalence",
+      "handler": "build_permission_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Exercise explicit developer feature flags in the implicitly privileged build sandbox.",
+      "preconditions": "Independent build runtime and separately compiled ptrace probe; host syscall control succeeds.",
+      "expected": "Ordinary, allow-devel and disallow-devel builds all retain build's implicit developer syscall access. No distinct permission-enforcement effect is claimed.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "build-permissions.devel-equivalence",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Actual ptrace calls establish the tested ordinary build result under explicit flags; this does not claim that these flags restrict a build sandbox.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.build.--allow",
+          "rationale": "Explicit devel allowance preserves implicit build privileges."
+        },
+        {
+          "id": "cli.option.build.--disallow",
+          "rationale": "The tested devel revocation does not remove build's implicit developer privileges; equivalence only."
+        }
+      ]
+    }
+  ]
+}

@@ -72,6 +72,7 @@ class MappingRequired(TypedDict):
 
 class CoverageMapping(MappingRequired, total=False):
     surface_assertions: list[SurfaceAssertion]
+    equivalent_options: list[SurfaceAssertion]
     notes: list[str]
 
 

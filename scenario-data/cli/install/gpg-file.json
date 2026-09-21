@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "bundle-trust.install-key",
+      "scenario": "bundle-trust-install-key",
+      "handler": "bundle_trust_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Require bundle verification using an explicitly selected public key.",
+      "preconditions": "Independent unsigned A and signed B bundles, valid public key and installed runtime.",
+      "expected": "Explicit verification rejects unsigned A without deployment; omission permits that control, and the same key verifies and installs exact signed B.",
+      "references": [
+        "doc/flatpak-install.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "bundle-trust.install-key",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "A valid key distinguishes signed and unsigned independent bundle inputs, with exact deployment oracles.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.install.--gpg-file",
+          "rationale": "The explicit key requires a valid signature and permits only independently signed content."
+        }
+      ]
+    }
+  ]
+}

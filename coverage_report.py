@@ -25,6 +25,7 @@ from report_schema import (
     CoverageMetrics,
     CoverageSummary,
     Definition,
+    EvidenceRecord,
     RunReport,
     Verification,
     parse_report,
@@ -52,6 +53,9 @@ POLICY = [
      "separately by catalogue.py --check."),
     ("Verified function reach also requires a call-stage trace from the library client. "
      "An early error cannot credit an unreached function."),
+    ("Default/no-op option equivalence checks are reported separately. They establish "
+     "the tested command's ordinary result, not a distinguishable effect of the option, "
+     "and never increase behavioral interface coverage."),
 ]
 
 
@@ -67,6 +71,26 @@ def write_json(path: Path, value: object) -> None:
 
 def case_key(case: CaseIdentity) -> tuple[str, str, str]:
     return case["behavior_id"], case["driver"], case["profile"]
+
+
+def invoked_option(record: EvidenceRecord, cli: str, command: str, option: str) -> bool:
+    """Require the selected CLI command and a leading option, not payload arguments."""
+    argv = record.get("argv", [])
+    if record.get("interface") != "cli" or not argv:
+        return False
+    if argv[0] != cli:
+        inner = record.get("cli_argv", [])
+        if not inner or inner[0] != cli or argv[-len(inner):] != inner:
+            return False
+        argv = inner
+    if len(argv) < 2 or argv[1] != command:
+        return False
+    for argument in argv[2:]:
+        if argument == "--" or not argument.startswith("-"):
+            break
+        if argument == option or argument.startswith(option + "="):
+            return True
+    return False
 
 
 def percentage(count: int, total: int) -> float | None:
@@ -210,6 +234,7 @@ class CoverageModel:
                 self.cases[key] = executable_behavior(behavior)
         self.mapping: dict[tuple[str, str, str], set[str]] = {}
         self.surface_assertions: dict[tuple[str, str, str], set[str]] = {}
+        self.equivalent_options: dict[tuple[str, str, str], set[str]] = {}
         mappings = load_mappings(self.suite)
         for mapping in mappings:
             key = (mapping["behavior_id"], mapping["driver"], mapping["profile"])
@@ -242,6 +267,18 @@ class CoverageModel:
                     raise ValueError(f"invalid explicit surface assertion: {identifier} from {key}")
                 assertions.add(identifier)
             self.surface_assertions[key] = assertions
+            equivalent = set()
+            behavioral = assertions | {surface for identifier in ids
+                                       for surface in self.requirements[identifier]["surfaces"]}
+            for assertion in mapping.get("equivalent_options", []):
+                identifier = assertion["id"]
+                if (key[1] != "cli" or identifier not in self.surfaces
+                        or self.surfaces[identifier]["kind"] != "cli-option"
+                        or not assertion["rationale"].strip()
+                        or identifier in equivalent or identifier in behavioral):
+                    raise ValueError(f"invalid equivalent option: {identifier} from {key}")
+                equivalent.add(identifier)
+            self.equivalent_options[key] = equivalent
         self.definition = self.snapshot()
 
     def snapshot(self) -> Definition:
@@ -283,6 +320,8 @@ class CoverageModel:
         result_statuses: Counter[str] = Counter()
         evidence: dict[str, list[CaseIdentity]] = {}
         interface_evidence: dict[str, list[CaseIdentity]] = {}
+        equivalent_evidence: dict[str, list[CaseIdentity]] = {}
+        passed_equivalent: set[str] | None = None
         if report is not None:
             if "coverage_definition" not in report:
                 verification = {
@@ -326,10 +365,26 @@ class CoverageModel:
                     }
                     passed = set()
                     passed_surfaces = set()
+                    passed_equivalent = set()
                     for result in results:
                         result_statuses[result["status"]] += 1
                         if result["status"] != "passed":
                             continue
+                        for identifier in self.equivalent_options.get(case_key(result), set()):
+                            command, option = identifier.removeprefix("cli.option.").split(".", 1)
+                            # Equivalence evidence still requires an actual CLI invocation
+                            # with the option, not a setup command or an annotation alone.
+                            if not any(
+                                invoked_option(record, report["target_provenance"]["cli_path"],
+                                               command, option)
+                                for record in result.get("evidence", [])
+                            ):
+                                continue
+                            passed_equivalent.add(identifier)
+                            equivalent_evidence.setdefault(identifier, []).append({
+                                "behavior_id": result["behavior_id"], "driver": result["driver"],
+                                "profile": result["profile"],
+                            })
                         asserted = set(self.surface_assertions.get(case_key(result), set()))
                         observed_functions = {
                             f"library.function.{name}" for command in result.get("evidence", [])
@@ -367,6 +422,8 @@ class CoverageModel:
                    for surface in self.requirements[identifier]["surfaces"]}
         if self.surface_assertions:
             reached.update(set().union(*self.surface_assertions.values()))
+        equivalent = set().union(*self.equivalent_options.values())
+        options = {key for key, item in self.surfaces.items() if item["kind"] == "cli-option"}
         metrics: CoverageMetrics = {
             "behaviors": {interface: metric(
                 {key for key, item in self.requirements.items() if item["interface"] == interface},
@@ -393,6 +450,13 @@ class CoverageModel:
                 "metrics": metrics, "case_statuses": dict(result_statuses),
                 "evidence": evidence,
                 "interface_evidence": interface_evidence,
+                "cli_option_accounting": {
+                    "equivalence_checks": metric(options, equivalent, passed_equivalent),
+                    "accounted": metric(options, reached | equivalent,
+                                        None if passed_surfaces is None else
+                                        passed_surfaces | (passed_equivalent or set())),
+                    "equivalence_evidence": equivalent_evidence,
+                },
                 "requirement_capabilities": {
                     identifier: requirement["required_capabilities"]
                     for identifier, requirement in self.requirements.items()
@@ -448,6 +512,19 @@ def format_summary(summary: CoverageSummary) -> str:
                 f"{values['passed']}/{total} ({values['passed_percent']:.2f}%)"
             )
             lines.append(f"| {labels[name]} | {implemented} | {passed} |")
+    if accounting := summary.get("cli_option_accounting"):
+        lines += ["", "## Separate CLI-option inventory accounting", "",
+                  "Equivalence checks test ordinary results for default/no-op options. "
+                  "They do not demonstrate an option-specific effect and do not increase "
+                  "the behavioral coverage above. Accounted options are the deduplicated "
+                  "union of behavioral assertions and equivalence checks.", "",
+                  "| Inventory measure | Implemented | Passing evidence |",
+                  "| --- | ---: | ---: |"]
+        rows = ((accounting["equivalence_checks"], "Default/no-op equivalence checks"),
+                (accounting["accounted"], "Options accounted for"))
+        for values, label in rows:
+            passing = "unverified" if values["passed"] is None else str(values["passed"])
+            lines.append(f"| {label} | {values['implemented']}/{values['total']} | {passing} |")
     lines += ["", f"Reference source commit: `{summary['definition']['reference_commit']}`.",
               "Source drift is checked separately with `catalogue.py --check`.",
               "No percentage of all possible behavior is inferred from these counts."]

@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "confirmation-options.uninstall",
+      "scenario": "confirmation-options-uninstall",
+      "handler": "confirmation_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Approve removal with closed stdin using either automatic mode.",
+      "preconditions": "Exact independent app/runtime installed before each mode.",
+      "expected": "An ordinary unapproved removal preserves both refs; automatic modes remove only the app without waiting for consent.",
+      "references": [
+        "doc/flatpak-uninstall.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "confirmation-options.uninstall",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Ref membership before and after refusal and approval establishes actual removal and preservation of the runtime.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.uninstall.--assumeyes",
+          "rationale": "Removal completes with closed stdin after ordinary refusal."
+        },
+        {
+          "id": "cli.option.uninstall.--noninteractive",
+          "rationale": "Removal completes without input or an unanswered prompt."
+        }
+      ]
+    }
+  ]
+}

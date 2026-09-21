@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "confirmation-options.update",
+      "scenario": "confirmation-options-update",
+      "handler": "confirmation_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Approve a pending A-to-B update with closed stdin using either automatic mode.",
+      "preconditions": "Known A deployment and an independent B app commit available from the same remote.",
+      "expected": "An ordinary unapproved update preserves A; each automatic mode reaches exact B while preserving the runtime and suppressing the confirmation prompt.",
+      "references": [
+        "doc/flatpak-update.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "confirmation-options.update",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "The changed app commit distinguishes a completed update from an already-current no-op.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.update.--assumeyes",
+          "rationale": "The pending update completes with closed stdin after an ordinary refusal."
+        },
+        {
+          "id": "cli.option.update.--noninteractive",
+          "rationale": "The pending update completes without input or an unanswered prompt."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,170 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "equivalent-options.build-bundle-gpg-home",
+      "scenario": "equivalent-options-build-bundle-gpg-home",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Preserve native bundle contents when an OCI signing home is supplied.",
+      "preconditions": "Independent native bundle input, controlled origin URL and empty selected keyring directory.",
+      "expected": "Native bundle creation still produces the exact installable commit and origin. This does not establish OCI signing key selection.",
+      "references": [
+        "doc/flatpak-build-bundle.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.build-update-repo-jobs",
+      "scenario": "equivalent-options-build-update-repo-jobs",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "local-repository"
+      ],
+      "description": "Preserve ordinary metadata updates when a delta worker count is supplied without delta generation.",
+      "preconditions": "Independent repository and controlled public metadata values; no generate-static-deltas request.",
+      "expected": "Ordinary metadata and ref queries remain correct. No worker concurrency or throughput effect is claimed.",
+      "references": [
+        "doc/flatpak-build-update-repo.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.remote-add-signatures",
+      "scenario": "equivalent-options-remote-add-signatures",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Keep OCI lookaside configuration inactive for a native OSTree remote added with that option.",
+      "preconditions": "Independent native branch-selection repository and monitored unused lookaside URL.",
+      "expected": "Exact branch/default changes and deployments remain correct and no lookaside request occurs. OCI signature retrieval is not established.",
+      "references": [
+        "doc/flatpak-remote-add.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.remote-modify-signatures",
+      "scenario": "equivalent-options-remote-modify-signatures",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Keep modified OCI lookaside configuration inactive for native OSTree operations.",
+      "preconditions": "Independent native branch-selection repository and monitored unused lookaside URL.",
+      "expected": "Branch/default changes and exact deployments remain correct without lookaside traffic. OCI signature retrieval is not established.",
+      "references": [
+        "doc/flatpak-remote-modify.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.preinstall-system",
+      "scenario": "equivalent-options-preinstall-system",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository",
+        "vendor-preinstall"
+      ],
+      "description": "Exercise explicit default-system selection through vendor install/remove/reinstall synchronization.",
+      "preconditions": "Disposable competing stores and independently prepared app/runtime vendor definitions.",
+      "expected": "Explicit system synchronization installs, removes and reinstalls the designated app while preserving runtime and competing stores. The selector equals this command's default.",
+      "references": [
+        "doc/flatpak-preinstall.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "equivalent-options.build-bundle-gpg-home",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "The selected keyring does not apply to the native unsigned bundle path, whose ordinary outputs are fully checked.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.build-bundle.--gpg-homedir",
+          "rationale": "Native bundle output equivalence only; OCI signing remains outside this assertion."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.build-update-repo-jobs",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "The worker budget has no work to govern without delta generation; ordinary metadata outputs are checked.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.build-update-repo.--static-delta-jobs",
+          "rationale": "Non-delta metadata-update equivalence only, with no concurrency claim."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.remote-add-signatures",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Native OSTree operations retain exact independent outcomes without consulting an OCI-only source.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.remote-add.--signature-lookaside",
+          "rationale": "Non-OCI result and network equivalence only; no OCI verification effect claimed."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.remote-modify-signatures",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Native OSTree operations retain exact independent outcomes after lookaside modification without consulting that OCI-only source.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.remote-modify.--signature-lookaside",
+          "rationale": "Non-OCI result and network equivalence only; no OCI verification effect claimed."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.preinstall-system",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [],
+      "rationale": "The full vendor synchronization contract is checked with explicit default-system selection, without claiming a distinct effect from omission.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.preinstall.--system",
+          "rationale": "Explicit default selection preserves system synchronization and excludes competing stores."
+        }
+      ]
+    }
+  ]
+}

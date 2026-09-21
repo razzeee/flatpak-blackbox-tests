@@ -4,7 +4,152 @@ This suite reports separate measurements for catalogued behavior and public
 interface reach. It does not report a percentage of all possible Flatpak behavior.
 There is no finite denominator for all Flatpak behavior yet.
 
-## Current expansion: complete behavior inventory, 500 CLI options
+## Current inventory: all 624 CLI options accounted for
+
+The suite now has **510 cases**, including 80 new cases after the 500-option
+checkpoint below. The denominators have not changed.
+
+| Measurement | Implemented | Meaning |
+| --- | ---: | --- |
+| Option-specific assertions | **584/624, 93.59%** | Tests assert a distinguishable option effect |
+| Separate equivalence checks | **40/624, 6.41%** | Tests assert ordinary results under default-equivalent or context-inapplicable options |
+| CLI-option inventory accounting | **624/624, 100%** | Deduplicated union of both kinds |
+
+All 136 CLI and 163 library behavior obligations, 44 commands, 223 public
+library functions and 14 signals still have implementations. These are
+implementation counts. **Full inventory accounting is not full passing coverage.**
+
+The 84 additional option-specific assertions cover confirmation, vendor
+preinstallation, SDK/base initialization, signing-key trust, remote
+authentication and metadata, installation selectors, USB exports, accessibility,
+process lifetime and visibility, forced removal, diagnostics and filesystem
+synchronization. Synchronization cases trace actual `fsync`/`fdatasync` calls
+while independently checking exported content and repository integrity.
+Process-lifetime cases observe a real launching process exit and use a
+helper-local subreaper to stop and reap their descendants.
+
+### Separate equivalence accounting
+
+Scenario mappings use `equivalent_options` when the ordinary result is tested
+without establishing an option-specific effect. Such mappings never increase
+the behavioral CLI-option metric. Reports expose `cli_option_accounting` in
+JSON and separate inventory tables in Markdown, console and GitHub summaries.
+Passing equivalence credit requires a complete, current, verified passing case
+with the selected CLI command and a leading option in its recorded invocation.
+Option-like payload arguments cannot establish credit. Wrapped commands record
+their exact executed `cli_argv` suffix.
+
+These cases retain independent result assertions. For example, explicit
+`document-export --allow-read` must provide actual read-only sandbox access,
+and permission commands with diagnostic flags must preserve exact permission
+store results. They do not merely check that a parser accepts an option.
+
+Some equivalence checks deliberately cover an inapplicable context. A GPG home
+on a native bundle does not establish OCI signing-key selection. Lookaside
+options on native OSTree remotes do not establish OCI signature retrieval.
+A delta worker count without delta generation does not establish concurrency
+limits. Those limitations remain even though the options are accounted for.
+
+### Local reference validation
+
+Local runs of both reference builds produce the same outcomes for the 80 new cases:
+
+| Target | Revision | Passed | Assertion failures | Local environment failures |
+| --- | --- | ---: | ---: | ---: |
+| CI-pinned Flatpak 1.19.1 | `1a6ec6a1f720fb30d76c76e656ac624fcaa237e9` | 70 | 6 | 4 |
+| Upstream main, Flatpak 1.19.1 | `a1bcecfc6cd2e33477e8d186acac631119780d06` | 70 | 6 | 4 |
+
+The six assertion failures remain visible and earn no passing credit:
+
+- `remote-add --no-follow-redirect` is rejected as an unknown option.
+- `remote-modify --no-follow-redirect` does not retain the original URL after
+  a redirect appears in independently published metadata.
+- `remote-modify --follow-redirect` does not enable following after the URL
+  has been explicitly pinned.
+- Explicit `install --gpg-file` verification of the independently signed bundle
+  in the new trust scenario exits with signal 11.
+- After changing the default system installation's current branch, a branchless
+  system launch still reports the competing master-branch commit.
+- `update --force-remove` leaves the old payload visible in the running sandbox.
+  The corresponding forced-uninstall case passes.
+
+Four build initialization cases stop at `security.selinux` xattr writes that the
+local container filesystem rejects. They cover `--type`, `--var`,
+`--sdk-extension` and `--base-extension`. Their local reports retain failed
+status and zero passing credit. All four pass on the Ubuntu worker described below.
+
+The passing focused cases verify **72 of the 84 new option-specific assertions**
+and **all 40 equivalence checks** on each target. Each target also rejects all
+72 option-removal controls, giving **144 deliberately failing controls** with
+zero passing credit. Mutating wrappers emit no diagnostic text, so wrapper
+messages cannot satisfy verbosity checks. Confirmation cleanup uses a separate
+approval spelling so removal of the option under test reaches its own assertion.
+
+All nine existing authentication cases pass on each target, giving 18 additional
+regression reports after extending the independent authenticator's wire checks.
+The focused reference builds disable the system helper. System-selector cases
+use the existing disposable root user/mount namespaces; they do not establish
+non-root helper authorization.
+
+`create-usb --allow-partial` is specifically a warning-suppression option. Its
+case verifies removal of the actual warning while preserving other diagnostics
+and the command status. The reference's independent partial-export failure is
+recorded separately; a full-install export control succeeds. This is not a claim
+that partial USB export succeeds on these references.
+
+Locked Ruff, ty and strict mypy pass, as do static JSON formatting and the source
+catalogue check. The host unit run executes 129 tests with the optional prepared
+fixture test skipped; all 17 fixture-schema tests, including that round trip,
+also pass in the prepared container.
+
+The external `selection-reference-evidence` directory contains the final indexes
+`final-remaining-v4-{pinned,upstream}{,-negative,-auth}-index.json`.
+`remaining-summary.json` audits all **322 reports**, recomputes their coverage,
+records report hashes and confirms their shared definition fingerprint:
+`e51748f26587cf3676a9f60331f3abb585e29deb4f8333b06f6e3abf93e3c6aa`.
+These focused reports do not establish whole-suite passing percentages.
+
+### Full Ubuntu CI validation
+
+[Run 35596676314](https://github.com/razzeee/flatpak-blackbox-tests/actions/runs/35596676314)
+executes the full suite against the pinned reference with freshly prepared
+fixtures and the provisioned system helper. Its complete report matches the same
+definition fingerprint above and records **481 passing and 29 failing cases**.
+The 80 added cases have **74 passes and six failures**. The same 23 existing cases
+still fail; no previously passing existing case regressed.
+
+All five new build initialization cases pass in CI, including the four blocked
+by the local filesystem. CI exposed an existing preparation bug during development:
+`ExtensionOf` payloads are exported from `files/`, but the contract preparer had
+written extension markers under `usr/`. Preparation now uses the correct directory
+and verifies the bytes in each exported commit. The new copy cases reject older
+markerless fixtures as an unmet prerequisite.
+
+| Full CI option measurement | Passing evidence |
+| --- | ---: |
+| Option-specific assertions | **572/624, 91.67%** |
+| Separate equivalence checks | **40/624, 6.41%** |
+| Deduplicated option inventory accounting | **612/624, 98.08%** |
+
+The six new failures are the reference failures listed above. They retain zero
+passing credit, and the compatibility job remains unsuccessful. The source
+catalogue, lint/type checks, unit tests and coverage-site checks pass.
+
+The 12 options without passing inventory evidence are:
+
+- `document-export --noexist`
+- `install --gpg-file`
+- `make-current --user`, `--system`, `--installation`
+- `override --installation`
+- `remote-add --no-follow-redirect`
+- `remote-modify --follow-redirect`, `--no-follow-redirect`
+- `run --clear-env`, `--file-forwarding`
+- `update --force-remove`
+
+A failed multi-option case grants no credit to any of its options; this list does
+not assert that each option independently fails.
+
+## Previous expansion: complete behavior inventory, 500 CLI options
 
 The suite now has **430 cases**. All **136/136 CLI** and **163/163 library**
 behavior obligations have implementations, along with all 44 commands,

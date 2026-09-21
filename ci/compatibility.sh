@@ -56,7 +56,7 @@ host() {
         libglib2.0-dev libgpgme11-dev libjson-glib-dev libostree-dev \
         libpolkit-agent-1-dev libpolkit-gobject-1-dev polkitd \
         libseccomp-dev libsystemd-dev libxau-dev libxml2-dev libzstd-dev \
-        bubblewrap dbus dbus-daemon dbus-bin dbus-tests fuse3 gnupg ostree \
+        bubblewrap dbus dbus-daemon dbus-bin dbus-tests fuse3 gnupg ostree strace \
         desktop-file-utils shared-mime-info xdg-dbus-proxy xdg-desktop-portal \
         xauth attr systemd
     dpkg-query -W > "$BB_CI_ROOT/logs/packages.txt"

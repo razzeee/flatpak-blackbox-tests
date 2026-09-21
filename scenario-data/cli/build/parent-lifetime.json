@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "parent-lifetime.build",
+      "scenario": "parent-lifetime-build",
+      "handler": "parent_lifetime_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Tie a build sandbox's lifetime to its real launching process.",
+      "preconditions": "Independent build payload/runtime, a separate launcher and a helper-local subreaper.",
+      "expected": "The unflagged build and holding payload survive parent exit; die-with-parent stops both before cleanup. All owned descendants are reaped.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "parent-lifetime.build",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Real process lifetime observations distinguish a bound build sandbox from an unflagged survival control.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build.--die-with-parent",
+          "rationale": "The flag terminates the build and payload when their actual launching process exits."
+        }
+      ]
+    }
+  ]
+}

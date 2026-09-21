@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "selection-options.make-current",
+      "scenario": "selection-options-make-current",
+      "handler": "selection_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Change only the selected installation's current branch among competing copies.",
+      "preconditions": "Independent test/master commits installed in disposable default, named and user stores.",
+      "expected": "Changing each selected store to test changes only its branchless launch commit; all competitors retain master and explicit restoration selects master again.",
+      "references": [
+        "doc/flatpak-make-current.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "selection-options.make-current",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [],
+      "rationale": "Real branchless sandbox launches expose exact independent current commits in public sandbox metadata for every competing store.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.make-current.--user",
+          "rationale": "Only user launches switch current branch; default/named launches remain unchanged."
+        },
+        {
+          "id": "cli.option.make-current.--system",
+          "rationale": "Only default-system launches switch current branch."
+        },
+        {
+          "id": "cli.option.make-current.--installation",
+          "rationale": "Only named-installation launches switch current branch."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "running-removal.update",
+      "scenario": "running-removal-update",
+      "handler": "running_removal_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Force removal of old files during an update while the old app remains running.",
+      "preconditions": "Independent A/B app commits and a live holding A sandbox.",
+      "expected": "Ordinary update retains the old sandbox's payload; force-remove deletes that entry. Both install exact B and preserve the runtime, with a newly launched app reporting B.",
+      "references": [
+        "doc/flatpak-update.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "running-removal.update",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Public enter probes observe the old sandbox mount directly while independent state queries verify the new deployment.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.update.--force-remove",
+          "rationale": "Forced update deletes old payload files retained by an ordinary update of a running app."
+        }
+      ]
+    }
+  ]
+}

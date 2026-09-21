@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "init-options.type",
+      "scenario": "init-options-type",
+      "handler": "build_init_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Initialize app, runtime and extension builds and reject an unknown type.",
+      "preconditions": "Distinct installed SDK and platform refs with independently different payload markers.",
+      "expected": "Types select the correct metadata group, copy SDK rather than platform bytes for runtime builds, and retain the distinct SDK/runtime refs and platform extension parent; unknown types create no metadata.",
+      "references": [
+        "doc/flatpak-build-init.xml"
+      ]
+    },
+    {
+      "id": "init-options.extension-tag",
+      "scenario": "init-options-extension-tag",
+      "handler": "build_init_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Preserve explicit extension mount-point tags in initialized metadata.",
+      "preconditions": "Independent installed parent runtime.",
+      "expected": "Two tag values remain distinguishable from untagged initialization while the parent ref is preserved.",
+      "references": [
+        "doc/flatpak-build-init.xml"
+      ]
+    },
+    {
+      "id": "init-options.var",
+      "scenario": "init-options-var",
+      "handler": "build_init_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Populate the build var directory from a selected runtime.",
+      "preconditions": "Independent runtime with a known payload marker.",
+      "expected": "The selected marker appears in var only; ordinary initialization lacks it.",
+      "references": [
+        "doc/flatpak-build-init.xml"
+      ]
+    },
+    {
+      "id": "init-options.sdk-extension",
+      "scenario": "init-options-sdk-extension",
+      "handler": "build_init_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Copy an installed extension into a writable SDK only when requested.",
+      "preconditions": "Distinct SDK and platform refs, both debug extensions installed, and an independent SDK-owned debug marker.",
+      "expected": "Explicit SDK-debug selection copies sdk_debug:A into usr/lib/debug and retains sdk:A at the SDK root; the control omits the extension and platform bytes cannot satisfy either assertion.",
+      "references": [
+        "doc/flatpak-build-init.xml"
+      ]
+    },
+    {
+      "id": "init-options.base-extension",
+      "scenario": "init-options-base-extension",
+      "handler": "build_init_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Copy a base app extension only when explicitly requested.",
+      "preconditions": "Independent installed base app and related extension with distinct markers.",
+      "expected": "Explicit selection copies extension bytes at the declared mount directory while retaining base bytes; the control omits the extension.",
+      "references": [
+        "doc/flatpak-build-init.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "init-options.type",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Public build layout and metadata distinguish every supported type and rejection.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-init.--type",
+          "rationale": "App, runtime and extension produce distinct expected layouts and metadata."
+        }
+      ]
+    },
+    {
+      "behavior_id": "init-options.extension-tag",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "The public ExtensionOf tag persists the selected mount-point identity.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-init.--extension-tag",
+          "rationale": "Exact first/second tag values differ from an untagged control."
+        }
+      ]
+    },
+    {
+      "behavior_id": "init-options.var",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent marker bytes distinguish a populated var directory from the ordinary empty one.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-init.--var",
+          "rationale": "The selected runtime payload populates var without replacing files."
+        }
+      ]
+    },
+    {
+      "behavior_id": "init-options.sdk-extension",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Installed presence alone is insufficient; the option must copy the extension payload.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-init.--sdk-extension",
+          "rationale": "Selected extension bytes appear at their SDK mount point only in the flagged build."
+        }
+      ]
+    },
+    {
+      "behavior_id": "init-options.base-extension",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "The base copy and extension copy have independent payload oracles.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-init.--base-extension",
+          "rationale": "Selected base extension bytes appear at their declared mount point only in the flagged build."
+        }
+      ]
+    }
+  ]
+}

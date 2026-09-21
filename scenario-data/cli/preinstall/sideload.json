@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "distribution-options.sideload-preinstall",
+      "scenario": "distribution-options-sideload-preinstall",
+      "handler": "distribution_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "vendor-preinstall",
+        "network-fault-injection"
+      ],
+      "description": "Preinstall a vendor app from independent sideload data while remote payload transfers are blocked.",
+      "preconditions": "Independent signed collection, actionable app definition, installed runtime, absent app and app-only offline source.",
+      "expected": "Ordinary preinstall attempts a blocked transfer and preserves state; the sideload option installs the exact signed app without remote payload requests.",
+      "references": [
+        "doc/flatpak-preinstall.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "distribution-options.sideload-preinstall",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "A blocked-download control and independent exact commits distinguish sideload use from cached or remotely downloaded content.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.preinstall.--sideload-repo",
+          "rationale": "The offline source enables exact vendor app deployment after ordinary network-dependent synchronization fails."
+        }
+      ]
+    }
+  ]
+}

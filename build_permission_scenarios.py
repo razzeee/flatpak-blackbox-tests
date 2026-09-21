@@ -126,7 +126,7 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
         driver.check(probe("read", str(persistent),
                            options=(*isolated, "--persist=blackbox-persist")) ==
                      "persistent-build-data", "persisted build data survives a later invocation")
-    elif name == "run-permissions-devel":
+    elif name in {"run-permissions-devel", "build-permissions-devel-equivalence"}:
         from run import PrerequisiteError
 
         binary = tree / "files/bin/devel-probe"
@@ -138,6 +138,13 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
         host = driver.external_call([str(binary)], "setup")
         if host.returncode != 0 or "ptrace-allowed" not in host.stdout:
             raise PrerequisiteError(f"host must permit the ptrace control: {host.stderr}")
+        if name == "build-permissions-devel-equivalence":
+            for options in ((), ("--allow=devel",), ("--disallow=devel",)):
+                result = driver.cli_call("build", *options, str(tree), "/app/bin/devel-probe")
+                driver.check(result.returncode == 0 and result.stdout ==
+                             "probe-started\nptrace-allowed\n",
+                             "build retains its implicit developer syscall access")
+            return
         driver.cli_success("install", "--user", "--noninteractive", "fixture", app)
         command = ("run", "--user", f"--filesystem={binary}:ro", f"--command={binary}")
         variants = [(("--disallow=devel",), False), (("--allow=devel",), True),
