@@ -28,7 +28,8 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
     def reject(remote: str) -> None:
         result = driver.cli_call("install", "--user", "--noninteractive", remote, app)
         _state(driver, {})
-        driver.check(result.returncode > 0,
+        driver.check(result.returncode > 0 and any(
+            text in result.stderr.casefold() for text in ("gpg", "signature", "public key")),
                      f"untrusted source must reject installation: {result.stderr}")
 
     if name == "remote-options-default-branch":
@@ -71,7 +72,10 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
         driver.check(rows == [runtime], f"filter must expose only the runtime: {rows}")
         result = driver.cli_call("install", "--user", "--noninteractive", "selection", app)
         _state(driver, {})
-        driver.check(result.returncode > 0, "filtered app must not be installable")
+        driver.check(result.returncode > 0 and fixture["app"] in result.stderr and any(
+            text in result.stderr.casefold()
+            for text in ("no remote refs found", "nothing matches", "filtered")),
+            f"filtered app must be rejected during ref resolution: {result.stderr}")
         install("selection", runtime)
         _state(driver, {runtime: fixture["runtime_commit"]})
         driver.cli_success("remote-modify", "--user", "--no-filter", "selection")

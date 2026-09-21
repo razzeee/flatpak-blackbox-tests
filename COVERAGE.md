@@ -89,6 +89,14 @@ by `final-pinned-positive-index.json`, `final-upstream-positive-index.json` and
 their shared definition fingerprint:
 `a179f385316d8f84777ac80473b81f08f18c7230a60717160a3b6aed47c51a36`.
 
+The PR review follow-up tightens GPG and filtered-ref rejection diagnostics so
+unrelated failures cannot satisfy those checks. All six affected remote scenarios
+pass again on both reference builds. Their 12 reports are indexed by
+`pr15-review-index.json`, with definition fingerprint
+`530fe5197d9fdb0c69e2cbb8d57bf3231639aed73afbdb3eff22f3507e0b9d0b`.
+The initial PR revision's full CI run records 407 passing and 23 failing cases;
+all 44 cases added by this expansion pass, and the failures are in existing cases.
+
 **124 CLI options remain** before implemented option coverage reaches 100%:
 
 | Remaining group | Options |
