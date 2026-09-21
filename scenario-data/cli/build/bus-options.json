@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "bus-options.build-session",
+      "scenario": "bus-options-build-session",
+      "handler": "bus_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus"
+      ],
+      "description": "Enforce build session-bus ownership and method grants, and observe traffic logging.",
+      "preconditions": "Independent build tree, private session bus, and controlled echo service; unrelated explicit rules keep the proxy enabled.",
+      "expected": "Unrelated rules deny access, own-name acquires the requested name, talk-name enables the echo call, and logging identifies its destination and method without breaking replies.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    },
+    {
+      "id": "bus-options.build-system",
+      "scenario": "bus-options-build-system",
+      "handler": "bus_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus"
+      ],
+      "description": "Enforce build system-bus ownership and method grants, and observe traffic logging.",
+      "preconditions": "The system-bus address is redirected to a private controlled bus; unrelated explicit rules keep the proxy enabled.",
+      "expected": "Unrelated rules deny access, system-own-name acquires the requested name, system-talk-name enables the echo call, and system-bus logging identifies its destination and method.",
+      "references": [
+        "doc/flatpak-build.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "bus-options.build-session",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Real RequestName and echo calls test enforcement, while quiet/logged/quiet calls isolate traffic diagnostics.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build.--own-name",
+          "rationale": "The grant obtains PRIMARY_OWNER for a name otherwise rejected by the proxy."
+        },
+        {
+          "id": "cli.option.build.--talk-name",
+          "rationale": "The grant changes a denied echo method into a successful reply."
+        },
+        {
+          "id": "cli.option.build.--log-session-bus",
+          "rationale": "The controlled destination and method appear in logged traffic but not quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "bus-options.build-system",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Real ownership and echo calls traverse the system-bus proxy connected to a private bus.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build.--system-own-name",
+          "rationale": "The grant obtains PRIMARY_OWNER for a name otherwise rejected by the proxy."
+        },
+        {
+          "id": "cli.option.build.--system-talk-name",
+          "rationale": "The grant changes a denied echo method into a successful reply."
+        },
+        {
+          "id": "cli.option.build.--log-system-bus",
+          "rationale": "The controlled destination and method appear in logged system-bus traffic only."
+        }
+      ]
+    }
+  ]
+}

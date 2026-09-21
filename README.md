@@ -38,6 +38,8 @@ using the same suite revision; their daily coverage and timings stay separate.
 
 - Linux, Python 3.10+, D-Bus, and working unprivileged user/mount namespaces.
 - A reference Flatpak, OSTree, GPG, `ldconfig`, and a C compiler to prepare fixtures.
+  Full fixture preparation also needs `pkg-config` and GIO development files for
+  the independently packaged authenticator service.
 - The target's public development headers and libraries, `pkg-config`, and `ldd`
   for library tests.
 - Desktop services and tools, including a document portal, for the relevant cases.

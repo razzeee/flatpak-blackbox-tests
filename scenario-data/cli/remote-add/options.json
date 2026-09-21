@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "remote-options.default-branch",
+      "scenario": "remote-options-default-branch",
+      "handler": "remote_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Select competing test/master app branches through remote defaults.",
+      "preconditions": "Independent query branches with distinct refs and commits.",
+      "expected": "Adding a test default selects test; modifying it to master selects master without an explicit branch in either install.",
+      "references": [
+        "doc/flatpak-remote-add.xml",
+        "doc/flatpak-remote-modify.xml"
+      ]
+    },
+    {
+      "id": "remote-options.add-disabled",
+      "scenario": "remote-options-add-disabled",
+      "handler": "remote_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Add a disabled remote and subsequently enable it.",
+      "preconditions": "Independent A repository and empty user installation.",
+      "expected": "Ordinary enumeration omits the remote, show-disabled exposes its disabled property, and enabling permits exact A installation.",
+      "references": [
+        "doc/flatpak-remote-add.xml"
+      ]
+    },
+    {
+      "id": "remote-options.add-filter",
+      "scenario": "remote-options-add-filter",
+      "handler": "remote_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Apply a ref filter while adding a remote.",
+      "preconditions": "Independent app/runtime repository and a runtime-only filter.",
+      "expected": "Only the runtime is advertised and installable; clearing the filter permits the exact app commit.",
+      "references": [
+        "doc/flatpak-remote-add.xml"
+      ]
+    },
+    {
+      "id": "remote-options.add-no-gpg-verify",
+      "scenario": "remote-options-add-no-gpg-verify",
+      "handler": "remote_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Contrast default verification with explicitly disabled verification on remote-add.",
+      "preconditions": "Independent unsigned A repository and no installed refs.",
+      "expected": "Default verification rejects unsigned content during remote addition or installation; the explicitly unchecked remote installs exact app/runtime commits.",
+      "references": [
+        "doc/flatpak-remote-add.xml"
+      ]
+    },
+    {
+      "id": "remote-options.add-gpg-import",
+      "scenario": "remote-options-add-gpg-import",
+      "handler": "remote_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Import a signing key while adding a remote and retain signature verification.",
+      "preconditions": "Independent signed and unsigned repositories plus the trusted public key.",
+      "expected": "Missing-key installation fails; the imported key permits exact signed commits; the same trusted remote still rejects unsigned content.",
+      "references": [
+        "doc/flatpak-remote-add.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "remote-options.default-branch",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Branchless installs select exact competing refs before and after changing the default.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--default-branch",
+          "rationale": "The added test default selects test instead of the competing master branch."
+        },
+        {
+          "id": "cli.option.remote-modify.--default-branch",
+          "rationale": "Changing the default to master changes the installed ref from test to master."
+        }
+      ]
+    },
+    {
+      "behavior_id": "remote-options.add-disabled",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "The persisted disabled property changes public enumeration before a successful enabled control.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--disable",
+          "rationale": "The remote is hidden from ordinary enumeration but remains explicitly queryable as disabled."
+        }
+      ]
+    },
+    {
+      "behavior_id": "remote-options.add-filter",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Ref membership and installability differ before and after filter removal.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--filter",
+          "rationale": "The configured filter restricts both advertised refs and installation resolution."
+        }
+      ]
+    },
+    {
+      "behavior_id": "remote-options.add-no-gpg-verify",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Identical unsigned input fails under default verification and succeeds only with verification disabled.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--no-gpg-verify",
+          "rationale": "Unsigned commits become installable with the explicit no-verification option."
+        }
+      ]
+    },
+    {
+      "behavior_id": "remote-options.add-gpg-import",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Signed installs depend on the imported key while unsigned installs remain rejected.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--gpg-import",
+          "rationale": "Importing the independent public key permits verified installation without accepting unsigned content."
+        }
+      ]
+    }
+  ]
+}

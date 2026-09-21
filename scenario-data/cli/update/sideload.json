@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "distribution-options.sideload-update",
+      "scenario": "distribution-options-sideload-update",
+      "handler": "distribution_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "network-fault-injection"
+      ],
+      "description": "Update from an independent sideload source when new remote payloads are unavailable.",
+      "preconditions": "Signed A deployment, independently signed B with different executable bytes, and a B app-only sideload repository.",
+      "expected": "Ordinary update attempts a blocked payload download and preserves A; the sideload option reaches exact B without requesting remote payloads, while retaining the runtime.",
+      "references": [
+        "doc/flatpak-update.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "distribution-options.sideload-update",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent changed payloads and a failing no-sideload control prevent a cached or metadata-only update from satisfying the assertion.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.update.--sideload-repo",
+          "rationale": "The local source permits the exact signed B update without HTTP payload downloads after ordinary update fails."
+        }
+      ]
+    }
+  ]
+}

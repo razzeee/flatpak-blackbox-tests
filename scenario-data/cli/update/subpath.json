@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "update-options.subpath",
+      "scenario": "update-options-subpath",
+      "handler": "install_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Update a partial installation with omitted, single and repeated subpath options.",
+      "preconditions": "Independent A/B query runtime commits with bin and subset-control payloads; each variant starts with only bin from A.",
+      "expected": "Ordinary update to B retains the original subset; explicit options select the new subset or both payloads; an explicit-commit update back to A without subpath options preserves the selection.",
+      "references": [
+        "doc/flatpak-update.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "update-options.subpath",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Exact independent B commits and public deployment payloads distinguish ordinary retention from explicit subset replacement and expansion.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.update.--subpath",
+          "rationale": "Explicit single and repeated subpaths alter which payloads are deployed, unlike omission which preserves the initial subset."
+        }
+      ]
+    }
+  ]
+}

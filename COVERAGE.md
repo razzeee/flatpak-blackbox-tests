@@ -4,6 +4,175 @@ This suite reports separate measurements for catalogued behavior and public
 interface reach. It does not report a percentage of all possible Flatpak behavior.
 There is no finite denominator for all Flatpak behavior yet.
 
+## Current expansion: complete behavior inventory, 500 CLI options
+
+The suite now has **430 cases**. All **136/136 CLI** and **163/163 library**
+behavior obligations have implementations, along with all 44 commands,
+223 public library functions and 14 signals. Implemented CLI-option coverage is
+**500/624, or 80.13%**, up from 433/624 at the selection checkpoint below.
+Denominators are unchanged. These are implementation counts, not a claim that
+the entire compatibility suite passes or that all possible Flatpak behavior is covered.
+
+The additional 67 CLI-option assertions cover:
+
+| Area | Additional options |
+| --- | ---: |
+| Remote default branches, disabling, filtering and GPG trust | 7 |
+| Observable Flatpak/OSTree diagnostics | 34 |
+| Build/run permissions and persistent storage | 13 |
+| Real D-Bus ownership, method access and traffic logging | 10 |
+| Image parsing and sideload installation/update | 3 |
+
+Diagnostic cases compare quiet, flagged and quiet-again invocations. They require
+additional diagnostics while preserving ordinary output and public state. Fault
+injection records its own activity out of band, so its messages cannot satisfy
+the diagnostic assertions. Probes that emit no diagnostics earn no option credit.
+
+Sandbox cases use host listener connections, shared-memory marker reads, socket
+visibility, persistent file contents and a real `ptrace` syscall. Bus cases
+actually acquire names and call a controlled echo service through private session
+and system-bus proxies. Unrelated rules keep build proxies enabled while the
+specific grant under test is removed. Logging must identify the real call's
+method and destination. No host system bus is used.
+
+Image cases respect automatic detection of valid OCI prefixes. Explicit `--image`
+is distinguished by forcing image-specific rejection of an unsupported transport,
+then validating independent A/B image payloads. Sideload cases first fail an
+ordinary transfer with HTTP payloads blocked, then install or update to the exact
+signed commit without remote payload requests. Update inputs contain changed
+executable bytes, preventing a cached or metadata-only update from satisfying the test.
+
+### Successful authenticator installation
+
+The last library obligation now has both refusal and success evidence. The
+`install-authenticator` handler verifies the exact remote/ref and confirms that
+the app is absent. It installs that app through a nested native transaction,
+checks the independent commit and launches the installed authenticator in its
+sandbox. The service validates the actual request and supplies the token needed
+by the independently gated HTTP repository. The protected commit, authenticator
+and its GIO runtime must be the exact final installed set; service bytes must
+match the independently prepared executable.
+
+The authenticator grants access to the case's private session bus so its unicast
+response signals can reach the caller. This does not expose the host session bus.
+CLI launch is an observer and adds no library launch credit. Older placeholder
+fixtures still support refusal, but report an unmet prerequisite for the new
+success case. Full preparation now builds the runnable service and runtime.
+
+### Validation and remaining work
+
+The combined 43 CLI cases and authenticator-success case pass against both the
+CI-pinned commit `1a6ec6a1f720fb30d76c76e656ac624fcaa237e9` and upstream main at
+`a1bcecfc6cd2e33477e8d186acac631119780d06`, both reporting Flatpak 1.19.1.
+Both are fresh local builds with the system helper disabled; these are isolated
+user-installation checks, not a replacement for full CI. All runs use a freshly
+prepared complete fixture set. There are **88 passing focused reports** and
+**77 deliberately failing controls**: 75 option-removal variants and two library
+controls that suppress authenticator installation or refuse its launch. Every
+negative report earns zero passing credit. Eight existing authentication cases
+also passed regression checks during development.
+
+The final CLI runs use a disposable Ubuntu container with an init process to reap
+exited sandbox helpers. An earlier container exhausted its process limit because
+it lacked that reaper; those failed runs are excluded from the final evidence.
+
+Locked Ruff, ty, strict mypy, static JSON formatting, the source catalogue check
+and all **125 unit tests** pass. The fixture round-trip test also covers the new
+complete manifest. Independent preparation and the native client builds succeed
+with their warning-as-error settings.
+
+Final reports are indexed in the external `selection-reference-evidence` directory
+by `final-pinned-positive-index.json`, `final-upstream-positive-index.json` and
+`final-pinned-negative-index.json`. The four native reports are under
+`final-auth-{pinned,upstream,negative-skip-install,negative-refuse-launch}/report.json`.
+`expansion-summary.json` audits all 165 reports, their artifact integrity and
+their shared definition fingerprint:
+`a179f385316d8f84777ac80473b81f08f18c7230a60717160a3b6aed47c51a36`.
+
+**124 CLI options remain** before implemented option coverage reaches 100%:
+
+| Remaining group | Options |
+| --- | ---: |
+| Other verbosity options | 52 |
+| Remote authentication, redirects, subsets and metadata settings | 17 |
+| Preinstall | 10 |
+| Remaining build/run feature, process and accessibility controls | 10 |
+| Build initialization, bundles, repository operations and distribution controls | 26 |
+| Make-current, search and repair installation selectors | 8 |
+| Document read grant | 1 |
+
+## CLI SDK/debug and subpath selection
+
+Five additional cases bring the suite to **391 cases** and implemented
+CLI-option reach to **433/624, or 69.39%**, up from 429/624. Catalogued behavior
+coverage remains 136/136 CLI and 162/163 library obligations. These cases add
+option assertions without changing any denominator or claiming behavior credit.
+
+- `install --include-sdk` and `--include-debug` run in all four combinations
+  against fresh, already-current and updatable apps. Each checks exact independent
+  commits for the app, runtime, related extensions, SDK and debug refs. The SDK
+  differs from the runtime; its debug ref is included only when both flags are on.
+  Already-current apps must still gain the requested dependencies. Inclusion
+  flags must update an older app without explicit `--or-update`, while the
+  ordinary repeated-install control retains its old commit.
+- `install --subpath` selects either of two disjoint payload directories. Repeated
+  options and an ordinary full-install control must deploy both. Assertions use
+  `info --show-location` and check excluded files as well as included files and
+  the independent marker contents.
+- `update --subpath` starts from a bin-only A deployment and advances to B.
+  Omission preserves the original subset; a single option replaces it and
+  repeated options expand it. A subsequent explicit-commit update back to A,
+  without subpath options, verifies that selection persists across another
+  deployment rather than merely a same-commit no-op.
+
+All five cases pass against three targets:
+
+| Target | Source revision |
+| --- | --- |
+| Installed Flatpak 1.18.2 | Distribution binary recorded by hash in each report |
+| CI-pinned Flatpak 1.19.1 | `1a6ec6a1f720fb30d76c76e656ac624fcaa237e9` |
+| Upstream main, also reporting 1.19.1 | `a1bcecfc6cd2e33477e8d186acac631119780d06` |
+
+The two source targets were freshly built in a disposable Ubuntu 24.04 container.
+Tests ran as an ordinary user. These builds disable the system helper and test
+only isolated user installations; they do not substitute for the full CI setup.
+
+Seventeen targeted negative controls also run against each target. They remove
+individual options, keep only the first or last repeated subpath, forget a stored
+subset, suppress dependency installation for an already-current app, omit only
+SDK debug, add unrequested debug refs, or install the correct dependencies while
+restoring the old app commit. All 51 control runs fail their intended ref-set,
+commit or payload-selection assertion and earn zero passing credit. The 15
+positive runs credit exactly the four options above. These focused runs do not
+establish full-suite passing percentages.
+
+A second, freshly exported fixture set also passes all five cases against the
+pinned build. Preparation uses the existing basic, query and contract exporters;
+these tests require no new fixture format or payload. This gives 20 passing
+focused reports alongside the 51 deliberately failing negative controls.
+
+An exploratory rejection check for `--include-sdk --no-deps` was removed. Both
+1.18.2 and the pinned build return success, install the app and omit the SDK.
+The manual calls the options incompatible but does not explicitly specify an
+error result. This observation is not counted as an implementation defect or
+additional coverage.
+
+Locked Ruff, ty, strict mypy, JSON formatting, the source catalogue check and
+all 123 unit tests pass, including the prepared-fixture round trip.
+
+Reports and validation scripts are retained outside the repository in the local
+`selection-reference-evidence` artifact directory. The indexes are
+`{host,pinned,upstream}-{reviewed,faults-reviewed}-index.json` and
+`fresh-pinned-reviewed-index.json`; they name all 71 reports and record their
+suite fingerprint. Container paths beginning `/evidence/` map to that artifact
+directory. The final definition fingerprint is
+`2471cc87986d9de0b2720292a7bc1ac4477b13a320ece3a8f1a848b72059fce9`.
+The existing `six-contract-fixtures-04` inputs from the imported Flatpak checkout
+were checksum-validated and reused without modification; their manifest SHA-256 is
+`05ceae1af2272444bbc2d3fdbf142f0b9de52ed7c7854b6906bce7d0db098a61`.
+The freshly exported fixture manifest SHA-256 is
+`8b5d7fde2c6dc74799910c0598df19a692b593b3a9f8ffc2d5a2f99e6fa9e780`.
+
 ## Cross-user library and authorization contracts
 
 Six new cases bring the suite to **383 cases** and implemented library behavior

@@ -2,6 +2,29 @@
   "schema": 1,
   "behaviors": [
     {
+      "id": "auth.install-success",
+      "scenario": "auth-install-success",
+      "handler": "auth_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository",
+        "session-bus",
+        "authentication",
+        "sandbox-execution"
+      ],
+      "description": "Install and launch the missing authenticator from its signal handler, then resume protected resolution.",
+      "preconditions": "Independent protected runtime, a runnable authenticator app and its gio runtime; all refs and the service initially absent.",
+      "expected": "Refusal fails without downloads or deployments; acceptance installs the exact candidate through a native nested transaction, launches that app, authenticates the exact request, and deploys the protected commit with an authorized token.",
+      "references": [
+        "common/flatpak-transaction.c: FlatpakTransaction::install-authenticator"
+      ]
+    },
+    {
       "id": "auth.install-required",
       "scenario": "auth-install-required",
       "handler": "auth_scenarios:run",
@@ -26,6 +49,15 @@
   ],
   "mappings": [
     {
+      "behavior_id": "auth.install-success",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.auth.install-authenticator"
+      ],
+      "rationale": "Both refusal and acceptance are exercised. Native signal payloads, nested installation and transaction resumption are asserted; the newly installed sandboxed service supplies the token needed by the independent protected HTTP repository."
+    },
+    {
       "behavior_id": "auth.install-required",
       "driver": "library",
       "profile": "user",
@@ -40,6 +72,6 @@
     }
   ],
   "notes": [
-    "The candidate is an installable placeholder app, not an authentication service. Only refusal is tested."
+    "Older fixture manifests with a placeholder candidate support refusal only. Successful installation requires the new runnable authenticator binary and its independently exported runtime. CLI launch and inspection are observers and earn no library launch coverage."
   ]
 }

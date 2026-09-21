@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "remote-options.modify-gpg-import",
+      "scenario": "remote-options-modify-gpg-import",
+      "handler": "remote_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Import a missing signing key into an existing verified remote.",
+      "preconditions": "Independent signed/unsigned repositories, the public signing key, and a remote initially lacking that key.",
+      "expected": "Installation changes from rejected to exact signed deployment after key import; unsigned content remains rejected.",
+      "references": [
+        "doc/flatpak-remote-modify.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "remote-options.modify-gpg-import",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Import changes trust for the same remote, with unsigned rejection proving verification remains enabled.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-modify.--gpg-import",
+          "rationale": "The imported key permits exact independently signed commits after a missing-key rejection."
+        }
+      ]
+    }
+  ]
+}
