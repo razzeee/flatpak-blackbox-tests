@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "diagnostic-options.preinstall",
+      "scenario": "diagnostic-options-preinstall",
+      "handler": "diagnostic_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe both verbosity modes during vendor synchronization with no pending definitions.",
+      "preconditions": "Exact independent A app/runtime and fixed fixture remote.",
+      "expected": "Each flag adds diagnostics between stable quiet controls while stdout, installed commits and remote configuration remain unchanged.",
+      "references": [
+        "doc/flatpak-preinstall.xml"
+      ]
+    },
+    {
+      "id": "diagnostic-options.search",
+      "scenario": "diagnostic-options-search",
+      "handler": "diagnostic_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Observe both verbosity modes while searching for an absent term.",
+      "preconditions": "Independent A installation and fixture-only remote catalogue.",
+      "expected": "Each flag adds diagnostics between stable quiet controls without changing search results, installed commits or the remote.",
+      "references": [
+        "doc/flatpak-search.xml"
+      ]
+    },
+    {
+      "id": "diagnostic-options.run",
+      "scenario": "diagnostic-options-run",
+      "handler": "diagnostic_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Observe both verbosity modes while running an independently installed payload.",
+      "preconditions": "Exact independent A app/runtime with a runnable probe.",
+      "expected": "Each flag adds diagnostics between stable quiet controls while ordinary probe stdout, installed commits and remote configuration remain unchanged.",
+      "references": [
+        "doc/flatpak-run.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "diagnostic-options.preinstall",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Quiet/flagged/quiet runs isolate diagnostics while public installation state is checked before and after.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.preinstall.--verbose",
+          "rationale": "Verbosity adds nonempty stderr lines absent from quiet controls."
+        },
+        {
+          "id": "cli.option.preinstall.--ostree-verbose",
+          "rationale": "OSTree verbosity adds nonempty stderr lines absent from quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "diagnostic-options.search",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Search output and public state remain stable while diagnostics increase.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.search.--verbose",
+          "rationale": "Verbosity adds nonempty stderr lines absent from quiet controls."
+        },
+        {
+          "id": "cli.option.search.--ostree-verbose",
+          "rationale": "OSTree verbosity adds nonempty stderr lines absent from quiet controls."
+        }
+      ]
+    },
+    {
+      "behavior_id": "diagnostic-options.run",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "A real sandboxed payload runs in each variant; diagnostic changes cannot replace ordinary output or deployment checks.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.run.--verbose",
+          "rationale": "Verbosity adds nonempty stderr lines without changing payload stdout."
+        },
+        {
+          "id": "cli.option.run.--ostree-verbose",
+          "rationale": "OSTree verbosity adds nonempty stderr lines without changing payload stdout."
+        }
+      ]
+    }
+  ]
+}

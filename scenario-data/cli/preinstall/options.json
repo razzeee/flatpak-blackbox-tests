@@ -1,0 +1,184 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "preinstall-options.includes",
+      "scenario": "preinstall-options-includes",
+      "handler": "preinstall_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "vendor-preinstall"
+      ],
+      "description": "Select SDK and debug refs in all four preinstall flag combinations.",
+      "preconditions": "Independent SDK/debug contract refs and one actionable vendor app definition.",
+      "expected": "Every combination installs exactly its selected independent commits, including SDK debug only when both flags are enabled.",
+      "references": [
+        "doc/flatpak-preinstall.xml"
+      ]
+    },
+    {
+      "id": "preinstall-options.dependencies",
+      "scenario": "preinstall-options-dependencies",
+      "handler": "preinstall_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "vendor-preinstall"
+      ],
+      "description": "Distinguish dependency suppression from related-ref suppression during preinstallation.",
+      "preconditions": "Independent app with separate runtime, app-related extension and runtime extension.",
+      "expected": "No-deps omits the runtime and its extension; no-related retains the runtime but omits related extensions; ordinary synchronization installs the full set.",
+      "references": [
+        "doc/flatpak-preinstall.xml"
+      ]
+    },
+    {
+      "id": "preinstall-options.confirmation",
+      "scenario": "preinstall-options-confirmation",
+      "handler": "preinstall_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "vendor-preinstall"
+      ],
+      "description": "Complete vendor installation without input in each automatic confirmation mode.",
+      "preconditions": "Actionable vendor app and empty installation before each variant.",
+      "expected": "Ordinary confirmation refuses with no deployments; each automatic mode installs exact commits without an unanswered prompt.",
+      "references": [
+        "doc/flatpak-preinstall.xml"
+      ]
+    },
+    {
+      "id": "preinstall-options.no-pull",
+      "scenario": "preinstall-options-no-pull",
+      "handler": "preinstall_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "vendor-preinstall"
+      ],
+      "description": "Prevent uncached vendor installation with no-pull and contrast ordinary synchronization.",
+      "preconditions": "Actionable vendor definition, initially uncached refs, and independently known commits.",
+      "expected": "No-pull leaves every uncached ref absent; ordinary synchronization immediately afterward installs the full independent ref set.",
+      "references": [
+        "doc/flatpak-preinstall.xml"
+      ]
+    },
+    {
+      "id": "preinstall-options.reinstall",
+      "scenario": "preinstall-options-reinstall",
+      "handler": "preinstall_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "vendor-preinstall"
+      ],
+      "description": "Restore a damaged public deployment through explicit vendor reinstallation.",
+      "preconditions": "Independently prepared installed app whose public marker is replaced without modifying repository objects.",
+      "expected": "Ordinary preinstall retains the damaged already-installed payload; explicit reinstall restores the independent original bytes at the same expected commit.",
+      "references": [
+        "doc/flatpak-preinstall.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "preinstall-options.includes",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Exact independent ref and commit sets distinguish all include combinations.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.preinstall.--include-sdk",
+          "rationale": "Only SDK-enabled variants install the distinct SDK."
+        },
+        {
+          "id": "cli.option.preinstall.--include-debug",
+          "rationale": "Only debug-enabled variants install debug refs, including SDK debug when applicable."
+        }
+      ]
+    },
+    {
+      "behavior_id": "preinstall-options.dependencies",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "The independently prepared ref graph distinguishes dependency and related-ref policies.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.preinstall.--no-deps",
+          "rationale": "Runtime dependencies remain absent while the designated app installs."
+        },
+        {
+          "id": "cli.option.preinstall.--no-related",
+          "rationale": "Related extensions remain absent while the app and runtime install."
+        }
+      ]
+    },
+    {
+      "behavior_id": "preinstall-options.confirmation",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Refusal and successful automatic consent produce opposite deployment outcomes.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.preinstall.--assumeyes",
+          "rationale": "Automatic yes installs the actionable vendor app without input."
+        },
+        {
+          "id": "cli.option.preinstall.--noninteractive",
+          "rationale": "Noninteractive synchronization installs without input or an unanswered prompt."
+        }
+      ]
+    },
+    {
+      "behavior_id": "preinstall-options.no-pull",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "An ordinary successful control proves the vendor definition and remote are actionable, while no-pull prevents uncached deployment.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.preinstall.--no-pull",
+          "rationale": "No-pull prevents installation of uncached refs that ordinary preinstall subsequently deploys."
+        }
+      ]
+    },
+    {
+      "behavior_id": "preinstall-options.reinstall",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent payload bytes distinguish real redeployment from same-commit no-op synchronization.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.preinstall.--reinstall",
+          "rationale": "Reinstallation replaces damaged public payload bytes that ordinary synchronization leaves unchanged."
+        }
+      ]
+    }
+  ]
+}

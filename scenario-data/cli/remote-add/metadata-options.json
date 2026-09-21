@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "remote-metadata.subset-add",
+      "scenario": "remote-metadata-subset-add",
+      "handler": "remote_metadata_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Configure a subset during remote addition and reject fallback to the full catalogue.",
+      "preconditions": "Independent app/runtime repository with no subset of the selected name.",
+      "expected": "The selected subset persists, install cannot fall back, and clearing it enables exact independent installation.",
+      "references": [
+        "doc/flatpak-remote-add.xml"
+      ]
+    },
+    {
+      "id": "remote-metadata.add-no-redirect",
+      "scenario": "remote-metadata-add-no-redirect",
+      "handler": "remote_metadata_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Refuse a published repository redirect during remote addition.",
+      "preconditions": "Independent A source advertises a public-summary redirect to B.",
+      "expected": "The documented no-follow-redirect option preserves the A URL and installs the exact A app commit.",
+      "references": [
+        "doc/flatpak-remote-add.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "remote-metadata.subset-add",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "The persisted subset and rejected otherwise-valid installation establish effective selection.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--subset",
+          "rationale": "A subset supplied on addition prevents falling back to the ordinary catalogue."
+        }
+      ]
+    },
+    {
+      "behavior_id": "remote-metadata.add-no-redirect",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Public URL and independent deployment commit distinguish redirect refusal from automatic following.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--no-follow-redirect",
+          "rationale": "Adding with opt-out preserves the original URL and source commit despite a published redirect."
+        }
+      ]
+    }
+  ]
+}

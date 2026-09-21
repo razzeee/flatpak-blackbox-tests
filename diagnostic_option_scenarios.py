@@ -47,6 +47,9 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
         "make-current": ("--user", fixture["app"], fixture["branch"]),
         "repair": ("--user", "--dry-run"),
         "repo": ("--info", str(Path(fixture["directory"]) / "A")),
+        "preinstall": ("--user", "--noninteractive"),
+        "search": ("--user", "--columns=application", "blackbox-absent-search-term"),
+        "run": ("--user", app),
     }
     if command not in arguments:
         raise ValueError(f"unknown diagnostic scenario: {name}")

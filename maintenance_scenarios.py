@@ -13,7 +13,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from fixture_manifest import FixtureManifest
+from report_schema import EvidenceRecord
 from system_selector_scenarios import Namespace
+from typed_json import parse_typed
 
 if TYPE_CHECKING:
     from run import Driver, RepositoryServer
@@ -49,10 +51,21 @@ def _run(ns: Namespace, fixture: FixtureManifest, name: str) -> None:
     short_runtime = runtime.removeprefix("runtime/")
     ns.app_versions = {fixture["commits"]["A"]: "A", fixture["commits"]["B"]: "B"}
 
-    if name == "maintenance-history":
+    if name in {"maintenance-history", "maintenance-history-equivalent"}:
+        history_flags = ["--verbose", "--ostree-verbose"] if name.endswith("-equivalent") else []
         result = ns.driver.external_call(
             [*ns.prefix, "/usr/bin/python3", "-B", str(Path(__file__).resolve()),
-             "--journal", ns.driver.cli, app, runtime], "cli")
+             "--journal", ns.driver.cli, app, runtime, *history_flags], "cli")
+        if history_flags:
+            for line in result.stdout.splitlines():
+                if not line.startswith("{"):
+                    continue
+                data = json.loads(line)
+                if (isinstance(data, dict)
+                        and data.get("argv", [])[:2] == [ns.driver.cli, "history"]):
+                    record = parse_typed(data, EvidenceRecord, "history command")
+                    record["interface"] = "cli"
+                    ns.driver.evidence.append(record)
         if result.returncode == 77:
             ns.block("private real journal unavailable: "
                      f"{result.stdout} {result.stderr}")
@@ -372,9 +385,10 @@ def _history_controls() -> None:
                       "duplicate_events_accepted": True, "semantic_aliases_accepted": True}))
 
 
-def _journal(cli: str, app: str, runtime: str) -> int:
+def _journal(cli: str, app: str, runtime: str, *history_options: str) -> int:
     """One guarded namespace invocation keeps its real journald alive for all calls."""
     assert os.getuid() == 0
+    assert all(option in {"--verbose", "--ostree-verbose"} for option in history_options)
     assert Path("/proc/self/uid_map").read_text().split() == ["0", "0", "1"]
     outer = json.loads(Path("/tmp/selector-outer-map.json").read_text())
     assert outer[0] == "0" and outer[1] != "0" and outer[2] == "1"
@@ -403,6 +417,8 @@ def _journal(cli: str, app: str, runtime: str) -> int:
             return 77
 
         def call(*args: str) -> str:
+            if args[0] == "history":
+                args = (args[0], *history_options, *args[1:])
             result = subprocess.run([cli, *args], text=True, capture_output=True,
                                     check=False, timeout=60)
             print(json.dumps({"argv": [cli, *args], "exit_status": result.returncode,
@@ -475,7 +491,7 @@ if __name__ == "__main__":
     if sys.argv[1:] == ["--history-checks"]:
         _history_controls()
         raise SystemExit(0)
-    if len(sys.argv) == 5 and sys.argv[1] == "--journal":
+    if len(sys.argv) in (5, 7) and sys.argv[1] == "--journal":
         raise SystemExit(_journal(*sys.argv[2:]))
     if len(sys.argv) == 5 and sys.argv[1] == "--repair-root":
         raise SystemExit(_repair_root(*sys.argv[2:]))

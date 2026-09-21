@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "remote-auth.options-add",
+      "scenario": "remote-auth-options-add",
+      "handler": "remote_auth_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "session-bus",
+        "authentication"
+      ],
+      "description": "Select a real authenticator and pass exact repeated-option values when adding a remote.",
+      "preconditions": "Independent protected runtime and separately compiled wire-protocol service on the private bus.",
+      "expected": "Unconfigured authentication fails without deployment; the configured service receives the final value including an equals sign, issues the required token, and permits the exact protected commit.",
+      "references": [
+        "doc/flatpak-remote-add.xml"
+      ]
+    },
+    {
+      "id": "remote-auth.autoinstall-add",
+      "scenario": "remote-auth-autoinstall-add",
+      "handler": "remote_auth_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "session-bus",
+        "authentication"
+      ],
+      "description": "Enable and disable automatic authenticator installation through ordered remote-add flags.",
+      "preconditions": "Independent protected runtime, available authenticator app/runtime, and no activation service.",
+      "expected": "The last flag controls whether the exact candidate and runtime are installed; authentication still fails without service activation and protected payloads remain untouched.",
+      "references": [
+        "doc/flatpak-remote-add.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "remote-auth.options-add",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Actual wire requests and independently gated transfers establish authenticator selection and exact option delivery.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--authenticator-name",
+          "rationale": "The selected real service supplies the token needed for the exact protected commit."
+        },
+        {
+          "id": "cli.option.remote-add.--authenticator-option",
+          "rationale": "The service validates the final repeated key value, including its embedded equals sign."
+        }
+      ]
+    },
+    {
+      "behavior_id": "remote-auth.autoinstall-add",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Opposite flag orders produce different real candidate deployment sets, independently of outer authentication failure.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--authenticator-install",
+          "rationale": "A final grant causes actual installation of the independently known candidate and runtime."
+        },
+        {
+          "id": "cli.option.remote-add.--no-authenticator-install",
+          "rationale": "A final revocation prevents candidate installation after an earlier grant."
+        }
+      ]
+    }
+  ]
+}

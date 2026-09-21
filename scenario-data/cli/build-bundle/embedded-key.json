@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "bundle-trust.embedded-key",
+      "scenario": "bundle-trust-embedded-key",
+      "handler": "bundle_trust_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Embed an independent signing key and observe retained origin verification after bundle installation.",
+      "preconditions": "Independent signed B source, public key, unsigned A source and runtime.",
+      "expected": "Both generated bundles install exact B. Only the embedded-key origin rejects a later unsigned A update; the keyless control accepts A.",
+      "references": [
+        "doc/flatpak-build-bundle.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "bundle-trust.embedded-key",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "A real update trust decision distinguishes embedded key data from bundle command acceptance or serialized metadata alone.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-bundle.--gpg-keys",
+          "rationale": "The embedded independent key enables persistent signature verification and rejection of unsigned updates."
+        }
+      ]
+    }
+  ]
+}

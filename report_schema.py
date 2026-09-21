@@ -50,6 +50,7 @@ class SideloadImageNetworkObservation(SideloadNetworkObservation):
 
 class EvidenceRecord(TypedDict, total=False):
     argv: list[str]
+    cli_argv: list[str]
     interface: str
     exit_status: int
     stdout: str
@@ -169,7 +170,13 @@ class CoverageMetrics(TypedDict):
     categories: dict[str, dict[str, CoverageMetric]]
 
 
-class CoverageSummary(TypedDict):
+class CLIOptionAccounting(TypedDict):
+    equivalence_checks: CoverageMetric
+    accounted: CoverageMetric
+    equivalence_evidence: dict[str, list[CaseIdentity]]
+
+
+class _CoverageSummaryRequired(TypedDict):
     schema: int
     definition: Definition
     verification: Verification
@@ -184,6 +191,10 @@ class CoverageSummary(TypedDict):
     unimplemented_requirements: list[str]
     unverified_requirements: list[str] | None
     limitations: list[str]
+
+
+class CoverageSummary(_CoverageSummaryRequired, total=False):
+    cli_option_accounting: CLIOptionAccounting
 
 
 def _check_observations(evidence: list[EvidenceRecord], path: str) -> None:

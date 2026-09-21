@@ -87,6 +87,7 @@ def execute(argv: list[str], env: dict[str, str], cwd: Path,
     evidence.append(record)
     try:
         process = subprocess.Popen(argv, env=env, cwd=cwd, text=True,
+                                   stdin=subprocess.DEVNULL,
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                    start_new_session=True)
     except FileNotFoundError as error:

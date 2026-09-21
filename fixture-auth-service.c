@@ -30,7 +30,7 @@ typedef struct
 {
   GDBusConnection *bus;
   GDBusNodeInfo *info;
-  const char *mode, *ref, *commit, *parent, *remote_url;
+  const char *mode, *ref, *commit, *parent, *remote_url, *expected_option;
   char *path, *sender;
   GSocketService *http;
   guint16 port;
@@ -142,6 +142,13 @@ method (GDBusConnection *connection, const char *sender, const char *path,
       g_assert_cmpstr (ref, ==, s->ref);
       g_assert_cmpstr (commit, ==, s->commit);
       g_assert_cmpint (token_type, ==, 2);
+      if (s->expected_option != NULL)
+        {
+          const char *value = NULL;
+          g_assert_true (g_variant_lookup (auth_options, "blackbox", "&s", &value));
+          g_assert_cmpstr (value, ==, s->expected_option);
+          g_print ("auth-option blackbox %s\n", value);
+        }
       for (char *p = escaped; *p; p++)
         if (*p == '.') *p = '_';
       s->sender = g_strdup (sender);
@@ -151,7 +158,9 @@ method (GDBusConnection *connection, const char *sender, const char *path,
       g_assert_no_error (error);
       g_print ("request %s %s %s %s\n", ref, commit, parent, url);
       g_dbus_method_invocation_return_value (invocation, g_variant_new ("(o)", s->path));
-      if (strcmp (s->mode, "web") == 0)
+      if (strcmp (s->mode, "options") == 0)
+        finish (s, 0);
+      else if (strcmp (s->mode, "web") == 0)
         {
           g_autofree char *login = g_strdup_printf ("http://127.0.0.1:%u/login", s->port);
           emit (s, "Webflow", g_variant_new ("(s@a{sv})", login, empty ()));
@@ -189,9 +198,10 @@ main (int argc, char **argv)
   g_autoptr(GError) error = NULL;
   g_autoptr(GVariant) reply = NULL;
   g_autoptr(GMainLoop) loop = g_main_loop_new (NULL, FALSE);
-  g_assert_cmpint (argc, ==, 6);
+  g_assert_true (argc == 6 || argc == 7);
   s.mode = argv[1]; s.ref = argv[2]; s.commit = argv[3];
   s.parent = argv[4]; s.remote_url = argv[5];
+  s.expected_option = argc == 7 ? argv[6] : NULL;
   s.info = g_dbus_node_info_new_for_xml (xml, &error);
   g_assert_no_error (error);
   s.bus = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
