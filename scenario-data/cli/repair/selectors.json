@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "selection-options.repair",
+      "scenario": "selection-options-repair",
+      "handler": "selection_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Select the independently configured repair root among competing stores.",
+      "preconditions": "Disposable default, named and user installations with distinct sentinel remotes.",
+      "expected": "Each dry run identifies only the selected installation path, preserves all remotes and deployments, and rejects an unknown named installation.",
+      "references": [
+        "doc/flatpak-repair.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "selection-options.repair",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [],
+      "rationale": "Public repair output must name the independently configured selected root and omit the competing roots. This is selection evidence, not a new corruption-recovery claim.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.repair.--user",
+          "rationale": "User repair selects the user root rather than the default or named system root."
+        },
+        {
+          "id": "cli.option.repair.--installation",
+          "rationale": "Named repair selects the configured alternate root and an absent name cannot fall back."
+        }
+      ]
+    }
+  ]
+}

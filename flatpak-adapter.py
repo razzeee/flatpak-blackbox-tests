@@ -58,4 +58,5 @@ paths = {
 for directory in paths.values():
     (root / directory).mkdir(mode=0o700)
 print(json.dumps({**{key: str(root / value) for key, value in paths.items()},
-                  "BLACKBOX_REPAIR_FIXTURE": str(Path(__file__).resolve())}))
+                  "BLACKBOX_REPAIR_FIXTURE": str(Path(__file__).resolve()),
+                  "BLACKBOX_PREINSTALL_DIR": str(root / "config/preinstall.d")}))

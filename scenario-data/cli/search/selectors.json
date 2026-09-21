@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "selection-options.search",
+      "scenario": "selection-options-search",
+      "handler": "selection_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository"
+      ],
+      "description": "Search competing default, named and user catalogues with explicit selectors.",
+      "preconditions": "Disposable namespace with independent A/B AppStream fixtures and distinct remote names in every installation.",
+      "expected": "Each selector returns only its own exact application/branch/remote rows for the matching independent term; opposite terms yield no matches and nothing is installed.",
+      "references": [
+        "doc/flatpak-search.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "selection-options.search",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [],
+      "rationale": "Competing catalogues, distinct remote names and positive/negative search terms distinguish every installation selector.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.search.--user",
+          "rationale": "Only user-catalogue rows appear despite matching entries in the system store."
+        },
+        {
+          "id": "cli.option.search.--system",
+          "rationale": "Only default-system rows appear despite competing named/user catalogues."
+        },
+        {
+          "id": "cli.option.search.--installation",
+          "rationale": "The named store exposes independent B search terms and excludes default/user A terms."
+        }
+      ]
+    }
+  ]
+}

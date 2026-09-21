@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "remote-metadata.build-redirect",
+      "scenario": "remote-metadata-build-redirect",
+      "handler": "remote_metadata_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Publish a repository redirect that changes real remote selection and deployment.",
+      "preconditions": "Independent A source and B destination with different app commits.",
+      "expected": "After publishing the redirect, remote addition selects the B URL and installation reaches its independent B commit.",
+      "references": [
+        "doc/flatpak-build-update-repo.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "remote-metadata.build-redirect",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "A consumer follows the published redirect and installs independently known destination content.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-update-repo.--redirect-url",
+          "rationale": "The generated repository metadata redirects real remote configuration and app installation to B."
+        }
+      ]
+    }
+  ]
+}

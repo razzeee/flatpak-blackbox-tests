@@ -1,0 +1,679 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "equivalent-options.permissions",
+      "scenario": "equivalent-options-permissions",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "session-bus",
+        "desktop-portals"
+      ],
+      "description": "Preserve permission enumeration contracts with both diagnostic flags.",
+      "preconditions": "Real private permission store with independently seeded entries.",
+      "expected": "Exact table, object and app-filtered rows remain correct. No option-specific diagnostic effect is claimed.",
+      "references": [
+        "doc/flatpak-permissions.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.permission-show",
+      "scenario": "equivalent-options-permission-show",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "session-bus",
+        "desktop-portals"
+      ],
+      "description": "Preserve per-app permission queries with both diagnostic flags.",
+      "preconditions": "Real private permission store with independent subject and control apps.",
+      "expected": "Subject, control and absent-app results satisfy the original exact-row assertions. No diagnostic effect is claimed.",
+      "references": [
+        "doc/flatpak-permission-show.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.permission-set",
+      "scenario": "equivalent-options-permission-set",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "session-bus",
+        "desktop-portals"
+      ],
+      "description": "Preserve permission data mutation and rejection with both diagnostic flags.",
+      "preconditions": "Real private permission store and independent D-Bus observers.",
+      "expected": "Typed data and permissions update exactly, omitted data is preserved, and malformed data fails without mutation. No diagnostic effect is claimed.",
+      "references": [
+        "doc/flatpak-permission-set.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.permission-remove",
+      "scenario": "equivalent-options-permission-remove",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "session-bus",
+        "desktop-portals"
+      ],
+      "description": "Preserve selected permission removal with both diagnostic flags.",
+      "preconditions": "Real private permission store with subject and control grants.",
+      "expected": "Only the selected grant disappears and other entries remain intact. No diagnostic effect is claimed.",
+      "references": [
+        "doc/flatpak-permission-remove.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.permission-reset",
+      "scenario": "equivalent-options-permission-reset",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "session-bus",
+        "desktop-portals"
+      ],
+      "description": "Preserve app permission reset with both diagnostic flags.",
+      "preconditions": "Real private permission store with independently seeded subject and control entries.",
+      "expected": "Subject grants disappear across tables while control grants remain. No diagnostic effect is claimed.",
+      "references": [
+        "doc/flatpak-permission-reset.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.document-export",
+      "scenario": "equivalent-options-document-export",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "session-bus",
+        "desktop-portals",
+        "sandbox",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Preserve real document read/write grants with both diagnostic flags.",
+      "preconditions": "Private document portal, FUSE, installed independent app and controlled host file.",
+      "expected": "Sandbox writes change the origin only while granted; revocation preserves reads and blocks writes. No diagnostic effect is claimed.",
+      "references": [
+        "doc/flatpak-document-export.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.documents",
+      "scenario": "equivalent-options-documents",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "session-bus",
+        "desktop-portals"
+      ],
+      "description": "Preserve document app filtering with both diagnostic flags.",
+      "preconditions": "Private real portal and independently exported subject/control documents.",
+      "expected": "Exact document ID sets remain correct for all, subject, control and absent apps. No diagnostic effect is claimed.",
+      "references": [
+        "doc/flatpak-documents.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.document-info",
+      "scenario": "equivalent-options-document-info",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "session-bus",
+        "desktop-portals"
+      ],
+      "description": "Preserve document identity and grant queries with both diagnostic flags.",
+      "preconditions": "Private real portal with controlled permission changes.",
+      "expected": "Queries by origin and exported path report exact identity and current permissions. No diagnostic effect is claimed.",
+      "references": [
+        "doc/flatpak-document-info.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.document-unexport",
+      "scenario": "equivalent-options-document-unexport",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "session-bus",
+        "desktop-portals",
+        "sandbox",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Preserve real document revocation with both diagnostic flags.",
+      "preconditions": "Private real portal, independent app, subject document and control export.",
+      "expected": "Revocation removes sandbox access and the export while retaining the origin and control grant. No diagnostic effect is claimed.",
+      "references": [
+        "doc/flatpak-document-unexport.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.ps",
+      "scenario": "equivalent-options-ps",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "session-bus",
+        "sandbox-execution",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Preserve running-instance enumeration with both diagnostic flags.",
+      "preconditions": "Independent live holding app with known launcher PID and environment.",
+      "expected": "Enumeration identifies the live process and loses it after public kill. No diagnostic effect is claimed.",
+      "references": [
+        "doc/flatpak-ps.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.enter",
+      "scenario": "equivalent-options-enter",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "session-bus",
+        "sandbox-execution",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Preserve entering a running sandbox with both diagnostic flags.",
+      "preconditions": "Independent live parent and child apps with controlled environment markers.",
+      "expected": "Entered probes observe the exact child marker only when its PID is exposed to the parent. No diagnostic effect is claimed.",
+      "references": [
+        "doc/flatpak-enter.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.kill",
+      "scenario": "equivalent-options-kill",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "session-bus",
+        "sandbox-execution",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Preserve instance termination with both diagnostic flags.",
+      "preconditions": "Independent live holding app verified by public enumeration.",
+      "expected": "Public kill stops the selected process and removes its instance row. No diagnostic effect is claimed.",
+      "references": [
+        "doc/flatpak-kill.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.info",
+      "scenario": "equivalent-options-info",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "sandbox-execution",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Preserve installed commit queries with verbose enabled throughout a real lifecycle.",
+      "preconditions": "Independent A/B app commits and runnable payloads.",
+      "expected": "Installed ref and commit queries follow the actual install/update/remove lifecycle. No verbose diagnostic effect is claimed.",
+      "references": [
+        "doc/flatpak-info.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.repo",
+      "scenario": "equivalent-options-repo",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "local-repository"
+      ],
+      "description": "Preserve public repository inspection with verbose enabled.",
+      "preconditions": "Independent repository with known refs, commits and metadata.",
+      "expected": "Repository branches, metadata and commit queries satisfy the independent assertions. No verbose diagnostic effect is claimed.",
+      "references": [
+        "doc/flatpak-repo.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.build-init",
+      "scenario": "equivalent-options-build-init",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Preserve build initialization metadata with verbose enabled.",
+      "preconditions": "Independent installed SDK/runtime and controlled tags and extension metadata.",
+      "expected": "Runtime, SDK, tags and extension directory retain their exact expected values. No verbose diagnostic effect is claimed.",
+      "references": [
+        "doc/flatpak-build-init.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.build-bundle",
+      "scenario": "equivalent-options-build-bundle",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Preserve bundle payload and origin contracts with verbose enabled.",
+      "preconditions": "Independent repository, exact app commit and controlled origin URL.",
+      "expected": "The generated bundle installs the known commit and retains the supplied update origin. No verbose diagnostic effect is claimed.",
+      "references": [
+        "doc/flatpak-build-bundle.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.build-sign",
+      "scenario": "equivalent-options-build-sign",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "local-repository"
+      ],
+      "description": "Preserve commit signing with verbose enabled.",
+      "preconditions": "Independent app commit and disposable signing material.",
+      "expected": "Signing preserves the commit checksum and passes independent public-key verification. No verbose diagnostic effect is claimed.",
+      "references": [
+        "doc/flatpak-build-sign.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.build-finish",
+      "scenario": "equivalent-options-build-finish",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "local-repository"
+      ],
+      "description": "Preserve build finalization metadata with OSTree verbosity enabled.",
+      "preconditions": "Independent unfinalized app with controlled metadata additions and removals.",
+      "expected": "Finalized command, runtime, SDK and extension metadata satisfy the original exact assertions. No OSTree diagnostic effect is claimed.",
+      "references": [
+        "doc/flatpak-build-finish.xml"
+      ]
+    },
+    {
+      "id": "equivalent-options.document-read",
+      "scenario": "equivalent-options-document-read",
+      "handler": "equivalent_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "session-bus",
+        "desktop-portals",
+        "sandbox",
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Exercise explicit allow-read as the default-equivalent document grant.",
+      "preconditions": "Private portal, FUSE, independent app and host file outside sandbox access.",
+      "expected": "The explicit grant permits the exact document bytes, denies writes and preserves the host origin. This flag selects the default and has no separate effect credit.",
+      "references": [
+        "doc/flatpak-document-export.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "equivalent-options.permissions",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent exact-row assertions remain active under the diagnostic flags.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.permissions.--verbose",
+          "rationale": "Ordinary enumeration remains correct; no diagnostic effect established."
+        },
+        {
+          "id": "cli.option.permissions.--ostree-verbose",
+          "rationale": "Ordinary enumeration remains correct; no OSTree effect established."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.permission-show",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent per-app permission assertions remain active.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.permission-show.--verbose",
+          "rationale": "Per-app query equivalence only."
+        },
+        {
+          "id": "cli.option.permission-show.--ostree-verbose",
+          "rationale": "Per-app query equivalence only."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.permission-set",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent D-Bus observers verify exact mutation and rejection outcomes.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.permission-set.--verbose",
+          "rationale": "Permission mutation equivalence only."
+        },
+        {
+          "id": "cli.option.permission-set.--ostree-verbose",
+          "rationale": "Permission mutation equivalence only."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.permission-remove",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent D-Bus observers verify selected removal and control preservation.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.permission-remove.--verbose",
+          "rationale": "Selected removal equivalence only."
+        },
+        {
+          "id": "cli.option.permission-remove.--ostree-verbose",
+          "rationale": "Selected removal equivalence only."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.permission-reset",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent D-Bus observers verify reset across tables and control preservation.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.permission-reset.--verbose",
+          "rationale": "App permission reset equivalence only."
+        },
+        {
+          "id": "cli.option.permission-reset.--ostree-verbose",
+          "rationale": "App permission reset equivalence only."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.document-export",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Actual sandbox reads and writes verify ordinary document permission semantics.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.document-export.--verbose",
+          "rationale": "Document grant enforcement equivalence only."
+        },
+        {
+          "id": "cli.option.document-export.--ostree-verbose",
+          "rationale": "Document grant enforcement equivalence only."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.documents",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Exact independent document ID sets verify ordinary filtering.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.documents.--verbose",
+          "rationale": "Document enumeration equivalence only."
+        },
+        {
+          "id": "cli.option.documents.--ostree-verbose",
+          "rationale": "Document enumeration equivalence only."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.document-info",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent document identities and changed grant sets verify ordinary queries.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.document-info.--verbose",
+          "rationale": "Document query equivalence only."
+        },
+        {
+          "id": "cli.option.document-info.--ostree-verbose",
+          "rationale": "Document query equivalence only."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.document-unexport",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Real access denial and control preservation verify ordinary revocation.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.document-unexport.--verbose",
+          "rationale": "Document revocation equivalence only."
+        },
+        {
+          "id": "cli.option.document-unexport.--ostree-verbose",
+          "rationale": "Document revocation equivalence only."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.ps",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Real live and terminated instances establish ordinary enumeration results.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.ps.--verbose",
+          "rationale": "Running-instance enumeration equivalence only."
+        },
+        {
+          "id": "cli.option.ps.--ostree-verbose",
+          "rationale": "Running-instance enumeration equivalence only."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.enter",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Real entered probes establish process visibility from inside the selected parent sandbox.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.enter.--verbose",
+          "rationale": "Entered probe output equivalence only."
+        },
+        {
+          "id": "cli.option.enter.--ostree-verbose",
+          "rationale": "Entered probe output equivalence only."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.kill",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Real process termination and disappearance from enumeration establish ordinary kill semantics.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.kill.--verbose",
+          "rationale": "Instance termination equivalence only."
+        },
+        {
+          "id": "cli.option.kill.--ostree-verbose",
+          "rationale": "Instance termination equivalence only."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.info",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Exact independent commit queries remain active throughout the lifecycle.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.info.--verbose",
+          "rationale": "Installed ref and commit query equivalence only."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.repo",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent repository inspection assertions remain active.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.repo.--verbose",
+          "rationale": "Repository query equivalence only."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.build-init",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Exact public build metadata verifies ordinary initialization.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.build-init.--verbose",
+          "rationale": "Build initialization output equivalence only."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.build-bundle",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Known commit and origin assertions verify ordinary bundle generation.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.build-bundle.--verbose",
+          "rationale": "Bundle payload and origin equivalence only."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.build-sign",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent signature verification remains active.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.build-sign.--verbose",
+          "rationale": "Signed commit equivalence only."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.build-finish",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Exact build metadata assertions remain active.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.build-finish.--ostree-verbose",
+          "rationale": "Build finalization metadata equivalence only."
+        }
+      ]
+    },
+    {
+      "behavior_id": "equivalent-options.document-read",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "The explicit default grant must still produce working read-only sandbox access.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.document-export.--allow-read",
+          "rationale": "Explicit default read permission grants exact file bytes and denies writes; no distinct effect from omission is claimed."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "These are ordinary-result contracts with the listed options applied. They permit diagnostic output, do not claim the options are universal no-ops, and never add effect-based interface or catalogued behavior credit."
+  ]
+}

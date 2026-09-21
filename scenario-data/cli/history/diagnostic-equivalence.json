@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "maintenance.history-equivalent",
+      "scenario": "maintenance-history-equivalent",
+      "handler": "maintenance_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "system",
+      "execution_environment": "root-userns",
+      "required_capabilities": [
+        "system-installation",
+        "user-installation",
+        "multiple-installations",
+        "local-repository",
+        "journal"
+      ],
+      "description": "Preserve real lifecycle history and filtering with both diagnostic flags.",
+      "preconditions": "Private real journal and disposable default, named and user installations with independent lifecycle changes.",
+      "expected": "The original chronological lifecycle, installation, reverse-order and time-filter assertions remain correct. No distinct diagnostic effect is claimed.",
+      "references": [
+        "doc/flatpak-history.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "maintenance.history-equivalent",
+      "driver": "cli",
+      "profile": "system",
+      "requirements": [],
+      "rationale": "The full independent lifecycle-history contract runs with both flags; actual nested history commands and their results are retained as CLI evidence.",
+      "equivalent_options": [
+        {
+          "id": "cli.option.history.--verbose",
+          "rationale": "Real journal query/filter equivalence only."
+        },
+        {
+          "id": "cli.option.history.--ostree-verbose",
+          "rationale": "Real journal query/filter equivalence only."
+        }
+      ]
+    }
+  ]
+}

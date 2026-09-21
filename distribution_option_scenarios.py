@@ -58,12 +58,24 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
         return
 
     if name not in {"distribution-options-sideload-install",
-                    "distribution-options-sideload-update"}:
+                    "distribution-options-sideload-update",
+                    "distribution-options-sideload-preinstall"}:
         raise ValueError(f"unknown distribution option scenario: {name}")
     build = fixture.get("build")
     if build is None:
         raise PrerequisiteError("signed collection repository and public key required")
     updating = name.endswith("-update")
+    preinstall = name.endswith("-preinstall")
+    if preinstall:
+        configured = driver.env.get("BLACKBOX_PREINSTALL_DIR")
+        if configured is None:
+            raise PrerequisiteError("an isolated vendor preinstall directory is required")
+        directory = Path(configured)
+        driver.check(directory.is_absolute() and directory.resolve().is_relative_to(driver.root),
+                     "vendor definitions must remain in isolated case state")
+        directory.mkdir(parents=True, exist_ok=True)
+        (directory / "sideload.preinstall").write_text(
+            f"[Flatpak Preinstall {fixture['app']}]\nBranch={fixture['branch']}\n")
     if updating and "sideload_update_repo" not in inputs:
         raise PrerequisiteError("independent signed sideload update input required")
     sources = driver.root / "sources"
@@ -86,8 +98,8 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
                 before_state[app] = build["usb_commits"]["app"]
                 server.version = "B"
             _state(driver, before_state)
-            command = "update" if updating else "install"
-            trailing = (app,) if updating else ("fixture", app)
+            command = "preinstall" if preinstall else "update" if updating else "install"
+            trailing = () if preinstall else (app,) if updating else ("fixture", app)
             sideload = inputs["sideload_update"] if updating else inputs["sideload"]
             commit = inputs["sideload_update_commit"] if updating else build["usb_commits"]["app"]
             server.fail_payloads = True

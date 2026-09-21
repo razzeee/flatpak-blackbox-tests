@@ -67,6 +67,23 @@ def coverage_rows(report: RunReport) -> list[tuple[str, str, str]]:
     return rows
 
 
+def option_accounting_rows(report: RunReport) -> list[tuple[str, str, str]]:
+    coverage = report.get("coverage")
+    accounting = coverage.get("cli_option_accounting") if coverage else None
+    if not accounting:
+        return []
+    verified = (coverage is not None and coverage["verification"]["status"] == "current"
+                and report.get("artifact_integrity", {}).get("status") == "verified")
+    rows = []
+    for label, metric in (("Equivalence checks", accounting["equivalence_checks"]),
+                          ("Accounted options", accounting["accounted"])):
+        passing = "unverified"
+        if verified and metric["passed"] is not None and metric["passed_percent"] is not None:
+            passing = f"{metric['passed']} ({metric['passed_percent']:.1f}%)"
+        rows.append((label, passing, str(metric["total"])))
+    return rows
+
+
 def slowest_cases(report: RunReport) -> list[CaseResult]:
     return sorted(
         (case for case in report.get("results", []) if "duration_seconds" in case
@@ -113,6 +130,10 @@ def github_summary(report: RunReport, status: int) -> str:
              ", ".join(f"{totals[key]} {label}" for key, (label, _) in _STATUSES.items()), "",
              "| Coverage | Passing | Total |", "| --- | ---: | ---: |"]
     lines.extend("| " + " | ".join(row) + " |" for row in coverage_rows(report))
+    if accounting := option_accounting_rows(report):
+        lines += ["", "Separate option inventory; equivalence is not behavioral coverage.", "",
+                  "| Inventory | Passing | Total |", "| --- | ---: | ---: |"]
+        lines.extend("| " + " | ".join(row) + " |" for row in accounting)
     lines.extend(["", "Full compatibility coverage is incomplete.", "",
                   "### Slowest selected cases", "",
                   "| Case | Driver | Status | Total | Setup | Execution | Cleanup |",
@@ -189,6 +210,10 @@ class ConsoleOutput:
         self.line("\nCoverage                    Passing           Total")
         for label, passing, total in coverage_rows(report):
             self.line(f"  {label:<24} {passing:>16} {total:>7}")
+        if accounting := option_accounting_rows(report):
+            self.line("\nOption inventory (equivalence is not behavioral coverage)")
+            for label, passing, total in accounting:
+                self.line(f"  {label:<24} {passing:>16} {total:>7}")
         self.line("\nSlowest selected cases:")
         self.line(f"  {'Status':<11} {'Driver':<{self.driver_width}} "
                   f"{'Case':<{self.case_width}}     Total     Setup Execution   Cleanup")

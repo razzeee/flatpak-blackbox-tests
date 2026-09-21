@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "remote-metadata.subset-modify",
+      "scenario": "remote-metadata-subset-modify",
+      "handler": "remote_metadata_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Select an unavailable subset and restore the ordinary remote catalogue.",
+      "preconditions": "Independent app/runtime remote with no subset of the chosen name.",
+      "expected": "The subset property persists, unresolved subset installation cannot fall back, and clearing the subset permits exact app/runtime installation.",
+      "references": [
+        "doc/flatpak-remote-modify.xml"
+      ]
+    },
+    {
+      "id": "remote-metadata.collection",
+      "scenario": "remote-metadata-collection",
+      "handler": "remote_metadata_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Persist changed remote collection IDs and install from the correctly bound signed collection.",
+      "preconditions": "Independent signed collection source and public key.",
+      "expected": "Two distinct collection IDs remain publicly queryable; the final correct ID permits exact verified app/runtime commits.",
+      "references": [
+        "doc/flatpak-remote-modify.xml"
+      ]
+    },
+    {
+      "id": "remote-metadata.update",
+      "scenario": "remote-metadata-update",
+      "handler": "remote_metadata_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Explicitly refresh independently published remote title and comment metadata.",
+      "preconditions": "Independent public OSTree summaries with distinct A/B title and comment values.",
+      "expected": "Ordinary modify retains A; update-metadata replaces it with exact B values without deploying refs.",
+      "references": [
+        "doc/flatpak-remote-modify.xml"
+      ]
+    },
+    {
+      "id": "remote-metadata.modify-no-redirect",
+      "scenario": "remote-metadata-modify-no-redirect",
+      "handler": "remote_metadata_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Persist a remote opt-out before a new redirect is published.",
+      "preconditions": "Independent source A and redirect destination B with distinct app commits.",
+      "expected": "Explicit opt-out preserves the source URL and installs A after metadata refresh advertises B.",
+      "references": [
+        "doc/flatpak-remote-modify.xml"
+      ]
+    },
+    {
+      "id": "remote-metadata.follow-redirect",
+      "scenario": "remote-metadata-follow-redirect",
+      "handler": "remote_metadata_option_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository"
+      ],
+      "description": "Re-enable summary redirection after explicitly pinning a remote URL.",
+      "preconditions": "Independent A source and B redirect destination; explicit URL initially prevents following.",
+      "expected": "Follow-redirect changes the public remote URL to B and installs the exact independent B app commit.",
+      "references": [
+        "doc/flatpak-remote-modify.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "remote-metadata.subset-modify",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Public subset persistence, rejection without fallback and successful clear distinguish the setting.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-modify.--subset",
+          "rationale": "An absent subset blocks otherwise installable refs until explicitly cleared."
+        }
+      ]
+    },
+    {
+      "behavior_id": "remote-metadata.collection",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Exact distinct collection properties and final verified deployment establish the selected remote identity.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-modify.--collection-id",
+          "rationale": "Explicit changes persist the exact independent collection identity."
+        }
+      ]
+    },
+    {
+      "behavior_id": "remote-metadata.update",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Independent summary metadata changes distinguish refresh from a cached no-op.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-modify.--update-metadata",
+          "rationale": "Explicit refresh changes both public metadata fields from independent A to B values."
+        }
+      ]
+    },
+    {
+      "behavior_id": "remote-metadata.modify-no-redirect",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "The configured URL and installed independent commit distinguish redirect refusal from following.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-modify.--no-follow-redirect",
+          "rationale": "Persisted opt-out retains the source URL and A payload despite a newly published B redirect."
+        }
+      ]
+    },
+    {
+      "behavior_id": "remote-metadata.follow-redirect",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "A pinned-URL control is followed by an explicit opt-in with a different public URL and independent commit.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-modify.--follow-redirect",
+          "rationale": "Opt-in enables redirection that an explicitly pinned URL had prevented."
+        }
+      ]
+    }
+  ]
+}

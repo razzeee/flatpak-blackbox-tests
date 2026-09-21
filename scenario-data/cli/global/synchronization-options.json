@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "build-sync.export",
+      "scenario": "build-sync-build-export",
+      "handler": "build_diagnostic_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "local-repository"
+      ],
+      "description": "Observe disabled filesystem synchronization during export without changing public content.",
+      "preconditions": "Independent finished app, recreated empty repositories and syscall tracing available.",
+      "expected": "The flag reduces real successful fsync/fdatasync calls between matching ordinary controls while metadata, executable bytes, stdout and repository integrity remain correct.",
+      "references": [
+        "doc/flatpak-build-export.xml"
+      ]
+    },
+    {
+      "id": "build-sync.commit",
+      "scenario": "build-sync-build-commit-from",
+      "handler": "build_diagnostic_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "local-repository"
+      ],
+      "description": "Observe disabled filesystem synchronization during promotion without changing public content.",
+      "preconditions": "Independent app source, recreated empty destinations and syscall tracing available.",
+      "expected": "The flag reduces real successful sync calls between matching ordinary controls while independent metadata and executable bytes remain correct and repositories pass integrity checks.",
+      "references": [
+        "doc/flatpak-build-commit-from.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "build-sync.export",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Out-of-band syscall traces establish synchronization changes separately from independent output correctness.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-export.--disable-fsync",
+          "rationale": "The flag reduces real sync syscalls while preserving the exported content."
+        }
+      ]
+    },
+    {
+      "behavior_id": "build-sync.commit",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Out-of-band syscall traces establish synchronization changes separately from public promoted content.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.build-commit-from.--disable-fsync",
+          "rationale": "The flag reduces real sync syscalls while preserving promoted content."
+        }
+      ]
+    }
+  ]
+}
