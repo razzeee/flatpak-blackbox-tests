@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 import { Chart } from "@tanstack/charts/react";
 import { useMemo, useState } from "react";
-import { performanceChart } from "./chart.ts";
+import { outcomeChart, performanceChart } from "./chart.ts";
 import { utcDay, type Snapshot } from "./history.ts";
 import { seconds } from "./format.ts";
 import { RunDiagnostics, focusSection } from "./RunDiagnostics.tsx";
@@ -18,6 +18,8 @@ import {
 } from "./runComparison.ts";
 import {
   runOutcomes,
+  outcomeNames,
+  outcomeSeries,
   timingNames,
   timingSeries,
   verifiedPerformance,
@@ -89,6 +91,9 @@ export function PerformancePanel({
   const hasRunTiming = entries.some(
     (entry) => verifiedPerformance(entry)?.duration_seconds !== undefined,
   );
+  const hasOutcomes = entries.some(
+    (entry) => verifiedPerformance(entry)?.case_statuses !== undefined,
+  );
   return (
     <section className="chart-section" aria-label="Performance">
       <h2>Performance</h2>
@@ -107,6 +112,25 @@ export function PerformancePanel({
       ) : (
         <p className="empty">No run timings recorded yet.</p>
       )}
+      <h3>Case outcomes</h3>
+      <p>Daily counts by outcome, including cases that did not run.</p>
+      {hasOutcomes ? (
+        <Chart
+          definition={outcomeChart(entries)}
+          height={300}
+          ariaLabel="Daily case outcomes"
+        />
+      ) : (
+        <p className="empty">No case outcomes recorded yet.</p>
+      )}
+      <ul className="legend" aria-label="Outcome series">
+        {outcomeNames.map((name) => (
+          <li key={name}>
+            <span style={{ background: outcomeSeries[name].color }} />
+            {outcomeSeries[name].label}
+          </li>
+        ))}
+      </ul>
       <RunDiagnostics
         run={run}
         reference={reference}

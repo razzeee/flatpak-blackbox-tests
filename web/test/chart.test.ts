@@ -6,8 +6,9 @@ import type { SceneNode } from "@tanstack/charts/types";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { App } from "../src/App.tsx";
-import { coverageChart } from "../src/chart.ts";
-import { entry } from "./fixtures.ts";
+import { coverageChart, outcomeChart } from "../src/chart.ts";
+import { outcomeRows } from "../src/performance.ts";
+import { completeEntry, entry } from "./fixtures.ts";
 
 function flatten(nodes: readonly SceneNode[]): SceneNode[] {
   return nodes.flatMap((node) =>
@@ -49,6 +50,62 @@ test("single-day and hidden-series charts have finite coordinates", () => {
     assert.deepEqual(scene.scales.y?.domain, [0, 100]);
     assert.ok(scene.scales.x?.domain.every((value) => Number.isFinite(value)));
   }
+});
+
+test("outcome rows preserve status counts and missing-day gaps", () => {
+  const rows = outcomeRows([
+    completeEntry("2026-09-17T21:00:00Z", [
+      {
+        behavior_id: "passed",
+        driver: "cli",
+        profile: "user",
+        status: "passed",
+      },
+      {
+        behavior_id: "failed",
+        driver: "cli",
+        profile: "user",
+        status: "failed",
+      },
+    ]),
+    completeEntry("2026-09-19T21:00:00Z", [
+      {
+        behavior_id: "skipped",
+        driver: "cli",
+        profile: "user",
+        status: "not-selected",
+      },
+    ]),
+  ]);
+  const passed = rows.filter((row) => row.status === "passed");
+  assert.deepEqual(
+    passed.map((row) => [row.date, row.count]),
+    [
+      ["2026-09-17", 1],
+      ["", null],
+      ["2026-09-19", 0],
+    ],
+  );
+  assert.equal(
+    rows.find((row) => row.status === "failed" && row.date === "2026-09-17")
+      ?.count,
+    1,
+  );
+});
+
+test("outcome chart renders finite stacked coordinates", () => {
+  const scene = createChartScene(
+    outcomeChart([
+      completeEntry("2026-09-17T21:00:00Z", []),
+      completeEntry("2026-09-19T21:00:00Z", []),
+    ]),
+    { width: 700, height: 300 },
+  );
+  assert.ok(
+    scene.points.every(
+      (point) => Number.isFinite(point.x) && Number.isFinite(point.y),
+    ),
+  );
 });
 
 test("counts retain denominator changes and React escapes metadata", () => {
