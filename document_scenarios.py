@@ -83,7 +83,7 @@ def _permissions(driver: Driver, document: Path, origin: Path,
 
 
 def _rows(driver: Driver, expected: set[tuple[str, str]], *apps: str) -> None:
-    output = driver.cli_success("documents", *apps)
+    output = driver.cli_success("documents", "--columns=id,origin", *apps)
     rows = [tuple(line.split("\t")) for line in output.splitlines()]
     driver.check(len(rows) == len(expected) and set(rows) == expected,
                  f"document rows: expected {expected!r}, got {rows!r}")
