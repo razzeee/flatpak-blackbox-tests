@@ -10,6 +10,7 @@ import {
 } from "../src/history.ts";
 import { optionalJson, readJson, record } from "./record.ts";
 import { withBaseline } from "../src/targets.ts";
+import { correctSnapshot } from "./corrections.ts";
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
@@ -40,7 +41,7 @@ async function save(path: string, value: unknown) {
 
 try {
   if (positionals.length !== 1)
-    throw new Error("Usage: history record|update [options]");
+    throw new Error("Usage: history record|update|migrate [options]");
   if (positionals[0] === "record") {
     const output = required("output");
     await save(
@@ -59,9 +60,21 @@ try {
     const existing = await optionalJson(path);
     const history = historySchema.parse(existing === undefined ? [] : existing);
     const snapshot = snapshotSchema.parse(await readJson(required("snapshot")));
-    await save(path, daily(history, snapshot).map(withBaseline));
+    await save(
+      path,
+      daily(history, snapshot).map(correctSnapshot).map(withBaseline),
+    );
+  } else if (positionals[0] === "migrate") {
+    const path = required("history");
+    const history = historySchema.parse(await readJson(path));
+    const corrected = history.map(correctSnapshot);
+    const changed = corrected.filter(
+      (item, index) => item !== history[index],
+    ).length;
+    await save(values.output ?? path, corrected);
+    console.error(`Corrected ${changed} coverage snapshots`);
   } else {
-    throw new Error("Usage: history record|update [options]");
+    throw new Error("Usage: history record|update|migrate [options]");
   }
 } catch (error) {
   console.error(

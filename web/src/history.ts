@@ -108,6 +108,14 @@ export const snapshotSchema = z
     fingerprint: z.string(),
     metrics: z.record(z.string(), metricSchema),
     performance: performanceSchema.optional(),
+    corrections: z
+      .array(
+        z.object({
+          id: z.string(),
+          changed_cases: z.number().int().positive(),
+        }),
+      )
+      .optional(),
   })
   .refine(
     (entry) =>

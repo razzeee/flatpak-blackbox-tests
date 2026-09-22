@@ -13,6 +13,7 @@ import {
 } from "../src/history.ts";
 import { findBaseline } from "../src/baselines.ts";
 import { diagnosticCase } from "./diagnostics.ts";
+import { correctSnapshot } from "./corrections.ts";
 
 export async function readJson(path: string): Promise<unknown> {
   return JSON.parse(await readFile(path, "utf8"));
@@ -112,21 +113,23 @@ export async function record(options: RecordOptions): Promise<Snapshot> {
       };
     }
   }
-  return snapshotSchema.parse({
-    schema: 1,
-    track: options.track,
-    timestamp: new Date(
-      timestampSchema.parse(report?.finished_at ?? options.timestamp),
-    ).toISOString(),
-    complete: report?.complete ?? false,
-    verification: summary.verification.status,
-    suite_commit: options.suiteCommit,
-    target_commit: options.targetCommit,
-    baseline,
-    target_version: report?.target_version,
-    run_url: options.runUrl,
-    fingerprint: summary.definition.fingerprint,
-    metrics: { ...summary.metrics.behaviors, ...summary.metrics.surfaces },
-    performance,
-  });
+  return correctSnapshot(
+    snapshotSchema.parse({
+      schema: 1,
+      track: options.track,
+      timestamp: new Date(
+        timestampSchema.parse(report?.finished_at ?? options.timestamp),
+      ).toISOString(),
+      complete: report?.complete ?? false,
+      verification: summary.verification.status,
+      suite_commit: options.suiteCommit,
+      target_commit: options.targetCommit,
+      baseline,
+      target_version: report?.target_version,
+      run_url: options.runUrl,
+      fingerprint: summary.definition.fingerprint,
+      metrics: { ...summary.metrics.behaviors, ...summary.metrics.surfaces },
+      performance,
+    }),
+  );
 }

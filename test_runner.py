@@ -455,6 +455,50 @@ elif command not in ('remote-add', 'list'):
             else:
                 self.assertEqual([case["duration_seconds"] for case in selected], [2.0, 2.0])
 
+    def test_library_build_failures_are_setup_errors_without_case_execution(self) -> None:
+        self.execute()
+        for index, error in enumerate((ValueError("public library client did not compile: broken"),
+                                       run.ContractFailure("compiler timed out"))):
+            output = self.root / f"compile-error-{index}"
+            argv = [str(RUNNER), "--target", str(self.target), "--fixtures", str(self.fixtures),
+                    "--output", str(output), "--driver", "library"]
+            with self.subTest(error=error), patch.object(sys, "argv", argv), \
+                    redirect_stdout(StringIO()), \
+                    patch.object(run, "build_client", side_effect=error), \
+                    patch.object(tempfile, "mkdtemp") as allocation:
+                self.assertEqual(run.main(), 1)
+                allocation.assert_not_called()
+            report = json.loads((output / "report.json").read_text())
+            selected = [case for case in report["results"] if case["status"] != "not-selected"]
+            self.assertGreater(len(selected), 1)
+            self.assertTrue(all(case["status"] == "setup-error" and case["error"] == str(error)
+                                and not case["evidence"] for case in selected))
+
+    def test_missing_api_only_blocks_its_dependent_scenario(self) -> None:
+        self.execute()
+        target = json.loads(self.target.read_text())
+        target["library"] = {"runtime_library_dirs": [str(self.root)]}
+        self.target.write_text(json.dumps(target))
+        for name in ("tx-rate", "tx-progress"):
+            output = self.root / name
+            argv = [str(RUNNER), "--target", str(self.target), "--fixtures", str(self.fixtures),
+                    "--output", str(output), "--driver", "library", "--scenario", name]
+            with patch.object(sys, "argv", argv), redirect_stdout(StringIO()), \
+                    patch.object(run, "build_client", return_value=self.root / "client"), \
+                    patch("transaction_scenarios.run") as handler:
+                run.main()
+                self.assertEqual(handler.call_count, 0 if name == "tx-rate" else 1)
+            report = json.loads((output / "report.json").read_text())
+            selected = next(case for case in report["results"] if case["status"] != "not-selected")
+            self.assertEqual(selected["status"], "unsupported" if name == "tx-rate" else "passed")
+            if name == "tx-rate":
+                self.assertIn("flatpak_transaction_progress_get_bytes_per_second",
+                              selected["error"])
+                self.assertEqual(selected["evidence"], [])
+                self.assertEqual(
+                    report["coverage"]["metrics"]["surfaces"]["library-function"]["passed"], 0,
+                )
+
     def test_failed_state_allocation_still_finalizes_case_timing(self) -> None:
         self.execute()
         now = 10.0

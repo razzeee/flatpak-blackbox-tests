@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: LGPL-2.1-or-later */
 #include "client-extension.h"
+#include "blackbox-features.h"
 #include <stdint.h>
 #include <string.h>
 
@@ -163,11 +164,15 @@ changed (FlatpakTransactionProgress *progress, Trace *trace)
   trace->changed++;
   if (strcmp (trace->mode, "rate") == 0 && start > 0)
     {
+#if BLACKBOX_HAVE_FLATPAK_TRANSACTION_PROGRESS_GET_BYTES_PER_SECOND
       uint64_t rate = CALL_API (flatpak_transaction_progress_get_bytes_per_second, progress);
       uint64_t elapsed = (uint64_t) g_get_monotonic_time () - start;
       if (elapsed < G_USEC_PER_SEC)
         g_assert_cmpuint (rate, ==, 0);
       g_print ("rate\t%" G_GUINT64_FORMAT "\t%" G_GUINT64_FORMAT "\n", elapsed, rate);
+#else
+      g_error ("rate scenario requires flatpak_transaction_progress_get_bytes_per_second");
+#endif
     }
   if (trace->status == NULL)
     {
