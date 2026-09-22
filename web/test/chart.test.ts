@@ -83,7 +83,7 @@ test("outcome rows preserve status counts and missing-day gaps", () => {
     [
       ["2026-09-17", 1],
       ["", null],
-      ["2026-09-19", 0],
+      ["2026-09-19", null],
     ],
   );
   assert.equal(
@@ -91,6 +91,13 @@ test("outcome rows preserve status counts and missing-day gaps", () => {
       ?.count,
     1,
   );
+});
+
+test("outcome rows preserve unverified-day gaps", () => {
+  const rows = outcomeRows([
+    { ...completeEntry("2026-09-17T21:00:00Z", []), verification: "stale" },
+  ]);
+  assert.ok(rows.every((row) => row.count === null));
 });
 
 test("outcome chart renders finite stacked coordinates", () => {

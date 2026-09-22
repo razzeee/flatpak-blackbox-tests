@@ -86,7 +86,7 @@ export function outcomeRows(entries: readonly Snapshot[]) {
       date,
       status,
       count: entry
-        ? (verifiedPerformance(entry)?.case_statuses[status] ?? 0)
+        ? (verifiedPerformance(entry)?.case_statuses[status] ?? null)
         : null,
       label: outcomeSeries[status].label,
     })),
