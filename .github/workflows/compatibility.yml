@@ -17,15 +17,62 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: compatibility-${{ github.event_name == 'schedule' && 'upstream-main' || github.event.pull_request.number || github.ref }}-${{ inputs.baseline || 'current' }}
-  cancel-in-progress: true
-
 jobs:
+  prepare:
+    name: Prepare compatibility matrix
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - name: Check out suite
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Generate compatibility matrix
+        id: matrix
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASELINE: ${{ inputs.baseline }}
+        run: |
+          node <<'NODE' >> "$GITHUB_OUTPUT"
+          const fs = require("node:fs");
+          const config = JSON.parse(fs.readFileSync("ci/baselines.json", "utf8"));
+          const baselines = config.baselines;
+          const selector = process.env.BASELINE;
+
+          function resolveBaseline(value) {
+            if (!value) return baselines.find((item) => item.commit === config.current);
+            const byCommit = baselines.find((item) => item.commit === value);
+            if (byCommit) return byCommit;
+            const matches = baselines.filter((item) => item.version === value);
+            if (matches.length === 1) return matches[0];
+            throw new Error(`Unknown or ambiguous baseline: ${value}`);
+          }
+
+          const entries = process.env.EVENT_NAME === "schedule"
+            ? [
+                ...baselines.map((baseline) => ({
+                  track: "pinned",
+                  baseline: baseline.commit,
+                })),
+                { track: "upstream", baseline: "" },
+              ]
+            : [{ track: "pinned", baseline: resolveBaseline(selector).commit }];
+          console.log(`matrix=${JSON.stringify({ include: entries })}`);
+          NODE
+
   compatibility:
-    name: ${{ github.event_name == 'schedule' && 'Full suite against upstream main' || 'Full suite against pinned baseline' }}
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    name: ${{ matrix.track == 'upstream' && 'Full suite against upstream main' || format('Full suite against pinned baseline {0}', matrix.baseline) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    concurrency:
+      group: compatibility-${{ matrix.track }}-${{ matrix.baseline || 'upstream' }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     env:
       # Both ordinary test users must be able to traverse the build and fixture paths.
       BB_CI_ROOT: /tmp/bb-compat
@@ -48,14 +95,14 @@ jobs:
         run: npm --prefix web ci
 
       - name: Select pinned baseline
-        if: github.event_name != 'schedule'
+        if: matrix.track == 'pinned'
         env:
-          BASELINE: ${{ inputs.baseline }}
+          BASELINE: ${{ matrix.baseline }}
         run: |
           npm --prefix web run --silent baseline -- --baseline "$BASELINE" >> "$GITHUB_ENV"
 
       - name: Resolve latest upstream main
-        if: github.event_name == 'schedule'
+        if: matrix.track == 'upstream'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -112,33 +159,30 @@ jobs:
       - name: Record daily coverage snapshot
         if: always() && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event_name != 'pull_request'
         env:
-          EVENT_NAME: ${{ github.event_name }}
+          TRACK: ${{ matrix.track }}
           SUITE_COMMIT: ${{ github.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          track=pinned
-          if [[ "$EVENT_NAME" == schedule ]]; then
-            track=upstream
-          fi
           npm --prefix web run history -- record \
             --report "$BB_CI_ROOT/results/report.json" \
-            --track "$track" --timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --track "$TRACK" --timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             --suite-commit "$SUITE_COMMIT" --target-commit "$FLATPAK_REFERENCE_COMMIT" \
-            --run-url "$RUN_URL" --output "$RUNNER_TEMP/coverage-snapshot.json"
+            --run-url "$RUN_URL" \
+            --output "$RUNNER_TEMP/coverage-snapshot-${TRACK}-${{ matrix.baseline || 'upstream' }}.json"
 
       - name: Upload daily coverage snapshot
         if: always() && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event_name != 'pull_request'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: coverage-snapshot
-          path: ${{ runner.temp }}/coverage-snapshot.json
+          name: coverage-snapshot-${{ matrix.track }}-${{ matrix.baseline || 'upstream' }}
+          path: ${{ runner.temp }}/coverage-snapshot-${{ matrix.track }}-${{ matrix.baseline || 'upstream' }}.json
           if-no-files-found: error
 
       - name: Upload reports and diagnostic logs
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: compatibility-${{ github.run_id }}-${{ github.run_attempt }}
+          name: compatibility-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.track }}-${{ matrix.baseline || 'upstream' }}
           retention-days: 14
           if-no-files-found: warn
           # Deliberately select evidence files, not fixtures, keys or build trees.
@@ -173,10 +217,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Download snapshot
+      - name: Download snapshots
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          name: coverage-snapshot
+          pattern: coverage-snapshot-*
+          merge-multiple: true
           path: ${{ runner.temp }}/coverage-input
 
       - name: Set up Node
@@ -209,9 +254,11 @@ jobs:
 
       - name: Update daily history and generate charts
         run: |
-          npm --prefix web run history -- update \
-            --snapshot "$RUNNER_TEMP/coverage-input/coverage-snapshot.json" \
-            --history "$GITHUB_WORKSPACE/coverage-site/history.json"
+          for snapshot in "$RUNNER_TEMP"/coverage-input/coverage-snapshot-*.json; do
+            npm --prefix web run history -- update \
+              --snapshot "$snapshot" \
+              --history "$GITHUB_WORKSPACE/coverage-site/history.json"
+          done
           cp coverage-site/history.json web/public/history.json
           npm --prefix web run build
 
