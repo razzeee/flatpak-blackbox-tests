@@ -8,6 +8,7 @@ try {
   // Version and commit are validated before becoming GitHub Actions env values.
   console.log(`FLATPAK_REFERENCE_COMMIT=${baseline.commit}`);
   console.log(`FLATPAK_BASELINE_VERSION=${baseline.version}`);
+  console.log(`FLATPAK_BASELINE_REF=${baseline.ref}`);
 } catch (error) {
   console.error(
     `baseline: ${error instanceof Error ? error.message : String(error)}`,

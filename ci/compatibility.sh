@@ -4,7 +4,7 @@
 set -euo pipefail
 
 : "${BB_CI_ROOT:?Set BB_CI_ROOT to a new absolute work directory}"
-phase=${1:?Usage: bash ci/compatibility.sh init|host|build|probe|prepare|system|run|cleanup|summary}
+phase=${1:?Usage: bash ci/compatibility.sh init|host|checkout|build|probe|prepare|system|run|cleanup|summary}
 if [[ "$phase" = summary ]]; then
     # This must also work when init, dependencies, or the runner failed early.
     # Actions assigns a different summary path to each step; use the delivery marker.
@@ -15,9 +15,11 @@ if [[ "$phase" = summary ]]; then
     exit 0
 fi
 : "${TMPDIR:?Set TMPDIR to a short absolute temporary directory}"
-: "${FLATPAK_REFERENCE_COMMIT:?Set the exact upstream commit}"
+if [[ "$phase" != init && "$phase" != host && "$phase" != checkout ]]; then
+    : "${FLATPAK_REFERENCE_COMMIT:?Set the resolved upstream commit}"
+    [[ "$FLATPAK_REFERENCE_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+fi
 [[ "$BB_CI_ROOT" = /* && "$TMPDIR" = /* ]]
-[[ "$FLATPAK_REFERENCE_COMMIT" =~ ^[0-9a-f]{40}$ ]]
 [[ $EUID -ne 0 ]] || { printf 'Run this script as an ordinary user.\n' >&2; exit 1; }
 
 suite=$(pwd -P)
@@ -62,12 +64,36 @@ host() {
     dpkg-query -W > "$BB_CI_ROOT/logs/packages.txt"
 }
 
-build() {
-    printf '%s\n' "$FLATPAK_REFERENCE_COMMIT" > "$BB_CI_ROOT/logs/reference-commit.txt"
+checkout() {
+    : "${FLATPAK_BASELINE_REF:?Select a full tag or branch ref}"
+    git check-ref-format "$FLATPAK_BASELINE_REF"
+    case "$FLATPAK_BASELINE_REF" in
+        refs/tags/*)
+            [[ "${FLATPAK_REFERENCE_COMMIT:-}" =~ ^[0-9a-f]{40}$ ]] || {
+                printf 'Tag baselines require an expected commit.\n' >&2; return 1;
+            } ;;
+        refs/heads/*) ;;
+        *) printf 'Select refs/tags/... or refs/heads/...\n' >&2; return 1 ;;
+    esac
     git init "$source_dir"
     git -C "$source_dir" remote add origin https://github.com/flatpak/flatpak.git
-    git -C "$source_dir" fetch --depth=1 origin "$FLATPAK_REFERENCE_COMMIT"
-    git -C "$source_dir" checkout --detach FETCH_HEAD
+    git -C "$source_dir" fetch --depth=1 origin "$FLATPAK_BASELINE_REF"
+    local commit
+    commit=$(git -C "$source_dir" rev-parse --verify 'FETCH_HEAD^{commit}')
+    if [[ "$FLATPAK_BASELINE_REF" == refs/tags/* && "$commit" != "$FLATPAK_REFERENCE_COMMIT" ]]; then
+        printf 'Tag %s resolves to %s; expected %s\n' \
+            "$FLATPAK_BASELINE_REF" "$commit" "$FLATPAK_REFERENCE_COMMIT" >&2
+        return 1
+    fi
+    git -C "$source_dir" checkout --detach "$commit"
+    printf '%s\n' "$commit" > "$BB_CI_ROOT/logs/reference-commit.txt"
+    printf '%s\n' "$FLATPAK_BASELINE_REF" > "$BB_CI_ROOT/logs/reference-ref.txt"
+    if [[ -n "${GITHUB_ENV:-}" ]]; then
+        printf 'FLATPAK_REFERENCE_COMMIT=%s\n' "$commit" >> "$GITHUB_ENV"
+    fi
+}
+
+build() {
     [[ $(git -C "$source_dir" rev-parse HEAD) = "$FLATPAK_REFERENCE_COMMIT" ]]
     # Meson fetches subprojects at the revisions in this commit's wrap files.
     # Use the bundled bubblewrap required by the selected Flatpak source.
@@ -176,7 +202,7 @@ cleanup() {
 }
 
 case "$phase" in
-    host|build|probe|prepare|system|run|cleanup)
+    host|checkout|build|probe|prepare|system|run|cleanup)
         # pipefail keeps setup errors and failed compatibility checks fatal.
         "$phase" 2>&1 | tee "$BB_CI_ROOT/logs/$phase.log"
         ;;

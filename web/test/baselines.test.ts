@@ -30,7 +30,11 @@ import {
 } from "../src/targets.ts";
 import { entry, timedEntry } from "./fixtures.ts";
 
-const nextBaseline: Baseline = { version: "1.20.0", commit: "c".repeat(40) };
+const nextBaseline: Baseline = {
+  version: "1.20.0",
+  commit: "c".repeat(40),
+  ref: "refs/tags/1.20.0",
+};
 
 function forBaseline(baseline: Baseline, timestamp?: string): Snapshot {
   return {
@@ -58,6 +62,15 @@ test("baseline configuration requires a known current pin and unique safe defini
       baselines: [{ ...currentBaseline, version: "1.19.1\nENV=bad" }],
     }),
   );
+  assert.throws(() =>
+    baselineConfigSchema.parse({
+      ...baselineConfig,
+      current: nextBaseline.commit,
+      baselines: [
+        { version: nextBaseline.version, commit: nextBaseline.commit },
+      ],
+    }),
+  );
   const upgraded = baselineConfigSchema.parse({
     schema: 1,
     current: nextBaseline.commit,
@@ -80,7 +93,7 @@ test("manual baseline selection resolves current, release version and exact comm
   );
   assert.equal(
     output,
-    `FLATPAK_REFERENCE_COMMIT=${currentBaseline.commit}\nFLATPAK_BASELINE_VERSION=${currentBaseline.version}\n`,
+    `FLATPAK_REFERENCE_COMMIT=${currentBaseline.commit}\nFLATPAK_BASELINE_VERSION=${currentBaseline.version}\nFLATPAK_BASELINE_REF=${currentBaseline.ref}\n`,
   );
   const invalid = spawnSync(
     process.execPath,
@@ -180,6 +193,22 @@ test("changing the active baseline keeps version-labelled historical choices", (
   );
 });
 
+test("archived baselines without refs remain readable after an upgrade", () => {
+  const archived = {
+    version: "1.19.1",
+    commit: "1a6ec6a1f720fb30d76c76e656ac624fcaa237e9",
+  };
+  const snapshot = forBaseline(archived);
+  assert.deepEqual(snapshotSchema.parse(snapshot).baseline, archived);
+  assert.match(
+    targetOptions([snapshot]).find((item) => item.key === targetKey(snapshot))!
+      .label,
+    /1.19.1/,
+  );
+  assert.throws(() => resolveBaseline(archived.version), /Unknown baseline/);
+  assert.throws(() => resolveBaseline(archived.commit), /Unknown baseline/);
+});
+
 test("snapshots reject baseline metadata attached to another target", () => {
   assert.throws(() =>
     snapshotSchema.parse({ ...entry(), baseline: nextBaseline }),
@@ -196,7 +225,11 @@ test("history updates migrate legacy labels and retain same-day baseline compari
   delete old.baseline;
   delete old.target_version;
   const next = forBaseline(nextBaseline);
-  await writeFile(historyPath, JSON.stringify([old]));
+  const archived = forBaseline({
+    version: "1.19.1",
+    commit: "1a6ec6a1f720fb30d76c76e656ac624fcaa237e9",
+  });
+  await writeFile(historyPath, JSON.stringify([old, archived]));
   await writeFile(snapshotPath, JSON.stringify(next));
   execFileSync(process.execPath, [
     "--import",
@@ -211,7 +244,11 @@ test("history updates migrate legacy labels and retain same-day baseline compari
   const saved = historySchema.parse(
     JSON.parse(await readFile(historyPath, "utf8")),
   );
-  assert.equal(saved.length, 2);
+  assert.equal(saved.length, 3);
+  assert.deepEqual(
+    saved.find((item) => item.target_commit === archived.target_commit),
+    archived,
+  );
   assert.deepEqual(
     saved.find((item) => item.target_commit === old.target_commit),
     withBaseline(old),

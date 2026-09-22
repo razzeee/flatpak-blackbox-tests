@@ -29,10 +29,18 @@ commands, with a 4,000-character field limit and a 24,000-character budget per
 case. Truncated output is labelled; the CI link leads to the full report artifacts
 while they remain available. Older snapshots without diagnostics say so.
 
-The active baseline is configured in `ci/baselines.json`. Add a version/commit pair
-and update `current` when upgrading; retain older definitions for historical labels.
-Manual runs accept a baseline version or commit. Compare old and new baselines
-using the same suite revision; their daily coverage and timings stay separate.
+The active baseline is configured in `ci/baselines.json`. Add a release tag head
+and update `current` when upgrading; retain older definitions for historical
+labels. The separate upstream track follows the `main` branch. Manual runs accept
+a configured tag version or its exact resolved commit. Compare old and new
+baselines using the same suite revision; their daily coverage and timings stay
+separate.
+
+CI fetches the selected full Git ref once and resolves it to a commit before
+building. Tag heads must match their configured commit (annotated and lightweight
+tags are supported); branches resolve to their current head. Reports record the
+exact checked-out commit. Archived snapshots remain readable after their baseline
+is removed from the active configuration.
 
 ## Requirements
 
