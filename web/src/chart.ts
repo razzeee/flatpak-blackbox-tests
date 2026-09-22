@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 import { lineY } from "@tanstack/charts/line";
+import { areaY } from "@tanstack/charts/area";
 import { scaleLinear } from "@tanstack/charts/scales/linear";
 import { defineChart } from "@tanstack/charts/scene";
+import { stack } from "@tanstack/charts/stack";
 import { tooltip } from "@tanstack/charts/tooltip";
 import {
   chartRows,
@@ -11,7 +13,13 @@ import {
   type Series,
   type Snapshot,
 } from "./history.ts";
-import { timingRows, timingSeries, timingNames } from "./performance.ts";
+import {
+  outcomeRows,
+  outcomeSeries,
+  timingRows,
+  timingSeries,
+  timingNames,
+} from "./performance.ts";
 
 function dateScale(entries: readonly Snapshot[]) {
   const days = entries.map(
@@ -119,6 +127,50 @@ export function performanceChart(entries: readonly Snapshot[], key?: string) {
             ({ datum }) => `${datum.label}: ${datum.seconds?.toFixed(2)}s`,
           ),
         ].join("\n"),
+    },
+  });
+}
+
+export function outcomeChart(entries: readonly Snapshot[]) {
+  const rows = outcomeRows(entries);
+  const totals = new Map<number, number>();
+  for (const row of rows) {
+    if (row.count !== null)
+      totals.set(row.day, (totals.get(row.day) ?? 0) + row.count);
+  }
+  const maximum = Math.max(1, ...totals.values());
+  return defineChart({
+    marks: [
+      areaY(rows, {
+        x: "day",
+        y: "count",
+        z: "status",
+        key: "date",
+        fill: (row) => outcomeSeries[row.status].color,
+        stroke: (row) => outcomeSeries[row.status].color,
+        fillOpacity: 0.8,
+        layout: stack(),
+      }),
+    ],
+    scales: {
+      x: dateScale(entries),
+      y: {
+        scale: scaleLinear().domain([0, maximum]),
+        nice: true,
+        grid: true,
+        axis: { ticks: { count: 5, format: (value) => `${value}` } },
+      },
+    },
+    focus: "group-x",
+    tooltip: {
+      use: tooltip,
+      formatGroup: (points) =>
+        points
+          .map(
+            ({ datum }) =>
+              `${datum.date}: ${datum.label} ${datum.count ?? "No data"}`,
+          )
+          .join("\n"),
     },
   });
 }

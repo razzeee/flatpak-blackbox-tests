@@ -1,5 +1,24 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
-import { dailyEntries, type CaseTiming, type Snapshot } from "./history.ts";
+import {
+  dailyEntries,
+  type CaseStatus,
+  type CaseTiming,
+  type Snapshot,
+} from "./history.ts";
+
+export const outcomeSeries = {
+  passed: { label: "Passed", color: "var(--green)" },
+  failed: { label: "Failed", color: "var(--red)" },
+  "setup-error": { label: "Setup error", color: "var(--orange)" },
+  "unmet-prerequisite": {
+    label: "Unmet prerequisite",
+    color: "var(--yellow)",
+  },
+  unsupported: { label: "Unsupported", color: "var(--purple)" },
+  "not-selected": { label: "Not selected", color: "var(--muted)" },
+  pending: { label: "Pending", color: "var(--blue)" },
+} as const;
+export const outcomeNames = Object.keys(outcomeSeries) as CaseStatus[];
 
 export const timingSeries = {
   duration_seconds: { label: "Total", color: "var(--blue)" },
@@ -58,6 +77,20 @@ export function runOutcomes(entry: Snapshot): string {
         .map(([status, count]) => `${count} ${status}`)
         .join(", ")
     : "No timing";
+}
+
+export function outcomeRows(entries: readonly Snapshot[]) {
+  return dailyEntries(entries).flatMap(({ day, date, entry }) =>
+    outcomeNames.map((status) => ({
+      day,
+      date,
+      status,
+      count: entry
+        ? (verifiedPerformance(entry)?.case_statuses[status] ?? null)
+        : null,
+      label: outcomeSeries[status].label,
+    })),
+  );
 }
 
 export function timingRows(
