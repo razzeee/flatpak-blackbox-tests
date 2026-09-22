@@ -231,6 +231,24 @@ class CoverageReportTests(unittest.TestCase):
         self.assertIn("0/0 (n/a)", result.stdout)
         self.assertNotIn("None%", result.stdout)
 
+    def test_json_output_is_written_atomically(self) -> None:
+        json_output = self.suite / "nested" / "summary.json"
+        json_output.parent.mkdir()
+        result = self.command("--json", "--output", str(json_output))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(json.loads(json_output.read_text())["verification"]["status"], "not-run")
+        self.assertEqual(list(json_output.parent.glob(".*.tmp")), [])
+
+    def test_markdown_output_writes_file(self) -> None:
+        markdown_output = self.suite / "summary.md"
+        result = subprocess.run([sys.executable, str(SCRIPT), "--suite", str(self.suite),
+                                 "--output", str(markdown_output)],
+                                text=True, capture_output=True, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, "")
+        self.assertIn("# Black-box coverage", markdown_output.read_text())
+
     def test_malformed_typed_evidence_never_receives_credit(self) -> None:
         for field, value in (("exit_status", True), ("api_calls", [7]), ("signals", False),
                              ("stdout", {}), ("argv", [None])):
