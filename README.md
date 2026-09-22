@@ -176,24 +176,6 @@ optimization. Keep newer-API assertions in dedicated behaviors where possible, s
 one missing API does not suppress older checks. Adding a feature does not add
 coverage: the existing assertion mappings and recorded call traces still apply.
 
-### Correcting historical classifications
-
-History corrections live in `web/scripts/corrections.ts`. Both `history record`
-and `history update` apply them. To migrate a saved history file independently:
-
-```sh
-npm --prefix web run history -- migrate \
-  --history coverage-site/history.json --output corrected-history.json
-```
-
-Omit `--output` to replace the input atomically. Migrations are idempotent and
-record their ID and changed-case count in each affected snapshot's `corrections`.
-The library-client-build correction requires the recorded compilation diagnostic,
-no case timings, and no case evidence. It changes `failed` to `setup-error` and
-updates outcome counts. It preserves diagnostics, coverage metrics, timestamps,
-suite/target commits and run URLs. Historical blocked tests remain unexecuted;
-new runs must not be presented as results from the original date.
-
 ### Checks
 
 ```sh

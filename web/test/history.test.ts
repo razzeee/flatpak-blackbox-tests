@@ -304,29 +304,6 @@ print(json.dumps({
     "setup-error": 1,
     failed: report.results.length - 3,
   });
-  const blocked = report.results.find(
-    (item) => item.driver === "library" && item.status === "failed",
-  )!;
-  delete blocked.duration_seconds;
-  delete blocked.timings;
-  blocked.error = "public library client did not compile: API absent";
-  blocked.evidence = [];
-  await writeFile(reportPath, JSON.stringify(report));
-  const corrected = await record(options);
-  assert.equal(
-    corrected.performance?.cases.find(
-      (item) =>
-        item.behavior_id === blocked.behavior_id &&
-        item.driver === blocked.driver &&
-        item.profile === blocked.profile,
-    )?.status,
-    "setup-error",
-  );
-  assert.equal(corrected.performance?.case_statuses["setup-error"], 2);
-  assert.deepEqual(corrected.metrics, timed.metrics);
-  assert.deepEqual(corrected.corrections, [
-    { id: "library-client-build-setup-error-v1", changed_cases: 1 },
-  ]);
   report.target_version = "Flatpak 0.0.0";
   await writeFile(reportPath, JSON.stringify(report));
   await assert.rejects(record(options), /does not match baseline/);
