@@ -8067,13 +8067,7 @@
         }
       ],
       "cases_complete": true
-    },
-    "corrections": [
-      {
-        "id": "library-client-build-setup-error-v1",
-        "changed_cases": 160
-      }
-    ]
+    }
   },
   {
     "schema": 1,
