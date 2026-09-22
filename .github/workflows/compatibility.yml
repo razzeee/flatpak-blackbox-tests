@@ -34,6 +34,8 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
           BASELINE: ${{ inputs.baseline }}
+          REF: ${{ github.ref }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           node <<'NODE' >> "$GITHUB_OUTPUT"
           const fs = require("node:fs");
@@ -50,7 +52,11 @@ jobs:
             throw new Error(`Unknown or ambiguous baseline: ${value}`);
           }
 
-          const entries = process.env.EVENT_NAME === "schedule"
+          const publishesCoverage =
+            process.env.EVENT_NAME === "schedule" ||
+            (process.env.EVENT_NAME === "push" &&
+              process.env.REF === `refs/heads/${process.env.DEFAULT_BRANCH}`);
+          const entries = publishesCoverage
             ? [
                 ...baselines.map((baseline) => ({
                   track: "pinned",
