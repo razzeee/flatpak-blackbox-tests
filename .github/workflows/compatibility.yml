@@ -101,21 +101,19 @@ jobs:
         run: |
           npm --prefix web run --silent baseline -- --baseline "$BASELINE" >> "$GITHUB_ENV"
 
-      - name: Resolve latest upstream main
+      - name: Select upstream branch
         if: matrix.track == 'upstream'
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
-          commit=$(gh api repos/flatpak/flatpak/commits/main --jq .sha)
-          [[ "$commit" =~ ^[0-9a-f]{40}$ ]]
-          printf 'FLATPAK_REFERENCE_COMMIT=%s\n' "$commit" >> "$GITHUB_ENV"
-          printf 'Testing flatpak/flatpak main at %s\n' "$commit"
+          printf 'FLATPAK_BASELINE_REF=refs/heads/main\n' >> "$GITHUB_ENV"
 
       - name: Initialize isolated CI directories
         run: bash ci/compatibility.sh init
 
       - name: Install host dependencies and enable runner namespaces
         run: bash ci/compatibility.sh host
+
+      - name: Check out selected reference ref
+        run: bash ci/compatibility.sh checkout
 
       - name: Set up uv
         uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6

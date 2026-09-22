@@ -3,17 +3,21 @@ import { z } from "zod";
 import configuration from "../../ci/baselines.json";
 
 const commitSchema = z.string().regex(/^[0-9a-f]{40}$/);
+const refSchema = z.string().regex(/^refs\/tags\/[0-9][0-9A-Za-z.+-]*$/);
 export const baselineSchema = z.object({
   version: z.string().regex(/^[0-9][0-9A-Za-z.+-]*$/),
   commit: commitSchema,
+  // Optional so archived snapshots from the old schema remain readable.
+  ref: refSchema.optional(),
 });
 export type Baseline = z.infer<typeof baselineSchema>;
+const baselineDefinitionSchema = baselineSchema.extend({ ref: refSchema });
 
 export const baselineConfigSchema = z
   .object({
     schema: z.literal(1),
     current: commitSchema,
-    baselines: z.array(baselineSchema).min(1),
+    baselines: z.array(baselineDefinitionSchema).min(1),
   })
   .refine(
     (value) => value.baselines.some((item) => item.commit === value.current),
@@ -35,7 +39,7 @@ export function findBaseline(commit: string): Baseline | undefined {
   return baselineConfig.baselines.find((item) => item.commit === commit);
 }
 
-/** Manual runs may select a retained release version or its exact source commit. */
+/** Manual runs may select a retained tag baseline or its exact source commit. */
 export function resolveBaseline(selector = ""): Baseline {
   if (!selector) return currentBaseline;
   const byCommit = findBaseline(selector);

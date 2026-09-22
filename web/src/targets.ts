@@ -21,7 +21,7 @@ export function withBaseline(entry: Snapshot): Snapshot {
 
 export function targetOptions(
   history: readonly Snapshot[],
-  active = currentBaseline,
+  active: Baseline = currentBaseline,
 ) {
   const current = baselineKey(active);
   const options = new Map<string, string>([

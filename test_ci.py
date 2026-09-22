@@ -11,6 +11,66 @@ from pathlib import Path
 
 
 class CompatibilityProbeTests(unittest.TestCase):
+    def test_checkout_resolves_tag_types_and_branch_and_rejects_wrong_pins(self) -> None:
+        if os.getuid() == 0:
+            self.skipTest("CI helper requires an ordinary user")
+        suite = Path(__file__).resolve().parent
+        with tempfile.TemporaryDirectory(prefix="ci-checkout-") as temporary:
+            root = Path(temporary)
+            remote = root / "remote"
+            env = {**os.environ, "GIT_AUTHOR_NAME": "Test", "GIT_COMMITTER_NAME": "Test",
+                   "GIT_AUTHOR_EMAIL": "test@example.org",
+                   "GIT_COMMITTER_EMAIL": "test@example.org"}
+
+            def git(*args: str) -> str:
+                return subprocess.check_output(
+                    ["git", "-C", str(remote), *args], env=env, text=True).strip()
+
+            subprocess.run(["git", "init", "-b", "main", str(remote)],
+                           env=env, check=True, capture_output=True)
+            git("commit", "--allow-empty", "-m", "First")
+            first = git("rev-parse", "HEAD")
+            git("tag", "lightweight")
+            git("tag", "-a", "annotated", "-m", "Release")
+            git("commit", "--allow-empty", "-m", "Second")
+            second = git("rev-parse", "HEAD")
+            for index, (ref, pin, expected) in enumerate([
+                ("refs/tags/lightweight", first, first),
+                ("refs/tags/annotated", first, first),
+                ("refs/heads/main", "", second),
+                ("refs/tags/annotated", second, None),
+                ("refs/tags/missing", first, None),
+                (first, first, None),
+            ]):
+                with self.subTest(ref=ref, pin=pin):
+                    work = root / str(index)
+                    (work / "logs").mkdir(parents=True)
+                    output = work / "environment"
+                    checkout_env = {
+                        **env, "BB_CI_ROOT": str(work), "TMPDIR": str(root),
+                        "FLATPAK_BASELINE_REF": ref, "FLATPAK_REFERENCE_COMMIT": pin,
+                        "GITHUB_ENV": str(output), "GIT_CONFIG_COUNT": "1",
+                        "GIT_CONFIG_KEY_0": f"url.{remote.as_uri()}.insteadOf",
+                        "GIT_CONFIG_VALUE_0": "https://github.com/flatpak/flatpak.git",
+                    }
+                    result = subprocess.run(
+                        ["bash", str(suite / "ci/compatibility.sh"), "checkout"],
+                        cwd=suite, env=checkout_env, capture_output=True, text=True,
+                        timeout=30, check=False)
+                    if expected is None:
+                        self.assertNotEqual(result.returncode, 0)
+                        self.assertFalse(output.exists())
+                    else:
+                        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                        self.assertEqual(output.read_text(),
+                                         f"FLATPAK_REFERENCE_COMMIT={expected}\n")
+                        self.assertEqual((work / "logs/reference-commit.txt").read_text(),
+                                         expected + "\n")
+                        actual = subprocess.check_output(
+                            ["git", "-C", str(work / "source"), "rev-parse", "HEAD"],
+                            text=True).strip()
+                        self.assertEqual(actual, expected)
+
     def test_system_helper_provisioning_rejects_an_unprovisioned_host(self) -> None:
         with tempfile.TemporaryDirectory(prefix="ci-system-guard-") as temporary:
             root = Path(temporary)
