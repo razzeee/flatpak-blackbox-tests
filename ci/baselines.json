@@ -3,6 +3,10 @@
   "current": "1a6ec6a1f720fb30d76c76e656ac624fcaa237e9",
   "baselines": [
     {
+      "version": "1.18.3",
+      "commit": "5712fe3687c86312fdd153f264ed7f217e0e2767"
+    },
+    {
       "version": "1.19.1",
       "commit": "1a6ec6a1f720fb30d76c76e656ac624fcaa237e9"
     }
