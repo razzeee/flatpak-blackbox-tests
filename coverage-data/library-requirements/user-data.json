@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "scope": "library",
+  "requirements": [
+    {
+      "id": "library.user-data.delete",
+      "interface": "library",
+      "profile": "user",
+      "category": "user-data",
+      "description": "flatpak_user_data_delete validates the app ID, honors cancellation, removes the current user's app data, and resets that app's permission-store entries without requiring the app to be installed.",
+      "sources": [
+        {
+          "path": "common/flatpak-user-data-utils.c",
+          "anchor": "flatpak_user_data_delete"
+        }
+      ],
+      "surfaces": [
+        "library.function.flatpak_user_data_delete"
+      ],
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation"
+      ]
+    }
+  ],
+  "limitations": []
+}

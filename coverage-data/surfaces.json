@@ -12186,6 +12186,18 @@
       ]
     },
     {
+      "id": "library.function.flatpak_user_data_delete",
+      "kind": "library-function",
+      "name": "flatpak_user_data_delete",
+      "sources": [
+        {
+          "path": "common/flatpak-user-data-utils.h",
+          "anchor": "flatpak_user_data_delete"
+        }
+      ],
+      "deprecated": false
+    },
+    {
       "id": "library.signal.FlatpakTransactionProgress.changed",
       "kind": "library-signal",
       "name": "changed",

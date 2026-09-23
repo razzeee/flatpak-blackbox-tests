@@ -6,8 +6,8 @@ There is no finite denominator for all Flatpak behavior yet.
 
 ## Current inventory: all 624 CLI options accounted for
 
-The suite now has **510 cases**, including 80 new cases after the 500-option
-checkpoint below. The denominators have not changed.
+The suite now has **511 cases**, including 80 new cases after the 500-option
+checkpoint below. The CLI-option denominators have not changed.
 
 | Measurement | Implemented | Meaning |
 | --- | ---: | --- |
@@ -15,7 +15,7 @@ checkpoint below. The denominators have not changed.
 | Separate equivalence checks | **40/624, 6.41%** | Tests assert ordinary results under default-equivalent or context-inapplicable options |
 | CLI-option inventory accounting | **624/624, 100%** | Deduplicated union of both kinds |
 
-All 136 CLI and 163 library behavior obligations, 44 commands, 223 public
+All 136 CLI and 164 library behavior obligations, 44 commands, 224 public
 library functions and 14 signals still have implementations. These are
 implementation counts. **Full inventory accounting is not full passing coverage.**
 

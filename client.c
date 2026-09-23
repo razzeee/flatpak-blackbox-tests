@@ -12,6 +12,7 @@ typedef enum
   OP_REMOTE,
   OP_INSTALL,
   OP_INSTALL_ABORT_READY,
+  OP_DELETE_DATA,
   OP_UPDATE,
   OP_UNINSTALL,
   OP_QUERY,
@@ -34,6 +35,7 @@ static const struct
   { "remote", 3, OP_REMOTE },
   { "install", 3, OP_INSTALL },
   { "install-abort-ready", 3, OP_INSTALL_ABORT_READY },
+  { "delete-data", 4, OP_DELETE_DATA },
   { "update", 3, OP_UPDATE },
   { "uninstall", 3, OP_UNINSTALL },
   { "query", 3, OP_QUERY },
@@ -167,6 +169,7 @@ main (int argc, char **argv)
       g_printerr ("usage: library-client OPERATION [ARGS...]\n"
                   "  remote|install|update|uninstall|query|list-refs ARG\n"
                   "  install-abort-ready REF\n"
+                  "  delete-data APP_ID MODE\n"
                   "  remote-create|remote-edit NAME URL TITLE PRIORITY\n"
                   "  remote-query|remote-delete|remote-clear-title NAME\n"
                   "  remote-ref-query NAME REF\n"
@@ -260,6 +263,26 @@ main (int argc, char **argv)
       formatted = CALL_API (flatpak_ref_format_ref, FLATPAK_REF (remote_ref));
       g_print ("%s\n", formatted);
       return 0;
+    }
+
+  if (operation == OP_DELETE_DATA)
+    {
+      g_autoptr(GCancellable) cancellable = NULL;
+
+      if (strcmp (argv[3], "cancel") == 0)
+        {
+          cancellable = g_cancellable_new ();
+          g_cancellable_cancel (cancellable);
+        }
+#if BLACKBOX_HAVE_FLATPAK_USER_DATA_DELETE
+      if (!CALL_API (flatpak_user_data_delete, argv[2], cancellable, &error))
+        goto fail;
+      return 0;
+#else
+      g_set_error_literal (&error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                           "flatpak_user_data_delete is unavailable");
+      goto fail;
+#endif
     }
 
   if (operation == OP_LIST_REFS)

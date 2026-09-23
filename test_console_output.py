@@ -120,7 +120,7 @@ class ConsoleTests(unittest.TestCase):
         metric.update({"passed": 17, "passed_percent": 12.5})
         self.assertEqual(coverage_rows(report)[0], ("CLI behaviors", "17 (12.5%)", "136"))
         self.assertEqual([row[2] for row in coverage_rows(report)],
-                         ["136", "163", "44", "624", "223", "14"])
+                         ["136", "164", "44", "624", "224", "14"])
         self.assertIn("17 (12.5%)", github_summary(report, 0))
         for verification in ("stale", "unverified", "invalid"):
             coverage["verification"]["status"] = verification
