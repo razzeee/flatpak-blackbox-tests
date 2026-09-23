@@ -142,6 +142,32 @@ def _delete_data(driver: Driver, url: str, fixture: FixtureManifest) -> None:
                  "deleted-data app must also be uninstalled")
 
 
+def _library_delete_data(driver: Driver) -> None:
+    home = Path(driver.env["HOME"])
+    app_dir = home / ".var/app" / APP
+    marker = app_dir / "data/marker"
+    marker.parent.mkdir(parents=True, exist_ok=True)
+    marker.write_text("library data\n")
+
+    cancelled = driver.call("delete-data", APP, "cancel")
+    driver.check(cancelled.returncode != 0, "cancelled user-data deletion must fail")
+    driver.check(marker.read_text() == "library data\n",
+                 "cancelled user-data deletion must preserve data")
+
+    deleted = driver.call("delete-data", APP, "normal")
+    driver.check(deleted.returncode == 0, f"library user-data deletion failed: {deleted.stderr}")
+    driver.check(not app_dir.exists(), "library user-data deletion removes app data")
+    for table, entry in ENTRIES:
+        _lookup(driver, table, entry, {OTHER: ["deny"]})
+
+    outside = home / ".var/outside"
+    outside.write_text("must survive\n")
+    invalid = driver.call("delete-data", "../outside", "normal")
+    driver.check(invalid.returncode != 0, "invalid app ID must fail")
+    driver.check(outside.read_text() == "must survive\n",
+                 "invalid app ID must not escape the app-data directory")
+
+
 def run(driver: Driver, repository: RepositoryServer, url: str,
         fixture: FixtureManifest, name: str) -> None:
     """Exercise mutations and queries, keeping fixture operations on public D-Bus."""
@@ -149,6 +175,8 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
         _seed(driver)
         if name == "permissions-delete-data":
             _delete_data(driver, url, fixture)
+        elif name == "library-delete-data":
+            _library_delete_data(driver)
         elif name == "permissions-persist":
             driver.cli_success("permission-set", "devices", "camera", APP, "ask", "record")
             _lookup(driver, "devices", "camera", {APP: ["ask", "record"], OTHER: ["deny"]})

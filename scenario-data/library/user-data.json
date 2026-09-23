@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "library.user-data.delete",
+      "scenario": "library-delete-data",
+      "handler": "permission_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation"
+      ],
+      "description": "Delete application user data and permission-store entries through libflatpak.",
+      "preconditions": "Fresh user environment with a real session permission store.",
+      "expected": [
+        "The public API honors cancellation, removes only the validated app-data directory, and resets the app's permission entries without requiring the app to be installed."
+      ],
+      "references": [
+        "common/flatpak-user-data-utils.c: flatpak_user_data_delete public API"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "library.user-data.delete",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.user-data.delete"
+      ],
+      "rationale": "The scenario exercises the exported function, including cancellation, path validation, data removal, and permission reset."
+    }
+  ]
+}

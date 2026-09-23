@@ -36,6 +36,7 @@
     "library-requirements/related-ref.json",
     "library-requirements/remote-ref.json",
     "library-requirements/remote.json",
+    "library-requirements/user-data.json",
     "library-requirements/transaction-operation.json",
     "library-requirements/transaction-progress.json",
     "library-requirements/transaction/authentication.json",

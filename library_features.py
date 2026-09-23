@@ -31,6 +31,12 @@ FEATURES = (
         "flatpak_transaction_progress_get_bytes_per_second;",
         ("transaction.rate",),
     ),
+    LibraryFeature(
+        "flatpak_user_data_delete",
+        "gboolean (*volatile blackbox_probe) (const char *, GCancellable *, GError **) = "
+        "flatpak_user_data_delete;",
+        ("library.user-data.delete",),
+    ),
 )
 
 Executor = Callable[
