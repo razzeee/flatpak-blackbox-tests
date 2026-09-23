@@ -144,6 +144,12 @@ as its delivery marker. Write failures return failure after saving the reports.
 CI adds an unverified fallback summary if delivery failed or the runner never ran.
 Without the environment variable, no extra summary file is created.
 
+Library client compilation failures are setup errors, not failed behavior checks.
+The runner probes optional public APIs against the target's headers and link library
+and records the results in `library_provenance.api_features`. Cases requiring an
+unavailable API report `unsupported`; unrelated cases still run. Unsupported cases
+receive no passing credit and do not reduce coverage denominators.
+
 A passing run covers only its selected, implemented cases. It does not establish
 full Flatpak compatibility. Coverage reports are tied to the suite definitions;
 changing those definitions requires a new run for current evidence.
@@ -153,6 +159,24 @@ python3 coverage_report.py --report /tmp/blackbox-results/report.json
 ```
 
 ## Development
+
+### Supporting API differences
+
+Register version-dependent APIs in `library_features.py`. Each entry supplies a
+typed function-pointer declaration and the IDs of behaviors that require it. Include the
+generated `blackbox-features.h` in the relevant C client and guard API-dependent
+code with its `BLACKBOX_HAVE_<UPPERCASE_API_NAME>` macro. Probes use the same
+compiler and flags as the client and never execute their test programs. A baseline
+probe distinguishes a broken compiler/SDK setup from an unavailable API.
+
+Use availability rather than version comparisons, so backports work. Each probe
+declares `blackbox_probe` as a volatile function pointer with the signature the
+test needs. This also checks signatures and keeps the linker reference under
+optimization. Keep newer-API assertions in dedicated behaviors where possible, so
+one missing API does not suppress older checks. Adding a feature does not add
+coverage: the existing assertion mappings and recorded call traces still apply.
+
+### Checks
 
 ```sh
 uv sync --locked

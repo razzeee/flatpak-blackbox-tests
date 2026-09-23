@@ -27,6 +27,7 @@ from console_output import ConsoleOutput, github_summary, use_color
 from coverage_report import CoverageModel, digest, format_summary, write_json
 from fixture_manifest import FixtureManifest, load_fixture
 from json_validation import decode_json
+from library_features import missing_apis, probe_features
 from remote_scenarios import (
     remote_cli_args,
     remote_configuration,
@@ -484,6 +485,9 @@ def build_client(target: TargetConfig, output: Path,
                     env, output, evidence, timeout)
     if flags.returncode:
         raise PrerequisiteError(f"public libflatpak development files missing: {flags.stderr}")
+    provenance["api_features"] = probe_features(
+        library.cc, shlex.split(flags.stdout), env, output, evidence, timeout, execute,
+    )
     client = output / "library-client"
     extensions = extension_clients(HERE)
     dispatcher = output / "client-extensions.c"
@@ -496,11 +500,12 @@ def build_client(target: TargetConfig, output: Path,
         + calls + "\nreturn -1;\n}\n"
     )
     result = execute([library.cc, "-std=c11", "-Wall", "-Wextra", "-Werror",
-                      "-I", str(HERE), str(HERE / "client.c"), str(dispatcher),
+                      "-I", str(output), "-I", str(HERE), str(HERE / "client.c"), str(dispatcher),
                       *(str(source) for source, _ in extensions),
                       "-o", str(client), *shlex.split(flags.stdout)],
                      env, output, evidence, timeout)
-    require(result.returncode == 0, f"public library client did not compile: {result.stderr}")
+    if result.returncode:
+        raise ValueError(f"public library client did not compile: {result.stderr}")
     linked = execute(["ldd", str(client)], env, output, evidence, timeout)
     if linked.returncode:
         raise PrerequisiteError(f"cannot verify runtime library selection: {linked.stderr}")
@@ -682,8 +687,10 @@ def main(*, clock: Callable[[], float] = monotonic) -> int:
                 try:
                     client = build_client(target, output, report["setup_evidence"], args.timeout,
                                           report["library_provenance"], artifacts)
-                except (ContractFailure, PrerequisiteError, KeyError) as error:
-                    client_error = error
+                except (ContractFailure, PrerequisiteError, KeyError, ValueError, OSError) as error:
+                    # No scenario has run yet, including when a compiler times out.
+                    client_error = (ValueError(str(error))
+                                    if isinstance(error, ContractFailure) else error)
             for behavior in inventory:
                 if "scenario" not in behavior:
                     continue
@@ -699,6 +706,18 @@ def main(*, clock: Callable[[], float] = monotonic) -> int:
                     status = 1
                     console.case_finished(result)
                     continue
+                if kind == "library":
+                    unavailable = missing_apis(
+                        behavior["id"], report["library_provenance"].get("api_features", {}),
+                    )
+                    if unavailable:
+                        result.update({
+                            "status": "unsupported",
+                            "error": "Public library APIs unavailable: " + ", ".join(unavailable),
+                        })
+                        status = 1
+                        console.case_finished(result)
+                        continue
                 case_started = clock()
                 execution_started: float | None = None
                 cleanup_started: float | None = None

@@ -114,6 +114,7 @@ class FixtureProvenance(TypedDict, total=False):
 class LibraryProvenance(ArtifactProvenance, total=False):
     package_version: str
     client_sha256: str
+    api_features: dict[str, bool]
 
 
 class ArtifactIntegrity(TypedDict, total=False):
