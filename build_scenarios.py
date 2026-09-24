@@ -409,7 +409,14 @@ def _init(driver: Driver, fixture: FixtureManifest, url: str, name: str) -> None
     driver.check((tree / "files").is_dir() and (tree / "var").is_dir(), "build layout missing")
     if name == "build-init-layout":
         driver.check(not list((tree / "files").iterdir()), "initial files must be empty")
-        driver.check(not list((tree / "var").iterdir()), "initial var must be empty")
+        driver.check({path.name for path in (tree / "var").iterdir()} == {"tmp", "run"},
+                     "initial var must contain only tmp and run")
+        temporary = tree / "var/tmp"
+        driver.check(temporary.is_dir() and not temporary.is_symlink() and
+                     not list(temporary.iterdir()), "initial var/tmp must be an empty directory")
+        run = tree / "var/run"
+        driver.check(run.is_symlink() and run.readlink() == Path("/run"),
+                     "initial var/run must be a symlink to /run")
     elif name == "build-init-options":
         driver.check((tree / "custom-sdk/bin/ldconfig").is_file(), "custom writable SDK absent")
         driver.check(_list(meta, "Application", "tags") == {"first", "second"}, "tags differ")
@@ -630,7 +637,7 @@ def _build(driver: Driver, fixture: FixtureManifest, url: str, name: str) -> Non
     tree = _tree(driver, fixture)
     probe = "/usr/bin/blackbox-probe"
     if name == "build-artifacts":
-        for mount, relative in (("app", "files"), ("var", "var")):
+        for mount, relative in (("app", "files"), ("var/lib", "var/lib"), ("var/tmp", "var/tmp")):
             payload = f"persistent {mount} artifact"
             driver.cli_success("build", str(tree), probe, "write", f"/{mount}/artifact", payload)
             driver.check((tree / relative / "artifact").is_file(),
@@ -639,11 +646,16 @@ def _build(driver: Driver, fixture: FixtureManifest, url: str, name: str) -> Non
                          f"{mount} write did not reach public build tree")
             output = driver.cli_success("build", str(tree), probe, "read", f"/{mount}/artifact")
             driver.check(output == payload, f"{mount} artifact did not survive a second command")
+        driver.cli_success("build", str(tree), probe, "write", "/var/artifact", "transient")
+        driver.check(not (tree / "var/artifact").exists(),
+                     "nonpersistent /var write reached the build tree")
+        result = driver.cli_call("build", str(tree), probe, "read", "/var/artifact")
+        driver.check(result.returncode != 0, "/var artifact survived a second command")
     elif name in ("build-readonly", "build-readonly-app"):
-        destinations = [("app", "files")]
+        destinations = [("app", "files", True)]
         if name == "build-readonly":
-            destinations.append(("var/lib", "var/lib"))
-        for mount, relative in destinations:
+            destinations.extend((("var/lib", "var/lib", False), ("var/tmp", "var/tmp", False)))
+        for mount, relative, readonly in destinations:
             path = tree / relative / "artifact"
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text("original")
@@ -652,8 +664,14 @@ def _build(driver: Driver, fixture: FixtureManifest, url: str, name: str) -> Non
             driver.check(observed == "original", f"readonly control cannot read {mount} artifact")
             result = driver.cli_call("build", "--readonly", str(tree), probe,
                                      "write", f"/{mount}/artifact", "changed")
-            driver.check(result.returncode != 0, f"readonly {mount} unexpectedly writable")
-            driver.check(path.read_text() == "original", f"readonly {mount} changed")
+            if readonly:
+                driver.check(result.returncode != 0, f"readonly {mount} unexpectedly writable")
+                driver.check(path.read_text() == "original", f"readonly {mount} changed")
+            else:
+                driver.check(result.returncode == 0,
+                             f"--readonly unexpectedly blocked {mount} write")
+                driver.check(path.read_text() == "changed",
+                             f"--readonly {mount} write did not persist")
     elif name == "build-command-options":
         mounted_input = driver.root / "mounted-input"
         mounted_input.mkdir()

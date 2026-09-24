@@ -7,7 +7,7 @@
       "interface": "cli",
       "profile": "any",
       "category": "building-distribution",
-      "description": "build-init creates a build directory with metadata identifying the requested app, SDK and runtime, and empty files and var subdirectories.",
+      "description": "build-init creates a build directory with metadata identifying the requested app, SDK and runtime, an empty files directory, and var containing only an empty tmp directory and a run symlink to /run.",
       "sources": [
         {
           "path": "doc/flatpak-build-init.xml",

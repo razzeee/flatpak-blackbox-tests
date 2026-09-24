@@ -74,9 +74,9 @@
         "user-installation",
         "sandbox-execution"
       ],
-      "description": "Accumulate app and var artifacts using the SDK probe.",
+      "description": "Persist /app, /var/lib and /var/tmp artifacts using the SDK probe.",
       "preconditions": "Independent initialized tree and installed SDK with file-capable probe.",
-      "expected": "Writes reach files/var and survive later independent build commands.",
+      "expected": "Writes reach files, var/lib and var/tmp and survive later build commands; a /var/artifact write neither reaches the build tree nor survives another command.",
       "references": [
         "doc/flatpak-build.xml"
       ]
@@ -94,9 +94,9 @@
         "user-installation",
         "sandbox-execution"
       ],
-      "description": "Prevent modifications to both build destinations.",
-      "preconditions": "Independent initialized tree with known app/var artifacts and installed SDK.",
-      "expected": "Both writes fail and original bytes survive.",
+      "description": "Prevent modifications to /app while /var/lib and /var/tmp remain writable under --readonly.",
+      "preconditions": "Independent initialized tree with known artifacts in files, var/lib and var/tmp and installed SDK.",
+      "expected": "Each artifact is readable. Writes to /app fail and its original host bytes survive; writes to /var/lib and /var/tmp succeed and update the host files.",
       "references": [
         "doc/flatpak-build.xml"
       ]
@@ -218,7 +218,7 @@
       "driver": "cli",
       "profile": "user",
       "requirements": [],
-      "rationale": "App-only readonly option effect remains separate from broader strict app/var obligation.",
+      "rationale": "App-only readonly option effect remains separate from the combined check of protected /app and writable /var/lib and /var/tmp.",
       "surface_assertions": [
         {
           "id": "cli.option.build.--readonly",
@@ -233,7 +233,7 @@
       "requirements": [
         "cli.build.any.artifacts"
       ],
-      "rationale": "SDK executable writes both public build destinations and subsequent commands read exact persisted bytes."
+      "rationale": "SDK executable writes /app, /var/lib and /var/tmp, host checks verify the build tree bytes, and subsequent commands read them back. A /var/artifact write does not persist."
     },
     {
       "behavior_id": "build.execution.readonly",
@@ -242,7 +242,7 @@
       "requirements": [
         "cli.build.any.readonly"
       ],
-      "rationale": "Readonly command writes fail and independently seeded files/var bytes remain intact."
+      "rationale": "Readonly commands read each seeded marker, reject writes through /app without changing its host file, and persist writes through /var/lib and /var/tmp in the corresponding host files."
     },
     {
       "behavior_id": "build.execution.options",

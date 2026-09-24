@@ -54,7 +54,7 @@
       ],
       "description": "Initialize a fresh application build tree.",
       "preconditions": "Independent runtime installed from fixture A.",
-      "expected": "Requested app, SDK and runtime metadata and empty files/var directories.",
+      "expected": "Requested app, SDK and runtime metadata, empty files, and var containing only empty tmp and a run symlink to /run.",
       "references": [
         "doc/flatpak-build-init.xml"
       ]
@@ -136,7 +136,7 @@
       "driver": "cli",
       "profile": "user",
       "requirements": [],
-      "rationale": "Metadata-only initialization options observed separately from strict empty-var and writable SDK contracts.",
+      "rationale": "Metadata-only initialization options observed separately from initial layout and writable SDK contracts.",
       "surface_assertions": [
         {
           "id": "cli.option.build-init.--tag",
@@ -155,7 +155,7 @@
       "requirements": [
         "cli.build-init.any.layout"
       ],
-      "rationale": "Exact requested metadata and independently empty files/var assertions; native architecture alone earns no selector credit."
+      "rationale": "Exact requested metadata, empty files and var/tmp, and var containing only tmp and run with run pointing to /run; native architecture alone earns no selector credit."
     },
     {
       "behavior_id": "build.init.existing",
