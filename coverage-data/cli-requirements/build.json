@@ -7,7 +7,7 @@
       "interface": "cli",
       "profile": "any",
       "category": "building-distribution",
-      "description": "A build command uses the declared SDK at /usr and can write artifacts through /app and /var that persist in the build directory across commands.",
+      "description": "A build command uses the declared SDK at /usr and can write artifacts through /app, /var/lib and /var/tmp that persist in the build directory across commands. Only those var subdirectories persist in the build tree.",
       "sources": [
         {
           "path": "doc/flatpak-build.xml",
@@ -29,7 +29,7 @@
       "interface": "cli",
       "profile": "any",
       "category": "building-distribution",
-      "description": "build --readonly prevents the command from changing the normally writable build destination directories.",
+      "description": "build --readonly keeps /app readable while preventing changes to its build tree contents. The persistent /var/lib and /var/tmp directories remain writable.",
       "sources": [
         {
           "path": "doc/flatpak-build.xml",
