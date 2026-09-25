@@ -87,23 +87,30 @@ def execute(argv: list[str], env: dict[str, str], cwd: Path,
     record: EvidenceRecord = {"argv": argv}
     evidence.append(record)
     try:
-        process = subprocess.Popen(argv, env=env, cwd=cwd, text=True,
-                                   stdin=subprocess.DEVNULL,
-                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                   start_new_session=True)
+        with (tempfile.TemporaryFile(mode="w+t") as stdout_file,
+              tempfile.TemporaryFile(mode="w+t") as stderr_file):
+            process = subprocess.Popen(argv, env=env, cwd=cwd, text=True,
+                                       stdin=subprocess.DEVNULL,
+                                       stdout=stdout_file, stderr=stderr_file,
+                                       start_new_session=True)
+            timeout_error = None
+            try:
+                process.wait(timeout=timeout)
+            except subprocess.TimeoutExpired as error:
+                timeout_error = error
+            finally:
+                terminate(process)
+            stdout_file.seek(0)
+            stderr_file.seek(0)
+            stdout = stdout_file.read()
+            stderr = stderr_file.read()
     except FileNotFoundError as error:
         record["error"] = str(error)
         raise PrerequisiteError(str(error)) from error
-    try:
-        stdout, stderr = process.communicate(timeout=timeout)
-    except subprocess.TimeoutExpired as error:
-        terminate(process)
-        stdout, stderr = process.communicate()
+    if timeout_error is not None:
         record.update({"stdout": stdout, "stderr": stderr, "timed_out": True,
                        "exit_status": process.wait()})
-        raise ContractFailure(f"command timed out after {timeout}s: {argv}") from error
-    finally:
-        terminate(process)
+        raise ContractFailure(f"command timed out after {timeout}s: {argv}") from timeout_error
     returncode = process.wait()
     record.update({"stdout": stdout, "stderr": stderr, "exit_status": returncode})
     return subprocess.CompletedProcess(argv, returncode, stdout, stderr)

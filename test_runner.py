@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager, redirect_stdout
@@ -17,6 +18,7 @@ from unittest.mock import patch
 
 import run
 from fixture_manifest import FixtureManifest
+from report_schema import EvidenceRecord
 
 RUNNER = Path(__file__).with_name("run.py")
 
@@ -35,6 +37,44 @@ class CommandInputTests(unittest.TestCase):
                                 check=False)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout, "''\n")
+
+    def test_execute_does_not_wait_for_descendant_inherited_output_pipes(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="runner-descendant-") as directory:
+            child_pid_path = Path(directory) / "child.pid"
+            script = (
+                "import subprocess,sys; "
+                "child=subprocess.Popen([sys.executable,'-c','import time; time.sleep(10)']); "
+                f"open({str(child_pid_path)!r},'w').write(str(child.pid)); "
+                "print('leader finished')"
+            )
+            evidence: list[EvidenceRecord] = []
+            result = run.execute([sys.executable, "-c", script], dict(os.environ),
+                                 Path.cwd(), evidence, 2)
+            self.assertEqual(result.returncode, 0)
+            self.assertEqual(result.stdout, "leader finished\n")
+            self.assertEqual(evidence[0]["exit_status"], 0)
+            child_pid = int(child_pid_path.read_text())
+            deadline = time.monotonic() + 1
+            while time.monotonic() < deadline:
+                try:
+                    state = Path(f"/proc/{child_pid}/stat").read_text().split()[2]
+                except FileNotFoundError:
+                    break
+                if state == "Z":
+                    break
+                time.sleep(0.01)
+            else:
+                self.fail(f"command descendant {child_pid} was not terminated")
+
+    def test_execute_preserves_output_when_command_times_out(self) -> None:
+        evidence: list[EvidenceRecord] = []
+        with self.assertRaisesRegex(run.ContractFailure, "timed out after 0.1s"):
+            run.execute([sys.executable, "-c",
+                         "import time; print('started', flush=True); time.sleep(10)"],
+                        dict(os.environ), Path.cwd(), evidence, 0.1)
+        self.assertEqual(evidence[0]["stdout"], "started\n")
+        self.assertTrue(evidence[0]["timed_out"])
+        self.assertNotEqual(evidence[0]["exit_status"], 0)
 
 
 @unittest.skipUnless(shutil.which("dbus-daemon"), "runner isolation requires dbus-daemon")
