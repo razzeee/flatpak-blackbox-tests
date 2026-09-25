@@ -38,6 +38,7 @@ class CommandInputTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout, "''\n")
 
+    @unittest.skipUnless(Path("/proc/self/stat").is_file(), "requires Linux procfs")
     def test_execute_does_not_wait_for_descendant_inherited_output_pipes(self) -> None:
         with tempfile.TemporaryDirectory(prefix="runner-descendant-") as directory:
             child_pid_path = Path(directory) / "child.pid"
@@ -75,6 +76,30 @@ class CommandInputTests(unittest.TestCase):
         self.assertEqual(evidence[0]["stdout"], "started\n")
         self.assertTrue(evidence[0]["timed_out"])
         self.assertNotEqual(evidence[0]["exit_status"], 0)
+
+    def test_execute_preserves_evidence_for_incomplete_output(self) -> None:
+        for fd, field in ((1, "stdout"), (2, "stderr")):
+            for timed_out in (False, True):
+                with self.subTest(stream=field, timed_out=timed_out):
+                    evidence: list[EvidenceRecord] = []
+                    script = (
+                        f"import os,time; os.write({fd}, b'partial: \\xe2\\x82'); "
+                        + ("time.sleep(10)" if timed_out else "raise SystemExit(7)")
+                    )
+                    argv = [sys.executable, "-c", script]
+                    if timed_out:
+                        with self.assertRaisesRegex(run.ContractFailure, "timed out"):
+                            run.execute(argv, dict(os.environ), Path.cwd(), evidence, 1)
+                        self.assertTrue(evidence[0]["timed_out"])
+                        self.assertLess(evidence[0]["exit_status"], 0)
+                    else:
+                        result = run.execute(argv, dict(os.environ), Path.cwd(), evidence, 1)
+                        self.assertEqual(result.returncode, 7)
+                        self.assertEqual(evidence[0]["exit_status"], 7)
+                        self.assertNotIn("timed_out", evidence[0])
+                    captured = evidence[0]["stdout"] if fd == 1 else evidence[0]["stderr"]
+                    self.assertTrue(captured.startswith("partial: "))
+                    self.assertIn("\ufffd", captured)
 
 
 @unittest.skipUnless(shutil.which("dbus-daemon"), "runner isolation requires dbus-daemon")

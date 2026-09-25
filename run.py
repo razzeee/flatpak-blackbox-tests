@@ -87,8 +87,8 @@ def execute(argv: list[str], env: dict[str, str], cwd: Path,
     record: EvidenceRecord = {"argv": argv}
     evidence.append(record)
     try:
-        with (tempfile.TemporaryFile(mode="w+t") as stdout_file,
-              tempfile.TemporaryFile(mode="w+t") as stderr_file):
+        with (tempfile.TemporaryFile(mode="w+t", errors="replace") as stdout_file,
+              tempfile.TemporaryFile(mode="w+t", errors="replace") as stderr_file):
             process = subprocess.Popen(argv, env=env, cwd=cwd, text=True,
                                        stdin=subprocess.DEVNULL,
                                        stdout=stdout_file, stderr=stderr_file,
