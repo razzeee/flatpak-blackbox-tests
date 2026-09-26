@@ -14,13 +14,59 @@ from contextlib import contextmanager, redirect_stdout
 from http.server import ThreadingHTTPServer
 from io import StringIO
 from pathlib import Path
+from typing import cast
 from unittest.mock import patch
 
 import run
 from fixture_manifest import FixtureManifest
-from report_schema import EvidenceRecord
+from report_schema import EvidenceRecord, RunReport
 
 RUNNER = Path(__file__).with_name("run.py")
+
+
+class ExpectedFailureGateTests(unittest.TestCase):
+    def report(self, statuses: set[str]) -> RunReport:
+        return cast(RunReport, {
+            "schema": 1,
+            "complete": True,
+            "results": [{"behavior_id": str(index), "driver": "cli", "profile": "user",
+                         "status": status} for index, status in enumerate(statuses)],
+            "artifact_integrity": {"status": "verified"},
+            "coverage": {"verification": {"status": "current"}},
+        })
+
+    def test_only_completed_verified_scenario_failures_are_allowed(self) -> None:
+        self.assertTrue(run.expected_scenario_failures_only(
+            self.report({"passed", "failed"}), 1))
+        self.assertFalse(run.expected_scenario_failures_only(
+            self.report({"passed"}), 1))
+        self.assertFalse(run.expected_scenario_failures_only(
+            self.report({"passed", "failed", "unsupported"}), 1))
+        self.assertFalse(run.expected_scenario_failures_only(
+            self.report({"passed", "failed"}) | {"complete": False}, 1))
+        self.assertFalse(run.expected_scenario_failures_only(
+            self.report({"passed", "failed"}), 0))
+        self.assertFalse(run.expected_scenario_failures_only(
+            self.report({"passed", "failed"}), 1, summary_delivered=False))
+        self.assertFalse(run.expected_scenario_failures_only(
+            self.report({"passed", "failed", "setup-error"}), 1))
+
+    def test_setup_and_report_integrity_failures_cannot_be_allowed(self) -> None:
+        report = self.report({"failed"})
+        report["setup_error"] = "setup failed"
+        self.assertFalse(run.expected_scenario_failures_only(report, 1))
+        report = self.report({"failed"})
+        report["artifact_integrity"] = {"status": "changed"}
+        self.assertFalse(run.expected_scenario_failures_only(report, 1))
+        report = self.report({"failed"})
+        report = cast(RunReport, {**report, "coverage": {
+            "verification": {"status": "invalid"},
+        }})
+        self.assertFalse(run.expected_scenario_failures_only(report, 1))
+
+    def test_interrupted_scenarios_are_diagnostic_errors_not_assertion_failures(self) -> None:
+        error = run.DiagnosticFailure("command timed out")
+        self.assertEqual(run.failure_status(error), "setup-error")
 
 
 class CommandInputTests(unittest.TestCase):

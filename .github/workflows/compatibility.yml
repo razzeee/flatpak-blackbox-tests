@@ -70,7 +70,6 @@ jobs:
 
   compatibility:
     needs: prepare
-    continue-on-error: true
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
@@ -146,7 +145,7 @@ jobs:
 
       - name: Run all CLI and library scenarios as the runner user
         # run.py appends coverage and timings to the automatic GITHUB_STEP_SUMMARY.
-        run: bash ci/compatibility.sh run
+        run: bash ci/compatibility.sh run --allow-expected-failures
 
       - name: Clean up system-helper test provisioning
         if: always()

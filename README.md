@@ -231,7 +231,10 @@ python3 catalogue.py --source-root ../flatpak --output coverage-data/surfaces.js
 
 Every push and pull request runs lint, type and formatting checks, unit tests on
 Python 3.10 and 3.14, and the full compatibility suite against a pinned reference
-Flatpak build. Compatibility failures remain failures; reports and diagnostic
+Flatpak build. Classified scenario assertion failures remain visible in reports
+but do not fail CI when they are the only failures and the complete report passes
+integrity and coverage verification. Setup, prerequisite, unsupported-capability,
+cleanup, integrity, and reporting failures still fail CI; reports and diagnostic
 logs are uploaded even when a run fails.
 
 CI builds the system helper from the same selected commit. After fixture

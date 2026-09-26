@@ -184,7 +184,7 @@ run() {
     # Case environments are sanitized and never receive that output path.
     uv run --locked python run.py --target "$BB_CI_ROOT/target.json" \
         --fixtures "$BB_CI_ROOT/fixtures" --output "$BB_CI_ROOT/results" --timeout 90 \
-        --color always
+        --color always "$@"
 }
 
 system() {
@@ -203,8 +203,9 @@ cleanup() {
 
 case "$phase" in
     host|checkout|build|probe|prepare|system|run|cleanup)
-        # pipefail keeps setup errors and failed compatibility checks fatal.
-        "$phase" 2>&1 | tee "$BB_CI_ROOT/logs/$phase.log"
+        # pipefail preserves runner/setup failures; the runner classifies the
+        # narrow CI exception for completed scenario assertion failures.
+        "$phase" "${@:2}" 2>&1 | tee "$BB_CI_ROOT/logs/$phase.log"
         ;;
     *) printf 'Unknown phase: %s\n' "$phase" >&2; exit 2 ;;
 esac

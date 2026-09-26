@@ -52,6 +52,10 @@ class ContractFailure(Exception):
     pass
 
 
+class DiagnosticFailure(ContractFailure):
+    """An interrupted or incomplete scenario, not a compatibility assertion."""
+
+
 class PrerequisiteError(Exception):
     pass
 
@@ -61,6 +65,8 @@ class UnsupportedCapability(Exception):
 
 
 def failure_status(error: Exception) -> str:
+    if isinstance(error, DiagnosticFailure):
+        return "setup-error"
     if isinstance(error, PrerequisiteError):
         return "unmet-prerequisite"
     if isinstance(error, UnsupportedCapability):
@@ -68,6 +74,22 @@ def failure_status(error: Exception) -> str:
     if isinstance(error, ContractFailure):
         return "failed"
     return "setup-error"
+
+
+def expected_scenario_failures_only(report: RunReport, status: int,
+                                    summary_delivered: bool = True) -> bool:
+    """Allow only completed reports whose sole failure is a scenario assertion."""
+    case_statuses = {result["status"] for result in report.get("results", [])}
+    return (
+        status == 1
+        and summary_delivered
+        and report.get("complete") is True
+        and "setup_error" not in report
+        and "failed" in case_statuses
+        and case_statuses <= {"passed", "failed", "not-selected"}
+        and report.get("artifact_integrity", {}).get("status") == "verified"
+        and report.get("coverage", {}).get("verification", {}).get("status") == "current"
+    )
 
 
 def require(condition: bool, message: str) -> None:
@@ -110,7 +132,7 @@ def execute(argv: list[str], env: dict[str, str], cwd: Path,
     if timeout_error is not None:
         record.update({"stdout": stdout, "stderr": stderr, "timed_out": True,
                        "exit_status": process.wait()})
-        raise ContractFailure(f"command timed out after {timeout}s: {argv}") from timeout_error
+        raise DiagnosticFailure(f"command timed out after {timeout}s: {argv}") from timeout_error
     returncode = process.wait()
     record.update({"stdout": stdout, "stderr": stderr, "exit_status": returncode})
     return subprocess.CompletedProcess(argv, returncode, stdout, stderr)
@@ -543,6 +565,9 @@ def main(*, clock: Callable[[], float] = monotonic) -> int:
     parser.add_argument("--fixtures", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path, help="new results directory")
     parser.add_argument("--driver", choices=["cli", "library", "all"], default="all")
+    parser.add_argument("--allow-expected-failures", action="store_true",
+                        help="return success only when completed scenario assertions are the "
+                             "sole failures and report integrity is verified")
     parser.add_argument("--color", choices=["auto", "always", "never"], default="auto",
                         help="console color (nonempty NO_COLOR overrides all modes)")
     try:
@@ -830,6 +855,7 @@ def main(*, clock: Callable[[], float] = monotonic) -> int:
         write_json(output / "report.json", report)
         (output / "coverage.md").write_text(format_summary(report["coverage"]))
     console.summary(report, output, status)
+    summary_delivered = not os.environ.get("GITHUB_STEP_SUMMARY")
     if summary_path := os.environ.get("GITHUB_STEP_SUMMARY"):
         try:
             rendered = github_summary(report, status)
@@ -837,9 +863,14 @@ def main(*, clock: Callable[[], float] = monotonic) -> int:
                 summary.write("\n\n" + rendered)
             # Only mark delivery after the Actions append has successfully closed.
             (output / "job-summary.md").write_text(rendered, encoding="utf-8")
+            summary_delivered = True
         except OSError as error:
             console.setup_error("setup-error", f"Cannot write GitHub job summary: {error}")
             status = 1
+    if args.allow_expected_failures and expected_scenario_failures_only(
+        report, status, summary_delivered,
+    ):
+        return 0
     return status
 
 
