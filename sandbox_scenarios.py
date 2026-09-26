@@ -494,7 +494,7 @@ def _shm(driver: Driver, app: str) -> None:
 
 
 def _environment_descriptor(driver: Driver, app: str) -> None:
-    from run import ContractFailure
+    from run import DiagnosticFailure
 
     with tempfile.TemporaryFile(dir=driver.root) as data:
         fd = data.fileno()
@@ -509,7 +509,7 @@ def _environment_descriptor(driver: Driver, app: str) -> None:
             try:
                 stdout, stderr = process.communicate(timeout=driver.timeout)
             except subprocess.TimeoutExpired as error:
-                raise ContractFailure("descriptor probe timed out") from error
+                raise DiagnosticFailure("descriptor probe timed out") from error
             _equal(driver, process.returncode, 0, f"descriptor launch status, stderr={stderr!r}")
             _equal(driver, stdout, expected, "descriptor contents reach probe")
 

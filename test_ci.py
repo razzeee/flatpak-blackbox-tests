@@ -93,20 +93,25 @@ class CompatibilityProbeTests(unittest.TestCase):
             root = Path(temporary)
             (root / "logs").mkdir()
             uv = root / "uv"
-            uv.write_text("#!/bin/sh\nprintf 'controlled runner failure\\n'\nexit 23\n")
+            uv.write_text("#!/bin/sh\nprintf '%s\\n' \"$*\" > \"$UV_ARGS\"\n"
+                          "printf 'controlled runner failure\\n'\nexit 23\n")
             uv.chmod(0o755)
             suite = Path(__file__).resolve().parent
             summary = root / "summary.md"
             env = {**os.environ, "BB_CI_ROOT": str(root), "TMPDIR": str(root),
-                   "FLATPAK_REFERENCE_COMMIT": "0" * 40,
-                   "PATH": f"{root}{os.pathsep}{os.defpath}",
-                   "GITHUB_STEP_SUMMARY": str(summary)}
-            command = ["bash", str(suite / "ci/compatibility.sh")]
-            result = subprocess.run([*command, "run"], cwd=suite, env=env, capture_output=True,
+                    "FLATPAK_REFERENCE_COMMIT": "0" * 40,
+                    "PATH": f"{root}{os.pathsep}{os.defpath}",
+                    "UV_ARGS": str(root / "uv-args"),
+                    "GITHUB_STEP_SUMMARY": str(summary)}
+            command = ["bash", str(suite / "ci/compatibility.sh"), "run",
+                       "--allow-expected-failures"]
+            result = subprocess.run(command, cwd=suite, env=env, capture_output=True,
                                     text=True, timeout=10, check=False)
             self.assertEqual(result.returncode, 23)
+            self.assertIn("--allow-expected-failures", (root / "uv-args").read_text())
             self.assertIn("controlled runner failure", (root / "logs/run.log").read_text())
-            result = subprocess.run([*command, "summary"], cwd=suite, env=env, capture_output=True,
+            result = subprocess.run(["bash", str(suite / "ci/compatibility.sh"), "summary"],
+                                    cwd=suite, env=env, capture_output=True,
                                     text=True, timeout=10, check=False)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertIn("Coverage and timings are unverified", summary.read_text())
