@@ -52,6 +52,10 @@ class ContractFailure(Exception):
     pass
 
 
+class DiagnosticFailure(ContractFailure):
+    """An interrupted or incomplete scenario, not a compatibility assertion."""
+
+
 class PrerequisiteError(Exception):
     pass
 
@@ -61,6 +65,8 @@ class UnsupportedCapability(Exception):
 
 
 def failure_status(error: Exception) -> str:
+    if isinstance(error, DiagnosticFailure):
+        return "setup-error"
     if isinstance(error, PrerequisiteError):
         return "unmet-prerequisite"
     if isinstance(error, UnsupportedCapability):
@@ -68,6 +74,33 @@ def failure_status(error: Exception) -> str:
     if isinstance(error, ContractFailure):
         return "failed"
     return "setup-error"
+
+
+def expected_scenario_failures_only(report: RunReport, status: int,
+                                    summary_delivered: bool = True) -> bool:
+    """Allow only completed reports whose sole failure is a scenario assertion."""
+    results = report.get("results", [])
+    case_statuses = {result["status"] for result in results}
+    security_sensitive_prefixes = (
+        "auth.", "remote-auth.", "multiuser.auth-", "sandbox.",
+    )
+    security_sensitive_failures = any(
+        result["status"] == "failed"
+        and (result["behavior_id"].startswith(security_sensitive_prefixes)
+             or result["behavior_id"] == "transaction.pre-auth")
+        for result in results
+    )
+    return (
+        status == 1
+        and summary_delivered
+        and report.get("complete") is True
+        and "setup_error" not in report
+        and "failed" in case_statuses
+        and not security_sensitive_failures
+        and case_statuses <= {"passed", "failed", "not-selected"}
+        and report.get("artifact_integrity", {}).get("status") == "verified"
+        and report.get("coverage", {}).get("verification", {}).get("status") == "current"
+    )
 
 
 def require(condition: bool, message: str) -> None:
@@ -110,7 +143,7 @@ def execute(argv: list[str], env: dict[str, str], cwd: Path,
     if timeout_error is not None:
         record.update({"stdout": stdout, "stderr": stderr, "timed_out": True,
                        "exit_status": process.wait()})
-        raise ContractFailure(f"command timed out after {timeout}s: {argv}") from timeout_error
+        raise DiagnosticFailure(f"command timed out after {timeout}s: {argv}") from timeout_error
     returncode = process.wait()
     record.update({"stdout": stdout, "stderr": stderr, "exit_status": returncode})
     return subprocess.CompletedProcess(argv, returncode, stdout, stderr)
@@ -256,6 +289,13 @@ class Driver:
         require(result.returncode == 0, f"CLI {arguments} failed: {result.stderr}")
         return result.stdout.strip()
 
+    def setup_cli_success(self, *arguments: str) -> str:
+        """Run a required CLI setup command without treating failure as a mismatch."""
+        result = self.cli_call(*arguments)
+        if result.returncode != 0:
+            raise DiagnosticFailure(f"CLI setup {arguments} failed: {result.stderr}")
+        return result.stdout.strip()
+
     def call(self, operation: str, *arguments: str) -> subprocess.CompletedProcess[str]:
         if operation == "run":
             # libflatpak lifecycle tests explicitly depend on CLI app launching.
@@ -285,6 +325,15 @@ class Driver:
     def success(self, operation: str, *arguments: str) -> str:
         result = self.call(operation, *arguments)
         require(result.returncode == 0, f"{self.kind} {operation} failed: {result.stderr}")
+        return result.stdout.strip()
+
+    def setup_success(self, operation: str, *arguments: str) -> str:
+        """Run required scenario setup without treating failure as a test mismatch."""
+        result = self.call(operation, *arguments)
+        if result.returncode != 0:
+            raise DiagnosticFailure(
+                f"{self.kind} {operation} setup failed: {result.stderr}"
+            )
         return result.stdout.strip()
 
     def expect_error(self, operation: str, ref: str, error_name: str) -> None:
@@ -337,7 +386,7 @@ def scenario(driver: Driver, repository: RepositoryServer, url: str,
         return
     app = f"app/{fixture['app']}/{fixture['arch']}/{fixture['branch']}"
     missing = f"app/{fixture['app']}.Missing/{fixture['arch']}/{fixture['branch']}"
-    driver.success("remote", url)
+    driver.setup_success("remote", url)
     if name == "ready-abort":
         aborted = driver.call("install-abort-ready", app)
         driver.check(aborted.returncode > 0,
@@ -362,7 +411,7 @@ def scenario(driver: Driver, repository: RepositoryServer, url: str,
         require(driver.success("list-refs", "") == "",
                 "failed install must leave the fresh installation empty")
         return
-    driver.success("install", app)
+    driver.setup_success("install", app)
     assert_installed_version(driver, fixture, "A", "after install")
     if name == "absent-ref":
         for operation in ("query", "uninstall"):
@@ -543,6 +592,9 @@ def main(*, clock: Callable[[], float] = monotonic) -> int:
     parser.add_argument("--fixtures", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path, help="new results directory")
     parser.add_argument("--driver", choices=["cli", "library", "all"], default="all")
+    parser.add_argument("--allow-expected-failures", action="store_true",
+                        help="return success only when completed scenario assertions are the "
+                             "sole failures and report integrity is verified")
     parser.add_argument("--color", choices=["auto", "always", "never"], default="auto",
                         help="console color (nonempty NO_COLOR overrides all modes)")
     try:
@@ -830,6 +882,7 @@ def main(*, clock: Callable[[], float] = monotonic) -> int:
         write_json(output / "report.json", report)
         (output / "coverage.md").write_text(format_summary(report["coverage"]))
     console.summary(report, output, status)
+    summary_delivered = not os.environ.get("GITHUB_STEP_SUMMARY")
     if summary_path := os.environ.get("GITHUB_STEP_SUMMARY"):
         try:
             rendered = github_summary(report, status)
@@ -837,9 +890,14 @@ def main(*, clock: Callable[[], float] = monotonic) -> int:
                 summary.write("\n\n" + rendered)
             # Only mark delivery after the Actions append has successfully closed.
             (output / "job-summary.md").write_text(rendered, encoding="utf-8")
+            summary_delivered = True
         except OSError as error:
             console.setup_error("setup-error", f"Cannot write GitHub job summary: {error}")
             status = 1
+    if args.allow_expected_failures and expected_scenario_failures_only(
+        report, status, summary_delivered,
+    ):
+        return 0
     return status
 
 

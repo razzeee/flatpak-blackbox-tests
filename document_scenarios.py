@@ -115,8 +115,8 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
     sandbox = name in {"documents-read", "documents-write", "documents-revoke"}
     if sandbox:
         repository.version = "A"
-        driver.success("remote", url)
-        driver.success("install", f"app/{app}/{fixture['arch']}/{fixture['branch']}")
+        driver.setup_success("remote", url)
+        driver.setup_success("install", f"app/{app}/{fixture['arch']}/{fixture['branch']}")
         _denied(driver, app, "read", str(file))
 
     with _service(driver):

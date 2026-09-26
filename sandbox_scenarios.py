@@ -494,7 +494,7 @@ def _shm(driver: Driver, app: str) -> None:
 
 
 def _environment_descriptor(driver: Driver, app: str) -> None:
-    from run import ContractFailure
+    from run import DiagnosticFailure
 
     with tempfile.TemporaryFile(dir=driver.root) as data:
         fd = data.fileno()
@@ -509,7 +509,7 @@ def _environment_descriptor(driver: Driver, app: str) -> None:
             try:
                 stdout, stderr = process.communicate(timeout=driver.timeout)
             except subprocess.TimeoutExpired as error:
-                raise ContractFailure("descriptor probe timed out") from error
+                raise DiagnosticFailure("descriptor probe timed out") from error
             _equal(driver, process.returncode, 0, f"descriptor launch status, stderr={stderr!r}")
             _equal(driver, stdout, expected, "descriptor contents reach probe")
 
@@ -536,7 +536,7 @@ def _instance_descriptor(driver: Driver, app: str) -> None:
 
 
 def _make_current(driver: Driver, fixture: FixtureManifest, app: str) -> None:
-    from run import execute
+    from run import DiagnosticFailure, execute
 
     # Construct independent branch inputs from immutable reference repositories.
     repo = driver.root / "branches-repo"
@@ -547,7 +547,8 @@ def _make_current(driver: Driver, fixture: FixtureManifest, app: str) -> None:
             args = ("checkout", "--force-copy", "--disable-cache", *args[1:])
         result = execute(["ostree", f"--repo={repo}", *args], driver.env, driver.root,
                          driver.evidence, driver.timeout)
-        driver.check(result.returncode == 0, f"reference branch setup failed: {result.stderr}")
+        if result.returncode != 0:
+            raise DiagnosticFailure(f"reference branch setup failed: {result.stderr}")
         return result.stdout.strip()
 
     arch = fixture["arch"]
@@ -596,7 +597,7 @@ def _make_current(driver: Driver, fixture: FixtureManifest, app: str) -> None:
 
 def _metadata_variant(driver: Driver, fixture: FixtureManifest,
                       values: dict[str, dict[str, str]]) -> None:
-    from run import execute
+    from run import DiagnosticFailure, execute
 
     repo = driver.root / "metadata-repo"
     shutil.copytree(Path(fixture["directory"]) / "A", repo)
@@ -607,7 +608,8 @@ def _metadata_variant(driver: Driver, fixture: FixtureManifest,
             args = ("checkout", "--force-copy", "--disable-cache", *args[1:])
         result = execute(["ostree", f"--repo={repo}", *args], driver.env, driver.root,
                          driver.evidence, driver.timeout)
-        driver.check(result.returncode == 0, f"reference metadata setup failed: {result.stderr}")
+        if result.returncode != 0:
+            raise DiagnosticFailure(f"reference metadata setup failed: {result.stderr}")
 
     ostree("checkout", "--user-mode", fixture["commits"]["A"], str(tree))
     metadata = tree / "metadata"
@@ -831,8 +833,8 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
     """Run one isolated contract; the runner owns environment and repository cleanup."""
     app = str(fixture["app"])
     repository.version = "A"
-    driver.success("remote", url)
-    driver.success("install", f"app/{app}/{fixture['arch']}/{fixture['branch']}")
+    driver.setup_success("remote", url)
+    driver.setup_success("install", f"app/{app}/{fixture['arch']}/{fixture['branch']}")
     if name in {"sandbox-environment", "sandbox-clear-env", "sandbox-override-env",
                 "sandbox-global-override"}:
         if name != "sandbox-clear-env":

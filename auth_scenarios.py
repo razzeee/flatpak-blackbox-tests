@@ -59,7 +59,7 @@ def protected_server(driver: Driver, directory: Path,
 def run(driver: Driver, repository: RepositoryServer, url: str,
          fixture: FixtureManifest, name: str) -> None:
     """Exercise isolated authentication decisions and observable deployment results."""
-    from run import PrerequisiteError, terminate
+    from run import DiagnosticFailure, PrerequisiteError, terminate
 
     del repository, url
     extra = fixture["extras"]["auth"]
@@ -71,7 +71,7 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
             raise PrerequisiteError("prepared runnable authenticator and runtime required")
         candidate = extra["authenticator_ref"]
         with protected_server(driver, directory, extra["payloads"]) as (auth_url, requests):
-            driver.success("remote", auth_url)
+            driver.setup_success("remote", auth_url)
             available = driver.cli_success("remote-info", "--user", "--show-commit",
                                            "fixture", candidate)
             driver.check(available == extra["authenticator_commit"],
@@ -121,7 +121,8 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
         "cc", "-Wall", "-Wextra", "-Werror", "-o", str(binary),
         str(Path(__file__).with_name("fixture-auth-service.c")), *shlex.split(flags),
     ], "setup")
-    driver.check(build.returncode == 0, f"authenticator compile failed: {build.stderr}")
+    if build.returncode != 0:
+        raise DiagnosticFailure(f"authenticator compile failed: {build.stderr}")
     mode = name.removeprefix("auth-")
     modes = {"web": ["web-wrong", "web"],
              "basic-abort": ["basic-decline", "basic-abort"],
@@ -129,7 +130,7 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
              "pre-auth": ["pre-abort", "basic"],
              "parent-window": ["basic", "basic"]}.get(mode, [mode])
     with protected_server(driver, directory, extra["payloads"]) as (auth_url, requests):
-        driver.success("remote", auth_url)
+        driver.setup_success("remote", auth_url)
         driver.cli_success("remote-modify", "--user", "fixture", "--authenticator-name",
                            "org.flatpak.BlackboxAuthenticator")
         for index, current in enumerate(modes):
