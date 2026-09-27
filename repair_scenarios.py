@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 def run(driver: Driver, repository: RepositoryServer, url: str,
         fixture: FixtureManifest, name: str) -> None:
-    from run import PrerequisiteError
+    from run import DiagnosticFailure, PrerequisiteError
 
     app = f"app/{fixture['app']}/{fixture['arch']}/{fixture['branch']}"
     runtime = f"runtime/{fixture['runtime']}/{fixture['arch']}/{fixture['branch']}"
@@ -27,7 +27,8 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
             raise PrerequisiteError("adapter does not provide BLACKBOX_REPAIR_FIXTURE")
         result = driver.external_call(
             [sys.executable, helper, str(driver.root), operation, commit], "setup")
-        driver.check(result.returncode == 0, f"repair fixture {operation}: {result.stderr}")
+        if result.returncode != 0:
+            raise DiagnosticFailure(f"repair fixture {operation}: {result.stderr}")
         return result.stdout
 
     def dry_run() -> str:
@@ -35,8 +36,8 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
         driver.check(result.returncode == 0, f"dry-run repair failed: {result.stderr}")
         return result.stdout + result.stderr
 
-    driver.success("remote", url)
-    driver.success("install", app)
+    driver.setup_success("remote", url)
+    driver.setup_success("install", app)
     driver.query(app, commit)
     driver.check(driver.success("run", app) == "A", "healthy app runs version A")
     if name == "repair-reinstall-all":

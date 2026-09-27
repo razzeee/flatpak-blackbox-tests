@@ -181,21 +181,22 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
     app = f"app/{fixture['app']}/{fixture['arch']}/{fixture['branch']}"
     runtime = f"runtime/{fixture['runtime']}/{fixture['arch']}/{fixture['branch']}"
     repository.version = "A"
-    driver.success("remote", url)
+    driver.setup_success("remote", url)
 
     if name == "tx-lookup":
-        driver.success("install", app)
-        driver.success("remote-create", "tx-second", url + "/", "Second origin", "1")
+        driver.setup_success("install", app)
+        driver.setup_success("remote-create", "tx-second", url + "/", "Second origin", "1")
         _tx(driver, "normal", "lookup", app, operand="tx-second")
         _state(driver, fixture, "A")
         return
 
     if name == "tx-cancel-download":
-        driver.success("install", app)
+        driver.setup_success("install", app)
         server = TransferServer(Path(fixture["directory"]) / "B")
         server.cancel_marker = driver.root / "payload-in-flight"
         with server.serving(driver) as transfer_url:
-            driver.success("remote-edit", "fixture", transfer_url, "Cancellation fixture", "1")
+            driver.setup_success("remote-edit", "fixture", transfer_url,
+                                 "Cancellation fixture", "1")
             rows = _tx(driver, "cancel", "update", app,
                        operand=str(server.cancel_marker), succeeds=False)
             driver.check(_rows(rows, "cancelled-in-flight") == [[]],
@@ -207,9 +208,9 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
         return
 
     if name == "tx-choose-remote":
-        driver.cli_success("remote-modify", "--user", "--no-use-for-deps", "fixture")
-        driver.success("remote-create", "tx-low", url + "/", "Low priority", "10")
-        driver.success("remote-create", "tx-high", url + "//", "High priority", "90")
+        driver.setup_cli_success("remote-modify", "--user", "--no-use-for-deps", "fixture")
+        driver.setup_success("remote-create", "tx-low", url + "/", "Low priority", "10")
+        driver.setup_success("remote-create", "tx-high", url + "//", "High priority", "90")
         for mode, succeeds in (("decline", False), ("normal", True)):
             rows = _tx(driver, mode, "install", app, succeeds=succeeds)
             driver.check(_rows(rows, "choose") == [[app, runtime, "tx-high", "tx-low"]],
@@ -302,7 +303,7 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
             driver.check(_rows(rows, "op")[0][4:] == ["0", "0"],
                          "uninstall sizes must both be zero")
     elif name in ("tx-download-only", "tx-no-pull", "tx-explicit-commit", "tx-no-deploy-uninstall"):
-        driver.success("install", app)
+        driver.setup_success("install", app)
         if name == "tx-no-deploy-uninstall":
             rows = _tx(driver, "no-deploy", "uninstall", app)
             _state(driver, fixture, "A")
@@ -329,7 +330,7 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
         else:
             _tx(driver, "normal", "empty", app)
     elif name == "tx-error-sequence":
-        driver.success("install", app)
+        driver.setup_success("install", app)
         repository.version = "B"
         repository.fail_payloads = True
         before = len(repository.requests)
@@ -363,8 +364,11 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
 
 
 def _supplemental(driver: Driver, fixture: FixtureManifest, name: str) -> None:
+    from run import DiagnosticFailure
+
     extra = fixture.get("extras", {}).get("transactions")
-    driver.check(extra is not None, "prepare_transactions.py supplemental fixture is required")
+    if extra is None:
+        raise DiagnosticFailure("prepare_transactions.py supplemental fixture is required")
     assert extra is not None
     directory = Path(fixture["directory"]) / extra["directory"]
     first, second = [f"app/{app}/{fixture['arch']}/{fixture['branch']}" for app in extra["apps"]]
@@ -380,8 +384,8 @@ def _supplemental(driver: Driver, fixture: FixtureManifest, name: str) -> None:
         driver.check(result.returncode == 3, f"{ref} must be absent with NOT_INSTALLED")
 
     with server.serving(driver) as url:
-        driver.success("remote-edit", "fixture", url, "Supplemental transactions", "1")
-        driver.success("install", first)
+        driver.setup_success("remote-edit", "fixture", url, "Supplemental transactions", "1")
+        driver.setup_success("install", first)
         state(first, "A")
         server.directory = directory / "B"
 
@@ -404,9 +408,9 @@ def _supplemental(driver: Driver, fixture: FixtureManifest, name: str) -> None:
                 with _fresh_transaction_state(driver, f"frequency-{index}"):
                     server.directory = directory / "A"
                     server.slow = False
-                    driver.success("remote-create", "fixture", url,
-                                   "Supplemental transactions", "1")
-                    driver.success("install", first)
+                    driver.setup_success("remote-create", "fixture", url,
+                                         "Supplemental transactions", "1")
+                    driver.setup_success("install", first)
                     state(first, "A")
                     server.directory = directory / "B"
                     server.slow = True

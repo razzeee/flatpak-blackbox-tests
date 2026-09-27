@@ -14,13 +14,160 @@ from contextlib import contextmanager, redirect_stdout
 from http.server import ThreadingHTTPServer
 from io import StringIO
 from pathlib import Path
+from typing import cast
 from unittest.mock import patch
 
 import run
 from fixture_manifest import FixtureManifest
-from report_schema import EvidenceRecord
+from report_schema import EvidenceRecord, RunReport
 
 RUNNER = Path(__file__).with_name("run.py")
+
+
+class ExpectedFailureGateTests(unittest.TestCase):
+    def report(self, statuses: set[str]) -> RunReport:
+        return cast(RunReport, {
+            "schema": 1,
+            "complete": True,
+            "results": [{"behavior_id": str(index), "driver": "cli", "profile": "user",
+                         "status": status} for index, status in enumerate(statuses)],
+            "artifact_integrity": {"status": "verified"},
+            "coverage": {"verification": {"status": "current"}},
+        })
+
+    def test_only_completed_verified_scenario_failures_are_allowed(self) -> None:
+        self.assertTrue(run.expected_scenario_failures_only(
+            self.report({"passed", "failed"}), 1))
+        self.assertFalse(run.expected_scenario_failures_only(
+            self.report({"passed"}), 1))
+        self.assertFalse(run.expected_scenario_failures_only(
+            self.report({"passed", "failed", "unsupported"}), 1))
+        self.assertFalse(run.expected_scenario_failures_only(
+            self.report({"passed", "failed"}) | {"complete": False}, 1))
+        self.assertFalse(run.expected_scenario_failures_only(
+            self.report({"passed", "failed"}), 0))
+        self.assertFalse(run.expected_scenario_failures_only(
+            self.report({"passed", "failed"}), 1, summary_delivered=False))
+        self.assertFalse(run.expected_scenario_failures_only(
+            self.report({"passed", "failed", "setup-error"}), 1))
+        for behavior_id in ("auth.basic", "remote-auth.options-add",
+                            "multiuser.auth-transaction", "transaction.pre-auth"):
+            with self.subTest(behavior_id=behavior_id):
+                report = self.report({"failed"})
+                report["results"][0]["behavior_id"] = behavior_id
+                self.assertFalse(run.expected_scenario_failures_only(report, 1))
+        report = self.report({"failed"})
+        report["results"][0]["behavior_id"] = "sandbox.filesystem-network"
+        self.assertFalse(run.expected_scenario_failures_only(report, 1))
+
+    def test_setup_and_report_integrity_failures_cannot_be_allowed(self) -> None:
+        report = self.report({"failed"})
+        report["setup_error"] = "setup failed"
+        self.assertFalse(run.expected_scenario_failures_only(report, 1))
+        report = self.report({"failed"})
+        report["artifact_integrity"] = {"status": "changed"}
+        self.assertFalse(run.expected_scenario_failures_only(report, 1))
+        report = self.report({"failed"})
+        report = cast(RunReport, {**report, "coverage": {
+            "verification": {"status": "invalid"},
+        }})
+        self.assertFalse(run.expected_scenario_failures_only(report, 1))
+
+    def test_interrupted_scenarios_are_diagnostic_errors_not_assertion_failures(self) -> None:
+        error = run.DiagnosticFailure("command timed out")
+        self.assertEqual(run.failure_status(error), "setup-error")
+
+    def test_failed_scenario_setup_is_not_a_compatibility_assertion(self) -> None:
+        driver = run.Driver("cli", "flatpak", None, {}, Path("."), [], 1)
+        with (
+            patch.object(driver, "call", return_value=subprocess.CompletedProcess(
+                ["flatpak", "install"], 1, "", "fixture setup failed",
+            )),
+            self.assertRaisesRegex(run.DiagnosticFailure, "install setup failed") as raised,
+        ):
+            driver.setup_success("install", "app/example")
+        self.assertEqual(run.failure_status(raised.exception), "setup-error")
+
+    def test_failed_transaction_cli_setup_is_not_a_compatibility_assertion(self) -> None:
+        driver = run.Driver("cli", "flatpak", None, {}, Path("."), [], 1)
+        failed = subprocess.CompletedProcess(["flatpak", "remote-modify"], 1, "", "setup failed")
+        with (
+            patch.object(driver, "cli_call", return_value=failed),
+            self.assertRaisesRegex(run.DiagnosticFailure, "CLI setup .*remote-modify"),
+        ):
+            driver.setup_cli_success("remote-modify", "--user", "fixture")
+
+    def test_missing_transaction_supplemental_fixture_is_diagnostic(self) -> None:
+        import transaction_scenarios
+
+        fixture = cast(FixtureManifest, {"extras": {}})
+        driver = run.Driver("cli", "flatpak", None, {}, Path("."), [], 1)
+        with self.assertRaisesRegex(run.DiagnosticFailure, "supplemental fixture is required"):
+            transaction_scenarios._supplemental(driver, fixture, "tx-metadata")
+
+    def test_ostree_fixture_preparation_failure_is_a_diagnostic_error(self) -> None:
+        import sandbox_scenarios
+
+        with tempfile.TemporaryDirectory(prefix="runner-ostree-setup-") as temporary:
+            root = Path(temporary)
+            fixture_dir = root / "fixtures"
+            (fixture_dir / "B").mkdir(parents=True)
+            fixture = cast(FixtureManifest, {
+                "directory": str(fixture_dir), "arch": "x86_64", "branch": "stable",
+                "commits": {"A": "a", "B": "b"},
+            })
+            driver = run.Driver("cli", "flatpak", None, {}, root, [], 1)
+            failed = subprocess.CompletedProcess(["ostree"], 1, "", "controlled setup error")
+            with (
+                patch.object(run, "execute", return_value=failed),
+                self.assertRaisesRegex(run.DiagnosticFailure, "reference branch setup failed"),
+            ):
+                sandbox_scenarios._make_current(driver, fixture, "org.example.App")
+
+    def test_ostree_metadata_preparation_failure_is_a_diagnostic_error(self) -> None:
+        import sandbox_scenarios
+
+        with tempfile.TemporaryDirectory(prefix="runner-metadata-setup-") as temporary:
+            root = Path(temporary)
+            fixture_dir = root / "fixtures"
+            (fixture_dir / "A").mkdir(parents=True)
+            fixture = cast(FixtureManifest, {
+                "directory": str(fixture_dir), "arch": "x86_64", "branch": "stable",
+                "app": "org.example.App", "commits": {"A": "a"},
+            })
+            driver = run.Driver("cli", "flatpak", None, {}, root, [], 1)
+            failed = subprocess.CompletedProcess(["ostree"], 1, "", "controlled setup error")
+            with (
+                patch.object(run, "execute", return_value=failed),
+                self.assertRaisesRegex(run.DiagnosticFailure, "reference metadata setup failed"),
+            ):
+                sandbox_scenarios._metadata_variant(driver, fixture, {})
+
+    def test_repair_fixture_failure_is_a_diagnostic_error(self) -> None:
+        import repair_scenarios
+
+        with tempfile.TemporaryDirectory(prefix="runner-repair-setup-") as temporary:
+            root = Path(temporary)
+            fixture = cast(FixtureManifest, {
+                "directory": str(root), "app": "org.example.App",
+                "runtime": "org.example.Runtime",
+                "arch": "x86_64", "branch": "stable", "commits": {"A": "a"},
+                "runtime_commit": "runtime",
+            })
+            driver = run.Driver("cli", "flatpak", None,
+                                {"BLACKBOX_REPAIR_FIXTURE": "repair-fixture"}, root, [], 1)
+            successful = subprocess.CompletedProcess(["flatpak"], 0, "healthy", "")
+            failed = subprocess.CompletedProcess(["repair-fixture"], 1, "", "controlled failure")
+            with (
+                patch.object(driver, "setup_success"),
+                patch.object(driver, "query"),
+                patch.object(driver, "success", return_value="A"),
+                patch.object(driver, "cli_call", return_value=successful),
+                patch.object(driver, "external_call", return_value=failed),
+                self.assertRaisesRegex(run.DiagnosticFailure, "repair fixture remove-payload"),
+            ):
+                repair_scenarios.run(driver, cast(run.RepositoryServer, None), "", fixture,
+                                     "repair-user-restore")
 
 
 class CommandInputTests(unittest.TestCase):

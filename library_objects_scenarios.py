@@ -29,8 +29,8 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
         first, second = fixture["commits"]["A"], fixture["commits"]["B"]
         driver.check(first != second, "latest-commit control requires distinct fixture commits")
         repository.version = "A"
-        driver.success("remote", url)
-        driver.success("install", app)
+        driver.setup_success("remote", url)
+        driver.setup_success("install", app)
         driver.success(name, app, first, first)
         repository.version = "B"
         driver.cli_success("update", "--user", "--noninteractive", "--no-deploy", app)
@@ -41,8 +41,8 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
     elif name == "objects-transaction-reinstall":
         app = f"app/{fixture['app']}/{fixture['arch']}/{fixture['branch']}"
         repository.version = "A"
-        driver.success("remote", url)
-        driver.success("install", app)
+        driver.setup_success("remote", url)
+        driver.setup_success("install", app)
         arguments = [app, fixture["commits"]["A"]]
     elif name == "objects-transaction-pruning":
         from lifecycle_extra_scenarios import run as lifecycle_run
@@ -71,8 +71,8 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
         (delta / "summary.idx").unlink(missing_ok=True)
         server = RepositoryServer(source)
         with server.serving() as server_url:
-            driver.success("remote", server_url)
-            driver.success("install", app)
+            driver.setup_success("remote", server_url)
+            driver.setup_success("install", app)
             for disabled in (False, True, False):
                 server.version = "B"
                 before = len(server.requests)
@@ -135,8 +135,8 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
         app = f"app/{fixture['app']}/{fixture['arch']}/{fixture['branch']}"
         runtime = f"runtime/{fixture['runtime']}/{fixture['arch']}/{fixture['branch']}"
         repository.version = "A"
-        driver.success("remote", url)
-        driver.success("install", app)
+        driver.setup_success("remote", url)
+        driver.setup_success("install", app)
         arguments = [str(driver.root / "custom-user"), app, runtime]
     elif name == "objects-overrides":
         driver.cli_success(
