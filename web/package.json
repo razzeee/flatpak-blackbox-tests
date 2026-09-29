@@ -13,7 +13,7 @@
     "test": "tsx --test test/*.test.ts",
     "history": "tsx scripts/history.ts",
     "baseline": "tsx scripts/baseline.ts",
-    "matrix": "tsx scripts/matrix.ts",
+    "matrix": "node scripts/matrix.mjs",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {

@@ -75,8 +75,7 @@ Expected: PASS.
 **Files:**
 - Modify: `.github/workflows/compatibility.yml`
 - Modify: `web/package.json`
-- Create: `web/src/baseline-matrix.ts`
-- Create: `web/scripts/matrix.ts`
+- Create: `web/scripts/matrix.mjs`
 - Modify: `ci/compatibility.sh`
 - Test: `web/test/baselines.test.ts`
 - Test: `test_ci.py`
@@ -97,7 +96,7 @@ Expected: FAIL on new matrix/default-selection cases while existing tag checks c
 
 - [ ] **Step 3: Update matrix generation and selection steps**
 
-Implement `buildCompatibilityMatrix` in `web/src/baseline-matrix.ts` and test the default, explicit-release, and publishing cases through that public function. Add `web/scripts/matrix.ts` as the Actions adapter and a package script for it. In `.github/workflows/compatibility.yml`, replace the inline generator with that script. Pass each matrix ref into the upstream selection step instead of hardcoding a separate value. Run the pinned selection step only for pinned matrix entries.
+Implement `web/scripts/matrix.mjs` as a dependency-free Node script so the matrix-preparation job can run before npm dependencies are installed. Test default, explicit-release, and publishing cases by executing that script from `web/test/baselines.test.ts`; add a package script for local runs. In `.github/workflows/compatibility.yml`, replace the inline generator with that script. Pass each matrix ref into the upstream selection step instead of hardcoding a separate value. Run the pinned selection step only for pinned matrix entries.
 
 - [ ] **Step 4: Resolve moving refs once at checkout**
 

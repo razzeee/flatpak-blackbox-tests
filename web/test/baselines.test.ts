@@ -28,7 +28,6 @@ import {
   targetOptions,
   withBaseline,
 } from "../src/targets.ts";
-import { buildCompatibilityMatrix } from "../src/baseline-matrix.ts";
 import { entry, timedEntry } from "./fixtures.ts";
 
 const nextBaseline: Baseline = {
@@ -44,6 +43,33 @@ function forBaseline(baseline: Baseline, timestamp?: string): Snapshot {
     target_commit: baseline.commit,
     target_version: `Flatpak ${baseline.version}`,
   };
+}
+
+function compatibilityMatrix(input: {
+  eventName: string;
+  ref: string;
+  defaultBranch: string;
+  selector: string;
+}) {
+  const output = execFileSync(
+    process.execPath,
+    [fileURLToPath(new URL("../scripts/matrix.mjs", import.meta.url))],
+    {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        EVENT_NAME: input.eventName,
+        REF: input.ref,
+        DEFAULT_BRANCH: input.defaultBranch,
+        BASELINE: input.selector,
+      },
+    },
+  );
+  return JSON.parse(output.slice("matrix=".length)).include as Array<{
+    track: "pinned" | "upstream";
+    baseline: string;
+    ref: string;
+  }>;
 }
 
 test("baseline configuration requires a moving current ref and unique safe definitions", () => {
@@ -118,7 +144,7 @@ test("manual baseline selection resolves current branch, release version and exa
 });
 
 test("compatibility matrix defaults to one moving main track and retains pinned choices", () => {
-  const pullRequest = buildCompatibilityMatrix({
+  const pullRequest = compatibilityMatrix({
     eventName: "pull_request",
     ref: "refs/pull/35/merge",
     defaultBranch: "main",
@@ -128,7 +154,7 @@ test("compatibility matrix defaults to one moving main track and retains pinned 
     { track: "upstream", baseline: "", ref: "refs/heads/main" },
   ]);
 
-  const selectedRelease = buildCompatibilityMatrix({
+  const selectedRelease = compatibilityMatrix({
     eventName: "workflow_dispatch",
     ref: "refs/heads/main",
     defaultBranch: "main",
@@ -142,7 +168,7 @@ test("compatibility matrix defaults to one moving main track and retains pinned 
     },
   ]);
 
-  const scheduled = buildCompatibilityMatrix({
+  const scheduled = compatibilityMatrix({
     eventName: "schedule",
     ref: "refs/heads/main",
     defaultBranch: "main",
