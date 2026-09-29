@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       baseline:
-        description: "Pinned baseline version or commit (blank uses current)"
+        description: "Pinned baseline version or commit (blank uses latest upstream main)"
         type: string
         default: ""
   schedule:
@@ -36,37 +36,7 @@ jobs:
           BASELINE: ${{ inputs.baseline }}
           REF: ${{ github.ref }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-        run: |
-          node <<'NODE' >> "$GITHUB_OUTPUT"
-          const fs = require("node:fs");
-          const config = JSON.parse(fs.readFileSync("ci/baselines.json", "utf8"));
-          const baselines = config.baselines;
-          const selector = process.env.BASELINE;
-
-          function resolveBaseline(value) {
-            if (!value) return baselines.find((item) => item.commit === config.current);
-            const byCommit = baselines.find((item) => item.commit === value);
-            if (byCommit) return byCommit;
-            const matches = baselines.filter((item) => item.version === value);
-            if (matches.length === 1) return matches[0];
-            throw new Error(`Unknown or ambiguous baseline: ${value}`);
-          }
-
-          const publishesCoverage =
-            process.env.EVENT_NAME === "schedule" ||
-            (process.env.EVENT_NAME === "push" &&
-              process.env.REF === `refs/heads/${process.env.DEFAULT_BRANCH}`);
-          const entries = publishesCoverage
-            ? [
-                ...baselines.map((baseline) => ({
-                  track: "pinned",
-                  baseline: baseline.commit,
-                })),
-                { track: "upstream", baseline: "" },
-              ]
-            : [{ track: "pinned", baseline: resolveBaseline(selector).commit }];
-          console.log(`matrix=${JSON.stringify({ include: entries })}`);
-          NODE
+        run: npm --prefix web run --silent matrix >> "$GITHUB_OUTPUT"
 
   compatibility:
     needs: prepare
@@ -109,8 +79,10 @@ jobs:
 
       - name: Select upstream branch
         if: matrix.track == 'upstream'
+        env:
+          BASELINE_REF: ${{ matrix.ref }}
         run: |
-          printf 'FLATPAK_BASELINE_REF=refs/heads/main\n' >> "$GITHUB_ENV"
+          printf 'FLATPAK_BASELINE_REF=%s\n' "$BASELINE_REF" >> "$GITHUB_ENV"
 
       - name: Initialize isolated CI directories
         run: bash ci/compatibility.sh init

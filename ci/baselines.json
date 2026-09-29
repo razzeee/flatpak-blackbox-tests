@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "current": "10b5972dfeff08f516ca571c8438c2e284cd60ce",
+  "current": "refs/heads/main",
   "baselines": [
     {
       "version": "1.19.2",

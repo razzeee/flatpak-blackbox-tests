@@ -48,11 +48,13 @@ class CompatibilityProbeTests(unittest.TestCase):
                     output = work / "environment"
                     checkout_env = {
                         **env, "BB_CI_ROOT": str(work), "TMPDIR": str(root),
-                        "FLATPAK_BASELINE_REF": ref, "FLATPAK_REFERENCE_COMMIT": pin,
+                        "FLATPAK_BASELINE_REF": ref,
                         "GITHUB_ENV": str(output), "GIT_CONFIG_COUNT": "1",
                         "GIT_CONFIG_KEY_0": f"url.{remote.as_uri()}.insteadOf",
                         "GIT_CONFIG_VALUE_0": "https://github.com/flatpak/flatpak.git",
                     }
+                    if pin:
+                        checkout_env["FLATPAK_REFERENCE_COMMIT"] = pin
                     result = subprocess.run(
                         ["bash", str(suite / "ci/compatibility.sh"), "checkout"],
                         cwd=suite, env=checkout_env, capture_output=True, text=True,
