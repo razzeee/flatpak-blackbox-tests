@@ -4,6 +4,7 @@ import configuration from "../../ci/baselines.json";
 
 const commitSchema = z.string().regex(/^[0-9a-f]{40}$/);
 const refSchema = z.string().regex(/^refs\/tags\/[0-9][0-9A-Za-z.+-]*$/);
+const currentRefSchema = z.literal("refs/heads/main");
 export const baselineSchema = z.object({
   version: z.string().regex(/^[0-9][0-9A-Za-z.+-]*$/),
   commit: commitSchema,
@@ -16,13 +17,9 @@ const baselineDefinitionSchema = baselineSchema.extend({ ref: refSchema });
 export const baselineConfigSchema = z
   .object({
     schema: z.literal(1),
-    current: commitSchema,
+    current: currentRefSchema,
     baselines: z.array(baselineDefinitionSchema).min(1),
   })
-  .refine(
-    (value) => value.baselines.some((item) => item.commit === value.current),
-    "Current baseline must have a definition",
-  )
   .refine(
     (value) =>
       new Set(value.baselines.map((item) => item.commit)).size ===
@@ -31,19 +28,21 @@ export const baselineConfigSchema = z
   );
 
 export const baselineConfig = baselineConfigSchema.parse(configuration);
-export const currentBaseline = baselineConfig.baselines.find(
-  (item) => item.commit === baselineConfig.current,
-)!;
+// Used to infer legacy pinned snapshots; the default target is baselineConfig.current.
+export const latestPinnedBaseline = baselineConfig.baselines[0]!;
 
 export function findBaseline(commit: string): Baseline | undefined {
   return baselineConfig.baselines.find((item) => item.commit === commit);
 }
 
-/** Manual runs may select a retained tag baseline or its exact source commit. */
-export function resolveBaseline(selector = ""): Baseline {
-  if (!selector) return currentBaseline;
+export type BaselineSelection =
+  { kind: "upstream"; ref: string } | { kind: "pinned"; baseline: Baseline };
+
+/** Manual runs default to moving main or select a retained tag baseline. */
+export function resolveBaseline(selector = ""): BaselineSelection {
+  if (!selector) return { kind: "upstream", ref: baselineConfig.current };
   const byCommit = findBaseline(selector);
-  if (byCommit) return byCommit;
+  if (byCommit) return { kind: "pinned", baseline: byCommit };
   const matches = baselineConfig.baselines.filter(
     (item) => item.version === selector,
   );
@@ -54,5 +53,5 @@ export function resolveBaseline(selector = ""): Baseline {
         : `Unknown baseline ${selector}; add its definition to ci/baselines.json`,
     );
   }
-  return matches[0]!;
+  return { kind: "pinned", baseline: matches[0]! };
 }

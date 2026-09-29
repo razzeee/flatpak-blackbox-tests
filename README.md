@@ -29,12 +29,13 @@ commands, with a 4,000-character field limit and a 24,000-character budget per
 case. Truncated output is labelled; the CI link leads to the full report artifacts
 while they remain available. Older snapshots without diagnostics say so.
 
-The active baseline is configured in `ci/baselines.json`. Add a release tag and
-its peeled commit, then update `current` when upgrading; retain older definitions
-for historical labels. The separate upstream track follows the `main` branch.
-Manual runs accept a configured tag version or its exact resolved commit. Compare
-old and new baselines using the same suite revision; their daily coverage and
-timings stay separate.
+The default baseline follows upstream `main` and resolves to a commit when each
+run checks out the branch. CI records that commit and the reported Flatpak version
+as evidence; the moving results share the upstream history track. Pinned release
+baselines are configured in `ci/baselines.json` with their tag and peeled commit.
+Manual runs accept a configured tag version or its exact commit. Compare release
+baselines using the same suite revision; their daily coverage and timings stay
+separate from upstream `main`.
 
 CI fetches the selected full Git ref once and resolves it to a commit before
 building. Tags must peel to their configured commit (annotated and lightweight
@@ -230,8 +231,9 @@ python3 catalogue.py --source-root ../flatpak --output coverage-data/surfaces.js
 ## CI
 
 Every push and pull request runs lint, type and formatting checks, unit tests on
-Python 3.10 and 3.14, and the full compatibility suite against a pinned reference
-Flatpak build. Classified non-security scenario assertion failures remain visible
+Python 3.10 and 3.14, and the full compatibility suite against the latest upstream
+Flatpak `main`. Scheduled runs also cover each retained tagged release. Classified
+non-security scenario assertion failures remain visible
 in reports but do not fail CI when they are the only failures and the complete
 report passes integrity and coverage verification. Authentication and sandbox
 assertions, scenario setup, prerequisite, unsupported-capability, cleanup,

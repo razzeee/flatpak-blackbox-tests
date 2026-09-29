@@ -17,7 +17,7 @@ import {
   type CaseTiming,
 } from "../src/history.ts";
 import { record } from "../scripts/record.ts";
-import { currentBaseline } from "../src/baselines.ts";
+import { latestPinnedBaseline } from "../src/baselines.ts";
 import { completeEntry, entry, timedEntry } from "./fixtures.ts";
 
 test("latest complete UTC-day run wins, including out-of-order reruns", () => {
@@ -120,7 +120,7 @@ test("snapshot CLI handles absent reports and update preserves existing history"
     "--suite-commit",
     "suite",
     "--target-commit",
-    currentBaseline.commit,
+    latestPinnedBaseline.commit,
     "--run-url",
     "https://github.com/example/suite/actions/runs/1",
     "--output",
@@ -247,7 +247,7 @@ print(json.dumps({
     track: "pinned" as const,
     timestamp: "2026-09-18T01:00:00Z",
     suiteCommit: "suite",
-    targetCommit: currentBaseline.commit,
+    targetCommit: latestPinnedBaseline.commit,
     runUrl: "https://github.com/example/suite",
   };
   const value = await record(options);
@@ -257,9 +257,9 @@ print(json.dumps({
   assert.equal(value.performance?.duration_seconds, undefined);
   assert.equal(value.performance?.cases.length, report.results.length);
   assert.equal(value.performance?.cases_complete, true);
-  assert.deepEqual(value.baseline, currentBaseline);
+  assert.deepEqual(value.baseline, latestPinnedBaseline);
   assert.equal(value.target_version, undefined);
-  report.target_version = `Flatpak ${currentBaseline.version}`;
+  report.target_version = `Flatpak ${latestPinnedBaseline.version}`;
   report.duration_seconds = 450;
   for (const result of report.results) {
     result.duration_seconds = 1;
@@ -318,7 +318,7 @@ print(json.dumps({
     record({ ...options, targetCommit: "c".repeat(40) }),
     /Unknown pinned commit/,
   );
-  report.target_version = `Flatpak ${currentBaseline.version}`;
+  report.target_version = `Flatpak ${latestPinnedBaseline.version}`;
   report.complete = false;
   await writeFile(reportPath, JSON.stringify(report));
   assert.equal((await record(options)).performance, undefined);
