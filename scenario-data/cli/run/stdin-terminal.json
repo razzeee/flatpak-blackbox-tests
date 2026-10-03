@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "app.stdin-terminal",
+      "scenario": "stdin-terminal",
+      "handler": "stdin_tty_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Run an app that consumes piped stdin and writes to the controlling terminal.",
+      "preconditions": "Fresh user installation of the fixture app and an interactive pseudo-terminal shell.",
+      "expected": "The app receives and echoes the exact piped marker, exits zero, and is not suspended for terminal output.",
+      "references": [
+        "doc/flatpak-run.xml",
+        "https://github.com/flatpak/flatpak/issues/6866"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "app.stdin-terminal",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.run.user.command"
+      ],
+      "rationale": "An installed fixture app consumes a real pipe and writes the exact marker to a controlling pseudo-terminal through the public run command."
+    }
+  ]
+}

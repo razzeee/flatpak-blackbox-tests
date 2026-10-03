@@ -15,11 +15,12 @@ from http.server import ThreadingHTTPServer
 from io import StringIO
 from pathlib import Path
 from typing import cast
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import run
 from fixture_manifest import FixtureManifest
 from report_schema import EvidenceRecord, RunReport
+from stdin_tty_scenarios import _run_interactive_pipeline
 
 RUNNER = Path(__file__).with_name("run.py")
 
@@ -171,6 +172,58 @@ class ExpectedFailureGateTests(unittest.TestCase):
 
 
 class CommandInputTests(unittest.TestCase):
+    def test_interactive_pipeline_keeps_terminal_output_foreground_with_piped_stdin(self) -> None:
+        """Exercise the interactive pipeline helper without Flatpak installation setup."""
+        with tempfile.TemporaryDirectory(prefix="runner-stdin-tty-") as directory:
+            root = Path(directory)
+            cli = root / "flatpak-probe"
+            cli.write_text(
+                "#!/bin/sh\nshift 3\ncat\n"
+                "python3 -c 'import sys; sys.stdout.write(\"x\" * 8192)'\n"
+            )
+            cli.chmod(0o755)
+            driver = run.Driver(
+                "cli", str(cli), None,
+                {**os.environ, "TERM": "dumb"}, root, [], 5,
+            )
+
+            status, output = _run_interactive_pipeline(
+                driver, "app/org.flatpak.Blackbox/x86_64/test",
+            )
+
+        self.assertEqual(status, 0, output)
+        self.assertIn("blackbox stdin marker", output)
+        self.assertGreaterEqual(output.count("x"), 8192)
+        self.assertNotIn("Stopped (tty output)", output)
+
+    def test_interactive_pipeline_drains_pty_after_shell_exits(self) -> None:
+        """Read buffered terminal output after the child process has exited."""
+        with tempfile.TemporaryDirectory(prefix="runner-stdin-tty-drain-") as directory:
+            root = Path(directory)
+            driver = run.Driver("cli", "/usr/bin/flatpak", None,
+                                {**os.environ, "TERM": "dumb"}, root, [], 5)
+            process = Mock(pid=1234)
+            process.poll.return_value = 0
+
+            with (
+                patch("stdin_tty_scenarios.pty.openpty", return_value=(101, 102)),
+                patch("stdin_tty_scenarios.subprocess.Popen", return_value=process),
+                patch("stdin_tty_scenarios.select.select",
+                             side_effect=[([101], [], []), ([101], [], [])]),
+                patch("stdin_tty_scenarios.os.read",
+                             side_effect=[b"x" * 5000, b"__BLACKBOX_RUN_STATUS=0__"]),
+                patch("stdin_tty_scenarios.os.close"),
+                patch("stdin_tty_scenarios.os.tcgetpgrp", return_value=1234),
+                patch("stdin_tty_scenarios.os.killpg"),
+            ):
+                status, output = _run_interactive_pipeline(
+                    driver, "app/org.flatpak.Blackbox/x86_64/test",
+                )
+
+        self.assertEqual(status, 0, output)
+        self.assertEqual(output.count("x"), 5000)
+        self.assertIn("__BLACKBOX_RUN_STATUS=0__", output)
+
     def test_target_commands_cannot_inherit_confirmation_from_runner_stdin(self) -> None:
         script = (
             "import os,sys; from pathlib import Path; import run; "
