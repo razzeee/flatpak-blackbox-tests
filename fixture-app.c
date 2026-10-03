@@ -18,6 +18,17 @@ main (int argc, char **argv)
       puts (VERSION);
       return 0;
     }
+  if (argc == 2 && strcmp (argv[1], "-") == 0)
+    {
+      char buffer[4096];
+      size_t count;
+      while ((count = fread (buffer, 1, sizeof buffer, stdin)) != 0)
+        if (fwrite (buffer, 1, count, stdout) != count)
+          goto error;
+      if (ferror (stdin) || fflush (stdout) != 0)
+        goto error;
+      return 0;
+    }
   if (strcmp (argv[1], "args") == 0)
     {
       for (size_t i = 2; i < (size_t) argc; i++)

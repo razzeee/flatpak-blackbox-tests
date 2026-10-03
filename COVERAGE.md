@@ -6,7 +6,7 @@ There is no finite denominator for all Flatpak behavior yet.
 
 ## Current inventory: all 624 CLI options accounted for
 
-The suite now has **511 cases**, including 80 new cases after the 500-option
+The suite now has **512 cases**, including 80 new cases after the 500-option
 checkpoint below. The CLI-option denominators have not changed.
 
 | Measurement | Implemented | Meaning |
