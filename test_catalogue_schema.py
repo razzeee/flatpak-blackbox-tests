@@ -23,10 +23,11 @@ from scenario_catalogue import extension_clients, load_behaviors
 
 class CatalogueSchemaTests(unittest.TestCase):
     def test_committed_catalogues_preserve_case_and_denominator_counts(self) -> None:
+        """Keep executable case counts aligned with the committed coverage inventory."""
         suite = Path(__file__).parent
         model = CoverageModel(suite)
         self.assertEqual(model.catalogue, load_json(suite / "coverage-data/surfaces.json"))
-        self.assertEqual(len(model.cases), 511)
+        self.assertEqual(len(model.cases), 512)
         metrics = model.summarize()["metrics"]
         self.assertEqual({key: item["total"] for key, item in metrics["behaviors"].items()},
                          {"cli": 136, "library": 164})
