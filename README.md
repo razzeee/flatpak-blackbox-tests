@@ -46,6 +46,7 @@ is removed from the active configuration.
 ## Requirements
 
 - Linux, Python 3.10+, D-Bus, and working unprivileged user/mount namespaces.
+- Bash and util-linux `setsid` for pseudo-terminal scenarios.
 - A reference Flatpak, OSTree, GPG, `ldconfig`, and a C compiler to prepare fixtures.
   Full fixture preparation also needs `pkg-config` and GIO development files for
   the independently packaged authenticator service.
@@ -96,7 +97,9 @@ Vendor-definition option cases use `BLACKBOX_PREINSTALL_DIR` to locate the publi
 `.preinstall` configuration directory. Adapters must point it inside the case's
 fresh state. The reference adapter maps it to its isolated `preinstall.d`.
 Ordinary runner commands receive EOF on stdin, so confirmation tests cannot
-accidentally consume input supplied to the runner.
+accidentally consume input supplied to the runner. The `stdin-terminal` regression
+scenario instead runs an interactive shell on a pseudo-terminal and pipes a marker
+into the fixture app.
 
 Repair scenarios also use the adapter's `BLACKBOX_REPAIR_FIXTURE` Python helper.
 The runner invokes it with `STATE_DIRECTORY OPERATION APP_COMMIT`. The reference
