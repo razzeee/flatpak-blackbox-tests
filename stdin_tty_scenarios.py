@@ -18,14 +18,14 @@ from fixture_manifest import FixtureManifest
 from run import Driver, PrerequisiteError, RepositoryServer, require
 
 
-def _interactive_shell_argv(driver: Driver, app: str, mode: str = "-") -> list[str]:
+def _interactive_shell_argv(driver: Driver, app: str) -> list[str]:
     """Build the command that gives Bash a controlling pseudo-terminal."""
     setsid = shutil.which("setsid")
     if setsid is None:
         raise PrerequisiteError("setsid is required for pseudo-terminal execution")
     command = (
         "printf '%s\\n' 'blackbox stdin marker' | "
-        f"{shlex.join([driver.cli, 'run', '--user', app, mode])}; "
+        f"{shlex.join([driver.cli, 'run', '--user', app, '-'])}; "
         "status=$?; jobs -l; printf '\\n__BLACKBOX_RUN_STATUS=%s__\\n' \"$status\""
     )
     return [setsid, "--ctty", "/bin/bash", "--noprofile", "--norc", "-i", "-c", command]
@@ -49,10 +49,9 @@ def _terminate_terminal_session(process: subprocess.Popen[bytes]) -> None:
         process.wait(timeout=2)
 
 
-def _run_interactive_pipeline(driver: Driver, app: str,
-                              mode: str = "-") -> tuple[int | None, str]:
+def _run_interactive_pipeline(driver: Driver, app: str) -> tuple[int | None, str]:
     """Read PTY output through the status marker or EOF, including after shell exit."""
-    argv = _interactive_shell_argv(driver, app, mode)
+    argv = _interactive_shell_argv(driver, app)
     terminal, slave = pty.openpty()
     try:
         original = termios.tcgetattr(slave)
@@ -91,7 +90,7 @@ def _run_interactive_pipeline(driver: Driver, app: str,
     return status, output.decode(errors="replace")
 
 
-def _check_pipeline(status: int | None, output: str, mode: str) -> None:
+def _check_pipeline(status: int | None, output: str) -> None:
     """Distinguish job-control suspension from missing output or a command timeout."""
     require(status != 128 + signal.SIGTTOU and "Stopped" not in output,
             f"application pipeline was suspended for terminal output: {output}")
@@ -100,12 +99,11 @@ def _check_pipeline(status: int | None, output: str, mode: str) -> None:
     require(status == 0, f"piped stdin app run exited with status {status}: {output}")
     require(output.splitlines().count("blackbox stdin marker") == 1,
             f"application did not echo exactly one marker line: {output}")
-    if mode == "stdin-terminal-control":
-        require("stdin-pipe=1 stdout-tty=1" in output,
-                f"application did not confirm pipe input and terminal output: {output}")
-        for marker in ("APPLY", "RESTORE", "COMPLETE"):
-            require(output.splitlines().count(f"__BLACKBOX_TERMINAL_{marker}__") == 1,
-                    f"terminal-control operation {marker} did not complete: {output}")
+    require("stdin-pipe=1 stdout-tty=1" in output,
+            f"application did not confirm pipe input and terminal output: {output}")
+    for marker in ("APPLY", "RESTORE", "COMPLETE"):
+        require(output.splitlines().count(f"__BLACKBOX_TERMINAL_{marker}__") == 1,
+                f"terminal-control operation {marker} did not complete: {output}")
 
 
 def run(driver: Driver, repository: RepositoryServer, url: str,
@@ -114,15 +112,14 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
     app = f"app/{fixture['app']}/{fixture['arch']}/{fixture['branch']}"
     driver.setup_success("remote", url)
     driver.setup_success("install", app)
-    mode = "stdin-terminal-control" if name == "stdin-terminal-control" else "-"
-    status, output = _run_interactive_pipeline(driver, app, mode)
+    status, output = _run_interactive_pipeline(driver, app)
     driver.evidence.append({
-        "argv": _interactive_shell_argv(driver, app, mode),
-        "cli_argv": [driver.cli, "run", "--user", app, mode],
+        "argv": _interactive_shell_argv(driver, app),
+        "cli_argv": [driver.cli, "run", "--user", app, "-"],
         "interface": "cli",
         "stdout": output,
         "stderr": "",
         "exit_status": status if status is not None else -1,
         "timed_out": status is None,
     })
-    _check_pipeline(status, output, mode)
+    _check_pipeline(status, output)

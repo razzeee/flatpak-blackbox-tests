@@ -6,7 +6,7 @@ There is no finite denominator for all Flatpak behavior yet.
 
 ## Current inventory: all 624 CLI options accounted for
 
-The suite now has **513 cases**, including 80 new cases after the 500-option
+The suite now has **512 cases**, including 80 new cases after the 500-option
 checkpoint below. The CLI-option denominators have not changed.
 
 | Measurement | Implemented | Meaning |
@@ -58,18 +58,20 @@ Focused runs on 2026-10-04 use fresh basic fixtures, an ordinary user in an
 isolated Ubuntu container, and each target's bundled bubblewrap. The builds
 disable the system helper; these cases test user installations.
 
-| Target | Revision | `app.stdin-terminal` | `app.stdin-terminal-control` |
-| --- | --- | --- | --- |
-| Flatpak 1.18.3 | `346b41f2e91bff14de940704302625c517d856b2` | Pass | Pass |
-| Flatpak 1.18.4 | `a02d0ba48abe9aacc377de15699e5d8c024b5669` | Pass | Fail |
-| Upstream main, Flatpak 1.19.2 | `acb9dc7959ad6eed865acb8fd1f2398095f54017` | Pass | Fail |
+| Target | Revision | `app.stdin-terminal` |
+| --- | --- | --- |
+| Flatpak 1.18.3 | `346b41f2e91bff14de940704302625c517d856b2` | Pass |
+| Flatpak 1.18.4 | `a02d0ba48abe9aacc377de15699e5d8c024b5669` | Fail |
+| Upstream main, Flatpak 1.19.2 | `acb9dc7959ad6eed865acb8fd1f2398095f54017` | Fail |
 
-The terminal-control case reproduces the job-control suspension reported in
+The stdin-terminal case reproduces the job-control suspension reported in
 [Flatpak #6866](https://github.com/flatpak/flatpak/issues/6866). Both failing
 targets stop at the first `tcsetattr()` call and report `Stopped (tty output)`.
 They return a recorded shell status of 128 without timing out. The 1.18.3 target
-applies and restores terminal settings and exits zero. Plain terminal writes
-succeed on every target, explaining why the original echo test missed the bug.
+applies and restores terminal settings and exits zero. Echoing the marker
+succeeds on every target, explaining why the original echo-only test missed the
+bug. The existing `-` fixture mode now also exercises terminal settings when
+stdout is a TTY; redirected stdout remains a byte-for-byte echo.
 Process-group IDs reported inside the sandbox are diagnostic only; PID namespace
 translation can make both IDs appear as zero even when terminal control fails.
 

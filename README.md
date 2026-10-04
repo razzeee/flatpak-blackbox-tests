@@ -99,13 +99,13 @@ fresh state. The reference adapter maps it to its isolated `preinstall.d`.
 Ordinary runner commands receive EOF on stdin, so confirmation tests cannot
 accidentally consume input supplied to the runner. The `stdin-terminal` regression
 scenario instead runs an interactive shell on a pseudo-terminal and pipes a marker
-into the fixture app.
-The separate `stdin-terminal-control` scenario applies and restores terminal
-settings with piped stdin. It records progress and signal-disposition diagnostics
-and detects job-control suspension. Local release comparisons reproduce issue
-#6866: the case passes on 1.18.3 and stops for terminal output on 1.18.4 and upstream
-main at `acb9dc7`. The echo-only case passes on all three targets.
-Prepare fresh fixtures to include this probe mode.
+into the fixture app's existing `-` mode. That mode echoes stdin and, when stdout
+is a TTY, applies and restores terminal settings. Redirected stdout remains a
+byte-for-byte echo. The scenario records progress and signal-disposition
+diagnostics and detects job-control suspension. Local release comparisons
+reproduce issue #6866: the case passes on 1.18.3 and stops for terminal output on
+1.18.4 and upstream main at `acb9dc7`. Prepare fresh fixtures to include the
+terminal-setting operations.
 
 Repair scenarios also use the adapter's `BLACKBOX_REPAIR_FIXTURE` Python helper.
 The runner invokes it with `STATE_DIRECTORY OPERATION APP_COMMIT`. The reference

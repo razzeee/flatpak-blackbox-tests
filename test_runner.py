@@ -183,6 +183,12 @@ class CommandInputTests(unittest.TestCase):
             subprocess.run(["cc", "-Wall", "-Wextra", "-Werror", '-DVERSION="test"',
                             str(RUNNER.with_name("fixture-app.c")), "-o", str(probe)],
                            check=True, capture_output=True, text=True)
+            payload = b"plain echo\n\x00\xff" * 1024
+            echo = subprocess.run([str(probe), "-"], input=payload, capture_output=True,
+                                  check=False, timeout=5)
+            self.assertEqual(echo.returncode, 0, echo.stderr)
+            self.assertEqual(echo.stdout, payload)
+            self.assertEqual(echo.stderr, b"")
             restored: list[bool] = []
             originals: list[list[int | list[bytes | int]]] = []
             set_attributes = termios.tcsetattr
@@ -223,7 +229,6 @@ class CommandInputTests(unittest.TestCase):
                     ):
                         status, output = _run_interactive_pipeline(
                             driver, "app/org.flatpak.Blackbox/x86_64/test",
-                            "stdin-terminal-control",
                         )
                     self.assertEqual(restored, [True], output)
                     self.assertIn("stdin-pipe=1 stdout-tty=1", output)
@@ -232,9 +237,9 @@ class CommandInputTests(unittest.TestCase):
                         self.assertIn("SIGTTOU=default", output)
                         self.assertNotIn("__BLACKBOX_TERMINAL_COMPLETE__", output)
                         with self.assertRaisesRegex(run.ContractFailure, "suspended"):
-                            _check_pipeline(status, output, "stdin-terminal-control")
+                            _check_pipeline(status, output)
                     else:
-                        _check_pipeline(status, output, "stdin-terminal-control")
+                        _check_pipeline(status, output)
                     pid = int(pid_path.read_text())
                     deadline = time.monotonic() + 1
                     while time.monotonic() < deadline:
