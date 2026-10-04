@@ -3,12 +3,44 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
+#include <termios.h>
 #include <unistd.h>
+
+static int
+exercise_terminal (void)
+{
+  struct stat input;
+  struct termios original, changed;
+  struct sigaction disposition;
+
+  if (fstat (STDIN_FILENO, &input) != 0 ||
+      sigaction (SIGTTOU, NULL, &disposition) != 0 ||
+      tcgetattr (STDOUT_FILENO, &original) != 0)
+    return -1;
+  printf ("stdin-pipe=%d stdout-tty=1 pgid=%ld foreground-pgid=%ld SIGTTOU=%s\n",
+          S_ISFIFO (input.st_mode), (long) getpgrp (),
+          (long) tcgetpgrp (STDOUT_FILENO),
+          disposition.sa_handler == SIG_DFL ? "default" :
+          disposition.sa_handler == SIG_IGN ? "ignored" : "handler");
+  puts ("__BLACKBOX_TERMINAL_APPLY__");
+  if (fflush (stdout) != 0)
+    return -1;
+  changed = original;
+  changed.c_lflag ^= ECHO;
+  if (tcsetattr (STDOUT_FILENO, TCSANOW, &changed) != 0)
+    return -1;
+  puts ("__BLACKBOX_TERMINAL_RESTORE__");
+  if (tcsetattr (STDOUT_FILENO, TCSANOW, &original) != 0)
+    return -1;
+  puts ("__BLACKBOX_TERMINAL_COMPLETE__");
+  return fflush (stdout);
+}
 
 int
 main (int argc, char **argv)
@@ -26,6 +58,8 @@ main (int argc, char **argv)
         if (fwrite (buffer, 1, count, stdout) != count)
           goto error;
       if (ferror (stdin) || fflush (stdout) != 0)
+        goto error;
+      if (isatty (STDOUT_FILENO) && exercise_terminal () != 0)
         goto error;
       return 0;
     }

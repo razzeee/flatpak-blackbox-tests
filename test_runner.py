@@ -3,10 +3,12 @@
 
 import json
 import os
+import pty
 import shutil
 import subprocess
 import sys
 import tempfile
+import termios
 import time
 import unittest
 from collections.abc import Callable, Iterator
@@ -20,7 +22,7 @@ from unittest.mock import Mock, patch
 import run
 from fixture_manifest import FixtureManifest
 from report_schema import EvidenceRecord, RunReport
-from stdin_tty_scenarios import _run_interactive_pipeline
+from stdin_tty_scenarios import _check_pipeline, _run_interactive_pipeline
 
 RUNNER = Path(__file__).with_name("run.py")
 
@@ -172,6 +174,86 @@ class ExpectedFailureGateTests(unittest.TestCase):
 
 
 class CommandInputTests(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("cc"), "requires a C compiler")
+    def test_terminal_control_probe_and_background_suspension(self) -> None:
+        """Run the real fixture in foreground and simulate a lost foreground group."""
+        with tempfile.TemporaryDirectory(prefix="runner-terminal-control-") as directory:
+            root = Path(directory)
+            probe = root / "probe"
+            subprocess.run(["cc", "-Wall", "-Wextra", "-Werror", '-DVERSION="test"',
+                            str(RUNNER.with_name("fixture-app.c")), "-o", str(probe)],
+                           check=True, capture_output=True, text=True)
+            payload = b"plain echo\n\x00\xff" * 1024
+            echo = subprocess.run([str(probe), "-"], input=payload, capture_output=True,
+                                  check=False, timeout=5)
+            self.assertEqual(echo.returncode, 0, echo.stderr)
+            self.assertEqual(echo.stdout, payload)
+            self.assertEqual(echo.stderr, b"")
+            restored: list[bool] = []
+            originals: list[list[int | list[bytes | int]]] = []
+            set_attributes = termios.tcsetattr
+            open_terminal = pty.openpty
+
+            def terminal_pair() -> tuple[int, int]:
+                terminal, slave = open_terminal()
+                originals.append(termios.tcgetattr(slave))
+                return terminal, slave
+
+            def restore(fd: int, when: int,
+                        attributes: list[int | list[bytes | int]]) -> None:
+                set_attributes(fd, when, attributes)
+                restored.append(termios.tcgetattr(fd) == originals[-1])
+
+            for background in (False, True):
+                with self.subTest(background=background):
+                    cli = root / "flatpak-probe"
+                    pid_path = root / "probe.pid"
+                    cli.write_text(
+                        f"#!{sys.executable}\nimport os, signal, sys, termios\n"
+                        f"open({str(pid_path)!r}, 'w').write(str(os.getpid()))\n"
+                        + ("attrs = termios.tcgetattr(1)\n"
+                           "attrs[3] ^= termios.ECHO\n"
+                           "termios.tcsetattr(1, termios.TCSANOW, attrs)\n"
+                           "os.setpgid(0, 0)\n"
+                           "signal.signal(signal.SIGTTOU, signal.SIG_DFL)\n"
+                           if background else "")
+                        + f"os.execv({str(probe)!r}, [{str(probe)!r}, sys.argv[4]])\n"
+                    )
+                    cli.chmod(0o755)
+                    driver = run.Driver("cli", str(cli), None,
+                                        {**os.environ, "TERM": "dumb"}, root, [], 5)
+                    restored.clear()
+                    with (
+                        patch("stdin_tty_scenarios.pty.openpty", side_effect=terminal_pair),
+                        patch("stdin_tty_scenarios.termios.tcsetattr", side_effect=restore),
+                    ):
+                        status, output = _run_interactive_pipeline(
+                            driver, "app/org.flatpak.Blackbox/x86_64/test",
+                        )
+                    self.assertEqual(restored, [True], output)
+                    self.assertIn("stdin-pipe=1 stdout-tty=1", output)
+                    self.assertIn("__BLACKBOX_TERMINAL_APPLY__", output)
+                    if background:
+                        self.assertIn("SIGTTOU=default", output)
+                        self.assertNotIn("__BLACKBOX_TERMINAL_COMPLETE__", output)
+                        with self.assertRaisesRegex(run.ContractFailure, "suspended"):
+                            _check_pipeline(status, output)
+                    else:
+                        _check_pipeline(status, output)
+                    pid = int(pid_path.read_text())
+                    deadline = time.monotonic() + 1
+                    while time.monotonic() < deadline:
+                        try:
+                            stat = Path(f"/proc/{pid}/stat").read_text()
+                            state = stat.rsplit(")", 1)[1].split()[0]
+                        except FileNotFoundError:
+                            break
+                        if state == "Z":
+                            break
+                        time.sleep(0.01)
+                    else:
+                        self.fail(f"terminal probe {pid} was not terminated")
+
     def test_interactive_pipeline_keeps_terminal_output_foreground_with_piped_stdin(self) -> None:
         """Exercise the interactive pipeline helper without Flatpak installation setup."""
         with tempfile.TemporaryDirectory(prefix="runner-stdin-tty-") as directory:
@@ -207,14 +289,15 @@ class CommandInputTests(unittest.TestCase):
 
             with (
                 patch("stdin_tty_scenarios.pty.openpty", return_value=(101, 102)),
+                patch("stdin_tty_scenarios.termios.tcgetattr", return_value=[]),
+                patch("stdin_tty_scenarios.termios.tcsetattr"),
                 patch("stdin_tty_scenarios.subprocess.Popen", return_value=process),
                 patch("stdin_tty_scenarios.select.select",
                              side_effect=[([101], [], []), ([101], [], [])]),
                 patch("stdin_tty_scenarios.os.read",
                              side_effect=[b"x" * 5000, b"__BLACKBOX_RUN_STATUS=0__"]),
                 patch("stdin_tty_scenarios.os.close"),
-                patch("stdin_tty_scenarios.os.tcgetpgrp", return_value=1234),
-                patch("stdin_tty_scenarios.os.killpg"),
+                patch("stdin_tty_scenarios._terminate_terminal_session"),
             ):
                 status, output = _run_interactive_pipeline(
                     driver, "app/org.flatpak.Blackbox/x86_64/test",

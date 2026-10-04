@@ -14,9 +14,9 @@
         "local-repository",
         "sandbox-execution"
       ],
-      "description": "Run an app that consumes piped stdin and writes to the controlling terminal.",
-      "preconditions": "Fresh user installation of the fixture app and an interactive pseudo-terminal shell.",
-      "expected": "The app receives and echoes the exact piped marker, exits zero, and is not suspended for terminal output.",
+      "description": "Run an app that consumes piped stdin, echoes it, and changes and restores terminal settings.",
+      "preconditions": "Fresh user installation of the fixture app and a foreground pipeline in an interactive pseudo-terminal shell.",
+      "expected": "The app echoes the exact piped marker, applies and restores terminal settings, and exits zero without job-control suspension.",
       "references": [
         "doc/flatpak-run.xml",
         "https://github.com/flatpak/flatpak/issues/6866"
@@ -31,7 +31,7 @@
       "requirements": [
         "cli.run.user.command"
       ],
-      "rationale": "An installed fixture app consumes a real pipe and writes the exact marker to a controlling pseudo-terminal through the public run command."
+      "rationale": "An installed fixture app consumes a real pipe, echoes the exact marker, and exercises terminal-setting operations that can suspend a process even when ordinary terminal writes succeed."
     }
   ]
 }
