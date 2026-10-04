@@ -3,11 +3,13 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
+#include <termios.h>
 #include <unistd.h>
 
 int
@@ -17,6 +19,44 @@ main (int argc, char **argv)
     {
       puts (VERSION);
       return 0;
+    }
+  if (argc == 2 && strcmp (argv[1], "stdin-terminal-control") == 0)
+    {
+      struct stat input;
+      struct termios original, changed;
+      struct sigaction disposition;
+      char buffer[128];
+      size_t count = fread (buffer, 1, sizeof buffer, stdin);
+      const char marker[] = "blackbox stdin marker\n";
+
+      if (ferror (stdin) || count != sizeof marker - 1 ||
+          memcmp (buffer, marker, sizeof marker - 1) != 0)
+        return 2;
+      if (fstat (STDIN_FILENO, &input) != 0 ||
+          sigaction (SIGTTOU, NULL, &disposition) != 0)
+        goto error;
+      printf ("stdin-pipe=%d stdout-tty=%d pgid=%ld foreground-pgid=%ld SIGTTOU=%s\n",
+              S_ISFIFO (input.st_mode), isatty (STDOUT_FILENO),
+              (long) getpgrp (), (long) tcgetpgrp (STDOUT_FILENO),
+              disposition.sa_handler == SIG_DFL ? "default" :
+              disposition.sa_handler == SIG_IGN ? "ignored" : "handler");
+      if (!S_ISFIFO (input.st_mode) || !isatty (STDOUT_FILENO))
+        return 2;
+      if (tcgetattr (STDOUT_FILENO, &original) != 0)
+        goto error;
+      puts ("__BLACKBOX_TERMINAL_APPLY__");
+      if (fflush (stdout) != 0)
+        goto error;
+      changed = original;
+      changed.c_lflag ^= ECHO;
+      if (tcsetattr (STDOUT_FILENO, TCSANOW, &changed) != 0)
+        goto error;
+      puts ("__BLACKBOX_TERMINAL_RESTORE__");
+      if (tcsetattr (STDOUT_FILENO, TCSANOW, &original) != 0 || fflush (stdout) != 0)
+        goto error;
+      puts ("blackbox stdin marker");
+      puts ("__BLACKBOX_TERMINAL_COMPLETE__");
+      return fflush (stdout) == 0 ? 0 : 1;
     }
   if (argc == 2 && strcmp (argv[1], "-") == 0)
     {
