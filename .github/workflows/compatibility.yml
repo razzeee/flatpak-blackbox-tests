@@ -2,7 +2,7 @@ name: Reference compatibility
 
 on:
   push:
-    branches-ignore: [coverage-history]
+    branches: [main]
   pull_request:
   workflow_dispatch:
     inputs:
