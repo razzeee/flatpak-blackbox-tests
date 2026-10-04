@@ -2,7 +2,7 @@ name: Development checks
 
 on:
   push:
-    branches-ignore: [coverage-history]
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
