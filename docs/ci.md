@@ -5,19 +5,20 @@
 Pushes and pull requests run lint, type, and formatting checks, unit tests on
 Python 3.10 and 3.14, and the full compatibility suite against upstream Flatpak
 `main`. Compatibility results on pull requests are informational and do not block
-merging; reports and diagnostics are still uploaded. Default-branch pushes and
-daily scheduled runs treat compatibility failures as fatal and also test configured
-tagged releases. Scheduled runs start at 21:00 in the `Europe/Berlin` timezone.
+merging; compatibility results on default-branch pushes are informational too.
+Reports and diagnostics are still uploaded. Daily scheduled runs treat compatibility
+failures as fatal and also test configured tagged releases. Scheduled runs start at
+21:00 in the `Europe/Berlin` timezone.
 The [workflows](../.github/workflows/) support manual runs from GitHub Actions.
 
 Classified non-security scenario assertion failures remain visible but do not
 fail CI when they are the only failures and the complete report passes integrity
 and coverage verification. Authentication and sandbox assertions, setup,
 prerequisite, unsupported-capability, cleanup, integrity, and reporting failures
-still fail default-branch and scheduled CI. On pull requests, the compatibility
-matrix is informational even for those failures; the report and diagnostic logs
-remain available, while development checks remain required. Reports and diagnostic
-logs are uploaded even when a run fails.
+still fail scheduled CI. On pull requests and default-branch pushes, the
+compatibility matrix is informational even for those failures; the report and
+diagnostic logs remain available, while development checks remain required.
+Reports and diagnostic logs are uploaded even when a run fails.
 
 ## Baselines
 

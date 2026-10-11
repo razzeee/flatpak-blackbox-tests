@@ -40,10 +40,10 @@ jobs:
 
   compatibility:
     needs: prepare
-    # Keep reference compatibility results visible on PRs without making known
-    # upstream behavior differences block changes to the test suite. Main and
-    # scheduled runs remain strict; development checks are always blocking.
-    continue-on-error: ${{ github.event_name == 'pull_request' }}
+    # Keep reference compatibility results visible on PRs and main pushes
+    # without making upstream behavior differences fail those pipelines.
+    # Scheduled runs remain strict; development checks are always blocking.
+    continue-on-error: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
