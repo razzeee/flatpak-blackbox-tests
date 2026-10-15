@@ -142,6 +142,9 @@ method (GDBusConnection *connection, const char *sender, const char *path,
       g_assert_cmpstr (ref, ==, s->ref);
       g_assert_cmpstr (commit, ==, s->commit);
       g_assert_cmpint (token_type, ==, 2);
+      gboolean no_interaction = FALSE;
+      g_variant_lookup (options, "no-interaction", "b", &no_interaction);
+      g_print ("no-interaction %d\n", no_interaction);
       if (s->expected_option != NULL)
         {
           const char *value = NULL;
@@ -158,7 +161,7 @@ method (GDBusConnection *connection, const char *sender, const char *path,
       g_assert_no_error (error);
       g_print ("request %s %s %s %s\n", ref, commit, parent, url);
       g_dbus_method_invocation_return_value (invocation, g_variant_new ("(o)", s->path));
-      if (strcmp (s->mode, "options") == 0)
+      if (strcmp (s->mode, "options") == 0 || strcmp (s->mode, "cli-options") == 0)
         finish (s, 0);
       else if (strcmp (s->mode, "web") == 0)
         {

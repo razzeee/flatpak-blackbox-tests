@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "confirmation.auth-interaction",
+      "scenario": "auth-cli-interaction",
+      "handler": "auth_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "session-bus",
+        "concurrent-processes"
+      ],
+      "description": "Automatic confirmation must not suppress authentication interaction.",
+      "preconditions": "Independent token-gated runtime and authenticator observe real CLI request options; separate installs avoid cached payloads; a PTY answers basic credentials.",
+      "expected": "--noninteractive requests no-interaction, --assumeyes does not, both can install with a noninteractive token, and --assumeyes also permits basic credential prompts and exact deployment.",
+      "references": [
+        "https://github.com/flatpak/flatpak/pull/6744"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "confirmation.auth-interaction",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "surface_assertions": [
+        {
+          "id": "cli.option.install.--assumeyes",
+          "rationale": "Observed authenticator options and a real basic-auth exchange prove automatic confirmation does not suppress credentials."
+        },
+        {
+          "id": "cli.option.install.--noninteractive",
+          "rationale": "The authenticator observes no-interaction while still supplying a valid token for an exact successful deployment."
+        }
+      ],
+      "rationale": "Focused authentication distinction, not an additional broad lifecycle requirement."
+    }
+  ],
+  "notes": [
+    "This development-branch interaction-policy change is not an authentication-bypass assertion. Older stable baselines may visibly fail it under the existing non-security failure policy; the auth.* security cases remain fatal."
+  ]
+}

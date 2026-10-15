@@ -3,6 +3,10 @@
 
 from __future__ import annotations
 
+import errno
+import os
+import pty
+import select
 import shlex
 import subprocess
 import time
@@ -20,6 +24,111 @@ from report_schema import EvidenceRecord
 
 if TYPE_CHECKING:
     from run import Driver, RepositoryServer
+
+
+def _credential_install(driver: Driver, ref: str) -> subprocess.CompletedProcess[str]:
+    """Answer credential prompts only after observing them, under a bounded PTY."""
+    from run import DiagnosticFailure, terminate
+
+    argv = [driver.cli, "install", "--user", "--assumeyes", "fixture", ref]
+    master, slave = pty.openpty()
+    output = bytearray()
+    record: EvidenceRecord = {"argv": argv, "interface": "cli"}
+    driver.evidence.append(record)
+    try:
+        process = subprocess.Popen(argv, env={**driver.env, "TERM": "dumb"}, cwd=driver.root,
+                                   stdin=slave, stdout=slave, stderr=slave, start_new_session=True)
+    except BaseException:
+        os.close(master)
+        os.close(slave)
+        raise
+    os.close(slave)
+    prompts = [(b"User:", b"blackbox\n"), (b"Password:", b"test-password\n")]
+    answered = 0
+    deadline = time.monotonic() + driver.timeout
+    try:
+        while time.monotonic() < deadline:
+            if not select.select([master], [], [], max(0, deadline - time.monotonic()))[0]:
+                break
+            try:
+                chunk = os.read(master, 4096)
+            except OSError as error:
+                if error.errno == errno.EIO:
+                    break
+                raise
+            if not chunk:
+                break
+            output.extend(chunk)
+            if answered < len(prompts) and prompts[answered][0] in output:
+                os.write(master, prompts[answered][1])
+                answered += 1
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise DiagnosticFailure("credential install timed out")
+        try:
+            process.wait(timeout=remaining)
+        except subprocess.TimeoutExpired as error:
+            raise DiagnosticFailure("credential install timed out") from error
+    finally:
+        terminate(process)
+        os.close(master)
+        record.update({"stdout": output.decode(errors="replace"), "stderr": "",
+                       "exit_status": process.returncode})
+    driver.check(answered == len(prompts), "-y must still request username and password")
+    return subprocess.CompletedProcess(argv, process.returncode,
+                                       output.decode(errors="replace"), "")
+
+
+def _cli_interaction(driver: Driver, fixture: FixtureManifest, binary: Path,
+                     directory: Path) -> None:
+    from run import terminate
+
+    extra = fixture["extras"]["auth"]
+    with protected_server(driver, directory, extra["payloads"]) as (auth_url, requests):
+        driver.setup_success("remote", auth_url)
+        driver.cli_success("remote-modify", "--user", "fixture", "--authenticator-name",
+                           "org.flatpak.BlackboxAuthenticator")
+        for index, (option, mode, no_interaction) in enumerate((
+            ("--noninteractive", "cli-options", 1),
+            ("--assumeyes", "cli-options", 0),
+            ("--assumeyes", "basic", 0),
+        )):
+            log_path = driver.root / f"cli-auth-{index}.log"
+            with log_path.open("w") as log:
+                service = subprocess.Popen(
+                    [str(binary), mode, extra["ref"], extra["commit"], "", auth_url],
+                    env=driver.env, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+                try:
+                    deadline = time.monotonic() + 5
+                    while "service-ready" not in log_path.read_text():
+                        driver.check(service.poll() is None, log_path.read_text())
+                        driver.check(time.monotonic() < deadline, "CLI authenticator startup")
+                        time.sleep(0.02)
+                    before = len(requests)
+                    result = (_credential_install(driver, extra["ref"]) if mode == "basic" else
+                              driver.cli_call("install", "--user", option, "fixture", extra["ref"]))
+                    text = log_path.read_text()
+                    driver.check(service.poll() is None, f"authenticator rejected request: {text}")
+                    driver.check(f"no-interaction {no_interaction}\n" in text,
+                                 f"{option} must send the correct authentication interaction flag")
+                    driver.check(result.returncode == 0,
+                                 f"CLI auth install failed: {result.stderr}")
+                    driver.check("response 0\n" in text, "authenticator issued a real token")
+                    if mode == "basic":
+                        driver.check("basic-credentials 1\n" in text,
+                                     "-y allows the basic credential exchange")
+                    transfers = [item for item in requests[before:] if item["protected"]]
+                    driver.check(bool(transfers) and all(item["authorized"] for item in transfers),
+                                 "CLI downloads the independent protected payload using its token")
+                    commit = driver.cli_success("info", "--user", "--show-commit", extra["ref"])
+                    driver.check(commit == extra["commit"],
+                                 "CLI deploys the exact protected commit")
+                finally:
+                    terminate(service)
+                    driver.evidence.append({"observation": "cli-authenticator-wire", "mode": mode,
+                                            "data": log_path.read_text()})
+            driver.cli_success("uninstall", "--user", "--noninteractive", extra["ref"])
+            driver.cli_success("repair", "--user")
 
 
 @contextmanager
@@ -123,6 +232,9 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
     ], "setup")
     if build.returncode != 0:
         raise DiagnosticFailure(f"authenticator compile failed: {build.stderr}")
+    if name == "auth-cli-interaction":
+        _cli_interaction(driver, fixture, binary, directory)
+        return
     mode = name.removeprefix("auth-")
     modes = {"web": ["web-wrong", "web"],
              "basic-abort": ["basic-decline", "basic-abort"],

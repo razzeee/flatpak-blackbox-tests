@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "remote-ls.oci-updates",
+      "scenario": "remote-ls-oci-updates",
+      "handler": "oci_update_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "OCI update listings compare image identities, not imported OSTree commits.",
+      "preconditions": "Independent OCI app A/B and runtime layouts served by a local registry; two remote names share its refs, only one is the installed origin.",
+      "expected": "Empty listing after install, exactly the changed app after publication, no cross-origin update, and empty listing after applying B; independent execution changes A to B.",
+      "references": [
+        "https://github.com/flatpak/flatpak/pull/6875"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "remote-ls.oci-updates",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-ls.--updates",
+          "rationale": "OCI publication and installation transitions determine the exact listed update set, with an origin-filter control."
+        }
+      ],
+      "rationale": "Focused OCI identity regression; no new requirement denominator."
+    }
+  ]
+}
