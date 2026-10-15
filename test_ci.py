@@ -11,6 +11,39 @@ from pathlib import Path
 
 
 class CompatibilityProbeTests(unittest.TestCase):
+    def test_build_disables_docs_for_old_and_new_meson_options(self) -> None:
+        if os.getuid() == 0:
+            self.skipTest("CI helper requires an ordinary user")
+        suite = Path(__file__).resolve().parent
+        with tempfile.TemporaryDirectory(prefix="ci-api-docs-") as temporary:
+            root = Path(temporary)
+            (root / "logs").mkdir()
+            (root / "source").mkdir()
+            tools = root / "tools"
+            tools.mkdir()
+            commit = "a" * 40
+            git = tools / "git"
+            git.write_text(f"#!/bin/sh\nprintf '%s\\n' '{commit}'\n")
+            git.chmod(0o755)
+            meson = tools / "meson"
+            meson.write_text("#!/bin/sh\nprintf '%s\\n' \"$@\" > \"$MESON_ARGS\"\nexit 23\n")
+            meson.chmod(0o755)
+            recorded = root / "meson-args"
+            env = {**os.environ, "BB_CI_ROOT": str(root), "TMPDIR": str(root),
+                   "FLATPAK_REFERENCE_COMMIT": commit, "MESON_ARGS": str(recorded),
+                   "PATH": f"{tools}{os.pathsep}{os.defpath}"}
+            for option in ("gtkdoc", "api_docs"):
+                (root / "source/meson_options.txt").write_text(
+                    f"option(\n  '{option}',\n  type : 'feature',\n)\n")
+                result = subprocess.run(
+                    ["bash", str(suite / "ci/compatibility.sh"), "build"],
+                    cwd=suite, env=env, text=True, capture_output=True, timeout=10, check=False)
+                self.assertEqual(result.returncode, 23, result.stderr)
+                arguments = recorded.read_text().splitlines()
+                self.assertIn(f"-D{option}=disabled", arguments)
+                other = "api_docs" if option == "gtkdoc" else "gtkdoc"
+                self.assertNotIn(f"-D{other}=disabled", arguments)
+
     def test_checkout_resolves_tag_types_and_branch_and_rejects_wrong_pins(self) -> None:
         if os.getuid() == 0:
             self.skipTest("CI helper requires an ordinary user")
