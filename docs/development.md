@@ -75,30 +75,3 @@ Regeneration should include review of affected requirements and mappings.
 Execution consumes the committed JSON and does not require the source checkout.
 Source drift is separate from report freshness; test-definition changes invalidate
 old passing evidence.
-
-## Focused upstream regressions
-
-The [recent-change analysis](recent-flatpak-test-opportunities.md) has source links
-and explains the gaps behind these additional scenarios:
-
-- `repair-pins`: explicit pins and automatic dependencies across both repair modes.
-- `sandbox-export-filter`: desktop/action/service sanitization with safe-field controls.
-- `sandbox-deployment-etc` and `sandbox-deployment-export`: private symlink canaries,
-  tested through CLI and libflatpak updates, followed by a valid recovery update.
-- `sandbox-process-group`: both process-group signal APIs, with a guarded host canary.
-- `auth-cli-interaction`: observed no-interaction flags plus a real PTY credential exchange.
-- `instance-fd-immediate`: a prestarted C observer performs the first public instance
-  lookup directly after receiving the ID, before releasing the app's stdin barrier.
-- `remote-ls-oci-updates`: real A/B publication, origin filtering and installed-image
-  identity checks using a local independent OCI registry.
-
-Use `run.py --scenario NAME` to select a case. Reprepare full fixtures for the OCI
-layouts and new app probe operations; old fixtures cannot supply those inputs.
-The runner still needs no third-party Python dependencies or external registry.
-
-Security cases use `sandbox.*` IDs so their failures remain fatal under CI's
-expected-failure policy. The CLI authentication interaction-policy change uses
-`confirmation.auth-interaction`: older stable releases can visibly fail it without
-being misclassified as an authentication bypass. These focused regressions do not
-expand the existing requirement denominators. Traversal canaries exercise a private
-user installation, not root-context/system-helper confinement or race freedom.
