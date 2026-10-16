@@ -128849,6 +128849,66 @@
   {
     "schema": 1,
     "track": "pinned",
+    "timestamp": "2026-10-16T07:09:47.000Z",
+    "complete": false,
+    "verification": "not-run",
+    "suite_commit": "f87e6f32a4197c96b0fa1b3ae3f8ab8788320820",
+    "target_commit": "10b5972dfeff08f516ca571c8438c2e284cd60ce",
+    "baseline": {
+      "version": "1.19.2",
+      "commit": "10b5972dfeff08f516ca571c8438c2e284cd60ce",
+      "ref": "refs/tags/1.19.2"
+    },
+    "run_url": "https://github.com/razzeee/flatpak-blackbox-tests/actions/runs/38865313038",
+    "fingerprint": "0ff6fc4fddcada0c6260a4c54317f530cb2aa27f2e50aebc4ebfbd2621a4c464",
+    "metrics": {
+      "cli": {
+        "total": 136,
+        "implemented": 136,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "library": {
+        "total": 164,
+        "implemented": 164,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "cli-command": {
+        "total": 44,
+        "implemented": 44,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "cli-option": {
+        "total": 624,
+        "implemented": 584,
+        "implemented_percent": 93.59,
+        "passed": null,
+        "passed_percent": null
+      },
+      "library-function": {
+        "total": 224,
+        "implemented": 224,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "library-signal": {
+        "total": 14,
+        "implemented": 14,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      }
+    }
+  },
+  {
+    "schema": 1,
+    "track": "pinned",
     "timestamp": "2026-09-22T22:05:37.802Z",
     "complete": true,
     "verification": "current",
@@ -327745,6 +327805,66 @@
   {
     "schema": 1,
     "track": "pinned",
+    "timestamp": "2026-10-16T07:09:58.000Z",
+    "complete": false,
+    "verification": "not-run",
+    "suite_commit": "f87e6f32a4197c96b0fa1b3ae3f8ab8788320820",
+    "target_commit": "346b41f2e91bff14de940704302625c517d856b2",
+    "baseline": {
+      "version": "1.18.3",
+      "commit": "346b41f2e91bff14de940704302625c517d856b2",
+      "ref": "refs/tags/1.18.3"
+    },
+    "run_url": "https://github.com/razzeee/flatpak-blackbox-tests/actions/runs/38865313038",
+    "fingerprint": "0ff6fc4fddcada0c6260a4c54317f530cb2aa27f2e50aebc4ebfbd2621a4c464",
+    "metrics": {
+      "cli": {
+        "total": 136,
+        "implemented": 136,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "library": {
+        "total": 164,
+        "implemented": 164,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "cli-command": {
+        "total": 44,
+        "implemented": 44,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "cli-option": {
+        "total": 624,
+        "implemented": 584,
+        "implemented_percent": 93.59,
+        "passed": null,
+        "passed_percent": null
+      },
+      "library-function": {
+        "total": 224,
+        "implemented": 224,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "library-signal": {
+        "total": 14,
+        "implemented": 14,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      }
+    }
+  },
+  {
+    "schema": 1,
+    "track": "pinned",
     "timestamp": "2026-09-29T23:03:10.963Z",
     "complete": true,
     "verification": "current",
@@ -456587,6 +456707,66 @@
         }
       ],
       "cases_complete": true
+    }
+  },
+  {
+    "schema": 1,
+    "track": "pinned",
+    "timestamp": "2026-10-16T07:09:50.000Z",
+    "complete": false,
+    "verification": "not-run",
+    "suite_commit": "f87e6f32a4197c96b0fa1b3ae3f8ab8788320820",
+    "target_commit": "75bdf1449b905ce117cd6fc1e4a3e8577f04e827",
+    "baseline": {
+      "version": "1.19.1",
+      "commit": "75bdf1449b905ce117cd6fc1e4a3e8577f04e827",
+      "ref": "refs/tags/1.19.1"
+    },
+    "run_url": "https://github.com/razzeee/flatpak-blackbox-tests/actions/runs/38865313038",
+    "fingerprint": "0ff6fc4fddcada0c6260a4c54317f530cb2aa27f2e50aebc4ebfbd2621a4c464",
+    "metrics": {
+      "cli": {
+        "total": 136,
+        "implemented": 136,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "library": {
+        "total": 164,
+        "implemented": 164,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "cli-command": {
+        "total": 44,
+        "implemented": 44,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "cli-option": {
+        "total": 624,
+        "implemented": 584,
+        "implemented_percent": 93.59,
+        "passed": null,
+        "passed_percent": null
+      },
+      "library-function": {
+        "total": 224,
+        "implemented": 224,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "library-signal": {
+        "total": 14,
+        "implemented": 14,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      }
     }
   },
   {
@@ -593399,6 +593579,66 @@
         }
       ],
       "cases_complete": true
+    }
+  },
+  {
+    "schema": 1,
+    "track": "pinned",
+    "timestamp": "2026-10-16T07:09:58.000Z",
+    "complete": false,
+    "verification": "not-run",
+    "suite_commit": "f87e6f32a4197c96b0fa1b3ae3f8ab8788320820",
+    "target_commit": "a02d0ba48abe9aacc377de15699e5d8c024b5669",
+    "baseline": {
+      "version": "1.18.4",
+      "commit": "a02d0ba48abe9aacc377de15699e5d8c024b5669",
+      "ref": "refs/tags/1.18.4"
+    },
+    "run_url": "https://github.com/razzeee/flatpak-blackbox-tests/actions/runs/38865313038",
+    "fingerprint": "0ff6fc4fddcada0c6260a4c54317f530cb2aa27f2e50aebc4ebfbd2621a4c464",
+    "metrics": {
+      "cli": {
+        "total": 136,
+        "implemented": 136,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "library": {
+        "total": 164,
+        "implemented": 164,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "cli-command": {
+        "total": 44,
+        "implemented": 44,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "cli-option": {
+        "total": 624,
+        "implemented": 584,
+        "implemented_percent": 93.59,
+        "passed": null,
+        "passed_percent": null
+      },
+      "library-function": {
+        "total": 224,
+        "implemented": 224,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "library-signal": {
+        "total": 14,
+        "implemented": 14,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      }
     }
   },
   {
@@ -800878,6 +801118,66 @@
         }
       ],
       "cases_complete": true
+    }
+  },
+  {
+    "schema": 1,
+    "track": "pinned",
+    "timestamp": "2026-10-16T07:09:58.000Z",
+    "complete": false,
+    "verification": "not-run",
+    "suite_commit": "f87e6f32a4197c96b0fa1b3ae3f8ab8788320820",
+    "target_commit": "ec707cb43a0b332e4eea581d49bf9bb11f0dbd73",
+    "baseline": {
+      "version": "1.19.0",
+      "commit": "ec707cb43a0b332e4eea581d49bf9bb11f0dbd73",
+      "ref": "refs/tags/1.19.0"
+    },
+    "run_url": "https://github.com/razzeee/flatpak-blackbox-tests/actions/runs/38865313038",
+    "fingerprint": "0ff6fc4fddcada0c6260a4c54317f530cb2aa27f2e50aebc4ebfbd2621a4c464",
+    "metrics": {
+      "cli": {
+        "total": 136,
+        "implemented": 136,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "library": {
+        "total": 164,
+        "implemented": 164,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "cli-command": {
+        "total": 44,
+        "implemented": 44,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "cli-option": {
+        "total": 624,
+        "implemented": 584,
+        "implemented_percent": 93.59,
+        "passed": null,
+        "passed_percent": null
+      },
+      "library-function": {
+        "total": 224,
+        "implemented": 224,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "library-signal": {
+        "total": 14,
+        "implemented": 14,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      }
     }
   },
   {
@@ -1010210,6 +1010510,61 @@
     "suite_commit": "b151ba7d9efc6900699087c6f964704fe4fe50d2",
     "target_commit": "ddbee83f4664b63f6e15ae563f52e4cc73ade185",
     "run_url": "https://github.com/razzeee/flatpak-blackbox-tests/actions/runs/38752934850",
+    "fingerprint": "0ff6fc4fddcada0c6260a4c54317f530cb2aa27f2e50aebc4ebfbd2621a4c464",
+    "metrics": {
+      "cli": {
+        "total": 136,
+        "implemented": 136,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "library": {
+        "total": 164,
+        "implemented": 164,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "cli-command": {
+        "total": 44,
+        "implemented": 44,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "cli-option": {
+        "total": 624,
+        "implemented": 584,
+        "implemented_percent": 93.59,
+        "passed": null,
+        "passed_percent": null
+      },
+      "library-function": {
+        "total": 224,
+        "implemented": 224,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      },
+      "library-signal": {
+        "total": 14,
+        "implemented": 14,
+        "implemented_percent": 100,
+        "passed": null,
+        "passed_percent": null
+      }
+    }
+  },
+  {
+    "schema": 1,
+    "track": "upstream",
+    "timestamp": "2026-10-16T07:09:35.000Z",
+    "complete": false,
+    "verification": "not-run",
+    "suite_commit": "f87e6f32a4197c96b0fa1b3ae3f8ab8788320820",
+    "target_commit": "ddbee83f4664b63f6e15ae563f52e4cc73ade185",
+    "run_url": "https://github.com/razzeee/flatpak-blackbox-tests/actions/runs/38865313038",
     "fingerprint": "0ff6fc4fddcada0c6260a4c54317f530cb2aa27f2e50aebc4ebfbd2621a4c464",
     "metrics": {
       "cli": {
