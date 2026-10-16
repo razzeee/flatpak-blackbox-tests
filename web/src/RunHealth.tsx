@@ -58,13 +58,13 @@ export function RunHealth({ entries }: { entries: Snapshot[] }) {
   if (!selected) return null;
   const gaps = days.filter((day) => day.state !== "verified").length;
   return (
-    <section className="run-health" aria-labelledby="run-health-title">
-      <div className="run-health-heading">
-        <h2 id="run-health-title">Daily evidence</h2>
+    <details className="run-health">
+      <summary>
+        Run history
         <span>
-          {days.length} days · {gaps} without verified evidence
+          {days.length} days{gaps > 0 ? ` · ${gaps} with coverage gaps` : ""}
         </span>
-      </div>
+      </summary>
       <p className="run-health-note">
         Runs are scheduled daily. Dates below are UTC completion days, not
         scheduled dates. A delayed schedule can leave a gap.
@@ -138,6 +138,6 @@ export function RunHealth({ entries }: { entries: Snapshot[] }) {
         <li>! Unverified</li>
         <li>– No snapshot</li>
       </ul>
-    </section>
+    </details>
   );
 }

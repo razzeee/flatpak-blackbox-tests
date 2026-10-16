@@ -221,7 +221,6 @@ export function App({ history }: { history: Snapshot[] }) {
             {utcDay(entries[0]!.timestamp)} to{" "}
             {utcDay(entries.at(-1)!.timestamp)} · {entries.length} recorded days
           </p>
-          <RunHealth key={selected.key} entries={entries} />
           <RunSummary
             entries={entries}
             run={run}
@@ -241,6 +240,7 @@ export function App({ history }: { history: Snapshot[] }) {
             title="Public interface reach"
             onSelectDay={selectDay}
           />
+          <RunHealth key={selected.key} entries={entries} />
           <DailyCounts entries={entries} />
           <PerformancePanel
             entries={entries}

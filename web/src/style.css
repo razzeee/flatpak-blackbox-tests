@@ -53,21 +53,11 @@ h2 {
   padding: 16px 0;
   border-block: 1px solid var(--border);
 }
-.run-health-heading {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-.run-health-heading h2 {
-  margin: 0;
-  font-size: clamp(1.2rem, 2vw, 1.55rem);
-  letter-spacing: -0.025em;
-}
-.run-health-heading > span {
+.run-health > summary span {
   color: var(--muted);
   font-size: 0.85rem;
+  display: inline-block;
+  margin-left: 12px;
 }
 .evidence-strip {
   display: grid;
