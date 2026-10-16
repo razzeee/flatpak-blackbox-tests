@@ -134,3 +134,21 @@ test("counts retain denominator changes and React escapes metadata", () => {
     /No recorded runs/,
   );
 });
+
+test("run health distinguishes absent days from recorded unverified attempts", () => {
+  const missing = entry("2026-09-17T21:00:00Z");
+  const noReport = {
+    ...entry("2026-09-19T21:00:00Z"),
+    complete: false,
+    verification: "not-run" as const,
+  };
+  const page = renderToStaticMarkup(
+    createElement(App, { history: [missing, noReport] }),
+  );
+  assert.match(page, /Days needing a closer look/);
+  assert.match(page, /2026-09-18/);
+  assert.match(page, /No run recorded/);
+  assert.match(page, /2026-09-19/);
+  assert.match(page, /Run recorded · tests did not run/);
+  assert.match(page, /Missing history means no run was recorded/);
+});
