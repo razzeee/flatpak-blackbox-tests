@@ -54,6 +54,7 @@ export interface RecordOptions {
   suiteCommit: string;
   targetCommit: string;
   runUrl: string;
+  workflow?: Snapshot["workflow"];
 }
 
 export async function record(options: RecordOptions): Promise<Snapshot> {
@@ -125,6 +126,7 @@ export async function record(options: RecordOptions): Promise<Snapshot> {
     baseline,
     target_version: report?.target_version,
     run_url: options.runUrl,
+    workflow: options.workflow,
     fingerprint: summary.definition.fingerprint,
     metrics: { ...summary.metrics.behaviors, ...summary.metrics.surfaces },
     performance,
