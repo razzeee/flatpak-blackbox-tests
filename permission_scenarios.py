@@ -8,7 +8,7 @@ import os
 import shutil
 import subprocess
 import time
-from collections.abc import Iterator
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -35,7 +35,7 @@ def _bus(driver: Driver, method: str, *args: str) -> str:
 
 
 @contextmanager
-def _service(driver: Driver) -> Iterator[None]:
+def _service(driver: Driver) -> Generator[None, None, None]:
     from run import PrerequisiteError, terminate
 
     executable = shutil.which("xdg-permission-store")

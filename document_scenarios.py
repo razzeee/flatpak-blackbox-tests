@@ -6,7 +6,7 @@ from __future__ import annotations
 import ast
 import os
 import time
-from collections.abc import Iterator
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -32,7 +32,7 @@ def _bus(driver: Driver, method: str, *args: str) -> str:
 
 
 @contextmanager
-def _portal(driver: Driver) -> Iterator[Path]:
+def _portal(driver: Driver) -> Generator[Path, None, None]:
     from run import PrerequisiteError
 
     if not os.access("/dev/fuse", os.R_OK | os.W_OK):

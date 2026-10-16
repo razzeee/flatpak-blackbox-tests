@@ -14,7 +14,7 @@ import subprocess
 import sys
 import tempfile
 import threading
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Generator
 from contextlib import ExitStack, contextmanager, suppress
 from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -151,7 +151,7 @@ def execute(argv: list[str], env: dict[str, str], cwd: Path,
 
 @contextmanager
 def session_bus(env: dict[str, str], root: Path, *,
-                on_cleanup: Callable[[], None] | None = None) -> Iterator[None]:
+                on_cleanup: Callable[[], None] | None = None) -> Generator[None, None, None]:
     # A private address alone still permits host desktop-service activation.
     # Adapters can supply the target's required services in this directory.
     services = root / "services"
@@ -202,7 +202,9 @@ class RepositoryServer:
         self.requests: list[RepositoryRequest] = []
 
     @contextmanager
-    def serving(self, *, on_cleanup: Callable[[], None] | None = None) -> Iterator[str]:
+    def serving(self, *, on_cleanup: Callable[[], None] | None = None) -> Generator[
+        str, None, None
+    ]:
         repository = self
 
         class Handler(SimpleHTTPRequestHandler):

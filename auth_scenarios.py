@@ -6,7 +6,7 @@ from __future__ import annotations
 import shlex
 import subprocess
 import time
-from collections.abc import Iterator
+from collections.abc import Generator
 from contextlib import contextmanager
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -24,7 +24,8 @@ if TYPE_CHECKING:
 
 @contextmanager
 def protected_server(driver: Driver, directory: Path,
-                     payloads: list[str]) -> Iterator[tuple[str, list[dict[str, Any]]]]:
+                     payloads: list[str]) -> Generator[
+                         tuple[str, list[dict[str, Any]]], None, None]:
     """Gate repository payloads on the independently issued bearer token."""
     requests: list[dict[str, Any]] = []
 

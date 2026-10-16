@@ -15,7 +15,7 @@ import sysconfig
 import tempfile
 import threading
 import time
-from collections.abc import Iterator
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 
 @contextmanager
 def _background(driver: Driver, *args: str,
-                pass_fds: tuple[int, ...] = ()) -> Iterator[subprocess.Popen[str]]:
+                pass_fds: tuple[int, ...] = ()) -> Generator[subprocess.Popen[str], None, None]:
     from run import terminate
 
     record: EvidenceRecord = {"argv": [driver.cli, *args], "interface": "cli"}
@@ -47,7 +47,7 @@ def _background(driver: Driver, *args: str,
 
 
 @contextmanager
-def _external_service(driver: Driver, *argv: str) -> Iterator[subprocess.Popen[str]]:
+def _external_service(driver: Driver, *argv: str) -> Generator[subprocess.Popen[str], None, None]:
     from run import PrerequisiteError, terminate
 
     if not Path(argv[0]).is_file():
@@ -248,7 +248,7 @@ def _network(driver: Driver, app: str, name: str) -> None:
 
 
 @contextmanager
-def _dummy_socket(endpoint: Path, wayland: bool) -> Iterator[None]:
+def _dummy_socket(endpoint: Path, wayland: bool) -> Generator[None, None, None]:
     """Answer Wayland display sync with an empty registry, without a compositor."""
     stopped = threading.Event()
     with socket.socket(socket.AF_UNIX) as server:

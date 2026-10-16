@@ -16,14 +16,14 @@ from parent_lifetime_scenarios import _descendants
 from sandbox_scenarios import _background
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Generator
 
     from run import Driver, RepositoryServer
 
 
 @contextmanager
 def _instance(driver: Driver, app: str, token: str,
-              *options: str) -> Iterator[tuple[str, int]]:
+              *options: str) -> Generator[tuple[str, int], None, None]:
     with _background(driver, "run", "--user", *options, f"--env=BLACKBOX_PARENT_TEST={token}",
                      app, "hold", "120") as process:
         record = driver.evidence[-1]
