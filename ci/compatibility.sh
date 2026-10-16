@@ -95,6 +95,11 @@ checkout() {
 
 build() {
     [[ $(git -C "$source_dir" rev-parse HEAD) = "$FLATPAK_REFERENCE_COMMIT" ]]
+    # main switched from gtk-doc to gi-docgen; pinned releases still use gtkdoc.
+    local api_docs_option=-Dgtkdoc=disabled
+    if grep -q "'api_docs'" "$source_dir/meson_options.txt"; then
+        api_docs_option=-Dapi_docs=disabled
+    fi
     # Meson fetches subprojects at the revisions in this commit's wrap files.
     # Use the bundled bubblewrap required by the selected Flatpak source.
     # Absolute system paths make the selector expectations below unambiguous.
@@ -102,7 +107,7 @@ build() {
         --prefix="$BB_CI_ROOT/prefix" --sysconfdir=/etc --localstatedir=/var \
         -Dsystem_install_dir=/var/lib/flatpak \
         -Dsystem_dbus_proxy=/usr/bin/xdg-dbus-proxy \
-        -Dtests=false -Dgir=disabled -Dgtkdoc=disabled -Dman=disabled \
+        -Dtests=false -Dgir=disabled "$api_docs_option" -Dman=disabled \
         -Ddocbook_docs=disabled -Dselinux_module=disabled \
         -Dsystem_helper=enabled -Dmalcontent=disabled \
         -Dwayland_security_context=disabled

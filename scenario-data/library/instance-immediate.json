@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "client": {
+    "source": "client-regressions.c",
+    "entry": "blackbox_regressions_main"
+  },
+  "behaviors": [
+    {
+      "id": "instance.fd-immediate",
+      "scenario": "instance-fd-immediate",
+      "handler": "regression_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "libflatpak",
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "session-bus",
+        "concurrent-processes"
+      ],
+      "description": "An instance ID is publicly usable immediately when its descriptor delivers it.",
+      "preconditions": "A prestarted C observer launches the CLI with an instance-ID pipe; the app cannot report readiness or exit until its stdin barrier is released.",
+      "expected": "First public get_all lookup, without polling or readiness waits, finds the exact ID, application, commit and positive live PID; releasing the barrier permits successful exit.",
+      "references": [
+        "https://github.com/flatpak/flatpak/pull/6864"
+      ]
+    }
+  ],
+  "mappings": [],
+  "notes": [
+    "Only public libflatpak APIs are called: flatpak_instance_new is private. This tests immediate enumeration, not every portal SpawnStarted protocol behavior, and adds no requirement denominator."
+  ]
+}

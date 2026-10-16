@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: LGPL-2.1-or-later */
 #define _POSIX_C_SOURCE 200809L
+#define _XOPEN_SOURCE 700
 #include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -42,12 +43,46 @@ exercise_terminal (void)
   return fflush (stdout);
 }
 
+static volatile sig_atomic_t group_signal_received;
+
+static void
+group_signal (int number)
+{
+  group_signal_received = number;
+}
+
 int
 main (int argc, char **argv)
 {
   if (argc == 1)
     {
       puts (VERSION);
+      return 0;
+    }
+  if (argc == 2 && strcmp (argv[1], "barrier") == 0)
+    {
+      if (getchar () != 'R')
+        return 1;
+      puts ("barrier-released");
+      return 0;
+    }
+  if (argc == 3 && strcmp (argv[1], "signal-group") == 0)
+    {
+      struct sigaction action = { 0 };
+      int status;
+      action.sa_handler = group_signal;
+      sigemptyset (&action.sa_mask);
+      if (sigaction (SIGCONT, &action, NULL) != 0)
+        goto error;
+      if (strcmp (argv[2], "kill") == 0)
+        status = kill (0, SIGCONT);
+      else if (strcmp (argv[2], "killpg") == 0)
+        status = killpg (0, SIGCONT);
+      else
+        return 2;
+      if (status != 0 || group_signal_received != SIGCONT)
+        goto error;
+      printf ("%s delivered\n", argv[2]);
       return 0;
     }
   if (argc == 2 && strcmp (argv[1], "-") == 0)

@@ -52,6 +52,7 @@ class FixtureBuildOptions(_BuildOptionsRequired, total=False):
     arch: str
     arch_repo: str
     arch_commits: dict[str, str]
+    oci_updates: dict[str, str]
 
 
 class FixtureQueryRef(FixtureSize):
@@ -273,6 +274,10 @@ def parse_build_options(value: object, path: str) -> FixtureBuildOptions:
         result["arch_repo"] = _text(data, "arch_repo", path)
     if "arch_commits" in data:
         result["arch_commits"] = string_map(data["arch_commits"], f"{path}.arch_commits")
+    if "oci_updates" in data:
+        result["oci_updates"] = string_map(data["oci_updates"], f"{path}.oci_updates")
+        if set(result["oci_updates"]) != {"app_A", "app_B", "runtime"}:
+            raise ValidationError(f"{path}.oci_updates: expected app_A, app_B and runtime layouts")
     _known(data, result, path)
     return result
 

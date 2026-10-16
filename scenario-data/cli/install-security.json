@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "sandbox.export-filter",
+      "scenario": "sandbox-export-filter",
+      "handler": "regression_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Sanitize untrusted desktop and D-Bus exports without losing safe fields.",
+      "preconditions": "Independent commit contains safe localized fields, an action, unsafe keys and unknown groups; no service is activated.",
+      "expected": "Safe fields and actions survive, unsafe fields/groups disappear, all Exec entries launch through Flatpak, and the app remains runnable.",
+      "references": [
+        "https://github.com/flatpak/flatpak/security/advisories/GHSA-v64f-hrwr-j4vh"
+      ]
+    },
+    {
+      "id": "sandbox.deployment-etc",
+      "scenario": "sandbox-deployment-etc",
+      "handler": "regression_scenarios:run",
+      "drivers": [
+        "cli",
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Runtime deployment must not follow files/etc into an external directory.",
+      "preconditions": "Independent runtime update redirects files/etc to private canaries, including symlink passwd/group/machine-id entries and a regular resolv.conf.",
+      "expected": "Canary paths, types and bytes remain unchanged; a rejected update retains the old commit, and a subsequent valid update runs normally.",
+      "references": [
+        "https://github.com/flatpak/flatpak/security/advisories/GHSA-8xgq-v545-vgvf"
+      ]
+    },
+    {
+      "id": "sandbox.deployment-export",
+      "scenario": "sandbox-deployment-export",
+      "handler": "regression_scenarios:run",
+      "drivers": [
+        "cli",
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Deployment export cleanup must not delete external canaries through a symlink.",
+      "preconditions": "Independent app update redirects export to a private external directory with bin/keep.",
+      "expected": "External directory entries, types and bytes survive; failed deployment preserves the old commit and valid recovery remains possible.",
+      "references": [
+        "https://github.com/flatpak/flatpak/security/advisories/GHSA-5p67-xh8x-rq54"
+      ]
+    }
+  ],
+  "mappings": [],
+  "notes": [
+    "Supplemental security regressions add executable checks without changing the existing requirement denominators or claiming full install/update coverage.",
+    "All malicious links point only into private per-case canaries. User-installation confinement is tested; no root-context or system-helper security guarantee is claimed."
+  ]
+}
