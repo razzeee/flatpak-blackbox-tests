@@ -3,6 +3,8 @@
 
 import hashlib
 import json
+import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -22,6 +24,39 @@ SUPERVISOR = Path(__file__).with_name("signal_supervisor.py")
 
 
 class CanaryTests(unittest.TestCase):
+    def test_instance_id_child_failure_reports_eof_without_timeout(self) -> None:
+        if not shutil.which("cc") or not shutil.which("pkg-config"):
+            self.skipTest("requires a C compiler and pkg-config")
+        flags = subprocess.run(["pkg-config", "--cflags", "--libs", "flatpak"],
+                               text=True, capture_output=True, check=False)
+        if flags.returncode:
+            self.skipTest("requires libflatpak development files")
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            main = root / "main.c"
+            main.write_text(
+                "#include <sys/resource.h>\n"
+                "int blackbox_regressions_main(int argc, char **argv);\n"
+                "int main(int argc, char **argv) {\n"
+                "  struct rlimit limit = {0, 0};\n"
+                "  setrlimit(RLIMIT_CORE, &limit);\n"
+                "  return blackbox_regressions_main(argc, argv);\n}\n")
+            binary = root / "instance-client"
+            built = subprocess.run([
+                "cc", "-Wall", "-Wextra", "-Werror", str(main),
+                str(Path(__file__).with_name("client-regressions.c")),
+                "-o", str(binary), *shlex.split(flags.stdout),
+            ], text=True, capture_output=True, timeout=30, check=False)
+            self.assertEqual(built.returncode, 0, built.stderr)
+            # The actual client must observe EOF when its CLI exits before
+            # writing an instance ID, not wait for the outer runner deadline.
+            result = subprocess.run([
+                str(binary), "instance-fd-immediate", "/bin/false",
+                "app/org.example.App/x86_64/test", "a" * 64,
+            ], text=True, capture_output=True, timeout=5, check=False)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("length > 0", result.stderr)
+
     def test_snapshot_detects_deletion_bytes_and_symlink_replacement(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

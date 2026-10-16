@@ -30,6 +30,8 @@ blackbox_regressions_main (int argc, char **argv)
                                          "--instance-id-fd=3", argv[3], "barrier", NULL);
   g_assert_no_error (error);
   g_assert_nonnull (process);
+  /* A child that exits without writing must produce EOF in the parent. */
+  g_clear_object (&launcher);
   /* No readiness output or polling before the first public instance lookup. */
   ssize_t length = read (descriptors[0], id, sizeof id - 1);
   close (descriptors[0]);
