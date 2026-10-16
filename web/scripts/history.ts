@@ -20,6 +20,8 @@ const { values, positionals } = parseArgs({
     "suite-commit": { type: "string" },
     "target-commit": { type: "string" },
     "run-url": { type: "string" },
+    "workflow-event": { type: "string" },
+    "workflow-created-at": { type: "string" },
     output: { type: "string" },
     snapshot: { type: "string" },
     history: { type: "string" },
@@ -52,6 +54,13 @@ try {
         suiteCommit: required("suite-commit"),
         targetCommit: required("target-commit"),
         runUrl: required("run-url"),
+        workflow:
+          values["workflow-event"] || values["workflow-created-at"]
+            ? {
+                event: required("workflow-event"),
+                created_at: required("workflow-created-at"),
+              }
+            : undefined,
       }),
     );
   } else if (positionals[0] === "update") {

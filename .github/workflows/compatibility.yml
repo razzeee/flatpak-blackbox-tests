@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   prepare:
@@ -138,12 +139,22 @@ jobs:
           TRACK: ${{ matrix.track }}
           SUITE_COMMIT: ${{ github.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          GH_TOKEN: ${{ github.token }}
+          WORKFLOW_EVENT: ${{ github.event_name }}
         run: |
+          # Use the workflow creation time, never the later snapshot/finish time.
+          provenance=()
+          if created_at=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" --jq .created_at); then
+            provenance=(--workflow-event "$WORKFLOW_EVENT" --workflow-created-at "$created_at")
+          else
+            echo "::warning::Workflow timing unavailable; preserving coverage without timing metadata"
+          fi
           npm --prefix web run history -- record \
             --report "$BB_CI_ROOT/results/report.json" \
             --track "$TRACK" --timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             --suite-commit "$SUITE_COMMIT" --target-commit "$FLATPAK_REFERENCE_COMMIT" \
             --run-url "$RUN_URL" \
+            "${provenance[@]}" \
             --output "$RUNNER_TEMP/coverage-snapshot-${TRACK}-${{ matrix.baseline || 'upstream' }}.json"
 
       - name: Upload daily coverage snapshot

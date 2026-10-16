@@ -123,6 +123,10 @@ test("snapshot CLI handles absent reports and update preserves existing history"
     latestPinnedBaseline.commit,
     "--run-url",
     "https://github.com/example/suite/actions/runs/1",
+    "--workflow-event",
+    "schedule",
+    "--workflow-created-at",
+    "2026-09-17T20:55:00Z",
     "--output",
     snapshot,
   ]);
@@ -131,6 +135,10 @@ test("snapshot CLI handles absent reports and update preserves existing history"
   );
   assert.equal(gap.complete, false);
   assert.equal(gap.verification, "not-run");
+  assert.deepEqual(gap.workflow, {
+    event: "schedule",
+    created_at: "2026-09-17T20:55:00Z",
+  });
   const retained = completeEntry(entry().timestamp, [
     ...timedEntry().performance!.cases,
     {

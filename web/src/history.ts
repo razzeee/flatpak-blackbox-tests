@@ -105,6 +105,12 @@ export const snapshotSchema = z
     baseline: baselineSchema.optional(),
     target_version: z.string().optional(),
     run_url: z.string(),
+    workflow: z
+      .object({
+        event: z.string(),
+        created_at: timestampSchema,
+      })
+      .optional(),
     fingerprint: z.string(),
     metrics: z.record(z.string(), metricSchema),
     performance: performanceSchema.optional(),
