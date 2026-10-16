@@ -6,7 +6,6 @@ import { PerformancePanel } from "./PerformancePanel.tsx";
 import {
   credit,
   daily,
-  dayMilliseconds,
   series,
   seriesNames,
   utcDay,
@@ -15,6 +14,7 @@ import {
 } from "./history.ts";
 import { targetKey, targetOptions } from "./targets.ts";
 import { RunSummary } from "./RunSummary.tsx";
+import { RunHealth } from "./RunHealth.tsx";
 import { ThemeSelect } from "./ThemeSelect.tsx";
 import { focusSection } from "./RunDiagnostics.tsx";
 import type { OutcomeFilter } from "./runComparison.ts";
@@ -157,66 +157,6 @@ function DailyCounts({ entries }: { entries: Snapshot[] }) {
   );
 }
 
-function RunHealth({ entries }: { entries: Snapshot[] }) {
-  const byDay = new Map(
-    entries.map((entry) => [utcDay(entry.timestamp), entry]),
-  );
-  const first = Date.parse(`${utcDay(entries[0]!.timestamp)}T00:00:00Z`);
-  const last = Date.parse(`${utcDay(entries.at(-1)!.timestamp)}T00:00:00Z`);
-  const issues: { date: string; entry?: Snapshot; label: string }[] = [];
-  for (let day = first; day <= last; day += dayMilliseconds) {
-    const date = new Date(day).toISOString().slice(0, 10);
-    const entry = byDay.get(date);
-    if (!entry) {
-      issues.push({ date, label: "No run recorded" });
-    } else if (!entry.complete || entry.verification !== "current") {
-      const label =
-        entry.verification === "not-run"
-          ? "Run recorded · tests did not run"
-          : entry.verification === "incomplete" || !entry.complete
-            ? "Run recorded · incomplete results"
-            : `Run recorded · ${entry.verification} evidence`;
-      issues.push({ date, entry, label });
-    }
-  }
-  if (issues.length === 0) return null;
-  return (
-    <section className="run-health" aria-labelledby="run-health-title">
-      <div className="run-health-heading">
-        <div>
-          <p className="eyebrow">RUN RECORD</p>
-          <h2 id="run-health-title">Days needing a closer look</h2>
-        </div>
-        <span className="issue-count">
-          {issues.length} {issues.length === 1 ? "day" : "days"}
-        </span>
-      </div>
-      <p className="run-health-note">
-        Missing history means no run was recorded here; it does not tell us why.
-        Recorded attempts link to their CI run.
-      </p>
-      <ul className="run-health-list">
-        {issues.map(({ date, entry, label }) => (
-          <li
-            key={date}
-            className={
-              entry ? "run-health-item recorded" : "run-health-item missing"
-            }
-          >
-            <time dateTime={date}>{date}</time>
-            <span>{label}</span>
-            {entry?.run_url.startsWith("https://github.com/") ? (
-              <a href={entry.run_url}>
-                View run<span className="visually-hidden"> for {date}</span> ↗
-              </a>
-            ) : null}
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
 export function App({ history }: { history: Snapshot[] }) {
   const options = useMemo(() => targetOptions(history), [history]);
   const [selection, setSelection] = useState(() =>
@@ -281,7 +221,7 @@ export function App({ history }: { history: Snapshot[] }) {
             {utcDay(entries[0]!.timestamp)} to{" "}
             {utcDay(entries.at(-1)!.timestamp)} · {entries.length} recorded days
           </p>
-          <RunHealth entries={entries} />
+          <RunHealth key={selected.key} entries={entries} />
           <RunSummary
             entries={entries}
             run={run}
