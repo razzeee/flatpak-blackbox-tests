@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections.abc import Iterator
+from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -87,7 +87,7 @@ class Registry:
         return 404, b"not found", "text/plain"
 
     @contextmanager
-    def serving(self) -> Iterator[str]:
+    def serving(self) -> Generator[str, None, None]:
         registry = self
 
         class Handler(BaseHTTPRequestHandler):

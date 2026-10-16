@@ -6,7 +6,7 @@ from __future__ import annotations
 import base64
 import configparser
 import time
-from collections.abc import Iterator
+from collections.abc import Generator
 from contextlib import contextmanager, suppress
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -36,7 +36,7 @@ class TransferServer:
         self.requests: list[dict[str, Any]] = []
 
     @contextmanager
-    def serving(self, driver: Driver) -> Iterator[str]:
+    def serving(self, driver: Driver) -> Generator[str, None, None]:
         fixture_server = self
 
         class Handler(SimpleHTTPRequestHandler):
@@ -118,7 +118,7 @@ def _tx(driver: Driver, mode: str, action: str, ref: str, *,
 
 
 @contextmanager
-def _fresh_transaction_state(driver: Driver, name: str) -> Iterator[None]:
+def _fresh_transaction_state(driver: Driver, name: str) -> Generator[None, None, None]:
     root = driver.root / "transaction-states" / name
     directories = {
         "HOME": root / "home",
