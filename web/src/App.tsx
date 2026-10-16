@@ -163,55 +163,91 @@ function RunHealth({ entries }: { entries: Snapshot[] }) {
   );
   const first = Date.parse(`${utcDay(entries[0]!.timestamp)}T00:00:00Z`);
   const last = Date.parse(`${utcDay(entries.at(-1)!.timestamp)}T00:00:00Z`);
-  const issues: { date: string; entry?: Snapshot; label: string }[] = [];
+  const days: {
+    date: string;
+    entry?: Snapshot;
+    label: string;
+    state: string;
+  }[] = [];
   for (let day = first; day <= last; day += dayMilliseconds) {
     const date = new Date(day).toISOString().slice(0, 10);
     const entry = byDay.get(date);
     if (!entry) {
-      issues.push({ date, label: "No run recorded" });
+      days.push({
+        date,
+        label: "Scheduled · no run observed",
+        state: "missing",
+      });
     } else if (!entry.complete || entry.verification !== "current") {
       const label =
         entry.verification === "not-run"
-          ? "Run recorded · tests did not run"
+          ? "Tests did not run"
           : entry.verification === "incomplete" || !entry.complete
-            ? "Run recorded · incomplete results"
-            : `Run recorded · ${entry.verification} evidence`;
-      issues.push({ date, entry, label });
+            ? "Incomplete results"
+            : `${entry.verification} evidence`;
+      days.push({
+        date,
+        entry,
+        label,
+        state: "unverified",
+      });
+    } else {
+      days.push({
+        date,
+        entry,
+        label: "Verified evidence",
+        state: "recorded",
+      });
     }
   }
-  if (issues.length === 0) return null;
+  const attentionCount = days.filter((day) => day.state !== "recorded").length;
+  if (attentionCount === 0) return null;
   return (
     <section className="run-health" aria-labelledby="run-health-title">
       <div className="run-health-heading">
         <div>
-          <p className="eyebrow">RUN RECORD</p>
-          <h2 id="run-health-title">Days needing a closer look</h2>
+          <p className="eyebrow">DAILY SCHEDULE · EUROPE/BERLIN</p>
+          <h2 id="run-health-title">Expected runs</h2>
         </div>
-        <span className="issue-count">
-          {issues.length} {issues.length === 1 ? "day" : "days"}
-        </span>
+        <span className="issue-count">{attentionCount} need attention</span>
       </div>
       <p className="run-health-note">
-        Missing history means no run was recorded here; it does not tell us why.
-        Recorded attempts link to their CI run.
+        Each day in this period was scheduled. Empty coverage stays empty when
+        no run is present; recorded attempts link to CI.
       </p>
       <ul className="run-health-list">
-        {issues.map(({ date, entry, label }) => (
-          <li
-            key={date}
-            className={
-              entry ? "run-health-item recorded" : "run-health-item missing"
-            }
-          >
-            <time dateTime={date}>{date}</time>
-            <span>{label}</span>
+        {days.map(({ date, entry, label, state }) => (
+          <li key={date} className={`run-health-day ${state}`}>
             {entry?.run_url.startsWith("https://github.com/") ? (
-              <a href={entry.run_url}>
-                View run<span className="visually-hidden"> for {date}</span> ↗
+              <a
+                href={entry.run_url}
+                aria-label={`${date}: ${label}; view CI run`}
+              >
+                <time dateTime={date}>{date.slice(5)}</time>
+                <span>{label}</span>
               </a>
-            ) : null}
+            ) : (
+              <div aria-label={`${date}: ${label}`}>
+                <time dateTime={date}>{date.slice(5)}</time>
+                <span>{label}</span>
+              </div>
+            )}
           </li>
         ))}
+      </ul>
+      <ul className="run-health-legend" aria-label="Run status legend">
+        <li>
+          <span className="recorded" />
+          Verified evidence
+        </li>
+        <li>
+          <span className="unverified" />
+          Run recorded, evidence unverified
+        </li>
+        <li>
+          <span className="missing" />
+          Scheduled, no run observed
+        </li>
       </ul>
     </section>
   );
