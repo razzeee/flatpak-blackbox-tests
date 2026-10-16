@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "repair.pins",
+      "scenario": "repair-pins",
+      "handler": "regression_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Repair preserves explicit pins without pinning automatic dependencies.",
+      "preconditions": "App A depends on an unpinned runtime; a different installed runtime branch is explicitly pinned. Before reinstall-all, unlink only the app's public deployment executable, retaining its repository object.",
+      "expected": "Ordinary and reinstall-all repair preserve the exact pin set and commits; forced repair restores the independent app executable and execution; unused cleanup removes the dependency but retains the pinned control.",
+      "references": [
+        "https://github.com/flatpak/flatpak/pull/6571"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "repair.pins",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "surface_assertions": [
+        {
+          "id": "cli.option.repair.--reinstall-all",
+          "rationale": "Forced redeployment preserves pins and does not turn an automatic dependency into a protected runtime."
+        }
+      ],
+      "rationale": "Pin preservation is a focused repair regression, not proof of damaged-object recovery."
+    }
+  ]
+}

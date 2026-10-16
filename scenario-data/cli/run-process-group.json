@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "sandbox.process-group",
+      "scenario": "sandbox-process-group",
+      "handler": "regression_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "concurrent-processes"
+      ],
+      "description": "App process-group signals must not reach the host supervisor.",
+      "preconditions": "A guarded private-session supervisor catches SIGCONT and first verifies its handler with a direct signal; the app catches the same signal. SIGCONT is harmless to bubblewrap's supervisor, which may share the inner process group.",
+      "expected": "Both kill(0, SIGCONT) and killpg(0, SIGCONT) deliver inside the app and complete without signaling its host supervisor.",
+      "references": [
+        "https://github.com/flatpak/flatpak/security/advisories/GHSA-f3p8-vr7v-gxf2"
+      ]
+    }
+  ],
+  "mappings": [],
+  "notes": [
+    "The supervisor refuses to run unless it leads its own private session/group. It never signals the runner's group. No requirement denominator is added."
+  ]
+}

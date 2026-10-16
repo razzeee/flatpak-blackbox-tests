@@ -121,6 +121,25 @@ def prepare_options(reference_cli: str, output: Path,
     supported = command(reference_cli, "--supported-arches").split()
     alternate = next((arch for arch in supported if arch != fixture["arch"]), None)
     options: dict[str, object] = {"oci": str(image.relative_to(output)), "oci_ref": oci_ref}
+    updates: dict[str, str] = {}
+    for label, version, identity, oci_options in (
+        ("app_A", "A", fixture["app"], ()),
+        ("app_B", "B", fixture["app"], ()),
+        ("runtime", "A", fixture["runtime"], ("--runtime",)),
+    ):
+        layout = root / f"registry-{label}"
+        source = root / f"registry-source-{label}"
+        kind = "runtime" if oci_options else "app"
+        ref = f"{kind}/{identity}/{fixture['arch']}/{fixture['branch']}"
+        # OCI defaults to token type 1 when no annotation is present. Explicitly
+        # publish public images so no host OCI authenticator is needed.
+        command("ostree", f"--repo={source}", "init", "--mode=archive")
+        command(reference_cli, "build-commit-from", f"--src-repo={output / version}",
+                f"--src-ref={ref}", "--token-type=0", str(source), ref)
+        command(reference_cli, "build-bundle", "--oci", *oci_options, str(source),
+                str(layout), identity, fixture["branch"])
+        updates[label] = str(layout.relative_to(output))
+    options["oci_updates"] = updates
     if alternate is not None:
         repo = root / "architectures"
         shutil.copytree(output / "A", repo)
