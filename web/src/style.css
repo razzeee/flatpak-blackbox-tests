@@ -49,94 +49,90 @@ h2 {
   margin-bottom: 8px;
 }
 .run-health {
-  --health-accent: var(--orange);
-  position: relative;
-  overflow: hidden;
-  margin: 28px 0 32px;
-  padding: 20px 24px 22px;
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--health-accent);
-  background:
-    radial-gradient(
-      ellipse at 100% 0%,
-      light-dark(#fff0d5, #332819),
-      transparent 48%
-    ),
-    var(--surface);
+  margin: 24px 0;
+  padding: 16px 0;
+  border-block: 1px solid var(--border);
 }
-.run-health-heading {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 16px;
-}
-.run-health-heading h2 {
-  margin: 0;
-  font-size: clamp(1.2rem, 2vw, 1.55rem);
-  letter-spacing: -0.025em;
-}
-.eyebrow {
-  margin: 0 0 4px;
+.run-health > summary span {
   color: var(--muted);
-  font:
-    700 0.7rem/1.3 ui-monospace,
-    "Cascadia Code",
-    monospace;
-  letter-spacing: 0.13em;
+  font-size: 0.85rem;
+  display: inline-block;
+  margin-left: 12px;
 }
-.issue-count {
-  flex: none;
-  padding: 3px 9px;
-  border: 1px solid var(--control-border);
-  border-radius: 99px;
-  font-size: 0.82rem;
+.evidence-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(30px, 1fr));
+  gap: 4px;
+  padding: 6px;
+  margin-inline: -6px;
+}
+.evidence-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 4px 0;
+  border: 1px solid var(--border);
+  border-bottom: 3px solid var(--green);
+  border-radius: 3px;
+  background: var(--background);
+  font:
+    0.85rem ui-monospace,
+    monospace;
   font-variant-numeric: tabular-nums;
+  touch-action: manipulation;
+}
+.evidence-day.unverified {
+  border-bottom-color: var(--red);
+}
+.evidence-day.missing {
+  border-bottom-color: var(--orange);
+  border-style: dashed;
+}
+.evidence-day:hover,
+.evidence-day[aria-pressed="true"] {
+  background: var(--surface);
+  border-color: var(--foreground);
+}
+.evidence-symbol {
+  font-size: 0.85rem;
+}
+.evidence-range {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.evidence-detail {
+  background: var(--surface);
+  padding: 12px 16px;
+  margin-top: 12px;
+  font-size: 0.9rem;
+}
+.evidence-detail p {
+  margin: 4px 0 8px;
 }
 .run-health-note {
   margin: 8px 0 16px;
   color: var(--muted);
   font-size: 0.92rem;
 }
-.run-health-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-  gap: 8px;
+.run-health-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
   list-style: none;
   padding: 0;
-  margin: 0;
-}
-.run-health-item {
-  display: grid;
-  grid-template-columns: minmax(6.5rem, auto) 1fr auto;
-  align-items: center;
-  gap: 8px 12px;
-  min-height: 42px;
-  padding: 6px 10px;
-  border-top: 1px solid var(--border);
-  font-size: 0.9rem;
-}
-.run-health-item time {
-  font:
-    600 0.85rem ui-monospace,
-    "Cascadia Code",
-    monospace;
-  font-variant-numeric: tabular-nums;
-}
-.run-health-item span {
+  margin: 14px 0 0;
   color: var(--muted);
+  font-size: 0.8rem;
 }
-.run-health-item.missing time::before,
-.run-health-item.recorded time::before {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  margin: 0 8px 1px 0;
-  border-radius: 50%;
-  background: var(--orange);
-  content: "";
-}
-.run-health-item.recorded time::before {
-  background: var(--red);
+.run-health-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
 }
 .visually-hidden {
   position: absolute;

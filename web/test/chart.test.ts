@@ -6,6 +6,7 @@ import type { SceneNode } from "@tanstack/charts/types";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { App } from "../src/App.tsx";
+import { evidenceDays, RunHealth } from "../src/RunHealth.tsx";
 import { coverageChart, outcomeChart } from "../src/chart.ts";
 import { outcomeRows } from "../src/performance.ts";
 import { completeEntry, entry } from "./fixtures.ts";
@@ -135,7 +136,7 @@ test("counts retain denominator changes and React escapes metadata", () => {
   );
 });
 
-test("run health distinguishes absent days from recorded unverified attempts", () => {
+test("run timeline distinguishes missing snapshots without claiming schedules were skipped", () => {
   const missing = entry("2026-09-17T21:00:00Z");
   const noReport = {
     ...entry("2026-09-19T21:00:00Z"),
@@ -145,10 +146,42 @@ test("run health distinguishes absent days from recorded unverified attempts", (
   const page = renderToStaticMarkup(
     createElement(App, { history: [missing, noReport] }),
   );
-  assert.match(page, /Days needing a closer look/);
-  assert.match(page, /2026-09-18/);
-  assert.match(page, /No run recorded/);
-  assert.match(page, /2026-09-19/);
-  assert.match(page, /Run recorded · tests did not run/);
-  assert.match(page, /Missing history means no run was recorded/);
+  assert.match(page, /<details class="run-health"><summary>Run history/);
+  assert.doesNotMatch(page, /<details class="run-health" open/);
+  assert.ok(
+    page.indexOf('aria-label="Public interface reach"') <
+      page.indexOf('class="run-health"'),
+  );
+  assert.match(page, /Runs are scheduled daily/);
+  assert.match(page, /No coverage snapshot/);
+  assert.match(page, /No test report/);
+  assert.match(page, /Verified evidence/);
+  assert.match(page, /delayed schedule can leave a gap/);
+  assert.doesNotMatch(page, /no run observed/);
+});
+
+test("evidence timeline is bounded, chronological and independent of today's date", () => {
+  assert.deepEqual(evidenceDays([]), []);
+  const days = evidenceDays([
+    entry("2026-10-16T21:00:00Z"),
+    entry("2026-08-01T21:00:00Z"),
+  ]);
+  assert.equal(days.length, 30);
+  assert.equal(days[0]!.date, "2026-09-17");
+  assert.equal(days.at(-1)!.date, "2026-10-16");
+  assert.equal(days[0]!.state, "missing");
+  assert.equal(days.at(-1)!.state, "verified");
+});
+
+test("workflow provenance renders observed trigger timing without redating coverage", () => {
+  const value = {
+    ...entry("2026-10-06T00:49:00Z"),
+    workflow: { event: "schedule", created_at: "2026-10-06T00:36:25Z" },
+  };
+  const page = renderToStaticMarkup(
+    createElement(RunHealth, { entries: [value] }),
+  );
+  assert.match(page, /Scheduled trigger/);
+  assert.match(page, /observed trigger time, not the planned start/);
+  assert.equal(evidenceDays([value])[0]!.date, "2026-10-06");
 });
