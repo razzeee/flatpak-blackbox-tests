@@ -6,11 +6,14 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { App } from "../src/App.tsx";
 import { snapshotSchema, type CaseTiming } from "../src/history.ts";
 import { caseKey } from "../src/performance.ts";
-import { RunDiagnostics } from "../src/RunDiagnostics.tsx";
+import { OutcomeFilters, RunDiagnostics } from "../src/RunDiagnostics.tsx";
 import { RunSummary } from "../src/RunSummary.tsx";
+import { DashboardTabs } from "../src/DashboardTabs.tsx";
+import { CaseHistory, PerformancePanel } from "../src/PerformancePanel.tsx";
 import {
   caseOptions,
   compareRuns,
+  defaultOutcomeFilter,
   delta,
   earlierRuns,
   filterCases,
@@ -22,6 +25,151 @@ import { completeEntry, entry, timedEntry } from "./fixtures.ts";
 
 const day1 = "2026-09-17T21:00:00Z";
 const day2 = "2026-09-18T21:00:00Z";
+
+test("default outcome view prioritizes verified failures, then setup errors, otherwise all cases", () => {
+  assert.equal(
+    defaultOutcomeFilter(completeEntry(day1, [result("broken", 1, "failed")])),
+    "failed",
+  );
+  assert.equal(
+    defaultOutcomeFilter(
+      completeEntry(day1, [result("setup", 1, "setup-error")]),
+    ),
+    "setup-error",
+  );
+  assert.equal(
+    defaultOutcomeFilter(completeEntry(day1, [result("ok", 1)])),
+    "all",
+  );
+  assert.equal(
+    defaultOutcomeFilter({
+      ...completeEntry(day1, [result("stale", 1, "failed")]),
+      verification: "stale",
+    }),
+    "all",
+  );
+  assert.equal(defaultOutcomeFilter(undefined), "all");
+});
+
+test("the dashboard opens on Trends and keeps failure-filtered Cases available", () => {
+  const run = completeEntry(day1, [
+    result("broken", 1, "failed"),
+    result("healthy", 1),
+  ]);
+  const html = renderToStaticMarkup(createElement(App, { history: [run] }));
+  const trendsTab = html.match(/<button[^>]*id="tab-trends"[^>]*>/)?.[0] ?? "";
+  assert.match(trendsTab, /aria-selected="true"/);
+  const trendsPanel = html.match(/<div[^>]*id="panel-trends"[^>]*>/)?.[0] ?? "";
+  assert.doesNotMatch(trendsPanel, /hidden=""/);
+  const casesPanel = html.match(/<div[^>]*id="panel-cases"[^>]*>/)?.[0] ?? "";
+  assert.match(casesPanel, /hidden=""/);
+  const table =
+    html.match(
+      /<table[^>]*class="[^"]*case-comparison[^"]*"[\s\S]*?<\/table>/,
+    )?.[0] ?? "";
+  assert.match(table, /Inspect broken/);
+  assert.doesNotMatch(table, /Inspect healthy/);
+  assert.match(html, /All cases/);
+  const selected =
+    html
+      .match(/<button[^>]*>[\s\S]*?<\/button>/g)
+      ?.find(
+        (button) =>
+          button.includes('role="radio"') &&
+          button.includes('aria-checked="true"'),
+      ) ?? "";
+  assert.match(selected, /Failed/);
+});
+
+test("inspector retains removed-case provenance and never replaces absent timings with zero", () => {
+  const before = completeEntry(day1, [result("retired", 5, "failed")]);
+  const current = completeEntry(day2, [result("replacement", 7)]);
+  const comparison = compareRuns(current, before).find(
+    (row) => row.before?.behavior_id === "retired",
+  )!;
+  const html = renderToStaticMarkup(
+    createElement(CaseHistory, {
+      entries: [before, current],
+      run: current,
+      caseId: comparison.key,
+      comparison,
+    }),
+  );
+  assert.match(html, /This case was not recorded in the selected run/);
+  assert.match(html, /Removed case/);
+  assert.match(html, /Before: 5\.00s \(Failed\)/);
+  assert.match(html, /Not recorded/);
+  assert.doesNotMatch(html, /\b0\.00s/);
+});
+
+test("dashboard tabs expose one selected view with matching labelled panels", () => {
+  const tabs = renderToStaticMarkup(
+    createElement(DashboardTabs, {
+      value: "trends",
+      onChange: () => {},
+    }),
+  );
+  assert.equal((tabs.match(/aria-selected="true"/g) ?? []).length, 1);
+  assert.match(
+    tabs.match(/<button[^>]*id="tab-trends"[^>]*>/)?.[0] ?? "",
+    /aria-selected="true"/,
+  );
+  const run = completeEntry(day2, [result("ok", 1)]);
+  const panel = renderToStaticMarkup(
+    createElement(
+      DashboardTabs,
+      { value: "trends", onChange: () => {} },
+      createElement(PerformancePanel, {
+        entries: [run],
+        activeTab: "trends",
+      }),
+    ),
+  );
+  const casesPanel = panel.match(/<div[^>]*id="panel-cases"[^>]*>/)?.[0] ?? "";
+  assert.match(casesPanel, /hidden=""/);
+  assert.match(casesPanel, /aria-labelledby="tab-cases"/);
+  const trendsPanel =
+    panel.match(/<div[^>]*id="panel-trends"[^>]*>/)?.[0] ?? "";
+  assert.match(trendsPanel, /aria-labelledby="tab-trends"/);
+  assert.doesNotMatch(trendsPanel, /hidden=""/);
+  const evidencePanel =
+    panel.match(/<div[^>]*id="panel-evidence"[^>]*>/)?.[0] ?? "";
+  assert.match(evidencePanel, /hidden=""/);
+});
+
+test("outcome filters include nonzero statuses without empty secondary options", () => {
+  const run = completeEntry(day2, [
+    result("ok", 1),
+    result("setup", 1, "setup-error"),
+  ]);
+  const html = renderToStaticMarkup(
+    createElement(OutcomeFilters, {
+      run,
+      value: "all",
+      onChange: () => {},
+    }),
+  );
+  assert.match(html, /Setup error/);
+  assert.match(html, /class="outcome-count">1/);
+  assert.doesNotMatch(html, /Unsupported|Pending/);
+});
+
+test("run-first layout puts failures and investigation ahead of historical charts", () => {
+  const run = completeEntry(day2, [
+    result("broken", 2, "failed"),
+    result("ok", 1),
+  ]);
+  const html = renderToStaticMarkup(createElement(App, { history: [run] }));
+  assert.match(html, /case needs[^<]* attention/);
+  assert.match(html, /Inspect failed cases/);
+  assert.ok(html.indexOf("case needs") < html.indexOf("Case results"));
+  assert.ok(
+    html.indexOf("Case results") < html.indexOf("Coverage &amp; performance"),
+  );
+  assert.match(html, /data-slot="tabs-trigger"/);
+  assert.match(html, /Open details for/);
+  assert.doesNotMatch(html, /<th scope="col">Phase deltas/);
+});
 
 function result(
   id: string,
@@ -241,27 +389,24 @@ test("untimed cases remain selectable and a single run defaults to slowest first
   );
 });
 
-test("outcome summary renders failed and skipped counts, not zeroes for unavailable data", () => {
+test("outcome filters render failed and skipped counts, not zeroes for unavailable data", () => {
   const current = completeEntry(day1, [
     result("failed", 1, "failed"),
     result("skip", undefined, "not-selected"),
   ]);
   const page = renderToStaticMarkup(
-    createElement(RunSummary, {
-      entries: [current],
+    createElement(OutcomeFilters, {
       run: current,
-      filter: "all",
-      onFilter: () => {},
-      onRunChange: () => {},
+      value: "all",
+      onChange: () => {},
     }),
   );
-  assert.match(page, /<strong>1<\/strong> Failed/);
-  assert.match(page, /<strong>1<\/strong> Not selected/);
+  assert.match(page, /Failed <span class="outcome-count">1/);
+  assert.match(page, /Not selected <span class="outcome-count">1/);
   const missing = renderToStaticMarkup(
     createElement(RunSummary, {
       entries: [entry()],
       run: entry(),
-      filter: "all",
       onFilter: () => {},
       onRunChange: () => {},
     }),
@@ -291,8 +436,8 @@ test("diagnostics explain legacy gaps and the page selects the latest run", () =
   const page = renderToStaticMarkup(
     createElement(App, { history: [latest, before] }),
   );
-  assert.match(page, /What changed\?/);
-  assert.match(page, /Inspecting 2026-09-18/);
+  assert.match(page, /Case results/);
+  assert.match(page, /SELECTED RUN \/ 2026-09-18/);
   assert.match(page, /\+10\.00s/);
   assert.match(page, /Outside recorded cases/);
 });

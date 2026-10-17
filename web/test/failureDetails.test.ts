@@ -99,7 +99,10 @@ test("case inspector renders escaped failure output, setup errors, truncation an
   assert.match(html, /&lt;script&gt;/);
   assert.doesNotMatch(html, /<script>/);
   assert.match(html, /Cleanup error/);
-  assert.match(html, /<details><summary>Evidence 1: Standard error/);
+  assert.match(
+    html,
+    /<button[^>]*data-slot="collapsible-trigger"[^>]*>Evidence 1: Standard error/,
+  );
   assert.match(html, /Diagnostic output was truncated/);
   assert.match(html, /View CI run and full report artifacts/);
   assert.match(

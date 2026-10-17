@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 import { Chart } from "@tanstack/charts/react";
 import { useMemo, useState } from "react";
+import { CubeFocusIcon } from "@phosphor-icons/react/dist/csr/CubeFocus";
+import { DownloadSimpleIcon } from "@phosphor-icons/react/dist/csr/DownloadSimple";
 import { coverageChart } from "./chart.ts";
 import { PerformancePanel } from "./PerformancePanel.tsx";
 import {
@@ -17,7 +19,33 @@ import { RunSummary } from "./RunSummary.tsx";
 import { RunHealth } from "./RunHealth.tsx";
 import { ThemeSelect } from "./ThemeSelect.tsx";
 import { focusSection } from "./RunDiagnostics.tsx";
-import type { OutcomeFilter } from "./runComparison.ts";
+import { defaultOutcomeFilter, type OutcomeFilter } from "./runComparison.ts";
+import { DashboardTabs, type DashboardTab } from "./DashboardTabs.tsx";
+import { ChartCard } from "./ChartCard.tsx";
+import { Disclosure } from "./Disclosure.tsx";
+import { Button } from "./components/ui/button.tsx";
+import { Field, FieldGroup, FieldLabel } from "./components/ui/field.tsx";
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from "./components/ui/native-select.tsx";
+import { Separator } from "./components/ui/separator.tsx";
+import { ToggleGroup, ToggleGroupItem } from "./components/ui/toggle-group.tsx";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+} from "./components/ui/empty.tsx";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
+} from "./components/ui/table.tsx";
 
 const behaviors: Series[] = ["cli", "library"];
 const surfaces: Series[] = [
@@ -51,109 +79,116 @@ function CoverageChart({
     names.some((name) => credit(entry, name) !== null),
   );
   return (
-    <section className="chart-section" aria-label={title}>
-      <h2>{title}</h2>
+    <ChartCard
+      title={title}
+      description="Daily passing percentage. Catalogue totals can change."
+      legend={
+        <ToggleGroup
+          type="multiple"
+          size="sm"
+          className="max-w-full flex-wrap"
+          aria-label={`${title} series`}
+          value={names.filter((name) => !hidden.includes(name))}
+          onValueChange={(visible) =>
+            setHidden(names.filter((name) => !visible.includes(name)))
+          }
+        >
+          {names.map((name) => (
+            <ToggleGroupItem key={name} value={name}>
+              <span
+                className="legend-dot"
+                style={{ background: series[name].color }}
+              />
+              {series[name].label}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+      }
+    >
       {hasEvidence ? (
         <Chart
           definition={definition}
-          height={300}
+          height={210}
           onSelect={(point) => {
             if (point) onSelectDay(point.datum.date);
           }}
           ariaLabel={`${title}, daily passing percentages`}
         />
       ) : (
-        <p className="empty">No verified evidence in these runs yet.</p>
+        <Empty>
+          <EmptyHeader>
+            <EmptyDescription>
+              No verified evidence in these runs yet.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       )}
-      <ul className="legend" aria-label={`${title} series`}>
-        {names.map((name) => (
-          <li key={name}>
-            <button
-              type="button"
-              aria-pressed={!hidden.includes(name)}
-              onClick={() =>
-                setHidden((current) =>
-                  current.includes(name)
-                    ? current.filter((item) => item !== name)
-                    : [...current, name],
-                )
-              }
-            >
-              <span style={{ background: series[name].color }} />
-              {series[name].label}
-            </button>
-          </li>
-        ))}
-      </ul>
       {hidden.length === names.length ? (
         <p role="status">
           All series hidden. Select a legend label to show it.
         </p>
       ) : null}
-    </section>
+    </ChartCard>
   );
 }
 
 function DailyCounts({ entries }: { entries: Snapshot[] }) {
   return (
-    <details>
-      <summary>Daily counts and run details</summary>
-      <div className="table-scroll">
-        <table>
-          <caption>
-            Passing / total. Each run records its own catalogue definition.
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col">UTC day / run</th>
-              {seriesNames.map((name) => (
-                <th scope="col" key={name}>
-                  {series[name].label}
-                </th>
-              ))}
-              <th scope="col">Source commits</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[...entries].reverse().map((entry) => (
-              <tr key={entry.timestamp}>
-                <th scope="row">
-                  {entry.run_url.startsWith("https://github.com/") ? (
-                    <a href={entry.run_url}>{utcDay(entry.timestamp)}</a>
-                  ) : (
-                    utcDay(entry.timestamp)
-                  )}
-                  <small>{entry.verification}</small>
-                </th>
-                {seriesNames.map((name) => {
-                  const value = credit(entry, name);
-                  return (
-                    <td key={name}>
-                      {value ? (
-                        <>
-                          {value.passed}/{value.total}
-                          <small>{value.percent.toFixed(2)}%</small>
-                        </>
-                      ) : (
-                        "No evidence"
-                      )}
-                    </td>
-                  );
-                })}
-                <td>
-                  Suite {entry.suite_commit.slice(0, 12)}
-                  <br />
-                  Target {entry.target_commit.slice(0, 12)}
-                  <small>
-                    Reported: {entry.target_version ?? "not recorded"}
-                  </small>
-                </td>
-              </tr>
+    <Disclosure title="Daily counts and run details">
+      <Table>
+        <TableCaption>
+          Passing / total. Each run records its own catalogue definition.
+        </TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead scope="col">UTC day / run</TableHead>
+            {seriesNames.map((name) => (
+              <TableHead scope="col" key={name}>
+                {series[name].label}
+              </TableHead>
             ))}
-          </tbody>
-        </table>
-      </div>
-    </details>
+            <TableHead scope="col">Source commits</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {[...entries].reverse().map((entry) => (
+            <TableRow key={entry.timestamp}>
+              <TableHead scope="row">
+                {entry.run_url.startsWith("https://github.com/") ? (
+                  <a href={entry.run_url}>{utcDay(entry.timestamp)}</a>
+                ) : (
+                  utcDay(entry.timestamp)
+                )}
+                <small>{entry.verification}</small>
+              </TableHead>
+              {seriesNames.map((name) => {
+                const value = credit(entry, name);
+                return (
+                  <TableCell key={name}>
+                    {value ? (
+                      <>
+                        {value.passed}/{value.total}
+                        <small>{value.percent.toFixed(2)}%</small>
+                      </>
+                    ) : (
+                      "No evidence"
+                    )}
+                  </TableCell>
+                );
+              })}
+              <TableCell>
+                Suite {entry.suite_commit.slice(0, 12)}
+                <br />
+                Target {entry.target_commit.slice(0, 12)}
+                <small>
+                  Reported: {entry.target_version ?? "not recorded"}
+                </small>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Disclosure>
   );
 }
 
@@ -163,7 +198,12 @@ export function App({ history }: { history: Snapshot[] }) {
     history.some((entry) => entry.track === "upstream") ? "upstream" : "",
   );
   const [runSelection, setRunSelection] = useState("");
-  const [outcomeFilter, setOutcomeFilter] = useState<OutcomeFilter>("all");
+  const [outcomeChoice, setOutcomeChoice] = useState<{
+    target: string;
+    timestamp: string;
+    value: OutcomeFilter;
+  }>();
+  const [tab, setTab] = useState<DashboardTab>("trends");
   const selected =
     options.find((item) => item.key === selection) ?? options[0]!;
   const entries = useMemo(
@@ -172,91 +212,156 @@ export function App({ history }: { history: Snapshot[] }) {
   );
   const run =
     entries.find((entry) => entry.timestamp === runSelection) ?? entries.at(-1);
+  const outcomeFilter =
+    outcomeChoice?.target === selected.key &&
+    outcomeChoice.timestamp === run?.timestamp
+      ? outcomeChoice.value
+      : defaultOutcomeFilter(run);
+  function setOutcomeFilter(value: OutcomeFilter) {
+    if (run)
+      setOutcomeChoice({
+        target: selected.key,
+        timestamp: run.timestamp,
+        value,
+      });
+  }
+  function showCases() {
+    setTab("cases");
+    requestAnimationFrame(() => focusSection("case-results"));
+  }
   function selectDay(date: string) {
     const entry = entries.find((item) => utcDay(item.timestamp) === date);
     if (entry) {
       setRunSelection(entry.timestamp);
-      focusSection("case-results");
+      showCases();
     }
   }
   function filterOutcomes(status: OutcomeFilter) {
     setOutcomeFilter(status);
-    focusSection("case-results");
+    showCases();
   }
+  const targetControl = (
+    <Field orientation="horizontal">
+      <FieldLabel htmlFor="target">Target</FieldLabel>
+      <NativeSelect
+        id="target"
+        value={selected.key}
+        onChange={(event) => {
+          setSelection(event.target.value);
+          setRunSelection("");
+          setOutcomeChoice(undefined);
+        }}
+      >
+        {options.map((item) => (
+          <NativeSelectOption key={item.key} value={item.key}>
+            {item.label}
+          </NativeSelectOption>
+        ))}
+      </NativeSelect>
+    </Field>
+  );
   return (
-    <main>
-      <header>
-        <h1>Flatpak daily coverage</h1>
-        <p>Passing evidence from public-interface compatibility tests.</p>
+    <main className="dashboard">
+      <header className="masthead">
+        <div className="brand">
+          <div className="brand-mark" aria-hidden="true">
+            <CubeFocusIcon weight="light" />
+          </div>
+          <div>
+            <span className="eyebrow">
+              PUBLIC INTERFACE / COMPATIBILITY OBSERVATORY
+            </span>
+            <h1>Flatpak daily coverage</h1>
+          </div>
+        </div>
+        <div className="masthead-actions">
+          <span className="subtitle">Evidence, not assumptions.</span>
+          <ThemeSelect />
+        </div>
       </header>
-      <div className="toolbar">
-        <label>
-          Target{" "}
-          <select
-            value={selected.key}
-            onChange={(event) => {
-              setSelection(event.target.value);
-              setRunSelection("");
-              setOutcomeFilter("all");
-            }}
-          >
-            {options.map((item) => (
-              <option key={item.key} value={item.key}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <a href="./history.json">Download history</a>
-        <ThemeSelect />
-      </div>
-      <p>
-        Latest complete run per target and UTC day. Gaps mean missing or
-        unverified evidence. Percentages describe the catalogue and public
-        interface reach; catalogue totals can change.
-      </p>
+      <Separator />
       {run ? (
         <>
-          <p className="date-range">
-            {utcDay(entries[0]!.timestamp)} to{" "}
-            {utcDay(entries.at(-1)!.timestamp)} · {entries.length} recorded days
-          </p>
-          <RunHealth key={selected.key} entries={entries} />
           <RunSummary
+            controls={targetControl}
             entries={entries}
             run={run}
             onRunChange={setRunSelection}
-            filter={outcomeFilter}
             onFilter={filterOutcomes}
           />
-          <CoverageChart
-            entries={entries}
-            names={behaviors}
-            title="Catalogued behavior"
-            onSelectDay={selectDay}
-          />
-          <CoverageChart
-            entries={entries}
-            names={surfaces}
-            title="Public interface reach"
-            onSelectDay={selectDay}
-          />
-          <DailyCounts entries={entries} />
-          <PerformancePanel
-            entries={entries}
-            key={selected.key}
-            run={run}
-            filter={outcomeFilter}
-            onFilter={setOutcomeFilter}
-            onSelectDay={selectDay}
-          />
+          <DashboardTabs
+            value={tab}
+            onChange={setTab}
+            range={`${entries.length} recorded days / UTC`}
+          >
+            <PerformancePanel
+              activeTab={tab}
+              entries={entries}
+              key={selected.key}
+              run={run}
+              filter={outcomeFilter}
+              onFilter={setOutcomeFilter}
+              onSelectDay={selectDay}
+              evidence={
+                <>
+                  <div className="section-heading">
+                    <h2>Evidence & provenance</h2>
+                    <p>
+                      {utcDay(entries[0]!.timestamp)} to{" "}
+                      {utcDay(entries.at(-1)!.timestamp)} · Latest complete run
+                      per target and UTC day.
+                    </p>
+                  </div>
+                  <RunHealth key={selected.key} entries={entries} />
+                  <DailyCounts entries={entries} />
+                </>
+              }
+            >
+              <div className="chart-grid">
+                <CoverageChart
+                  entries={entries}
+                  names={behaviors}
+                  title="Catalogued behavior"
+                  onSelectDay={selectDay}
+                />
+                <CoverageChart
+                  entries={entries}
+                  names={surfaces}
+                  title="Public interface reach"
+                  onSelectDay={selectDay}
+                />
+              </div>
+            </PerformancePanel>
+          </DashboardTabs>
         </>
       ) : (
-        <p className="empty">
-          No recorded runs for {selected.label} yet. History starts with the
-          first published CI run.
-        </p>
+        <>
+          <FieldGroup className="scope-fields scope-bar">
+            {targetControl}
+          </FieldGroup>
+          <Empty>
+            <EmptyHeader>
+              <EmptyTitle>No recorded runs</EmptyTitle>
+              <EmptyDescription>
+                No recorded runs for {selected.label} yet. History starts with
+                the first published CI run.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        </>
       )}
+      <footer className="page-footer">
+        <span>
+          Passing evidence from public-interface tests. Missing measurements are
+          never zero.
+        </span>
+        <Button variant="link" size="sm" asChild>
+          <a href="./history.json">
+            <DownloadSimpleIcon data-icon="inline-start" />
+            Download history JSON
+          </a>
+        </Button>
+      </footer>
     </main>
   );
 }

@@ -13,7 +13,8 @@ import {
   timingRows,
   verifiedPerformance,
 } from "../src/performance.ts";
-import { PerformancePanel } from "../src/PerformancePanel.tsx";
+import { CaseHistory, PerformancePanel } from "../src/PerformancePanel.tsx";
+import { DashboardTabs } from "../src/DashboardTabs.tsx";
 import { entry, timedEntry } from "./fixtures.ts";
 
 test("old snapshots remain valid, while new snapshots preserve finite nonnegative timings", () => {
@@ -167,17 +168,41 @@ test("TanStack performance charts use seconds and break lines at missing timing 
 
 test("performance UI includes exact counts, outcomes and legacy empty states", () => {
   const page = renderToStaticMarkup(
-    createElement(PerformancePanel, { entries: [timedEntry()] }),
+    createElement(
+      DashboardTabs,
+      { value: "cases", onChange: () => {} },
+      createElement(PerformancePanel, { entries: [timedEntry()] }),
+    ),
   );
   assert.match(page, /430\.00s/);
-  assert.match(page, /1 passed, 1 failed, 2 not-selected/);
-  assert.match(page, /lifecycle\.user \/ cli \/ user/);
-  assert.match(page, /lifecycle\.user \/ library \/ user/);
-  assert.match(page, /Daily timings and outcomes/);
+  const run = timedEntry();
+  for (const item of run.performance!.cases) {
+    const history = renderToStaticMarkup(
+      createElement(CaseHistory, {
+        entries: [run],
+        run,
+        caseId: caseKey(item),
+      }),
+    );
+    assert.match(history, /1 passed, 1 failed, 2 not-selected/);
+    assert.match(history, /Daily timings and outcomes/);
+    assert.ok(
+      history.includes(
+        `${item.behavior_id} / ${item.driver} / ${item.profile}`,
+      ),
+    );
+  }
   const legacy = renderToStaticMarkup(
-    createElement(PerformancePanel, { entries: [entry()] }),
+    createElement(
+      DashboardTabs,
+      { value: "cases", onChange: () => {} },
+      createElement(PerformancePanel, { entries: [entry()] }),
+    ),
   );
   assert.match(legacy, /No run timings recorded yet/);
-  assert.match(legacy, /No per-case timings recorded yet/);
+  const noCase = renderToStaticMarkup(
+    createElement(CaseHistory, { entries: [entry()], run: entry() }),
+  );
+  assert.match(noCase, /No per-case timings recorded yet/);
   assert.doesNotMatch(legacy, /0\.00s/);
 });

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 import { useState } from "react";
 import { dayMilliseconds, utcDay, type Snapshot } from "./history.ts";
+import { Button } from "./components/ui/button.tsx";
 
 export function evidenceDays(entries: readonly Snapshot[]) {
   if (!entries.length) return [];
@@ -60,7 +61,7 @@ export function RunHealth({ entries }: { entries: Snapshot[] }) {
   return (
     <section className="run-health" aria-labelledby="run-health-title">
       <div className="run-health-heading">
-        <h2 id="run-health-title">Daily evidence</h2>
+        <h3 id="run-health-title">Daily evidence</h3>
         <span>
           {days.length} days · {gaps} without verified evidence
         </span>
@@ -75,10 +76,11 @@ export function RunHealth({ entries }: { entries: Snapshot[] }) {
         aria-label="Daily evidence; select a day for details"
       >
         {days.map((day) => (
-          <button
+          <Button
+            variant="evidence"
             type="button"
             key={day.date}
-            className={`evidence-day ${day.state}`}
+            data-evidence={day.state}
             aria-pressed={day.date === selected.date}
             aria-label={`${dateFormat.format(new Date(day.date))}: ${day.label}`}
             title={`${day.date}: ${day.label}`}
@@ -92,7 +94,7 @@ export function RunHealth({ entries }: { entries: Snapshot[] }) {
                   ? "–"
                   : "!"}
             </span>
-          </button>
+          </Button>
         ))}
       </div>
       <div className="evidence-range" aria-hidden="true">

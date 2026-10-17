@@ -10,6 +10,12 @@
         if (theme === "light" || theme === "dark") {
           document.documentElement.dataset.theme = theme;
         }
+        document.documentElement.classList.toggle(
+          "dark",
+          theme === "dark" ||
+            (theme !== "light" &&
+              matchMedia("(prefers-color-scheme: dark)").matches),
+        );
       } catch {
         // Use the system theme when storage is unavailable.
       }

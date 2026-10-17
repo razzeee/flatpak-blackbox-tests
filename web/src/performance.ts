@@ -15,7 +15,7 @@ export const outcomeSeries = {
     color: "var(--yellow)",
   },
   unsupported: { label: "Unsupported", color: "var(--purple)" },
-  "not-selected": { label: "Not selected", color: "var(--muted)" },
+  "not-selected": { label: "Not selected", color: "var(--muted-foreground)" },
   pending: { label: "Pending", color: "var(--blue)" },
 } as const;
 export const outcomeNames = Object.keys(outcomeSeries) as CaseStatus[];
