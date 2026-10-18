@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import shutil
-from collections.abc import Iterator
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 
 @contextmanager
-def _observed_search_server(driver: Driver, server: RepositoryServer) -> Iterator[str]:
+def _observed_search_server(driver: Driver, server: RepositoryServer) -> Generator[str, None, None]:
     try:
         with server.serving() as uri:
             yield uri

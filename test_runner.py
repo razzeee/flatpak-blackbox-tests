@@ -11,7 +11,7 @@ import tempfile
 import termios
 import time
 import unittest
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Generator
 from contextlib import contextmanager, redirect_stdout
 from http.server import ThreadingHTTPServer
 from io import StringIO
@@ -575,7 +575,7 @@ elif command not in ('remote-add', 'list'):
 
         @contextmanager
         def bus(env: dict[str, str], root: Path, *,
-                on_cleanup: Callable[[], None] | None = None) -> Iterator[None]:
+                on_cleanup: Callable[[], None] | None = None) -> Generator[None, None, None]:
             nonlocal now
             self.assertNotIn("GITHUB_STEP_SUMMARY", env)
             now += 2

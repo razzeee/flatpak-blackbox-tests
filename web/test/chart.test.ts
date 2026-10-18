@@ -146,7 +146,15 @@ test("run timeline distinguishes missing snapshots without claiming schedules we
   const page = renderToStaticMarkup(
     createElement(App, { history: [missing, noReport] }),
   );
-  assert.match(page, /Daily evidence/);
+  const historyPanel =
+    page.match(/<section class="run-health"[\s\S]*?<\/section>/)?.[0] ?? "";
+  assert.match(historyPanel, /Run history/);
+  assert.match(historyPanel, /aria-expanded="false"/);
+  assert.match(historyPanel, /hidden=""/);
+  assert.match(
+    page.match(/<div[^>]*id="panel-evidence"[^>]*>/)?.[0] ?? "",
+    /hidden=""/,
+  );
   assert.match(page, /Runs are scheduled daily/);
   assert.match(page, /No coverage snapshot/);
   assert.match(page, /No test report/);
