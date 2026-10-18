@@ -10,7 +10,7 @@ The [workflows](../.github/workflows/) support manual runs from GitHub Actions.
 
 Classified non-security scenario assertion failures remain visible but do not
 fail CI when they are the only failures and the complete report passes integrity
-and coverage verification. Authentication and sandbox assertions, setup,
+and coverage verification. Authentication, sandbox, and OCI signature assertions, setup,
 prerequisite, unsupported-capability, cleanup, integrity, and reporting failures
 still fail CI. Reports and diagnostic logs are uploaded even when a run fails.
 

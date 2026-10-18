@@ -1,0 +1,173 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "oci-signatures.missing",
+      "scenario": "oci-signatures-missing",
+      "handler": "oci_signature_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Require a signature from the configured OCI lookaside before deployment.",
+      "preconditions": "Independent OCI app, trusted public key, installed native runtime, and monitored lookaside initially returning 404.",
+      "expected": "Missing signature rejects installation without changing deployments; publishing the trusted signature at the same URL permits execution of A.",
+      "references": [
+        "doc/flatpak-remote-add.xml"
+      ]
+    },
+    {
+      "id": "oci-signatures.untrusted",
+      "scenario": "oci-signatures-untrusted",
+      "handler": "oci_signature_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Reject an OCI lookaside signature made by an untrusted key.",
+      "preconditions": "Independent OCI image signed with a second disposable key absent from the remote trust store.",
+      "expected": "Untrusted signature rejects deployment; replacing only the signature with one from the trusted key permits execution of A.",
+      "references": [
+        "doc/flatpak-remote-add.xml"
+      ]
+    },
+    {
+      "id": "oci-signatures.tampered",
+      "scenario": "oci-signatures-tampered",
+      "handler": "oci_signature_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Reject a damaged OCI signature fetched from the configured lookaside.",
+      "preconditions": "Independent OCI app and a truncated trusted signed payload, with image and key unchanged.",
+      "expected": "Damaged signature rejects deployment; restoring the original signature permits execution of A.",
+      "references": [
+        "doc/flatpak-remote-add.xml"
+      ]
+    },
+    {
+      "id": "oci-signatures.modify-url",
+      "scenario": "oci-signatures-modify-url",
+      "handler": "oci_signature_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Replace the OCI lookaside URL on an existing remote.",
+      "preconditions": "Original lookaside has no signature; a second monitored URL already serves the independently trusted signature.",
+      "expected": "Installation fails before remote-modify, then fetches only the replacement lookaside and executes A with unchanged trust keys and registry image.",
+      "references": [
+        "doc/flatpak-remote-modify.xml"
+      ]
+    },
+    {
+      "id": "oci-signatures.stale-update",
+      "scenario": "oci-signatures-stale-update",
+      "handler": "oci_signature_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Bind a trusted OCI signature to the exact image digest during update.",
+      "preconditions": "Signed A is installed; B is published with A's valid signature served at B's lookaside path.",
+      "expected": "Stale signed digest rejects update and preserves runnable A; replacing only the signature with a trusted signature for B permits execution of B.",
+      "references": [
+        "doc/flatpak-remote-add.xml",
+        "doc/flatpak-update.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "oci-signatures.missing",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Focused OCI trust contract without changing the requirement denominator.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--signature-lookaside",
+          "rationale": "Recorded signature fetch, missing-signature rejection, unchanged deployments, and recovery after publishing a trusted signature at the configured URL."
+        }
+      ]
+    },
+    {
+      "behavior_id": "oci-signatures.untrusted",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Focused OCI key trust contract without changing the requirement denominator.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--signature-lookaside",
+          "rationale": "Lookaside payload signed by an untrusted key is rejected; a trusted replacement alone permits the independent app."
+        }
+      ]
+    },
+    {
+      "behavior_id": "oci-signatures.tampered",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Focused signed-payload integrity contract without changing the requirement denominator.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--signature-lookaside",
+          "rationale": "Damaged lookaside payload is rejected and replacing only that payload with the original trusted signature permits the independent app."
+        }
+      ]
+    },
+    {
+      "behavior_id": "oci-signatures.modify-url",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Focused lookaside replacement contract without changing the requirement denominator.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-modify.--signature-lookaside",
+          "rationale": "Changing only the lookaside URL changes rejected installation to trusted execution; monitored requests exclude the old URL after modification."
+        }
+      ]
+    },
+    {
+      "behavior_id": "oci-signatures.stale-update",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Focused signed-image identity contract without changing the requirement denominator.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.remote-add.--signature-lookaside",
+          "rationale": "Signature for A at B's monitored lookaside path cannot authorize B; A survives and only a corrected signature permits execution of B."
+        }
+      ]
+    }
+  ]
+}
