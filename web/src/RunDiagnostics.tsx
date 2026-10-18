@@ -391,6 +391,7 @@ export function RunDiagnostics({
               onClick={() => {
                 setQuery("");
                 onFilter("all");
+                setExpanded(false);
               }}
             >
               Clear filters
