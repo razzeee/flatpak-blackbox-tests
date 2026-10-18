@@ -26,6 +26,8 @@ command or type. Nested JSON participates in discovery and report hashes.
 
 Map assertions to existing requirements without changing denominators merely to
 increase coverage. See [coverage semantics](../COVERAGE.md) for the counting rules.
+The [option gap audit](option-gap-audit.md) records priorities and why some
+options retain equivalence-only checks.
 
 Use `surface_assertions` for focused CLI-option, library-function, or
 library-signal checks that do not establish a complete behavior requirement.

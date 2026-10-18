@@ -16,6 +16,7 @@ from urllib.request import urlopen
 from fixture_manifest import parse_build_options
 from json_validation import ValidationError
 from oci_registry import Image, Registry
+from oci_signature_scenarios import signature_path
 from regression_scenarios import _snapshot, _wrapped
 from run import ContractFailure, Driver
 from scenario_catalogue import load_behaviors
@@ -141,6 +142,20 @@ class CanaryTests(unittest.TestCase):
         report["results"][0]["behavior_id"] = "confirmation.auth-interaction"
         self.assertTrue(expected_scenario_failures_only(report, 1))
 
+    def test_oci_signature_cases_remain_hard_failures(self) -> None:
+        from run import expected_scenario_failures_only
+        from test_runner import ExpectedFailureGateTests
+
+        selected = {b["id"] for b in load_behaviors(Path(__file__).parent)
+                    if b.get("handler") == "oci_signature_scenarios:run"}
+        self.assertEqual(selected, {f"oci-signatures.{mode}" for mode in (
+            "missing", "untrusted", "tampered", "modify-url", "stale-update")})
+        for identifier in selected:
+            with self.subTest(identifier=identifier):
+                report = ExpectedFailureGateTests().report({"failed"})
+                report["results"][0]["behavior_id"] = identifier
+                self.assertFalse(expected_scenario_failures_only(report, 1))
+
 
 class OCIRegistryTests(unittest.TestCase):
     def image(self, directory: Path, payload: str) -> Image:
@@ -192,6 +207,35 @@ class OCIRegistryTests(unittest.TestCase):
             (root / "blobs/sha256" / image.digest.removeprefix("sha256:")).write_bytes(b"bad")
             with self.assertRaisesRegex(ValueError, "checksum mismatch"):
                 Image.load(root)
+
+    def test_lookaside_paths_payload_replacement_and_missing_signatures(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            first, second = self.image(root / "A", "A"), self.image(root / "B", "B")
+            registry = Registry({"application": first})
+            path = signature_path("selected", first)
+            self.assertEqual(path, f"/selected/application@sha256={first.digest[7:]}/signature-1")
+            with registry.serving() as oci_url:
+                url = oci_url.removeprefix("oci+")
+                with self.assertRaises(HTTPError) as raised:
+                    urlopen(url + path, timeout=5)
+                self.assertEqual(raised.exception.code, 404)
+                raised.exception.close()
+                for payload in (b"\x00\xffdamaged", b"replacement-signature"):
+                    registry.signatures[path] = payload
+                    with urlopen(url + path, timeout=5) as response:
+                        self.assertEqual(response.read(), payload)
+                        self.assertEqual(response.headers["Content-Type"],
+                                         "application/octet-stream")
+                # Neither another prefix, another digest, nor signature-2 can
+                # accidentally fall back to the published signature.
+                for missing in (signature_path("other", first), signature_path("selected", second),
+                                path.removesuffix("1") + "2"):
+                    with self.subTest(path=missing), self.assertRaises(HTTPError) as raised:
+                        urlopen(url + missing, timeout=5)
+                    self.assertEqual(raised.exception.code, 404)
+                    raised.exception.close()
+            self.assertIn(path, registry.requests)
 
     def test_optional_registry_layouts_are_validated(self) -> None:
         basic = {"oci": "image", "oci_ref": "app/org.example.App/x86_64/test"}

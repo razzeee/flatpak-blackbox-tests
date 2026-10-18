@@ -82,7 +82,7 @@ def expected_scenario_failures_only(report: RunReport, status: int,
     results = report.get("results", [])
     case_statuses = {result["status"] for result in results}
     security_sensitive_prefixes = (
-        "auth.", "remote-auth.", "multiuser.auth-", "sandbox.",
+        "auth.", "remote-auth.", "multiuser.auth-", "sandbox.", "oci-signatures.",
     )
     security_sensitive_failures = any(
         result["status"] == "failed"

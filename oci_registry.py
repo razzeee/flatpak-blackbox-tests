@@ -55,6 +55,7 @@ class Registry:
     def __init__(self, images: dict[str, Image]) -> None:
         self.images = images.copy()
         self.requests: list[str] = []
+        self.signatures: dict[str, bytes] = {}
         # Retain previously published blobs to permit in-flight readers to finish.
         self.blobs = {name: dict(image.blobs) for name, image in images.items()}
         self.serial = 0
@@ -67,6 +68,8 @@ class Registry:
     def response(self, path: str) -> tuple[int, bytes, str]:
         path = unquote(urlsplit(path).path)
         self.requests.append(path)
+        if path in self.signatures:
+            return 200, self.signatures[path], "application/octet-stream"
         if path in {"/index/static", "/index/dynamic"}:
             body = {"Registry": "/", "Results": [
                 {"Name": name, "Images": [image.record], "Lists": []}
