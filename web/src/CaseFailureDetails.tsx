@@ -2,6 +2,8 @@
 import { isFailure } from "./failureDetails.ts";
 import { utcDay, type CaseTiming, type Snapshot } from "./history.ts";
 import { RunLink } from "./RunSummary.tsx";
+import { Disclosure } from "./Disclosure.tsx";
+import { Alert, AlertDescription } from "./components/ui/alert.tsx";
 
 export function CaseFailureDetails({
   item,
@@ -33,18 +35,25 @@ export function CaseFailureDetails({
               <pre>{details.cleanup_error}</pre>
             </>
           ) : null}
-          {details.evidence.map((record, index) => (
-            <details key={index}>
-              <summary>{record.title}</summary>
-              <pre>{record.body}</pre>
-            </details>
-          ))}
+          {details.evidence.length ? (
+            <Disclosure
+              title={`Evidence log · ${details.evidence.length} records`}
+            >
+              {details.evidence.map((record, index) => (
+                <Disclosure key={index} title={record.title}>
+                  <pre>{record.body}</pre>
+                </Disclosure>
+              ))}
+            </Disclosure>
+          ) : null}
           {details.truncated ? (
-            <p className="data-note">
-              Diagnostic output was truncated. Only the last 12 evidence records
-              and up to 4,000 characters per field are retained, with a
-              24,000-character budget per case.
-            </p>
+            <Alert variant="warning">
+              <AlertDescription>
+                Diagnostic output was truncated. Only the last 12 evidence
+                records and up to 4,000 characters per field are retained, with
+                a 24,000-character budget per case.
+              </AlertDescription>
+            </Alert>
           ) : null}
         </>
       )}

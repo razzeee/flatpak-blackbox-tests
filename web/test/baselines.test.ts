@@ -358,7 +358,7 @@ test("the page defaults to upstream without mixing target data", () => {
   const page = renderToStaticMarkup(
     createElement(App, { history: [archived, entry(), upstream] }),
   );
-  assert.match(page, /option value="upstream" selected="">Upstream main/);
+  assert.match(page, /option[^>]*value="upstream" selected="">Upstream main/);
   assert.match(page, /Flatpak 1.18.0/);
   assert.doesNotMatch(page, /current baseline/);
   assert.match(page, /3\/10/);

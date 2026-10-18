@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 import { useState } from "react";
 import { dayMilliseconds, utcDay, type Snapshot } from "./history.ts";
+import { Button } from "./components/ui/button.tsx";
+import { Disclosure } from "./Disclosure.tsx";
 
 export function evidenceDays(entries: readonly Snapshot[]) {
   if (!entries.length) return [];
@@ -58,86 +60,90 @@ export function RunHealth({ entries }: { entries: Snapshot[] }) {
   if (!selected) return null;
   const gaps = days.filter((day) => day.state !== "verified").length;
   return (
-    <details className="run-health">
-      <summary>
-        Run history
-        <span>
-          {days.length} days{gaps > 0 ? ` · ${gaps} with coverage gaps` : ""}
-        </span>
-      </summary>
-      <p className="run-health-note">
-        Runs are scheduled daily. Dates below are UTC completion days, not
-        scheduled dates. A delayed schedule can leave a gap.
-      </p>
-      <div
-        className="evidence-strip"
-        role="group"
-        aria-label="Daily evidence; select a day for details"
+    <section className="run-health" aria-label="Run history">
+      <Disclosure
+        title={
+          <span>
+            Run history · {days.length} days
+            {gaps > 0 ? ` · ${gaps} with coverage gaps` : ""}
+          </span>
+        }
       >
-        {days.map((day) => (
-          <button
-            type="button"
-            key={day.date}
-            className={`evidence-day ${day.state}`}
-            aria-pressed={day.date === selected.date}
-            aria-label={`${dateFormat.format(new Date(day.date))}: ${day.label}`}
-            title={`${day.date}: ${day.label}`}
-            onClick={() => setSelection(day.date)}
-          >
-            <span aria-hidden="true">{new Date(day.date).getUTCDate()}</span>
-            <span className="evidence-symbol" aria-hidden="true">
-              {day.state === "verified"
-                ? "✓"
-                : day.state === "missing"
-                  ? "–"
-                  : "!"}
-            </span>
-          </button>
-        ))}
-      </div>
-      <div className="evidence-range" aria-hidden="true">
-        <span>{dateFormat.format(new Date(days[0]!.date))}</span>
-        <span>{dateFormat.format(new Date(days.at(-1)!.date))}</span>
-      </div>
-      <div
-        className="evidence-detail"
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        <strong>
-          {dateFormat.format(new Date(selected.date))} · {selected.label}
-        </strong>
-        <p>
-          {!selected.entry
-            ? "No coverage snapshot was published for this UTC day. This does not prove the scheduled run was skipped; it may have started or finished on another day."
-            : selected.state === "verified"
-              ? "This run produced verified coverage evidence. Individual tests can still have failed."
-              : selected.entry.verification === "not-run"
-                ? "No test report was available when this snapshot was published. Check CI for build or setup failures."
-                : "This attempt did not produce complete, current evidence. Check CI for details."}
+        <p className="run-health-note">
+          Runs are scheduled daily. Dates below are UTC completion days, not
+          scheduled dates. A delayed schedule can leave a gap.
         </p>
-        {selected.entry?.workflow ? (
+        <div
+          className="evidence-strip"
+          role="group"
+          aria-label="Daily evidence; select a day for details"
+        >
+          {days.map((day) => (
+            <Button
+              variant="evidence"
+              type="button"
+              key={day.date}
+              data-evidence={day.state}
+              aria-pressed={day.date === selected.date}
+              aria-label={`${dateFormat.format(new Date(day.date))}: ${day.label}`}
+              title={`${day.date}: ${day.label}`}
+              onClick={() => setSelection(day.date)}
+            >
+              <span aria-hidden="true">{new Date(day.date).getUTCDate()}</span>
+              <span className="evidence-symbol" aria-hidden="true">
+                {day.state === "verified"
+                  ? "✓"
+                  : day.state === "missing"
+                    ? "–"
+                    : "!"}
+              </span>
+            </Button>
+          ))}
+        </div>
+        <div className="evidence-range" aria-hidden="true">
+          <span>{dateFormat.format(new Date(days[0]!.date))}</span>
+          <span>{dateFormat.format(new Date(days.at(-1)!.date))}</span>
+        </div>
+        <div
+          className="evidence-detail"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <strong>
+            {dateFormat.format(new Date(selected.date))} · {selected.label}
+          </strong>
           <p>
-            {selected.entry.workflow.event === "schedule"
-              ? "Scheduled trigger"
-              : `${selected.entry.workflow.event} trigger`}{" "}
-            · created{" "}
-            {timeFormat.format(new Date(selected.entry.workflow.created_at))}{" "}
-            UTC. This is the observed trigger time, not the planned start.
+            {!selected.entry
+              ? "No coverage snapshot was published for this UTC day. This does not prove the scheduled run was skipped; it may have started or finished on another day."
+              : selected.state === "verified"
+                ? "This run produced verified coverage evidence. Individual tests can still have failed."
+                : selected.entry.verification === "not-run"
+                  ? "No test report was available when this snapshot was published. Check CI for build or setup failures."
+                  : "This attempt did not produce complete, current evidence. Check CI for details."}
           </p>
-        ) : selected.entry ? (
-          <p>Trigger timing was not recorded in this historical snapshot.</p>
-        ) : null}
-        {selected.entry?.run_url.startsWith("https://github.com/") ? (
-          <a href={selected.entry.run_url}>View CI run</a>
-        ) : null}
-      </div>
-      <ul className="run-health-legend" aria-label="Evidence legend">
-        <li>✓ Verified</li>
-        <li>! Unverified</li>
-        <li>– No snapshot</li>
-      </ul>
-    </details>
+          {selected.entry?.workflow ? (
+            <p>
+              {selected.entry.workflow.event === "schedule"
+                ? "Scheduled trigger"
+                : `${selected.entry.workflow.event} trigger`}{" "}
+              · created{" "}
+              {timeFormat.format(new Date(selected.entry.workflow.created_at))}{" "}
+              UTC. This is the observed trigger time, not the planned start.
+            </p>
+          ) : selected.entry ? (
+            <p>Trigger timing was not recorded in this historical snapshot.</p>
+          ) : null}
+          {selected.entry?.run_url.startsWith("https://github.com/") ? (
+            <a href={selected.entry.run_url}>View CI run</a>
+          ) : null}
+        </div>
+        <ul className="run-health-legend" aria-label="Evidence legend">
+          <li>✓ Verified</li>
+          <li>! Unverified</li>
+          <li>– No snapshot</li>
+        </ul>
+      </Disclosure>
+    </section>
   );
 }

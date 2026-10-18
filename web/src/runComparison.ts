@@ -21,6 +21,14 @@ export const outcomeLabels: Record<CaseStatus, string> = {
 export type OutcomeFilter = CaseStatus | "all";
 export type CaseSort = "change" | "duration";
 
+/** Start with actionable outcomes, but never infer failures from missing evidence. */
+export function defaultOutcomeFilter(run?: Snapshot): OutcomeFilter {
+  const statuses = run && verifiedPerformance(run)?.case_statuses;
+  if (statuses?.failed) return "failed";
+  if (statuses?.["setup-error"]) return "setup-error";
+  return "all";
+}
+
 export function caseLabel(item: CaseTiming): string {
   return `${item.behavior_id} / ${item.driver} / ${item.profile}`;
 }

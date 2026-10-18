@@ -3,8 +3,29 @@ import { createRoot } from "react-dom/client";
 import { App } from "./App.tsx";
 import { historySchema } from "./history.ts";
 import { ThemeSelect } from "./ThemeSelect.tsx";
+import { Button } from "./components/ui/button.tsx";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyContent,
+} from "./components/ui/empty.tsx";
+import { Skeleton } from "./components/ui/skeleton.tsx";
 
 const root = createRoot(document.getElementById("root")!);
+root.render(
+  <div
+    className="loading-shell"
+    role="status"
+    aria-label="Loading coverage history"
+  >
+    <Skeleton className="h-12 w-64" />
+    <Skeleton className="h-40 w-full" />
+    <Skeleton className="h-80 w-full" />
+    <span className="sr-only">Loading coverage history…</span>
+  </div>,
+);
 async function load() {
   try {
     const response = await fetch(`${import.meta.env.BASE_URL}history.json`);
@@ -13,17 +34,22 @@ async function load() {
     root.render(<App history={history} />);
   } catch {
     root.render(
-      <main>
+      <main className="dashboard">
         <ThemeSelect />
-        <h1>Flatpak daily coverage</h1>
-        <p role="alert">
-          Coverage history could not be loaded. Check the published history file
-          or try again.
-        </p>
-        <button type="button" onClick={() => void load()}>
-          Try again
-        </button>{" "}
-        <a href="./history.json">Download history</a>
+        <Empty>
+          <EmptyHeader>
+            <EmptyTitle>Coverage history could not be loaded</EmptyTitle>
+            <EmptyDescription role="alert">
+              Check the published history file or try again.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button onClick={() => void load()}>Try again</Button>
+            <Button variant="link" asChild>
+              <a href="./history.json">Download history</a>
+            </Button>
+          </EmptyContent>
+        </Empty>
       </main>,
     );
   }
