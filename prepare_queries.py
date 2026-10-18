@@ -15,6 +15,7 @@ import tempfile
 import zlib
 from pathlib import Path
 
+import prepare_extension_mounts
 from fixture_manifest import (
     FixtureManifest,
     FixturePolicyExtension,
@@ -298,6 +299,7 @@ def prepare(reference_cli: str, output: Path,
     result["appstream"] = str((root / "appstream.xml").relative_to(output))
     result["icons"] = {str(size): str((root / f"icon-{size}.png").relative_to(output))
                        for size in (64, 128)}
+    result["extension_mounts"] = prepare_extension_mounts.prepare(reference_cli, output, fixture)
     return {"queries": parse_queries(result, "fixture.queries", arch=arch)}
 
 

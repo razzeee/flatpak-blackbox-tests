@@ -8,7 +8,12 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from fixture_manifest import FixtureContracts, load_fixture, parse_fixture
+from fixture_manifest import (
+    FixtureContracts,
+    load_fixture,
+    parse_extension_mounts,
+    parse_fixture,
+)
 from json_validation import JSONValue, ValidationError, json_value, load_json
 
 
@@ -109,6 +114,31 @@ def malformed_nodes(value: JSONValue, path: str = "fixture") -> list[tuple[JSONV
 
 
 class FixtureManifestTests(unittest.TestCase):
+    def test_extension_mounts_require_all_independent_oracles(self) -> None:
+        value = {
+            "app": "app/org.example.App/x86_64/test",
+            "extension": "runtime/org.example.App.Data/x86_64/test",
+            "app_repo": "mounts/app", "combined_repo": "mounts/combined",
+            "extension_repo": "mounts/extension", "app_commit": "app-a",
+            "runtime_commit": "runtime-a", "combined_commit": "extension-combined",
+            "separate_commit": "extension-separate", "combined_marker": "combined",
+            "separate_marker": "separate",
+        }
+        self.assertEqual(parse_extension_mounts(value, "mounts"), value)
+        for key in value:
+            with self.subTest(key=key), self.assertRaises(ValidationError):
+                parse_extension_mounts({k: v for k, v in value.items() if k != key}, "mounts")
+        for bad, path in malformed_nodes(json_value(value), "mounts"):
+            with self.subTest(path=path, bad=bad), self.assertRaises(ValidationError):
+                parse_extension_mounts(bad, "mounts")
+        with self.assertRaises(ValidationError):
+            parse_extension_mounts({**value, "unexpected": "field"}, "mounts")
+        rich_value = rich()
+        queries = rich_value["queries"]
+        assert isinstance(queries, dict)
+        queries["extension_mounts"] = value
+        self.assertEqual(parse_fixture(rich_value), rich_value)
+
     def test_sideload_update_requires_source_local_repo_and_commit(self) -> None:
         lifecycle = rich()["lifecycle_extra"]
         assert isinstance(lifecycle, dict)
