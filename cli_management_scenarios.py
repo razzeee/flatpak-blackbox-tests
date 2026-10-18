@@ -97,6 +97,13 @@ def _rich(driver: Driver, fixture: FixtureManifest, name: str) -> None:
                          f"ambiguity diagnostic must list {ref}")
         _equal(driver, commits, {ref: versions["A"]["refs"][ref]["commit"] for ref in refs},
                "ambiguous update preserves both installed commits")
+        # No REF is a separate operation: it updates all eligible installed
+        # refs rather than applying partial-REF ambiguity handling.
+        driver.cli_success("update", "--user", "--noninteractive")
+        commits = {ref: driver.cli_success("info", "--user", "--show-commit", ref)
+                   for ref in refs}
+        _equal(driver, commits, {ref: versions["B"]["refs"][ref]["commit"] for ref in refs},
+               "update without a REF advances both eligible installed branches")
         return
 
     if name == "management-update-all":
