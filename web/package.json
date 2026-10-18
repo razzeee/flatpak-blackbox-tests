@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && tsx scripts/prerender.ts",
     "check": "tsc --noEmit && prettier --check . ../ci/baselines.json",
     "format": "prettier --write . ../ci/baselines.json",
     "test": "tsx --test test/*.test.ts",

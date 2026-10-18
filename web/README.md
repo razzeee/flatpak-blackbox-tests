@@ -19,6 +19,11 @@ review, copy the published dashboard's history there temporarily and restore the
 empty file before committing. Save screenshots under `screenshots/` (gitignored),
 not `dist/` or a temporary directory: builds replace `dist/`.
 
+Production builds prerender the dashboard into `dist/index.html` from
+`public/history.json`, so the page has useful content before the browser finishes
+loading the history file and JavaScript. The client still fetches the history to
+enable interactions and refresh the rendered dashboard.
+
 ## Visual system
 
 - Compact test-lab console, not a general-purpose dashboard template.
