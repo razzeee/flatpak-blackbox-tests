@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "behaviors": [
+    {
+      "id": "sandbox.extension-same-origin",
+      "scenario": "extension-mount-same-origin",
+      "handler": "extension_mount_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "runtime-extensions"
+      ],
+      "description": "Read a manually installed same-origin extension inside its app sandbox.",
+      "preconditions": "Independent app, runtime and optional data extension in one repository; no host filesystem grants.",
+      "expected": "The live app cannot read the marker before installation or after removal. Between them it reads the exact extension marker, reports its commit and sees a read-only mount at /app/data; installation origin matches the app's.",
+      "references": [
+        "doc/flatpak-metadata.xml: Extension groups",
+        "doc/flatpak-run.xml"
+      ]
+    },
+    {
+      "id": "sandbox.extension-remote-alias",
+      "scenario": "extension-mount-remote-alias",
+      "handler": "extension_mount_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "runtime-extensions"
+      ],
+      "description": "Use an extension installed from another remote name for the same repository.",
+      "preconditions": "App installed from queries; optional extension explicitly installed from extensions; both remotes have the identical fixture repository URL.",
+      "expected": "Extension origin is extensions. Only while installed, the app reads the exact marker, reports the extension commit and sees its read-only mount. This does not assert installed-related API enumeration.",
+      "references": [
+        "doc/flatpak-metadata.xml: Extension groups",
+        "common/flatpak-installation.c: flatpak_installation_list_installed_related_refs_sync"
+      ]
+    },
+    {
+      "id": "sandbox.extension-separate-repos",
+      "scenario": "extension-mount-separate-repos",
+      "handler": "extension_mount_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution",
+        "runtime-extensions"
+      ],
+      "description": "Use an extension installed from a genuinely separate repository.",
+      "preconditions": "queries contains only app and runtime; extensions contains only a separately exported extension with distinct marker bytes. App metadata disables automatic download.",
+      "expected": "The app remains runnable without the extension. Explicit installation from extensions exposes its exact distinct marker, commit and read-only mount inside the sandbox; removal makes them disappear. No available-related or installed-related API result is inferred from runtime use.",
+      "references": [
+        "doc/flatpak-metadata.xml: Extension groups",
+        "doc/flatpak-run.xml"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "behavior_id": "sandbox.extension-same-origin",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.run.user.command"
+      ],
+      "rationale": "The metadata's default command reports A in all three installation states; its read mode separately proves extension data visibility without adding a new coverage denominator."
+    },
+    {
+      "behavior_id": "sandbox.extension-remote-alias",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.run.user.command"
+      ],
+      "rationale": "A live default app command and exact sandbox reads distinguish successful cross-origin extension use from installation success alone; no library enumeration credit is claimed."
+    },
+    {
+      "behavior_id": "sandbox.extension-separate-repos",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.run.user.command"
+      ],
+      "rationale": "The metadata command remains live before installation and after removal; while installed it consumes extension-only bytes from an independently exported repository."
+    }
+  ]
+}

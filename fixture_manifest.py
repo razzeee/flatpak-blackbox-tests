@@ -94,9 +94,24 @@ class _QueriesRequired(TypedDict):
     icons: dict[str, str]
 
 
+class FixtureExtensionMounts(TypedDict):
+    app: str
+    extension: str
+    app_repo: str
+    combined_repo: str
+    extension_repo: str
+    app_commit: str
+    runtime_commit: str
+    combined_commit: str
+    separate_commit: str
+    combined_marker: str
+    separate_marker: str
+
+
 class FixtureQueries(_QueriesRequired, total=False):
     selection_repo: str
     selection_commits: dict[str, str]
+    extension_mounts: FixtureExtensionMounts
 
 
 class FixtureTransactions(TypedDict):
@@ -316,6 +331,24 @@ def parse_policy_extension(value: object, path: str) -> FixturePolicyExtension:
     return result
 
 
+def parse_extension_mounts(value: object, path: str) -> FixtureExtensionMounts:
+    data = object_map(value, path)
+    result: FixtureExtensionMounts = {
+        "app": _text(data, "app", path), "extension": _text(data, "extension", path),
+        "app_repo": _text(data, "app_repo", path),
+        "combined_repo": _text(data, "combined_repo", path),
+        "extension_repo": _text(data, "extension_repo", path),
+        "app_commit": _text(data, "app_commit", path),
+        "runtime_commit": _text(data, "runtime_commit", path),
+        "combined_commit": _text(data, "combined_commit", path),
+        "separate_commit": _text(data, "separate_commit", path),
+        "combined_marker": _text(data, "combined_marker", path),
+        "separate_marker": _text(data, "separate_marker", path),
+    }
+    _known(data, result, path)
+    return result
+
+
 def parse_queries(value: object, path: str, *, arch: str) -> FixtureQueries:
     data = object_map(value, path)
     result: FixtureQueries = {
@@ -355,6 +388,9 @@ def parse_queries(value: object, path: str, *, arch: str) -> FixtureQueries:
                 raise ValidationError(f"{path}.selection_commits.{ref}: required field is missing")
             string(result["selection_commits"][ref],
                    f"{path}.selection_commits.{ref}", nonempty=True)
+    if "extension_mounts" in data:
+        result["extension_mounts"] = parse_extension_mounts(
+            data["extension_mounts"], f"{path}.extension_mounts")
     _known(data, result, path)
     return result
 
