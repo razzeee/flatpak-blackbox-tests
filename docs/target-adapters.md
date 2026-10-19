@@ -20,6 +20,8 @@ instead runs an interactive shell on a pseudo-terminal and pipes a marker into
 the fixture app's `-` mode. With stdout on a TTY, that mode applies and restores
 terminal settings as well as echoing stdin. The scenario detects job-control
 suspension. Prepare fresh fixtures to include the terminal-setting operations.
+See [terminal job-control regression](terminal-job-control.md) for the confirmed
+upstream cause, security constraints, and remaining coverage gaps.
 
 Filesystem-synchronization cases require `strace` and permission to trace the
 target. They compare actual `fsync`/`fdatasync` calls while checking output content
