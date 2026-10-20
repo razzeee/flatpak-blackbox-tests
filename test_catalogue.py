@@ -340,6 +340,12 @@ class CatalogueCLI(unittest.TestCase):
                 )
                 self.assertFalse(self.output.exists())
 
+    def test_generated_permission_dbus_is_not_a_public_signal_source(self) -> None:
+        self.write("common/meson.build", MESON.replace(
+            "sources: sources", "sources: sources + flatpak_permission_gdbus[1]"))
+        self.cli()
+        self.assertTrue(self.output.exists())
+
 
 if __name__ == "__main__":
     unittest.main()

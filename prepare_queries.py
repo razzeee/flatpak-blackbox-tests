@@ -16,6 +16,7 @@ import zlib
 from pathlib import Path
 
 import prepare_extension_mounts
+import search_kind_scenarios
 from fixture_manifest import (
     FixtureManifest,
     FixturePolicyExtension,
@@ -91,6 +92,7 @@ def prepare(reference_cli: str, output: Path,
     versions: dict[str, FixtureQueryVersion] = {}
     result: dict[str, object] = {"app": app, "second": second, "extension": extension,
                                  "foreign_arch": foreign, "versions": versions}
+    result["search_kind_repo"] = search_kind_scenarios.prepare(reference_cli, output, arch)
 
     def command(*args: str) -> str:
         return subprocess.check_output(args, text=True).strip()

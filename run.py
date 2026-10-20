@@ -826,8 +826,8 @@ def main(*, clock: Callable[[], float] = monotonic) -> int:
                     else:
                         scenario(driver, repository, url, fixture, name)
                     result["status"] = "passed"
-                except (PrerequisiteError, ContractFailure, OSError, ValueError,
-                        KeyError, TypeError) as error:
+                except (PrerequisiteError, ContractFailure, UnsupportedCapability,
+                        OSError, ValueError, KeyError, TypeError) as error:
                     result.update({"status": failure_status(error), "error": str(error)})
                     status = 1
                 finally:

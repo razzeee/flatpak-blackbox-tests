@@ -512,6 +512,33 @@ elif command not in ('remote-add', 'list'):
         self.assertIn("2 UNSUPPORTED", result.stdout)
         self.assertNotIn("Selected cases passed", result.stdout)
 
+    def test_optional_search_interface_is_case_local_and_still_unsuccessful(self) -> None:
+        self.write_executable(self.selected / "candidate-flatpak", """
+import sys
+if sys.argv[1] == '--version':
+    print('Old target')
+elif sys.argv[1] == '--default-arch':
+    print('x86_64')
+elif sys.argv[1:] == ['search', '--help']:
+    print('  --arch  Architecture')
+else:
+    raise SystemExit(88)
+""")
+        result = subprocess.run([
+            sys.executable, str(RUNNER), "--target", str(self.target),
+            "--fixtures", str(self.fixtures), "--output", str(self.root / "results"),
+            "--driver", "cli", "--scenario", "search-kind-filters", "--color", "never",
+        ], text=True, capture_output=True, check=False, timeout=30)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        report = json.loads((self.root / "results/report.json").read_text())
+        self.assertNotIn("setup_error", report)
+        case = next(case for case in report["results"] if case["status"] != "not-selected")
+        self.assertEqual(case["status"], "unsupported")
+        self.assertIn("--app, --runtime", case["error"])
+        self.assertTrue(case["cleanup_complete"])
+        self.assertIn("1 UNSUPPORTED", result.stdout)
+        self.assertEqual(report["coverage"]["metrics"]["surfaces"]["cli-option"]["passed"], 0)
+
     def test_target_diagnostic_is_safe_on_console_and_raw_in_json(self) -> None:
         raw = "\x1b]0;injected\x07\x1b[31mbroken\x1b[0m\r\n" + "x" * 1000
         self.adapter.write_text(f"import sys\nsys.stderr.write({raw!r})\nsys.exit(77)\n")
