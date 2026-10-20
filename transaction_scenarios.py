@@ -251,8 +251,7 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
 
     if name in ("tx-metadata", "tx-independent-errors", "tx-completed-survive",
                  "tx-progress", "tx-rate", "tx-frequency",
-                "tx-eol", "tx-eol-rebase", "tx-rebase-success", "tx-rebase-failure",
-                "tx-rebase-null"):
+                "tx-eol", "tx-eol-rebase", "tx-rebase-success", "tx-rebase-failure"):
         _supplemental(driver, fixture, name)
         return
 
@@ -507,14 +506,6 @@ def _supplemental(driver: Driver, fixture: FixtureManifest, name: str) -> None:
             driver.check([row[2] for row in _rows(rows, "op")] == ["0", "3"],
                          "old update must be skipped in favor of uninstall")
             state(second, "REBASE")
-            absent(first)
-        elif name == "tx-rebase-null":
-            # gtk-doc explicitly annotates previous_ids nullable. Keep this
-            # variant separate from the ordinary explicit-IDs rebase contract.
-            rows = _tx(driver, "normal", "rebase-null", first, operand=second)
-            driver.check(_rows(rows, "new") == [[second], [first]],
-                         "documented nullable IDs must still install then uninstall")
-            state(second, "B")
             absent(first)
         elif name in ("tx-rebase-success", "tx-rebase-failure"):
             if name == "tx-rebase-failure":

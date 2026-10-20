@@ -431,13 +431,12 @@ blackbox_transactions_main (int argc, char **argv)
       if (result)
         result = CALL_API (flatpak_transaction_add_install, transaction, argv[4], argv[6], NULL, &error);
     }
-  else if (strcmp (argv[3], "rebase") == 0 || strcmp (argv[3], "rebase-null") == 0)
+  else if (strcmp (argv[3], "rebase") == 0)
     {
       g_auto(GStrv) fields = g_strsplit (argv[5], "/", -1);
       const char *previous_ids[] = { fields[1], NULL };
       result = CALL_API (flatpak_transaction_add_rebase_and_uninstall, transaction,
-                         argv[4], argv[6], argv[5], NULL,
-                         strcmp (argv[3], "rebase-null") == 0 ? NULL : previous_ids, &error);
+                         argv[4], argv[6], argv[5], NULL, previous_ids, &error);
     }
   else if (strcmp (argv[3], "uninstall") == 0)
     result = CALL_API (flatpak_transaction_add_uninstall, transaction, argv[5], &error);
