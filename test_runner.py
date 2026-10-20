@@ -827,7 +827,7 @@ elif command not in ('remote-add', 'list'):
         target = json.loads(self.target.read_text())
         target["library"] = {"runtime_library_dirs": [str(self.root)]}
         self.target.write_text(json.dumps(target))
-        for name in ("tx-rate", "tx-progress"):
+        for name in ("tx-rate", "tx-bytes-total", "tx-progress"):
             output = self.root / name
             argv = [str(RUNNER), "--target", str(self.target), "--fixtures", str(self.fixtures),
                     "--output", str(output), "--driver", "library", "--scenario", name]
@@ -835,12 +835,15 @@ elif command not in ('remote-add', 'list'):
                     patch.object(run, "build_client", return_value=self.root / "client"), \
                     patch("transaction_scenarios.run") as handler:
                 run.main()
-                self.assertEqual(handler.call_count, 0 if name == "tx-rate" else 1)
+                self.assertEqual(handler.call_count, 1 if name == "tx-progress" else 0)
             report = json.loads((output / "report.json").read_text())
             selected = next(case for case in report["results"] if case["status"] != "not-selected")
-            self.assertEqual(selected["status"], "unsupported" if name == "tx-rate" else "passed")
-            if name == "tx-rate":
-                self.assertIn("flatpak_transaction_progress_get_bytes_per_second",
+            self.assertEqual(selected["status"], "passed" if name == "tx-progress"
+                             else "unsupported")
+            if name != "tx-progress":
+                api = ("flatpak_transaction_progress_get_bytes_per_second" if name == "tx-rate"
+                       else "flatpak_transaction_progress_get_bytes_total")
+                self.assertIn(api,
                               selected["error"])
                 self.assertEqual(selected["evidence"], [])
                 self.assertEqual(

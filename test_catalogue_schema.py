@@ -27,18 +27,18 @@ class CatalogueSchemaTests(unittest.TestCase):
         suite = Path(__file__).parent
         model = CoverageModel(suite)
         self.assertEqual(model.catalogue, load_json(suite / "coverage-data/surfaces.json"))
-        self.assertEqual(len(model.cases), 530)
+        self.assertEqual(len(model.cases), 531)
         metrics = model.summarize()["metrics"]
         self.assertEqual({key: item["total"] for key, item in metrics["behaviors"].items()},
-                         {"cli": 136, "library": 164})
+                         {"cli": 136, "library": 165})
         self.assertEqual({key: item["implemented"] for key, item in metrics["behaviors"].items()},
-                          {"cli": 136, "library": 164})
+                          {"cli": 136, "library": 165})
         self.assertEqual({key: item["total"] for key, item in metrics["surfaces"].items()},
                          {"cli-command": 44, "cli-option": 626,
                           "library-function": 225, "library-signal": 14})
         self.assertEqual({key: item["implemented"] for key, item in metrics["surfaces"].items()},
                             {"cli-command": 44, "cli-option": 585,
-                             "library-function": 224, "library-signal": 14})
+                             "library-function": 225, "library-signal": 14})
         accounting = model.summarize()["cli_option_accounting"]
         self.assertEqual(accounting["equivalence_checks"]["implemented"], 40)
         self.assertEqual(accounting["accounted"]["implemented"], 623)

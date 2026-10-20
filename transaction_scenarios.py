@@ -250,7 +250,7 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
         return
 
     if name in ("tx-metadata", "tx-independent-errors", "tx-completed-survive",
-                 "tx-progress", "tx-rate", "tx-frequency",
+                 "tx-progress", "tx-rate", "tx-frequency", "tx-bytes-total",
                 "tx-eol", "tx-eol-rebase", "tx-rebase-success", "tx-rebase-failure",
                 "tx-rebase-null"):
         _supplemental(driver, fixture, name)
@@ -425,6 +425,19 @@ def _supplemental(driver: Driver, fixture: FixtureManifest, name: str) -> None:
             driver.evidence.append({"observation": "progress-update-cadence",
                                     "data": json_value({"interval_ms": [50, 1000, 50],
                                                         "advancing_samples": counts})})
+        elif name == "tx-bytes-total":
+            payloads = extra["payloads"]["B"][first]
+            payload_bytes = sum((directory / "B" / path).stat().st_size for path in payloads)
+            driver.check(bool(payloads) and payload_bytes >= 1024 * 1024,
+                         "independently exported B payload must require at least 1 MiB")
+            server.requests.clear()
+            server.slow = True
+            rows = _tx(driver, "bytes-total", "update", first)
+            _check_bytes_total(driver, rows, payload_bytes)
+            driver.check(all(any(request.get("path") == path and not request.get("blocked")
+                                 for request in server.requests) for path in payloads),
+                         "transfer must request independently prepared B payload objects")
+            state(first, "B")
         elif name in ("tx-progress", "tx-rate"):
             server.slow = True
             rows = _tx(driver, "progress" if name == "tx-progress" else "rate", "update", first)
@@ -540,3 +553,22 @@ def _supplemental(driver: Driver, fixture: FixtureManifest, name: str) -> None:
         driver.check(driver.success("query", runtime).split() ==
                      [runtime, fixture["runtime_commit"]],
                      "supplemental transactions must retain unchanged runtime")
+
+
+def _check_bytes_total(driver: Driver, rows: list[list[str]], payload_bytes: int) -> None:
+    samples = _rows(rows, "bytes-total")
+    driver.check(any(phase == "new" for phase, _, _, _ in samples),
+                 "total getter must be sampled before transfer")
+    changed = [(int(estimating), int(transferred), int(total))
+               for phase, estimating, transferred, total in samples if phase == "changed"]
+    driver.check(len(changed) > 2, "paced transfer must exercise repeated total readings")
+    driver.check(all(total == 0 for estimating, _, total in changed if estimating),
+                 "estimating samples must expose unknown total as zero")
+    driver.check(any(not estimating and transferred > 0 and total > 0
+                     for estimating, transferred, total in changed),
+                 "known transfer must expose a positive total estimate")
+    driver.check(max((transferred for _, transferred, _ in changed), default=0) >= payload_bytes,
+                 "transferred count must account for independently prepared payload bytes")
+    driver.evidence.append({"observation": "progress-bytes-total",
+                            "data": json_value({"prepared_payload_bytes": payload_bytes,
+                                                "samples": samples})})
