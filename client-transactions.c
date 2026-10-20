@@ -135,6 +135,28 @@ ready (FlatpakTransaction *transaction, Trace *trace)
 }
 
 static void
+sample_total (FlatpakTransactionProgress *progress, Trace *trace, const char *phase)
+{
+  if (strcmp (trace->mode, "bytes-total") != 0)
+    return;
+#if BLACKBOX_HAVE_FLATPAK_TRANSACTION_PROGRESS_GET_BYTES_TOTAL
+  uint64_t total = CALL_API (flatpak_transaction_progress_get_bytes_total, progress);
+  uint64_t bytes = CALL_API (flatpak_transaction_progress_get_bytes_transferred, progress);
+  gboolean estimating = CALL_API (flatpak_transaction_progress_get_is_estimating, progress);
+  if (estimating)
+    g_assert_cmpuint (total, ==, 0);
+  /* The estimate may change, disappear, or decrease as objects are resolved.
+   * In particular, it is not a promised upper bound on transferred bytes. */
+  g_print ("bytes-total\t%s\t%d\t%" G_GUINT64_FORMAT "\t%" G_GUINT64_FORMAT "\n",
+           phase, estimating, bytes, total);
+#else
+  (void) progress;
+  (void) phase;
+  g_error ("bytes-total scenario requires flatpak_transaction_progress_get_bytes_total");
+#endif
+}
+
+static void
 changed (FlatpakTransactionProgress *progress, Trace *trace)
 {
   TRACE_SIGNAL (FlatpakTransactionProgress, "changed");
@@ -162,6 +184,7 @@ changed (FlatpakTransactionProgress *progress, Trace *trace)
   trace->bytes = bytes;
   trace->start = start;
   trace->changed++;
+  sample_total (progress, trace, "changed");
   if (strcmp (trace->mode, "rate") == 0 && start > 0)
     {
 #if BLACKBOX_HAVE_FLATPAK_TRANSACTION_PROGRESS_GET_BYTES_PER_SECOND
@@ -202,6 +225,7 @@ new_operation (FlatpakTransaction *transaction, FlatpakTransactionOperation *ope
   trace->start = 0;
   guint interval = strcmp (trace->mode, "frequency-slow") == 0 ? 1000 : 50;
   CALL_API (flatpak_transaction_progress_set_update_frequency, progress, interval);
+  sample_total (progress, trace, "new");
   g_signal_connect (progress, "changed", G_CALLBACK (changed), trace);
   g_print ("new\t%s\n", CALL_API (flatpak_transaction_operation_get_ref, operation));
 }

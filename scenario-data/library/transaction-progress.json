@@ -2,6 +2,28 @@
   "schema": 1,
   "behaviors": [
     {
+      "id": "transaction.bytes-total",
+      "scenario": "tx-bytes-total",
+      "handler": "transaction_scenarios:run",
+      "drivers": [
+        "library"
+      ],
+      "profile": "user",
+      "required_capabilities": [],
+      "description": "Optional total transfer byte estimate during a prepared paced update.",
+      "preconditions": [
+        "prepare_transactions.py extras.transactions",
+        "flatpak_transaction_progress_get_bytes_total public API (Since 1.19.3)"
+      ],
+      "expected": [
+        "Estimating readings return zero; a known transfer exposes a positive estimate and transfers independently exported payload bytes to the exact B commit.",
+        "Estimates may change or become unknown; neither progress monotonicity nor ETA text is required."
+      ],
+      "references": [
+        "common/flatpak-transaction.c: flatpak_transaction_progress_get_bytes_total"
+      ]
+    },
+    {
       "id": "transaction.rate",
       "scenario": "tx-rate",
       "handler": "transaction_scenarios:run",
@@ -43,6 +65,15 @@
     }
   ],
   "mappings": [
+    {
+      "behavior_id": "transaction.bytes-total",
+      "driver": "library",
+      "profile": "user",
+      "requirements": [
+        "library.progress.total-transfer-bytes"
+      ],
+      "rationale": "A dedicated availability-gated client traces total getter calls before and during a paced update. Estimating samples must return zero and known transfer samples expose a positive estimate. Prepared immutable B payload paths and file sizes independently establish real transfer, HTTP requests and exact deployment; no fixed total, monotonic estimate, upper-bound or ETA assumption is made."
+    },
     {
       "behavior_id": "transaction.rate",
       "driver": "library",
