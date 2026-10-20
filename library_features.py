@@ -32,6 +32,12 @@ FEATURES = (
         ("transaction.rate",),
     ),
     LibraryFeature(
+        "flatpak_transaction_progress_get_bytes_total",
+        "guint64 (*volatile blackbox_probe) (FlatpakTransactionProgress *) = "
+        "flatpak_transaction_progress_get_bytes_total;",
+        ("transaction.bytes-total",),
+    ),
+    LibraryFeature(
         "flatpak_user_data_delete",
         "gboolean (*volatile blackbox_probe) (const char *, GCancellable *, GError **) = "
         "flatpak_user_data_delete;",
