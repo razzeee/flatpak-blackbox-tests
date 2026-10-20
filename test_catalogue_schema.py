@@ -34,14 +34,14 @@ class CatalogueSchemaTests(unittest.TestCase):
         self.assertEqual({key: item["implemented"] for key, item in metrics["behaviors"].items()},
                           {"cli": 136, "library": 164})
         self.assertEqual({key: item["total"] for key, item in metrics["surfaces"].items()},
-                         {"cli-command": 44, "cli-option": 624,
-                          "library-function": 224, "library-signal": 14})
+                         {"cli-command": 44, "cli-option": 626,
+                          "library-function": 225, "library-signal": 14})
         self.assertEqual({key: item["implemented"] for key, item in metrics["surfaces"].items()},
-                            {"cli-command": 44, "cli-option": 586,
+                            {"cli-command": 44, "cli-option": 585,
                              "library-function": 224, "library-signal": 14})
         accounting = model.summarize()["cli_option_accounting"]
         self.assertEqual(accounting["equivalence_checks"]["implemented"], 40)
-        self.assertEqual(accounting["accounted"]["implemented"], 624)
+        self.assertEqual(accounting["accounted"]["implemented"], 623)
         self.assertIsNone(accounting["accounted"]["passed"])
         self.assertTrue(extension_clients(suite))
 
