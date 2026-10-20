@@ -59,6 +59,7 @@ def rich() -> dict[str, object]:
                 "autodelete": True, "should_download": True, "should_delete": False,
             }],
             "appstream": "appstream.xml", "icons": {"64": "icon.png"},
+            "search_kind_repo": "search-kind-inputs",
             "selection_repo": "selection", "selection_commits": {
                 "app/org.flatpak.Selection/x86_64/test": "selection-a",
                 "app/org.flatpak.SelectionOther/x86_64/test": "other-a",

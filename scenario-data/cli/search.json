@@ -18,6 +18,25 @@
       "references": [
         "doc/flatpak-search.xml"
       ]
+    },
+    {
+      "id": "search.kind-filters",
+      "scenario": "search-kind-filters",
+      "handler": "search_kind_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "appstream"
+      ],
+      "description": "Filter mixed AppStream results by the Flatpak bundle ref kind.",
+      "preconditions": "Fresh user remote with independently exported matching and nonmatching app and runtime components; search help advertises both kind options.",
+      "expected": "Default and both flags return exactly the matching app and runtime; each single flag returns only its kind; nonmatching controls and absent keywords never match; no refs are deployed. Missing kind options are explicitly unsupported, not passing.",
+      "references": [
+        "doc/flatpak-search.xml",
+        "https://github.com/flatpak/flatpak/pull/6902"
+      ]
     }
   ],
   "mappings": [
@@ -29,6 +48,23 @@
         "cli.search.user.appstream"
       ],
       "rationale": "Unique description-only keyword matches exactly the prepared app ID, with B-only and nonexistent terms excluded."
+    },
+    {
+      "behavior_id": "search.kind-filters",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [],
+      "rationale": "Exact mixed-kind results distinguish the default, each individual kind filter, and their union without adding a behavior requirement.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.search.--app",
+          "rationale": "App-only excludes the independently matching runtime; adding --runtime restores both matching refs, with nonmatching controls excluded."
+        },
+        {
+          "id": "cli.option.search.--runtime",
+          "rationale": "Runtime-only excludes the independently matching app; adding --app restores both matching refs, with nonmatching controls excluded."
+        }
+      ]
     }
   ]
 }

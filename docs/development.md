@@ -77,3 +77,11 @@ Regeneration should include review of affected requirements and mappings.
 Execution consumes the committed JSON and does not require the source checkout.
 Source drift is separate from report freshness; test-definition changes invalidate
 old passing evidence.
+
+The dedicated `search-kind-filters` scenario probes `search --help` for `--app`
+and `--runtime` before invoking either option. Older baselines without them are
+reported as **unsupported**, remain uncovered, and still make the runner
+unsuccessful under the normal policy. A failed help command or an advertised
+option with incorrect behavior is a failure, not an optional-interface skip.
+Regenerate query fixtures to supply its independent mixed-kind repository;
+existing description-search scenarios remain separate.

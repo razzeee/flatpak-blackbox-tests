@@ -109,6 +109,7 @@ class FixtureExtensionMounts(TypedDict):
 
 
 class FixtureQueries(_QueriesRequired, total=False):
+    search_kind_repo: str
     selection_repo: str
     selection_commits: dict[str, str]
     extension_mounts: FixtureExtensionMounts
@@ -373,6 +374,8 @@ def parse_queries(value: object, path: str, *, arch: str) -> FixtureQueries:
         "appstream": _text(data, "appstream", path),
         "icons": string_map(required(data, "icons", path), f"{path}.icons"),
     }
+    if "search_kind_repo" in data:
+        result["search_kind_repo"] = _text(data, "search_kind_repo", path)
     if "selection_repo" in data:
         result["selection_repo"] = _text(data, "selection_repo", path)
         result["selection_commits"] = string_map(
