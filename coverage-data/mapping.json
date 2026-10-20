@@ -218,7 +218,7 @@
       "requirements": [
         "library.remote.list-priority"
       ],
-      "rationale": "Freshly added reverse-alphabetical names with equal priorities must retain insertion order, ahead of a lower-priority remote. Kept separate because reference Flatpak 1.19.1 disagrees with its public documentation; a failing result earns no verified credit."
+      "rationale": "Freshly added reverse-alphabetical names with equal priorities must be listed in ascending name order, ahead of a lower-priority remote. Exact output order is asserted without sorting, independently of persistence checks. This is the public library contract, not a CLI tie-order promise."
     },
     {
       "behavior_id": "transaction.library.ready-decision",

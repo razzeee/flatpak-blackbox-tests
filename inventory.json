@@ -182,9 +182,9 @@
     },
     {
       "id": "remotes.library.priority-order",
-      "description": "Check the public library's documented descending priority order and earlier-added-first tie order.",
+      "description": "Check the public library's documented descending priority order and ascending-name tie order.",
       "preconditions": "Fresh user installation with three newly added remotes; two share priority and have reverse-alphabetical names.",
-      "expected": "Higher priority remotes precede the lower priority remote, and the earlier added equal-priority remote precedes the later one. The contract remains strict even when reference Flatpak disagrees.",
+      "expected": "Higher priority remotes precede the lower priority remote, and equal-priority remotes appear in ascending name order regardless of creation order.",
       "drivers": [
         "library"
       ],
