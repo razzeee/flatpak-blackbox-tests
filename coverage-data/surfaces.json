@@ -1,18 +1,18 @@
 {
   "schema": 1,
   "reference": {
-    "commit": "74d525dcd206febbdc937b24bddb90d05bbf0c43",
+    "commit": "07f8e741d065e3660936190f049248e272c98937",
     "sources": {
       "app/flatpak-main.c": "a545200e203b3dbe5c71ce7c32d2c5646e7648206d335734717fb313dfc8f2f5",
-      "common/flatpak-appdata.c": "79d575bbe34880816510a59049b2cd6d6202909f15239c1ddde0e182c6d30c10",
+      "common/flatpak-appdata.c": "9d0110518f4794357f5f2bf7de47da2a2bc7292ff94642dc64877d4ec8e28e18",
       "common/flatpak-auth.c": "3d3d578f9cd3068360d952e170b3167367e0c76c7840d9cd2b2b1118d6426175",
       "common/flatpak-bundle-ref.c": "2f1e5ff89dada3fc7c85e0739158f38abc550d4794b4e296854f29eba9cd6540",
       "common/flatpak-bundle-ref.h": "e48eb439516a7ed51a20fbff29b666bd9b1c8074caf6d96bda144e56a24b2497",
-      "common/flatpak-bwrap.c": "4090ebbb09acae3322c29a01aa85bbddb3e7b82ffa0277504be88f3aafbbc2f9",
+      "common/flatpak-bwrap.c": "702f21978e021e17d2a1187bd752f6dd27c0488f1e5549203de922592b58e707",
       "common/flatpak-chain-input-stream.c": "3a7259913f30337e8bbfe080584d8fc17dd50ca192d66ccdc0fc86022e80a4f5",
-      "common/flatpak-context.c": "33476d189e09848715222c3074de459a6392e9ba4b090ea7bb4f0500210b9fb4",
+      "common/flatpak-context.c": "aed5341f037052689902c377673bbeeb58b7882d0782b4bce2503c5e7d03d8ba",
       "common/flatpak-dir-utils.c": "a98721dd15d15389f482363318e98d9e3f8de6c1d0f2b9b5d7a4bfdcf66f0461",
-      "common/flatpak-dir.c": "c0cff7e66f2374956541bf982aef6acd33c168f2547dad091037c46ecd739911",
+      "common/flatpak-dir.c": "de7e3f7a6253a52b7b49551a7218d97cfb32722645b7933a83b85c847629438e",
       "common/flatpak-docker-reference.c": "aa6e93ba0255de38e23a5f4f4d1259ed26019fa0d9b015e2a83e614b74640afd",
       "common/flatpak-enum-types.h.template": "e3aa40c18704adda0ba8adad7f6ac6e5647b002458ead94153672b9fa6cb6788",
       "common/flatpak-error.c": "8efef7c6646ca56b8ef05e598b08b217fd8df83c03bf2bde08e12c892c5a3951",
@@ -21,7 +21,7 @@
       "common/flatpak-glib-backports.c": "5be6acd1d83021d6df0959c4fdf3b8b730a4886d4057cf9cfaa652326030cf02",
       "common/flatpak-image-collection.c": "aad152e59b1b13f47b96e41bde904f185f80c0564978b20b531d3bb225b4516a",
       "common/flatpak-image-source.c": "3797c85ec36256abe0cef0d4c01fad30f70c9b730392c7eb37a01d994a0902d4",
-      "common/flatpak-installation.c": "98bb2170dc0592504705157655da837741723c83fe7c132115515cd291345b05",
+      "common/flatpak-installation.c": "bf06c06572024602489dbb418fae4a91a12ac27dcfacba46408fbbfd73d72fb6",
       "common/flatpak-installation.h": "06e585b99c76758edd86f3d88c46725a9e8140ac8858263ca03621cc1aab2e21",
       "common/flatpak-installed-ref.c": "aeb65699b106c98766810082383e040ec6258be02638faa5c79aa7188c0bbd38",
       "common/flatpak-installed-ref.h": "e1f1f4d93220ab2d7425880ece74d7f4efa6730d46ff970e6ad10604d30f5954",
@@ -30,12 +30,13 @@
       "common/flatpak-json-oci.c": "934debf3d4f4a1b06c4b4a3cccf1f719cb9454fbb1cedc0b90324b2bb4b8a04b",
       "common/flatpak-json.c": "59578ac8f9b0065078e6e1e7aca50172d7ebc11067ecfda0d11d5ac20b512723",
       "common/flatpak-locale-utils.c": "f925b317ff099335ba01ae41eca8aa6f98dc6eab3234b604ed59b34441ed341b",
-      "common/flatpak-oci-registry.c": "be733302b802714f46f526f25049c22febacb393753dcd35c40322de2e5f3005",
-      "common/flatpak-oci-signatures.c": "5b7751cfe3e8a3059bd3475e9bbec23bb70ea2c8ec1c86f28a6efada0a5ab2d1",
+      "common/flatpak-oci-registry.c": "86ff2dce91859b6e3fd7b98b3e2cd26e40dbb4d9113cb5b28957eea32c434119",
+      "common/flatpak-oci-signatures.c": "68a032d9ba2721c8ae1acabf95af0cb67991d66110612d593c0965fb3bb9bccd",
       "common/flatpak-parental-controls.c": "d64bd744733eac262fb2fa5bc5135a7cbc079c1f00f8cd318051afb49a006d7b",
+      "common/flatpak-permission-utils.c": "44620ec79f2b2b58d2fa7589f4e6ddb26c10af620ef22dd6c08ea45b0bcc90f6",
       "common/flatpak-portal-error.c": "52b9db9825ea2b85df051863e72db1a186bd4b3441b056fd4129561216c44558",
       "common/flatpak-portal-error.h": "9610c44f008f7b6d46ecebbdd6012ef86e51647a3b6e22dab700fe016c97adcc",
-      "common/flatpak-progress.c": "78a122f96e731479223736814184b9ce18c6f9e0f6f7280ad6cab15eac37dd4a",
+      "common/flatpak-progress.c": "95ac01f1abe412b9f43875430b5e7028bf2a1153392a4f9842dd2ca8b9c519ec",
       "common/flatpak-prune.c": "fa1b5c3cbce8e52dee9fa83b32e5a08f48d53025565d1e3d6fd55e8edb679480",
       "common/flatpak-ref-utils.c": "219a1211d927ecb6f8892baa270877d8258cd04a6a2eb8936039ffb34d379ddb",
       "common/flatpak-ref.c": "b6542009058c194351fad6fb3f9cf6e5bd490cb595690e4f5e248bf970206744",
@@ -46,36 +47,38 @@
       "common/flatpak-remote-ref.h": "eecac3d9fa93742ab5ecf22bbbcd5655f015bb0baf953993e57da97685bfcf0d",
       "common/flatpak-remote.c": "dccc3cb6b6a831791d85a8d5a25cc14d57e5b04eb7bad3d644add4dcf0a4f218",
       "common/flatpak-remote.h": "a904d8451c9a92215cd38eb569c13b66d4e76ca55b81b10ffb05d1bda895a32a",
-      "common/flatpak-repo-utils.c": "59f2a4b3099a9f7eeb42700b9ab9bdfc7a61d979b6760781f140c44fc4c229e4",
+      "common/flatpak-repo-utils.c": "2d8758f13da9043b1e0ed006944ab808e4bfd0dba2ce5fa54b8d0f208e17cbd7",
       "common/flatpak-run-cups.c": "98cf12d99e1f7b709ffe3d65bb9b4a19810fa859a4d1ae72f8978aa351387b2a",
       "common/flatpak-run-dbus.c": "c3442647d543d00755063cfbbdccdb0110b1018061714b04e4a5fc8cbbbda2e3",
       "common/flatpak-run-pulseaudio.c": "b146dda87902a05c19e096aa2202ed7870783d4b3ef04f996aee50e4e46ef6d1",
       "common/flatpak-run-sockets.c": "016c9e588b65f15a4db76a4e9d7e60c4172a4176cfcf20ff5417564104bb8e8d",
       "common/flatpak-run-wayland.c": "e3ff88ec3dc4d5e57a9675f24c63b4176a69ce690e12420bd35613ba52c345d3",
       "common/flatpak-run-x11.c": "2a5d5adc0e099d5e48cd1f8f307ca75ff4d259d8bbbf07dff1d88b3e9b13e41e",
-      "common/flatpak-run.c": "0f988b2a378d0c461257d1bc06caf6b5aa10268d9e39f85e70984b9eaf8d423c",
-      "common/flatpak-transaction.c": "ff389a2f7a116c04a9cce2602b1ac9ac4219d28db4e7379d8d002a4f22eac8b4",
-      "common/flatpak-transaction.h": "b0af33c1787005913afcbecfd4c06dec9750a4b822f454e06cc4a84171300799",
+      "common/flatpak-run.c": "c88a5dbf320b0bfff390157e867e05e61f3c69f777aeacdc3cb1fad2e609932a",
+      "common/flatpak-transaction.c": "394fea2cc60e1a4317f5fcfb41775cb37e6e4748bea10dd5bec89d65fb30867b",
+      "common/flatpak-transaction.h": "6f6123a89cd656e6d9a15dd3360803fec98555b40026776ca46cee8207e3e483",
       "common/flatpak-uri.c": "8dae5aa337e8ff419546ed363a4a22e6b4c1f49acd8e9e4472e0d2679c9b5d9c",
       "common/flatpak-usb.c": "e50001cfdbb3710a8ec0bfb8f880ce4167928502b16f78c4eb8d7e5036a05a8c",
+      "common/flatpak-user-data-utils.c": "234c376a95fd258b48176cce76389dea6d88fc21dec917954bad095dba042315",
+      "common/flatpak-user-data-utils.h": "7d585e44ddc985059142d0a24d70bdc3a54e586bd855d7bcc20ee6943c3f1c87",
       "common/flatpak-utils-base.c": "154ded7a76b9280e2b92771cba43a1e1b68d46fa47496a8df76aac67d96d55d6",
-      "common/flatpak-utils-http.c": "2c5542bbb8316cfb22adc08f1df8d60c00fceb67beebce4583ac982ccff18ba0",
-      "common/flatpak-utils.c": "3fecde8b0995ea50d2aed09fe838ab71fbfaa30baf352fc1d8543bbe001fa8e2",
+      "common/flatpak-utils-http.c": "0ad8d269754bb4149c84c44bc51fb51e1efc3b339144be67213d9b489aa8a91a",
+      "common/flatpak-utils.c": "53760eea856e57cf39e46422e50482da6921cb788491db4ad87ce0f801ba1132",
       "common/flatpak-xml-utils.c": "4cc6c55580e8fe7e603a3eafe7bb079ec7eb1b27aff2552a0815c8bc4705930d",
       "common/flatpak-zstd-compressor.c": "5b5d41336c0303b1ef8f4b7713632daf67794f3806a82076403642df4251faf0",
       "common/flatpak-zstd-decompressor.c": "cb594c8add2898d8f85d9ca12b7adcbd17bfba61af3d510a2b69c9a2ad3c878f",
       "common/flatpak.c": "306e0391b67424df2651c017c43083e9223e78a298a1178d1b0d80cffa584ff1",
-      "common/flatpak.h": "b607b549cec060cfe4d95399121c168bd0f9199c3f46289385320724a870dbb7",
-      "common/meson.build": "b3b8a9a26e29c58375c711bed08f136ecda94030ee46a161a1850a71066e0714",
+      "common/flatpak.h": "02398c2047a8d2569a39cd4740ad26e699b26e2f01fc0d8c087b86a98ea0ff73",
+      "common/meson.build": "995baf4914d6ce95b9f7cd23de58af8a5f556e1f33d4c2e1ddcc1dc144789eab",
       "doc/flatpak-build-bundle.xml": "b62e10808e2faf2045bf18db4a9a04f528aef6d3811b10fd86d620505b1120a4",
       "doc/flatpak-build-commit-from.xml": "f1e84788ce10131e6fa87676854fafd8c5e0052172e7127a34033f1efa817f32",
       "doc/flatpak-build-export.xml": "187a086f422bc06d9b400a1420e2bf6999714230c7b384ceebc0449712df9a25",
       "doc/flatpak-build-finish.xml": "a44129e30ac845fc64576d976a7482b03eb1d19180969fa5777d705c778c3304",
       "doc/flatpak-build-import-bundle.xml": "560e3cf7bdbe13c313533d7201b4f2e94eee2654aba80eca9e461bf6877e8204",
-      "doc/flatpak-build-init.xml": "a1e967fe63391fdda67268ceba6242225e312127e7d29168b3fb6f98b7753c21",
+      "doc/flatpak-build-init.xml": "2eedfaabf680d927ec83ae3d688b17c67585404ad1dfa862f01ce2ebf8ac66a0",
       "doc/flatpak-build-sign.xml": "bb3c87431cf30fc26c99010178306af804b7427dd513e4768107f1e2d0292db6",
       "doc/flatpak-build-update-repo.xml": "063b440899fce3c6a7bebe1f3885d7cb1290185cd27a619cf2ca23fbda9241b1",
-      "doc/flatpak-build.xml": "e5bdf50c89f39b97d96f97ddb807182e878ab1e69ecfb80164e4b0b688ed0193",
+      "doc/flatpak-build.xml": "d0603297b7786b99174a04d504d1736053b2d1aaefe98bc0085ec36c27852de8",
       "doc/flatpak-config.xml": "3283064be69b542778887f08496e675fb06e2dacd5abf3b2bd60aff9e3565465",
       "doc/flatpak-create-usb.xml": "a6598203364d4021fb107ca5a7229b4daab0f5b4af93288abacf2eb48c0bcfac",
       "doc/flatpak-document-export.xml": "e509465d81839d5adf4adedac7409746245fc1262793bbb1ec0a6f1f2dfbb6d1",
@@ -85,32 +88,32 @@
       "doc/flatpak-enter.xml": "c04b6aafbf67cea3110bc9f99d540206e54ea3cfc62fc6eb54b24007b360a905",
       "doc/flatpak-history.xml": "543777a1a54a8c69e29fd76373dbc02a36bf232e538f5e5ec505916c34439748",
       "doc/flatpak-info.xml": "84d4328cd113fe15c94c3ff3715af4a7c83010c7081814c57a162034f243d543",
-      "doc/flatpak-install.xml": "e74671b817a3399a235b579b46b1d3f7a9ebb38a6328959b72a643bba62513b0",
+      "doc/flatpak-install.xml": "a201689f28215246daa730927c9843be24087f121fc2557319de3c20d8837600",
       "doc/flatpak-kill.xml": "02992bc5c120540fdd9c56593d54a1fa5b79d6eeac06dcc9dd3a54f708a841c1",
-      "doc/flatpak-list.xml": "adbab610ff3e6e39cd40cd160bf6bc90a00cea45034795174d8ac569beeff146",
+      "doc/flatpak-list.xml": "030a2db378bfa7431bd9bb380def1ac6f14c6da6c0fe4385971d8c94c04ce985",
       "doc/flatpak-make-current.xml": "75fe2d180ae2a9f7fbc130aa399aaec2b8bf3cae42130bb252ae2458a201cd56",
       "doc/flatpak-mask.xml": "c3c8942eb126749a70bb2c2f9e726060a783b39cc131446118e85fa14c3f9d11",
-      "doc/flatpak-override.xml": "76fc4f9ef85e56e987f8b0bf82bc690878089623802f450a1b2efcc326ed4287",
+      "doc/flatpak-override.xml": "342e3089501df28b55c8e36f439d9e9d24c5467909e7902b9ca07f749bb03d52",
       "doc/flatpak-permission-remove.xml": "106b9fcc40b99add8ab6735202709d94494665ee18f82d1e0f132bfcd632e387",
       "doc/flatpak-permission-reset.xml": "f2439b946003c75d2f512746559a97da29bc2acdc2d81296a5bbce538fe7c112",
       "doc/flatpak-permission-set.xml": "be1410a3b4bfc762c6fc2823fb092fb13d04063a43e65c819fc3df50b1f64142",
       "doc/flatpak-permission-show.xml": "077cff5d22637f50d87e18de1f1cdbcacaffeb003090788e9b74a61d63cab21e",
       "doc/flatpak-permissions.xml": "f02dbc8cc152f3fa9e604a6088a3090a48bdd3c324dcb1dce1f285dc0f5e4dae",
-      "doc/flatpak-pin.xml": "3eb08d5f47b4e67324dae716c7ff171f1e48a3adad143352de4562115f896a36",
+      "doc/flatpak-pin.xml": "26cdcf24e9ee76fdfe05fb8f6ea196b5716f079a2ea66e23b5673d4fdf5359ce",
       "doc/flatpak-preinstall.xml": "ff929dccf6fbfae211812f5e3e032b8e6fe1a1e402e24dec5e0a6da79a0e7cb4",
       "doc/flatpak-ps.xml": "ac01a8dfcc5fbe7756a7ba359100204130aef77ee598fb5accc8b50bc94c899c",
       "doc/flatpak-remote-add.xml": "2ee06018ad150a9ea9b736e0cb63d4bfb3abf8ebace85f189a0459592f47a039",
       "doc/flatpak-remote-delete.xml": "b3b8ae0d8da28d89461a95ef0432a0602bea2ef825266f90ab95b3382afe2f7d",
       "doc/flatpak-remote-info.xml": "17004f2888bad83e916cf8bcb9e00423864327e1486a5094560e74c63f09d9d9",
       "doc/flatpak-remote-ls.xml": "5b1abee3645ff7dd8a631a24042a6715e4474dd2e46ae34c306a969bf2b1022d",
-      "doc/flatpak-remote-modify.xml": "98a9dd64fc350136982e40adb39680e2c3bb43a18d4f266c99d0ddb463fa3a2d",
+      "doc/flatpak-remote-modify.xml": "4848ec55f826428a8247ec779f4efbff853782047d53630325fb2c78a9171b97",
       "doc/flatpak-remotes.xml": "e72dcd653914ae0c5141fa62ec5deef39341a54fa2be0821cd8de597909176cb",
       "doc/flatpak-repair.xml": "0ac74c78b3a6025b9eebc197150eaeb3ce30848ba20d450661f94a3f8f327dde",
       "doc/flatpak-repo.xml": "8ec012a58c698879dda1706561ffd25ede5dff5fd75d8e5c12039adad4307582",
       "doc/flatpak-run.xml": "9f20a047b8ea9b37a9128425a9292119c1bcef6b7d0f08417b4f8649c4531ed6",
-      "doc/flatpak-search.xml": "4bbf1d4608062b9b29b55687313cfa6a01f6df0b61da97e0c0aecd8764b48145",
+      "doc/flatpak-search.xml": "1b8cc0e06d1cacd82692f943ce642b2c3dad7eaced062b270667cd7f4b6eb34e",
       "doc/flatpak-uninstall.xml": "4ce083ecf8d8a4c75320c5b196dbf438b4147c4de4a19cc1fb8cf7bb85d2f6f9",
-      "doc/flatpak-update.xml": "8524e7fd8af25e60f96e36517b854b9cb61902d537ece0c4fa913aa1fd47d79f",
+      "doc/flatpak-update.xml": "fb3266d3668bb3296503b7d234e7d8a2a0e980c80d6cbfcb8cc2e2ef6d7c2335",
       "doc/flatpak.xml": "d54cd43ed2170144fc810640eb6e6d874a08a953c4f7ec6265479fe378c6b462"
     }
   },
@@ -122,7 +125,7 @@
     "Library functions are explicit flatpak_* callable declarations in the literal public_headers list in common/meson.build, including deprecated functions. Macros, callbacks, class vfunc slots, private headers and generated plumbing are excluded. All type-registration get_type functions are excluded individually below, consistently for explicit declarations, G_DECLARE_* and generated enums.",
     "Library signals require a gtk-doc Owner::signal block and a matching g_signal_new registration for a public GType. Inherited GLib signals and private-class signals are excluded. Common library C sources listed in Meson are scanned without a built tree or preprocessing; conditional public declarations are counted regardless of the local build configuration.",
     "Meson discovery supports one literal public_headers assignment installed by one direct install_headers(public_headers, ...) call. Header reassignment, augmentation and alternative installer arguments are rejected. Library source discovery supports literal file lists assigned to names ending in sources, literal-list augmentation, and direct library/static_library source arguments. Source-list reassignment and indirect or computed source expressions are rejected.",
-    "Meson parsing is a static subset, not a guarantee that future build structures are understood. It does not evaluate conditions, follow subdir/include calls, or resolve dependency-provided sources. The known generated inputs enums, flatpak_gdbus, flatpak_document_gdbus, systemd_gdbus, flatpak_variant and wl_security_context are excluded from signal discovery without interpreting their generator definitions. New build indirection or generated public APIs require a catalogue-parser review.",
+    "Meson parsing is a static subset, not a guarantee that future build structures are understood. It does not evaluate conditions, follow subdir/include calls, or resolve dependency-provided sources. The known generated inputs enums, flatpak_gdbus, flatpak_document_gdbus, flatpak_permission_gdbus, systemd_gdbus, flatpak_variant and wl_security_context are excluded from signal discovery without interpreting their generator definitions. New build indirection or generated public APIs require a catalogue-parser review.",
     "XML is parsed offline with the standard library. Internal entities and local SYSTEM XML entities/includes with one root element are supported and hashed. External DTDs are not fetched; unresolved entities, includes and unsupported XPointer syntax are errors.",
     "Collapsed duplicate option definition build-commit-from --disable-fsync (doc/flatpak-build-commit-from.xml); identical long spellings count once, with merged source references.",
     "Collapsed duplicate option definition run --app-path (doc/flatpak-run.xml); identical long spellings count once, with merged source references.",
@@ -4890,6 +4893,21 @@
       "aliases": []
     },
     {
+      "id": "cli.option.list.--bytes",
+      "kind": "cli-option",
+      "name": "--bytes",
+      "command": "list",
+      "sources": [
+        {
+          "path": "doc/flatpak-list.xml",
+          "anchor": "varlistentry/term/option: --bytes"
+        }
+      ],
+      "aliases": [
+        "-b"
+      ]
+    },
+    {
       "id": "cli.option.list.--columns",
       "kind": "cli-option",
       "name": "--columns",
@@ -8700,6 +8718,19 @@
       ]
     },
     {
+      "id": "cli.option.search.--app",
+      "kind": "cli-option",
+      "name": "--app",
+      "command": "search",
+      "sources": [
+        {
+          "path": "doc/flatpak-search.xml",
+          "anchor": "varlistentry/term/option: --app"
+        }
+      ],
+      "aliases": []
+    },
+    {
       "id": "cli.option.search.--columns",
       "kind": "cli-option",
       "name": "--columns",
@@ -8749,6 +8780,19 @@
         {
           "path": "doc/flatpak-search.xml",
           "anchor": "varlistentry/term/option: --ostree-verbose"
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "id": "cli.option.search.--runtime",
+      "kind": "cli-option",
+      "name": "--runtime",
+      "command": "search",
+      "sources": [
+        {
+          "path": "doc/flatpak-search.xml",
+          "anchor": "varlistentry/term/option: --runtime"
         }
       ],
       "aliases": []
@@ -9088,19 +9132,6 @@
         {
           "path": "doc/flatpak-update.xml",
           "anchor": "varlistentry/term/option: --commit"
-        }
-      ],
-      "aliases": []
-    },
-    {
-      "id": "cli.option.update.--force-remove",
-      "kind": "cli-option",
-      "name": "--force-remove",
-      "command": "update",
-      "sources": [
-        {
-          "path": "doc/flatpak-update.xml",
-          "anchor": "varlistentry/term/option: --force-remove"
         }
       ],
       "aliases": []
@@ -11714,6 +11745,18 @@
       "deprecated": false
     },
     {
+      "id": "library.function.flatpak_transaction_progress_get_bytes_total",
+      "kind": "library-function",
+      "name": "flatpak_transaction_progress_get_bytes_total",
+      "sources": [
+        {
+          "path": "common/flatpak-transaction.h",
+          "anchor": "flatpak_transaction_progress_get_bytes_total"
+        }
+      ],
+      "deprecated": false
+    },
+    {
       "id": "library.function.flatpak_transaction_progress_get_bytes_transferred",
       "kind": "library-function",
       "name": "flatpak_transaction_progress_get_bytes_transferred",
@@ -11978,6 +12021,18 @@
       "deprecated": false
     },
     {
+      "id": "library.function.flatpak_user_data_delete",
+      "kind": "library-function",
+      "name": "flatpak_user_data_delete",
+      "sources": [
+        {
+          "path": "common/flatpak-user-data-utils.h",
+          "anchor": "flatpak_user_data_delete"
+        }
+      ],
+      "deprecated": false
+    },
+    {
       "id": "library.signal.FlatpakTransaction.add-new-remote",
       "kind": "library-signal",
       "name": "add-new-remote",
@@ -12184,18 +12239,6 @@
           "anchor": "g_signal_new (\"webflow-start\""
         }
       ]
-    },
-    {
-      "id": "library.function.flatpak_user_data_delete",
-      "kind": "library-function",
-      "name": "flatpak_user_data_delete",
-      "sources": [
-        {
-          "path": "common/flatpak-user-data-utils.h",
-          "anchor": "flatpak_user_data_delete"
-        }
-      ],
-      "deprecated": false
     },
     {
       "id": "library.signal.FlatpakTransactionProgress.changed",

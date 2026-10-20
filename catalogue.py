@@ -112,7 +112,8 @@ POLICY = [
         "Meson parsing is a static subset, not a guarantee that future build structures "
         "are understood. It does not evaluate conditions, follow subdir/include calls, "
         "or resolve dependency-provided sources. The known generated inputs enums, "
-        "flatpak_gdbus, flatpak_document_gdbus, systemd_gdbus, flatpak_variant and "
+        "flatpak_gdbus, flatpak_document_gdbus, flatpak_permission_gdbus, systemd_gdbus, "
+        "flatpak_variant and "
         "wl_security_context are excluded from signal discovery without interpreting "
         "their generator definitions. New build indirection or generated public APIs "
         "require a catalogue-parser review."
@@ -204,7 +205,8 @@ def meson_inputs(text: str) -> tuple[list[str], list[str]]:
         raise CatalogueError("Empty or duplicate public_headers list")
 
     generated = {
-        "enums", "flatpak_gdbus", "flatpak_document_gdbus", "systemd_gdbus",
+        "enums", "flatpak_gdbus", "flatpak_document_gdbus", "flatpak_permission_gdbus",
+        "systemd_gdbus",
         "flatpak_variant", "wl_security_context",
     }
     source_names = {name for name in assignments if name.endswith("sources")}

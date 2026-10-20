@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
-"""Observe forced removal through the public mount of a still-running sandbox."""
+"""Observe live update retention and uninstall removal through a running sandbox."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
     app = f"app/{fixture['app']}/{fixture['arch']}/{fixture['branch']}"
     runtime = f"runtime/{fixture['runtime']}/{fixture['arch']}/{fixture['branch']}"
     driver.cli_success("remote-add", "--user", "--no-gpg-verify", "fixture", url)
-    for forced in (False, True):
+    for forced in ((False, True) if command == "uninstall" else (False,)):
         repository.version = "A"
         driver.cli_success("install", "--user", "--noninteractive", "fixture", app)
         _state(driver, {app: fixture["commits"]["A"], runtime: fixture["runtime_commit"]})

@@ -313,6 +313,14 @@ class CatalogueCLI(unittest.TestCase):
                 )
                 self.assertFalse(self.output.exists())
 
+    def test_permission_store_generated_plumbing_is_excluded(self) -> None:
+        self.cli()
+        baseline = self.data()["surfaces"]
+        self.write("common/meson.build", MESON.replace(
+            "sources: sources", "sources: sources + flatpak_permission_gdbus"))
+        self.cli()
+        self.assertEqual(self.data()["surfaces"], baseline)
+
     def test_indirect_library_sources_and_source_reassignment_fail(self) -> None:
         mutations = [
             MESON.replace("sources = ['flatpak-public.c']", "sources = another_list"),
