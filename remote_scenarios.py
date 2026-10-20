@@ -119,7 +119,7 @@ def remote_configuration(driver: Driver, repository: RepositoryServer, url: str,
 
 def remote_priority_order(driver: Driver, repository: RepositoryServer, url: str,
                           fixture: FixtureManifest) -> None:
-    """Check the documented library priority and insertion-order tie contract."""
+    """Check the documented library priority and ascending-name tie contract."""
     rows: list[RemoteRow] = [
         ("remote-z-first", url, "Earlier tied remote", "20"),
         ("remote-a-second", url, "Later tied remote", "20"),
@@ -129,4 +129,6 @@ def remote_priority_order(driver: Driver, repository: RepositoryServer, url: str
     for name, remote_url, title, priority in rows:
         assert title is not None
         driver.success("remote-create", name, remote_url, title, priority)
-    _expect_remotes(driver, rows, "documented priority order and fresh insertion-order ties")
+    # Create tied names in reverse order so insertion order cannot satisfy the contract.
+    _expect_remotes(driver, [rows[1], rows[0], rows[2]],
+                    "documented descending priority and ascending-name ties")

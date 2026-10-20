@@ -204,7 +204,7 @@
       "interface": "library",
       "profile": "any",
       "category": "remotes",
-      "description": "Listing several configured remotes returns them in descending priority, with earlier-added remotes before later-added remotes at equal priority.",
+      "description": "Listing several configured remotes returns them in descending priority, with names in ascending order at equal priority.",
       "sources": [
         {
           "path": "common/flatpak-installation.c",
