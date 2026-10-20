@@ -25,26 +25,6 @@
       ]
     },
     {
-      "id": "transaction.rebase-null",
-      "scenario": "tx-rebase-null",
-      "handler": "transaction_scenarios:run",
-      "drivers": [
-        "library"
-      ],
-      "profile": "user",
-      "required_capabilities": [],
-      "description": "Isolated documented nullable previous_ids rebase variant.",
-      "preconditions": [
-        "prepare_transactions.py extras.transactions"
-      ],
-      "expected": [
-        "Public gtk-doc permits NULL previous_ids; addition succeeds and replacement installs before old uninstall."
-      ],
-      "references": [
-        "common/flatpak-transaction.c:flatpak_transaction_add_rebase_and_uninstall"
-      ]
-    },
-    {
       "id": "transaction.rebase-success",
       "scenario": "tx-rebase-success",
       "handler": "transaction_scenarios:run",

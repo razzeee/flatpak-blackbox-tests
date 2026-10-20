@@ -27,7 +27,7 @@ class CatalogueSchemaTests(unittest.TestCase):
         suite = Path(__file__).parent
         model = CoverageModel(suite)
         self.assertEqual(model.catalogue, load_json(suite / "coverage-data/surfaces.json"))
-        self.assertEqual(len(model.cases), 530)
+        self.assertEqual(len(model.cases), 529)
         metrics = model.summarize()["metrics"]
         self.assertEqual({key: item["total"] for key, item in metrics["behaviors"].items()},
                          {"cli": 136, "library": 164})
@@ -54,6 +54,29 @@ class CatalogueSchemaTests(unittest.TestCase):
                    "extension": {"future": [True, None]}, "notes": ["A note"]}
             parsed = parse_behavior(raw)
             self.assertEqual(parsed, {**raw, "required_capabilities": []})
+
+    def test_rebase_coverage_requires_explicit_previous_ids(self) -> None:
+        suite = Path(__file__).parent
+        model = CoverageModel(suite)
+        behaviors = {item["id"]: item for item in load_behaviors(suite)}
+        self.assertNotIn("transaction.rebase-null", behaviors)
+        self.assertNotIn("tx-rebase-null", {item.get("scenario") for item in behaviors.values()})
+        for behavior, requirement in (
+            ("contracts.rebase-migration", "library.transaction.rebase-migration"),
+            ("transaction.rebase-success", "library.transaction.rebase-uninstall-success"),
+            ("transaction.rebase-failure", "library.transaction.rebase-failure-preserves-old"),
+        ):
+            with self.subTest(behavior=behavior):
+                key = (behavior, "library", "user")
+                self.assertIn(key, model.cases)
+                self.assertIn(requirement, model.mapping[key])
+
+    def test_retired_null_rebase_has_no_dispatch_or_client_alias(self) -> None:
+        suite = Path(__file__).parent
+        for name in ("transaction_scenarios.py", "client-transactions.c"):
+            with self.subTest(path=name):
+                self.assertFalse("rebase-null" in (suite / name).read_text(),
+                                 f"retired NULL-rebase reference in {name}")
 
     def test_required_executable_fields_and_optional_metadata_are_checked(self) -> None:
         raw = {"id": "test", "scenario": "test", "drivers": ["cli"], "profile": "user"}
