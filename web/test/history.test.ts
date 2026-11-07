@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -212,6 +212,47 @@ test("snapshot CLI handles absent reports and update preserves existing history"
   );
   assert.equal(invalidHistory.status, 1);
   assert.equal(await readFile(history, "utf8"), "null");
+});
+
+test("daily history migration preserves evidence and supports subsequent updates", async (context) => {
+  const root = await mkdtemp(join(tmpdir(), "coverage-shards-"));
+  context.after(() => rm(root, { recursive: true, force: true }));
+  const cli = fileURLToPath(new URL("../scripts/history.ts", import.meta.url));
+  const history = join(root, "history.json");
+  const directory = join(root, "history");
+  const output = join(root, "export.json");
+  const snapshot = join(root, "snapshot.json");
+  const run = (...args: string[]) =>
+    execFileSync(process.execPath, ["--import", "tsx", cli, ...args]);
+  const first = timedEntry();
+  const next = entry("2026-10-01T00:30:00+02:00", "upstream");
+  await writeFile(history, JSON.stringify([first, next]));
+  const split = () =>
+    run("split", "--history", history, "--history-dir", directory);
+  split();
+  await assert.rejects(readFile(history), { code: "ENOENT" });
+  assert.deepEqual((await readdir(directory)).sort(), [
+    "2026-09-17.json",
+    "2026-09-30.json",
+  ]);
+  const untouched = await readFile(join(directory, "2026-09-30.json"), "utf8");
+  split();
+  run("export", "--history-dir", directory, "--output", output);
+  assert.deepEqual(JSON.parse(await readFile(output, "utf8")), [first, next]);
+  const later = { ...first, timestamp: "2026-09-17T23:59:00Z" };
+  await writeFile(snapshot, JSON.stringify(later));
+  run("update", "--history-dir", directory, "--snapshot", snapshot);
+  run("export", "--history-dir", directory, "--output", output);
+  assert.deepEqual(JSON.parse(await readFile(output, "utf8")), [later, next]);
+  assert.equal(
+    await readFile(join(directory, "2026-09-30.json"), "utf8"),
+    untouched,
+  );
+  // Retrying an interrupted migration must not overwrite a newer daily run.
+  await writeFile(history, JSON.stringify([first, next]));
+  split();
+  run("export", "--history-dir", directory, "--output", output);
+  assert.deepEqual(JSON.parse(await readFile(output, "utf8")), [later, next]);
 });
 
 test("Python accounting accepts completed failed runs but rejects stale definitions", async (context) => {

@@ -241,18 +241,24 @@ jobs:
 
       - name: Update daily history and generate charts
         run: |
+          npm --prefix web run history -- split \
+            --history "$GITHUB_WORKSPACE/coverage-site/history.json" \
+            --history-dir "$GITHUB_WORKSPACE/coverage-site/history"
           for snapshot in "$RUNNER_TEMP"/coverage-input/coverage-snapshot-*.json; do
             npm --prefix web run history -- update \
               --snapshot "$snapshot" \
-              --history "$GITHUB_WORKSPACE/coverage-site/history.json"
+              --history-dir "$GITHUB_WORKSPACE/coverage-site/history"
           done
-          cp coverage-site/history.json web/public/history.json
+          npm --prefix web run history -- export \
+            --history-dir "$GITHUB_WORKSPACE/coverage-site/history" \
+            --output "$GITHUB_WORKSPACE/web/public/history.json"
           npm --prefix web run build
 
       - name: Save durable history
         working-directory: coverage-site
         run: |
-          git add history.json
+          git add history
+          git add -u
           if ! git diff --cached --quiet; then
             git -c user.name=github-actions[bot] \
               -c user.email=41898282+github-actions[bot]@users.noreply.github.com \
