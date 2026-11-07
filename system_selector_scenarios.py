@@ -440,8 +440,50 @@ def _run(ns: Namespace, fixture: FixtureManifest, name: str) -> None:
                  {app}, "other filter unchanged")
         return
 
-    if name in ("system-selectors-overrides", "system-selectors-override-named"):
-        scopes = SELECTORS if name.endswith("override-named") else ("system", "user")
+    if name == "system-selectors-override-named":
+        for args in ((), (fixture["app"],)):
+            values = {}
+
+            def check_overrides(args: tuple[str, ...] = args,
+                                values: dict[str, str] = values) -> None:
+                for scope in SELECTORS:
+                    output = ns.ok("override", "--show", *args, scope=scope)
+                    store = "user" if scope == "user" else "system"
+                    if store in values:
+                        data = _OverrideConfig(interpolation=None)
+                        data.read_string(output)
+                        ns.equal(dict(data["Environment"]), {"SELECTOR": values[store]},
+                                 "named and default selectors share system overrides")
+                    else:
+                        ns.equal(output, "", f"{scope} override scope is empty")
+
+            check_overrides()
+            for scope in ("user", "system", "alt"):
+                ns.ok("override", f"--env=SELECTOR={scope}", *args, scope=scope)
+                values["user" if scope == "user" else "system"] = scope
+                check_overrides()
+            ns.ok("override", "--reset", *args, scope="alt")
+            del values["system"]
+            check_overrides()
+            ns.ok("override", "--env=SELECTOR=alt", *args, scope="alt")
+            values["system"] = "alt"
+            check_overrides()
+            ns.ok("override", "--reset", *args, scope="user")
+            del values["user"]
+            check_overrides()
+            ns.ok("override", "--env=SELECTOR=user", *args, scope="user")
+            values["user"] = "user"
+            check_overrides()
+            ns.ok("override", "--reset", *args, scope="system")
+            del values["system"]
+            check_overrides()
+            ns.ok("override", "--reset", *args, scope="user")
+            del values["user"]
+            check_overrides()
+        return
+
+    if name == "system-selectors-overrides":
+        scopes = ("system", "user")
         values = {}
         for scope in scopes:
             ns.ok("override", f"--env=SELECTOR={scope}", fixture["app"], scope=scope)
