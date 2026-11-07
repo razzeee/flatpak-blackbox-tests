@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
-import { mkdir, rename, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
+import { mkdir, readdir, rename, unlink, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
 import { parseArgs } from "node:util";
 import {
   daily,
   historySchema,
   snapshotSchema,
   trackSchema,
+  utcDay,
+  type Snapshot,
 } from "../src/history.ts";
 import { optionalJson, readJson, record } from "./record.ts";
 import { withBaseline } from "../src/targets.ts";
@@ -25,6 +27,7 @@ const { values, positionals } = parseArgs({
     output: { type: "string" },
     snapshot: { type: "string" },
     history: { type: "string" },
+    "history-dir": { type: "string" },
   },
 });
 
@@ -42,7 +45,7 @@ async function save(path: string, value: unknown) {
 
 try {
   if (positionals.length !== 1)
-    throw new Error("Usage: history record|update [options]");
+    throw new Error("Usage: history record|update|split|export [options]");
   if (positionals[0] === "record") {
     const output = required("output");
     await save(
@@ -64,13 +67,46 @@ try {
       }),
     );
   } else if (positionals[0] === "update") {
-    const path = required("history");
+    const snapshot = snapshotSchema.parse(await readJson(required("snapshot")));
+    const path = values["history-dir"]
+      ? join(values["history-dir"], `${utcDay(snapshot.timestamp)}.json`)
+      : required("history");
     const existing = await optionalJson(path);
     const history = historySchema.parse(existing === undefined ? [] : existing);
-    const snapshot = snapshotSchema.parse(await readJson(required("snapshot")));
     await save(path, daily(history, snapshot).map(withBaseline));
+  } else if (positionals[0] === "split") {
+    const path = required("history");
+    const directory = required("history-dir");
+    const existing = await optionalJson(path);
+    await mkdir(directory, { recursive: true });
+    if (existing !== undefined) {
+      const groups = new Map<string, Snapshot[]>();
+      for (const snapshot of historySchema.parse(existing)) {
+        const day = utcDay(snapshot.timestamp);
+        const group = groups.get(day) ?? [];
+        group.push(snapshot);
+        groups.set(day, group);
+      }
+      for (const [day, snapshots] of groups) {
+        const shard = join(directory, `${day}.json`);
+        let history = historySchema.parse((await optionalJson(shard)) ?? []);
+        for (const snapshot of snapshots) history = daily(history, snapshot);
+        await save(shard, history.map(withBaseline));
+      }
+      await unlink(path);
+    }
+  } else if (positionals[0] === "export") {
+    const directory = required("history-dir");
+    const history: Snapshot[] = [];
+    for (const file of (await readdir(directory)).sort()) {
+      if (!/^\d{4}-\d{2}-\d{2}\.json$/.test(file)) continue;
+      history.push(
+        ...historySchema.parse(await readJson(join(directory, file))),
+      );
+    }
+    await save(required("output"), history);
   } else {
-    throw new Error("Usage: history record|update [options]");
+    throw new Error("Usage: history record|update|split|export [options]");
   }
 } catch (error) {
   console.error(
