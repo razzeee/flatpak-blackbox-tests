@@ -16,8 +16,10 @@ from run import execute
 @unittest.skipUnless(shutil.which("cc"), "requires a C compiler")
 class LibraryFeatureTests(unittest.TestCase):
     def test_headers_and_link_library_must_both_provide_the_api(self) -> None:
-        api = FEATURES[0].name
-        for header, symbol in ((False, False), (True, False), (False, True), (True, True)):
+        cases = ((feature, header, symbol) for feature in FEATURES[:2]
+                 for header, symbol in ((False, False), (True, False), (False, True), (True, True)))
+        for feature, header, symbol in cases:
+            api = feature.name
             with self.subTest(header=header, symbol=symbol), tempfile.TemporaryDirectory() as tmp:
                 root = Path(tmp)
                 (root / "flatpak.h").write_text(
@@ -38,7 +40,7 @@ class LibraryFeatureTests(unittest.TestCase):
                 )
                 self.assertEqual(available[api], header and symbol)
                 self.assertEqual(missing_apis("transaction.progress", available), [])
-                self.assertEqual(missing_apis("transaction.rate", available),
+                self.assertEqual(missing_apis(feature.behaviors[0], available),
                                  [] if header and symbol else [api])
                 # A dependent client must compile with either feature result, and
                 # must not accidentally reference a missing symbol in its fallback.
@@ -46,7 +48,7 @@ class LibraryFeatureTests(unittest.TestCase):
                 client.write_text(
                     '#include <flatpak.h>\n#include "blackbox-features.h"\n'
                     "int main(void) {\n"
-                    f"#if {FEATURES[0].macro}\n"
+                    f"#if {feature.macro}\n"
                     f"return {api}(NULL) != 0;\n"
                     "#else\nreturn 77;\n#endif\n}\n"
                 )
@@ -68,13 +70,20 @@ class LibraryFeatureTests(unittest.TestCase):
                 probe_features("cc", [f"-I{root}"], dict(os.environ), root, [], 10, execute)
 
     def test_changed_signature_is_unavailable_even_with_the_symbol_present(self) -> None:
+        cases = ((feature, signature) for feature in FEATURES[:2]
+                 for signature in ("int {api}(FlatpakTransactionProgress *);",
+                                   "guint64 {api}(const FlatpakTransactionProgress *);"))
+        for feature, signature in cases:
+            with self.subTest(api=feature.name, signature=signature):
+                self.check_changed_signature(feature.name, signature)
+
+    def check_changed_signature(self, api: str, signature: str) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            api = FEATURES[0].name
             (root / "flatpak.h").write_text(
                 "#include <stddef.h>\ntypedef unsigned long long guint64;\n"
                 "typedef struct Progress FlatpakTransactionProgress;\n"
-                f"int {api}(FlatpakTransactionProgress *);\n"
+                + signature.format(api=api) + "\n"
             )
             implementation = root / "library.c"
             implementation.write_text(f"int {api}(void *p) {{ (void)p; return 0; }}\n")
