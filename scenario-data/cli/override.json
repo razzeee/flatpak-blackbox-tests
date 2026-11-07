@@ -152,11 +152,12 @@
         "user-installation",
         "multiple-installations"
       ],
-      "description": "Assert that the named override selector is independent of the default system override.",
-      "preconditions": "Fresh default, named and user stores; default override is written first.",
-      "expected": "Named show is initially empty, and subsequent writes/resets affect only their selected store. Reference target currently fails this contract.",
+      "description": "Verify that named and default system selectors share overrides while user overrides remain independent.",
+      "preconditions": "Fresh default, named and user stores with no global or application overrides.",
+      "expected": "Named and default system show return the same values after writes through either selector; resets through either clear the shared scope and preserve user overrides, for both global and application overrides.",
       "references": [
-        "doc/flatpak-override.xml"
+        "doc/flatpak-override.xml",
+        "https://github.com/flatpak/flatpak/issues/6256#issuecomment-3150571646"
       ]
     }
   ],
@@ -319,11 +320,11 @@
       "driver": "cli",
       "profile": "system",
       "requirements": [],
-      "rationale": "Named overrides must be independent of default overrides; a failure receives no verified credit.",
-      "surface_assertions": [
+      "rationale": "Named system selection has the same override scope as default system selection; user storage remains independent.",
+      "equivalent_options": [
         {
           "id": "cli.option.override.--installation",
-          "rationale": "Named show must exclude a default-only override; selected writes and resets must remain isolated."
+          "rationale": "Named and default system selectors observe the same global and application override writes and resets; no distinct installation-selection effect is claimed."
         }
       ]
     }
@@ -334,6 +335,6 @@
     "Readonly exposure includes only the suite directory, selected target executables, configured helpers and LD_LIBRARY_PATH directories. Uninstalled targets can explicitly add colon-separated absolute paths with BLACKBOX_TARGET_READONLY_PATHS in the target environment. No repository ancestor is inferred. Paths that cover private namespace roots or overlap protected installation/service content are rejected, including symlink aliases.",
     "CLI deployment location checks use the public returned location, verify containment in the selected public installation base, locate the controlled bin/blackbox-probe payload there and execute it to distinguish A from B. They never construct a deployment path from a ref or commit, and never recursively search a general installation root for content.",
     "Direct-root mutations may satisfy explicitly selected installation outcomes. These cases do not assert polkit authorization, non-root helper behavior, or multiple-user access. No requirement demanding those outcomes is mapped.",
-    "The named override case intentionally asserts the documented isolation contract; the reference target currently fails it, so that option receives no verified credit from that case."
+    "Overrides are scoped to the user or system, not the application's installation. The named override selector is checked for equivalence with default system selection, following the maintainer clarification in https://github.com/flatpak/flatpak/issues/6256#issuecomment-3150571646."
   ]
 }
