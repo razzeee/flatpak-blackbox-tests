@@ -653,16 +653,25 @@ def _build(driver: Driver, fixture: FixtureManifest, url: str, name: str) -> Non
         driver.check(result.returncode != 0, "/var artifact survived a second command")
     elif name in ("build-readonly", "build-readonly-app"):
         destinations = [("app", "files", True)]
+        options = []
         if name == "build-readonly":
+            runtime = Path(fixture["directory"]) / fixture["assets"]["runtime_tree"]
+            shutil.copytree(runtime / "usr", tree / "selected-sdk", symlinks=True)
+            options = ["--sdk-dir=selected-sdk"]
+            destinations.append(("usr", "selected-sdk", True))
             destinations.extend((("var/lib", "var/lib", False), ("var/tmp", "var/tmp", False)))
         for mount, relative, readonly in destinations:
             path = tree / relative / "artifact"
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text("original")
-            observed = driver.cli_success("build", "--readonly", str(tree), probe,
+            driver.cli_success("build", *options, str(tree), probe,
+                               "write", f"/{mount}/artifact", "control")
+            driver.check(path.read_text() == "control", f"writable {mount} control did not persist")
+            path.write_text("original")
+            observed = driver.cli_success("build", "--readonly", *options, str(tree), probe,
                                           "read", f"/{mount}/artifact")
             driver.check(observed == "original", f"readonly control cannot read {mount} artifact")
-            result = driver.cli_call("build", "--readonly", str(tree), probe,
+            result = driver.cli_call("build", "--readonly", *options, str(tree), probe,
                                      "write", f"/{mount}/artifact", "changed")
             if readonly:
                 driver.check(result.returncode != 0, f"readonly {mount} unexpectedly writable")
@@ -672,6 +681,9 @@ def _build(driver: Driver, fixture: FixtureManifest, url: str, name: str) -> Non
                              f"--readonly unexpectedly blocked {mount} write")
                 driver.check(path.read_text() == "changed",
                              f"--readonly {mount} write did not persist")
+                observed = driver.cli_success("build", "--readonly", *options, str(tree), probe,
+                                              "read", f"/{mount}/artifact")
+                driver.check(observed == "changed", f"readonly {mount} write did not survive")
     elif name == "build-command-options":
         mounted_input = driver.root / "mounted-input"
         mounted_input.mkdir()

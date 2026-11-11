@@ -29,7 +29,7 @@
       "interface": "cli",
       "profile": "any",
       "category": "building-distribution",
-      "description": "build --readonly keeps /app readable while preventing changes to its build tree contents. The persistent /var/lib and /var/tmp directories remain writable.",
+      "description": "build --readonly keeps /app and a local SDK at /usr readable while preventing changes to their build tree contents. The persistent /var/lib and /var/tmp directories remain writable.",
       "sources": [
         {
           "path": "doc/flatpak-build.xml",

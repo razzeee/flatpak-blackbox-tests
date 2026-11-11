@@ -56,7 +56,7 @@
       ],
       "description": "Prevent modifications to app build destination independently of the var contract.",
       "preconditions": "Independent initialized tree with known app artifact and installed SDK.",
-      "expected": "Write fails and original app artifact bytes survive.",
+      "expected": "A control write without --readonly persists. With --readonly, the artifact is readable, writing fails and original app artifact bytes survive.",
       "references": [
         "doc/flatpak-build.xml"
       ]
@@ -94,9 +94,9 @@
         "user-installation",
         "sandbox-execution"
       ],
-      "description": "Prevent modifications to /app while /var/lib and /var/tmp remain writable under --readonly.",
-      "preconditions": "Independent initialized tree with known artifacts in files, var/lib and var/tmp and installed SDK.",
-      "expected": "Each artifact is readable. Writes to /app fail and its original host bytes survive; writes to /var/lib and /var/tmp succeed and update the host files.",
+      "description": "Prevent modifications to /app and a local SDK at /usr while /var/lib and /var/tmp remain writable under --readonly.",
+      "preconditions": "Independent initialized tree with known artifacts in files, selected-sdk, var/lib and var/tmp; local SDK selected with --sdk-dir.",
+      "expected": "Control writes without --readonly persist at each destination. With --readonly, each artifact is readable. Writes to /app and /usr fail and their original host bytes survive; writes to /var/lib and /var/tmp succeed, update the host files and survive another build command.",
       "references": [
         "doc/flatpak-build.xml"
       ]
@@ -218,7 +218,7 @@
       "driver": "cli",
       "profile": "user",
       "requirements": [],
-      "rationale": "App-only readonly option effect remains separate from the combined check of protected /app and writable /var/lib and /var/tmp.",
+      "rationale": "App-only readonly option effect remains separate from the combined check of protected /app and local /usr and writable /var/lib and /var/tmp.",
       "surface_assertions": [
         {
           "id": "cli.option.build.--readonly",
@@ -242,7 +242,7 @@
       "requirements": [
         "cli.build.any.readonly"
       ],
-      "rationale": "Readonly commands read each seeded marker, reject writes through /app without changing its host file, and persist writes through /var/lib and /var/tmp in the corresponding host files."
+      "rationale": "Writable controls persist at every destination. Readonly commands read each seeded marker, reject writes through /app and local /usr without changing their host files, and persist writes through /var/lib and /var/tmp in the host files and later commands."
     },
     {
       "behavior_id": "build.execution.options",
