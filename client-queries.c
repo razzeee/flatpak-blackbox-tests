@@ -875,6 +875,26 @@ instance_identity (FlatpakInstance *instance, GKeyFile *data, GPtrArray *snapsho
 }
 
 static void
+assert_process_ancestor (int process, int ancestor)
+{
+  for (size_t depth = 0; process > 1 && process != ancestor && depth < 100; depth++)
+    {
+      g_autoptr(GError) error = NULL;
+      g_autofree char *path = g_strdup_printf ("/proc/%d/status", process);
+      g_autofree char *contents = NULL;
+      g_assert_true (g_file_get_contents (path, &contents, NULL, &error));
+      g_assert_no_error (error);
+      char *field = strstr (contents, "\nPPid:");
+      g_assert_nonnull (field);
+      int parent = 0;
+      g_assert_cmpint (sscanf (field, "\nPPid: %d", &parent), ==, 1);
+      g_assert_cmpint (parent, !=, process);
+      process = parent;
+    }
+  g_assert_cmpint (process, ==, ancestor);
+}
+
+static void
 instance_processes (FlatpakInstallation *installation, FlatpakInstance *instance,
                     GKeyFile *data)
 {
@@ -899,32 +919,61 @@ instance_processes (FlatpakInstallation *installation, FlatpakInstance *instance
   g_assert_cmpint (outer, >, 1);
   g_assert_cmpint (child, >, 1);
   g_assert_cmpint (outer, !=, child);
-  g_autofree char *proc_exe = g_strdup_printf ("/proc/%d/exe", child);
-  g_autofree char *resolved_exe = g_file_read_link (proc_exe, &error);
+  g_autofree char *status_path = g_strdup_printf ("/proc/%d/status", child);
+  g_autofree char *status = NULL;
+  g_assert_true (g_file_get_contents (status_path, &status, NULL, &error));
   g_assert_no_error (error);
-  g_printerr ("query-process outer=%d child=%d executable=%s\n", outer, child, resolved_exe);
-  g_autofree char *contents = NULL;
-  size_t length = 0;
-  g_assert_true (g_file_get_contents (proc_exe, &contents, &length, &error));
+  char *field = strstr (status, "\nNSpid:");
+  g_assert_nonnull (field);
+  g_autofree char *line = g_strndup (field + 7, strcspn (field + 7, "\n"));
+  g_auto(GStrv) pids = g_strsplit_set (line, " \t", -1);
+  size_t count = 0;
+  int last = 0;
+  for (size_t i = 0; pids[i] != NULL; i++)
+    if (*pids[i] != '\0')
+      {
+        last = g_ascii_strtoll (pids[i], NULL, 10);
+        if (count++ == 0)
+          g_assert_cmpint (last, ==, child);
+      }
+  /* These normal launches create a dedicated PID namespace. */
+  g_assert_cmpuint (count, >=, 2);
+  g_assert_cmpint (last, ==, 1);
+  assert_process_ancestor (child, outer);
+
+  g_autofree char *namespace_path = g_strdup_printf ("/proc/%d/ns/pid", child);
+  g_autofree char *sandbox_namespace = g_file_read_link (namespace_path, &error);
   g_assert_no_error (error);
-  g_autoptr(GBytes) executable_bytes = g_bytes_new (contents, length);
-  bytes_file (executable_bytes, executable);
-  /* The reported outer process must actually supervise this executable. */
-  int ancestor = child;
-  while (ancestor > 1 && ancestor != outer)
+  g_autofree char *expected = NULL;
+  size_t expected_length = 0;
+  g_assert_true (g_file_get_contents (executable, &expected, &expected_length, &error));
+  g_assert_no_error (error);
+  g_autoptr(GDir) proc = g_dir_open ("/proc", 0, &error);
+  g_assert_no_error (error);
+  const char *entry;
+  int application = 0;
+  while ((entry = g_dir_read_name (proc)) != NULL)
     {
-      g_autofree char *path = g_strdup_printf ("/proc/%d/status", ancestor);
-      g_autofree char *status_contents = NULL;
-      g_assert_true (g_file_get_contents (path, &status_contents, NULL, &error));
-      g_assert_no_error (error);
-      char *parent_field = strstr (status_contents, "\nPPid:");
-      g_assert_nonnull (parent_field);
-      int parent = 0;
-      g_assert_cmpint (sscanf (parent_field, "\nPPid: %d", &parent), ==, 1);
-      g_assert_cmpint (parent, !=, ancestor);
-      ancestor = parent;
+      if (strspn (entry, "0123456789") != strlen (entry))
+        continue;
+      g_autofree char *path = g_build_filename ("/proc", entry, "ns/pid", NULL);
+      g_autofree char *candidate_namespace = g_file_read_link (path, NULL);
+      if (g_strcmp0 (candidate_namespace, sandbox_namespace) != 0)
+        continue;
+      g_autofree char *proc_exe = g_build_filename ("/proc", entry, "exe", NULL);
+      g_autofree char *contents = NULL;
+      size_t length = 0;
+      if (!g_file_get_contents (proc_exe, &contents, &length, NULL) ||
+          length != expected_length || memcmp (contents, expected, length) != 0)
+        continue;
+      g_assert_cmpint (application, ==, 0);
+      application = g_ascii_strtoll (entry, NULL, 10);
     }
-  g_assert_cmpint (ancestor, ==, outer);
+  g_assert_cmpint (application, >, 1);
+  g_assert_cmpint (application, !=, child);
+  assert_process_ancestor (application, child);
+  g_printerr ("query-process outer=%d supervisor=%d namespace-pid=1 application=%d\n",
+              outer, child, application);
 }
 
 static void

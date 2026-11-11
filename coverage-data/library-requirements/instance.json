@@ -105,7 +105,7 @@
       "interface": "library",
       "profile": "any",
       "category": "instances",
-      "description": "For a synchronized live sandbox, get_pid identifies the outer babysitter and get_child_pid identifies the application process. A zero child PID is permitted briefly after launch and is not treated as a permanent result.",
+      "description": "For a synchronized live sandbox, get_pid identifies the outer bubblewrap process and get_child_pid identifies the sandbox's initial process on the host, normally its supervisor rather than the application. Normal launches use namespace PID 1; shared namespaces may use another PID. Zero means unavailable, including during startup; a nonzero PID alone guarantees neither application startup nor process liveness.",
       "sources": [
         {
           "path": "common/flatpak-instance.c",
