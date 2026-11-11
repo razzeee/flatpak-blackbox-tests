@@ -17,9 +17,9 @@
         "session-bus",
         "concurrent-processes"
       ],
-      "description": "Identify the controlled sandbox's application process and supervising parent.",
-      "preconditions": "DO_NOT_REAP launches held alive until explicit release; public procfs exposes process executable and ancestry.",
-      "expected": "Child PID becomes positive and executable bytes match the deployed probe; process ancestry reaches outer PID; child watch confirms successful exit.",
+      "description": "Identify the controlled sandbox's initial process and its relationship to the application and outer supervisor.",
+      "preconditions": "Normal DO_NOT_REAP launches in dedicated PID namespaces held alive until explicit release; public procfs exposes NSpid, PID namespaces, executable bytes and ancestry.",
+      "expected": "Child PID becomes positive and identifies namespace PID 1 on the host; the deployed probe runs in that namespace with ancestry through the child PID to the outer PID; release ends both instances and child watches confirm successful exit.",
       "references": [
         "common/flatpak-instance.c: flatpak_instance_get_pid, flatpak_instance_get_child_pid"
       ]
@@ -55,7 +55,7 @@
       "requirements": [
         "library.instance.processes"
       ],
-      "rationale": "Synchronized child PID must identify the deployed probe executable; its ancestry must reach the outer PID; caller child watch confirms exit."
+      "rationale": "Synchronized child PID identifies the host-visible sandbox init (namespace PID 1), with ancestry to the outer PID. A distinct process in the same PID namespace matches the deployed probe bytes and descends from that init. Explicit release ends the instances and caller child watches confirm successful exit."
     },
     {
       "behavior_id": "lifex.runtime-instance",
