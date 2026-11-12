@@ -30,11 +30,12 @@
       "profile": "user",
       "required_capabilities": [
         "user-installation",
-        "local-repository"
+        "local-repository",
+        "sandbox-execution"
       ],
       "description": "Reinstall an installed app from a local flatpakref description.",
       "preconditions": "Independent A/B repositories; a case-local description initially installs A.",
-      "expected": "Reinstall succeeds at A and advances to B, preserving runtime, origin and exact installed refs.",
+      "expected": "Reinstall succeeds at A and advances to B with matching payloads, preserving runtime, origin and exact installed refs. Ordinary install rejects the installed app without changing its commit or payload.",
       "references": [
         "doc/flatpak-install.xml",
         "https://github.com/flatpak/flatpak/issues/5460"
@@ -50,11 +51,54 @@
       "profile": "user",
       "required_capabilities": [
         "user-installation",
-        "local-repository"
+        "local-repository",
+        "sandbox-execution"
       ],
       "description": "Reinstall an installed app from an HTTP flatpakref description.",
       "preconditions": "Independent A/B repositories; a loopback-served description initially installs A.",
-      "expected": "Reinstall succeeds at A and advances to B, preserving runtime, origin and exact installed refs.",
+      "expected": "Reinstall succeeds at A and advances to B with matching payloads, preserving runtime, origin and exact installed refs. Ordinary install rejects the installed app without changing its commit or payload.",
+      "references": [
+        "doc/flatpak-install.xml",
+        "https://github.com/flatpak/flatpak/issues/5460"
+      ]
+    },
+    {
+      "id": "management.flatpakref-or-update",
+      "scenario": "management-flatpakref-or-update",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Install or update an installed app from a local flatpakref description.",
+      "preconditions": "Independent A/B repositories; a case-local description initially installs A.",
+      "expected": "Or-update succeeds at A and advances to B with matching payloads, preserving runtime, origin and exact installed refs. Ordinary install rejects the installed app without changing its commit or payload.",
+      "references": [
+        "doc/flatpak-install.xml",
+        "https://github.com/flatpak/flatpak/issues/5460"
+      ]
+    },
+    {
+      "id": "management.flatpakref-or-update-http",
+      "scenario": "management-flatpakref-or-update-http",
+      "handler": "cli_management_scenarios:run",
+      "drivers": [
+        "cli"
+      ],
+      "profile": "user",
+      "required_capabilities": [
+        "user-installation",
+        "local-repository",
+        "sandbox-execution"
+      ],
+      "description": "Install or update an installed app from an HTTP flatpakref description.",
+      "preconditions": "Independent A/B repositories; a loopback-served description initially installs A.",
+      "expected": "Or-update succeeds at A and advances to B with matching payloads, preserving runtime, origin and exact installed refs. Ordinary install rejects the installed app without changing its commit or payload.",
       "references": [
         "doc/flatpak-install.xml",
         "https://github.com/flatpak/flatpak/issues/5460"
@@ -300,6 +344,36 @@
         {
           "id": "cli.option.install.--reinstall",
           "rationale": "An HTTP description-driven reinstall replaces installed A with independently prepared B."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.flatpakref-or-update",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.install.user.app"
+      ],
+      "rationale": "Local description or-update accepts an installed app at unchanged and advanced tips, checking exact commits and executed payloads.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.install.--or-update",
+          "rationale": "The option replaces installed A with independently prepared B where ordinary description installation rejects the installed app."
+        }
+      ]
+    },
+    {
+      "behavior_id": "management.flatpakref-or-update-http",
+      "driver": "cli",
+      "profile": "user",
+      "requirements": [
+        "cli.install.user.app"
+      ],
+      "rationale": "HTTP description or-update accepts an installed app at unchanged and advanced tips, checking exact commits and executed payloads.",
+      "surface_assertions": [
+        {
+          "id": "cli.option.install.--or-update",
+          "rationale": "The option replaces installed A with independently prepared B where ordinary description installation rejects the installed app."
         }
       ]
     },

@@ -238,7 +238,7 @@ def _remote_options(driver: Driver, url: str, name: str) -> None:
 
 
 def _flatpakref_reinstall(driver: Driver, repository: RepositoryServer, url: str,
-                         fixture: FixtureManifest, *, http: bool) -> None:
+                         fixture: FixtureManifest, *, http: bool, option: str) -> None:
     from run import RepositoryServer
 
     app = f"app/{fixture['app']}/{fixture['arch']}/{fixture['branch']}"
@@ -256,18 +256,30 @@ def _flatpakref_reinstall(driver: Driver, repository: RepositoryServer, url: str
             source = f"{description_url}/app.flatpakref" if http else str(path)
             driver.cli_success("install", "--user", "--noninteractive", source)
             _commit(driver, app, fixture["commits"]["A"])
+            _equal(driver, driver.success("run", app), "A", "initial description payload")
             _commit(driver, runtime, fixture["runtime_commit"])
             origin = driver.cli_success("info", "--user", "--show-origin", app)
             for version in ("A", "B"):
                 repository.version = version
+                before = driver.cli_success("info", "--user", "--show-commit", app)
+                payload = driver.success("run", app)
+                rejected = driver.cli_call("install", "--user", "--noninteractive", source)
+                driver.check(rejected.returncode != 0,
+                             "ordinary description install must reject an installed ref")
+                _commit(driver, app, before)
+                _equal(driver, driver.success("run", app), payload,
+                       "rejected description install preserves payload")
                 result = driver.cli_call("install", "--user", "--noninteractive",
-                                         "--reinstall", source)
+                                         option, source)
                 # Exercise both unchanged and advanced tips even when the first
                 # reinstall fails, and retain public state queries in the report.
                 installed = driver.cli_success("info", "--user", "--show-commit", app)
                 if result.returncode != 0 or installed != fixture["commits"][version]:
                     failures.append(f"{version}: exit={result.returncode}, commit={installed}, "
                                     f"stderr={result.stderr.strip()!r}")
+                actual_payload = driver.success("run", app)
+                if actual_payload != version:
+                    failures.append(f"{version}: payload={actual_payload!r}")
                 _commit(driver, runtime, fixture["runtime_commit"])
                 _equal(driver, _refs(driver),
                        {app.removeprefix("app/"), runtime.removeprefix("runtime/")},
@@ -278,7 +290,7 @@ def _flatpakref_reinstall(driver: Driver, repository: RepositoryServer, url: str
                 driver.check(any(request["path"] == "/app.flatpakref"
                                  for request in server.requests),
                              "HTTP description input must be fetched")
-            driver.check(not failures, "flatpakref reinstall failed: " + "; ".join(failures))
+            driver.check(not failures, f"flatpakref {option} failed: " + "; ".join(failures))
     finally:
         repository.requests.extend(server.requests)
 
@@ -332,8 +344,11 @@ def run(driver: Driver, repository: RepositoryServer, url: str,
     driver.cli_success("remote-add", "--user", "--no-gpg-verify",
                        "--title=Original title", "--prio=17", "fixture", url)
 
-    if name in ("management-flatpakref-reinstall", "management-flatpakref-reinstall-http"):
-        _flatpakref_reinstall(driver, repository, url, fixture, http=name.endswith("-http"))
+    if name in ("management-flatpakref-reinstall", "management-flatpakref-reinstall-http",
+                "management-flatpakref-or-update", "management-flatpakref-or-update-http"):
+        option = "--or-update" if "or-update" in name else "--reinstall"
+        _flatpakref_reinstall(driver, repository, url, fixture,
+                             http=name.endswith("-http"), option=option)
         return
 
     if name == "management-duplicate-remote-description":
