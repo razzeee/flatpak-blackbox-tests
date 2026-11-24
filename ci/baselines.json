@@ -3,6 +3,11 @@
   "current": "refs/heads/main",
   "baselines": [
     {
+      "version": "1.19.4",
+      "commit": "d4eeb53e07f6d2e4b1ca03f76feb3402b9e43d60",
+      "ref": "refs/tags/1.19.4"
+    },
+    {
       "version": "1.19.2",
       "commit": "10b5972dfeff08f516ca571c8438c2e284cd60ce",
       "ref": "refs/tags/1.19.2"
@@ -16,6 +21,11 @@
       "version": "1.19.0",
       "commit": "ec707cb43a0b332e4eea581d49bf9bb11f0dbd73",
       "ref": "refs/tags/1.19.0"
+    },
+    {
+      "version": "1.18.6",
+      "commit": "7a986ba376d9e2fd8857b0afcdf5d171ef733b1f",
+      "ref": "refs/tags/1.18.6"
     },
     {
       "version": "1.18.4",
