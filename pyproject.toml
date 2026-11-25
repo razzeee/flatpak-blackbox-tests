@@ -8,8 +8,8 @@ dependencies = []
 [dependency-groups]
 dev = [
   "mypy==2.4.1",
-  "ruff==0.17.5",
-  "ty==0.0.104",
+  "ruff==0.17.6",
+  "ty==0.0.107",
 ]
 
 [tool.uv]
